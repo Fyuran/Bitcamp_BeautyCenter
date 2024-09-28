@@ -114,5 +114,29 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/moneta-convert-1.4.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/danke/eclipse-workspace/centroEstetico/javadocs/moneta-convert-1.4.4-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/moneta-convert-ecb-1.4.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/moneta-convert-ecb-1.4.4-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/moneta-convert-imf-1.4.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/moneta-convert-imf-1.4.4-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/moneta-core-1.4.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/moneta-core-1.4.4-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
