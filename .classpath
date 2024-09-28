@@ -138,5 +138,11 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/money-api-1.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/money-api-1.1-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
