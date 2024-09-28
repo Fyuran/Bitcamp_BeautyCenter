@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-20">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="lib/barcodes-7.0.4.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/bcrypt-0.10.2.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/bytes-1.6.1.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/codice-fiscale-1.6.0.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/font-asian-7.0.4.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/forms-7.0.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/forms-7.0.4-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/hyph-7.0.4.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/io-7.0.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/io-7.0.4-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/jcalendar-1.4.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/jgoodies-common-1.2.0.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/jgoodies-looks-2.4.1.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/junit-4.6.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/kernel-7.0.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/kernel-7.0.4-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/layout-7.0.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/layout-7.0.4-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/mysql-connector-j-9.0.0.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/pdfa-7.0.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/pdfa-7.0.4-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/pdfbox-3.0.3.jar">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/PdfInvoiceCreator-1.0.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/PdfInvoiceCreator-1.0.1-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/sign-7.0.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/sign-7.0.4-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.7.13.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/slf4j-api-1.7.13-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
