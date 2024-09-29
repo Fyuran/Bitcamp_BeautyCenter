@@ -11,6 +11,4 @@ module centroEstetico {
 	requires PdfInvoiceCreator;
 	requires java.desktop;
 	requires jcalendar;
-	requires org.javamoney.moneta;
-	requires java.money;
 }
