@@ -1,4 +1,4 @@
-package template;
+package com.centro.estetico.example.bitcamp;
 
 import java.awt.EventQueue;
 
@@ -7,31 +7,31 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
 import java.awt.Font;
-import javax.swing.JTextField;
 import java.awt.Color;
 import javax.swing.border.LineBorder;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JRadioButton;
+import javax.swing.JTextField;
 import javax.swing.ImageIcon;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import javax.swing.UIManager;
 
-public class installazioneGuidataDatiFiscali extends JFrame {
+public class creaAccount extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JTextField txfSearchBar;
+	private JTextField textField;
 	private JTextField txfName;
 	private JTextField txfPhone;
-	private JTextField txfPEC;
-	private JTextField txfEmail;
-	private JTextField txfSedeLegale;
-	private JTextField txfSedeOperativa;
-	private JTextField txfRea;
-	private JTextField txfPIva;
-	private JTextField txfAliquota;
-	private JTextField txfApertura;
-	private JTextField txfChiusura;
+	private JTextField textField_3;
+	private JTextField textField_4;
+	private JTextField textField_5;
+	private JTextField textField_6;
+	private JTextField textField_7;
+	private JTextField textField_8;
+	private JTextField textField_9;
+	private JTextField textField_10;
+	private JTextField textField_11;
 
 	/**
 	 * Launch the application.
@@ -40,7 +40,7 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					installazioneGuidataDatiFiscali frame = new installazioneGuidataDatiFiscali();
+					creaAccount frame = new creaAccount();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -52,8 +52,7 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public installazioneGuidataDatiFiscali() {
-		setTitle("Centro Estetico - Installazione Guidata- Dati Fiscali");
+	public creaAccount() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1024, 768);
 		contentPane = new JPanel();
@@ -64,17 +63,21 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 		
 		JLabel lblName = new JLabel("Nome:");
 		lblName.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblName.setBounds(50, 448, 170, 14);
+		lblName.setBounds(50, 460, 170, 14);
 		contentPane.add(lblName);
 		
 		JPanel containerPanel = new JPanel();
 		containerPanel.setLayout(null);
 		containerPanel.setBorder(new LineBorder(new Color(0, 0, 0), 3));
 		containerPanel.setBackground(Color.WHITE);
-		containerPanel.setBounds(10, 65, 988, 347);
+		containerPanel.setBounds(10, 77, 988, 347);
 		contentPane.add(containerPanel);
 		
 		JButton btnSearch = new JButton("");
+		btnSearch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		btnSearch.setIcon(new ImageIcon("C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\searchIcon.png"));
 		btnSearch.setOpaque(false);
 		btnSearch.setContentAreaFilled(false);
@@ -82,13 +85,17 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 		btnSearch.setBounds(206, 8, 40, 30);
 		containerPanel.add(btnSearch);
 		
-		txfSearchBar = new JTextField();
-		txfSearchBar.setColumns(10);
-		txfSearchBar.setBackground(UIManager.getColor("CheckBox.background"));
-		txfSearchBar.setBounds(23, 14, 168, 24);
-		containerPanel.add(txfSearchBar);
+		textField = new JTextField();
+		textField.setColumns(10);
+		textField.setBackground(UIManager.getColor("CheckBox.background"));
+		textField.setBounds(23, 14, 168, 24);
+		containerPanel.add(textField);
 		
 		JButton btnFilter = new JButton("");
+		btnFilter.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		btnFilter.setIcon(new ImageIcon("C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\filterIcon.png"));
 		btnFilter.setOpaque(false);
 		btnFilter.setContentAreaFilled(false);
@@ -97,7 +104,11 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 		containerPanel.add(btnFilter);
 		
 		JButton btnInsert = new JButton("");
-		btnInsert.setIcon(new ImageIcon("C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\Insert.png"));
+		btnInsert.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnInsert.setIcon(new ImageIcon("C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\InsertUser.png"));
 		btnInsert.setOpaque(false);
 		btnInsert.setContentAreaFilled(false);
 		btnInsert.setBorderPainted(false);
@@ -105,7 +116,11 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 		containerPanel.add(btnInsert);
 		
 		JButton btnUpdate = new JButton("");
-		btnUpdate.setIcon(new ImageIcon("C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\Update.png"));
+		btnUpdate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnUpdate.setIcon(new ImageIcon("C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\UpdateUser.png"));
 		btnUpdate.setOpaque(false);
 		btnUpdate.setContentAreaFilled(false);
 		btnUpdate.setBorderPainted(false);
@@ -113,7 +128,11 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 		containerPanel.add(btnUpdate);
 		
 		JButton btnDelete = new JButton("");
-		btnDelete.setIcon(new ImageIcon("C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\delete.png"));
+		btnDelete.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnDelete.setIcon(new ImageIcon("C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\deleteUser.png"));
 		btnDelete.setOpaque(false);
 		btnDelete.setContentAreaFilled(false);
 		btnDelete.setBorderPainted(false);
@@ -121,7 +140,11 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 		containerPanel.add(btnDelete);
 		
 		JButton btnDisable = new JButton("");
-		btnDisable.setIcon(new ImageIcon("C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\disattivo.png"));
+		btnDisable.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnDisable.setIcon(new ImageIcon("C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\userDisable.png"));
 		btnDisable.setOpaque(false);
 		btnDisable.setContentAreaFilled(false);
 		btnDisable.setBorderPainted(false);
@@ -134,122 +157,126 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 		containerPanel.add(outputPanel);
 		
 		JButton btnHystorical = new JButton("");
-		btnHystorical.setIcon(new ImageIcon("C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\storicoIcon.png"));
+		btnHystorical.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnHystorical.setIcon(new ImageIcon("C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\StoricoUser2.png"));
 		btnHystorical.setOpaque(false);
 		btnHystorical.setContentAreaFilled(false);
 		btnHystorical.setBorderPainted(false);
 		btnHystorical.setBounds(870, 8, 40, 30);
 		containerPanel.add(btnHystorical);
 		
-		JLabel titleDatiFiscali = new JLabel("INIZIALIZZA IL TUO CENTRO - INSERISCI  I DATI FISCALI");
-		titleDatiFiscali.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
-		titleDatiFiscali.setBounds(241, 11, 513, 32);
-		contentPane.add(titleDatiFiscali);
+		JLabel lblCreaAccountAdmin = new JLabel("CREA ACCOUNT ADMIN - RECEPTIONIST - PERSONALE");
+		lblCreaAccountAdmin.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
+		lblCreaAccountAdmin.setBounds(266, 23, 474, 32);
+		contentPane.add(lblCreaAccountAdmin);
 		
 		txfName = new JTextField();
 		txfName.setColumns(10);
-		txfName.setBounds(224, 447, 220, 20);
+		txfName.setBounds(224, 459, 220, 20);
 		contentPane.add(txfName);
 		
 		JLabel lblPEC = new JLabel("PEC:");
 		lblPEC.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblPEC.setBounds(50, 532, 170, 14);
+		lblPEC.setBounds(50, 544, 170, 14);
 		contentPane.add(lblPEC);
 		
 		JLabel lblPhone = new JLabel("Contatto Telefonico:");
 		lblPhone.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblPhone.setBounds(50, 490, 170, 14);
+		lblPhone.setBounds(50, 502, 170, 14);
 		contentPane.add(lblPhone);
 		
 		JLabel lblEmail = new JLabel("Email:");
 		lblEmail.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblEmail.setBounds(50, 574, 170, 14);
+		lblEmail.setBounds(50, 586, 170, 14);
 		contentPane.add(lblEmail);
 		
 		JLabel lblSedeLegale = new JLabel("Sede Legale:");
 		lblSedeLegale.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblSedeLegale.setBounds(50, 616, 170, 14);
+		lblSedeLegale.setBounds(50, 628, 170, 14);
 		contentPane.add(lblSedeLegale);
 		
 		JLabel lblSedeOperativa = new JLabel("Sede Operativa:");
 		lblSedeOperativa.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblSedeOperativa.setBounds(50, 658, 170, 14);
+		lblSedeOperativa.setBounds(50, 670, 170, 14);
 		contentPane.add(lblSedeOperativa);
 		
 		txfPhone = new JTextField();
 		txfPhone.setColumns(10);
-		txfPhone.setBounds(224, 489, 220, 20);
+		txfPhone.setBounds(224, 501, 220, 20);
 		contentPane.add(txfPhone);
 		
-		txfPEC = new JTextField();
-		txfPEC.setColumns(10);
-		txfPEC.setBounds(224, 531, 220, 20);
-		contentPane.add(txfPEC);
+		textField_3 = new JTextField();
+		textField_3.setColumns(10);
+		textField_3.setBounds(224, 543, 220, 20);
+		contentPane.add(textField_3);
 		
-		txfEmail = new JTextField();
-		txfEmail.setColumns(10);
-		txfEmail.setBounds(224, 573, 220, 20);
-		contentPane.add(txfEmail);
+		textField_4 = new JTextField();
+		textField_4.setColumns(10);
+		textField_4.setBounds(224, 585, 220, 20);
+		contentPane.add(textField_4);
 		
-		txfSedeLegale = new JTextField();
-		txfSedeLegale.setColumns(10);
-		txfSedeLegale.setBounds(224, 615, 220, 20);
-		contentPane.add(txfSedeLegale);
+		textField_5 = new JTextField();
+		textField_5.setColumns(10);
+		textField_5.setBounds(224, 627, 220, 20);
+		contentPane.add(textField_5);
 		
-		txfSedeOperativa = new JTextField();
-		txfSedeOperativa.setColumns(10);
-		txfSedeOperativa.setBounds(224, 657, 220, 20);
-		contentPane.add(txfSedeOperativa);
+		textField_6 = new JTextField();
+		textField_6.setColumns(10);
+		textField_6.setBounds(224, 669, 220, 20);
+		contentPane.add(textField_6);
 		
 		JLabel lblREA = new JLabel("REA:");
 		lblREA.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblREA.setBounds(549, 448, 170, 14);
+		lblREA.setBounds(549, 460, 170, 14);
 		contentPane.add(lblREA);
 		
 		JLabel lblPIva = new JLabel("Partita IVA:");
 		lblPIva.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblPIva.setBounds(549, 492, 170, 14);
+		lblPIva.setBounds(549, 504, 170, 14);
 		contentPane.add(lblPIva);
 		
 		JLabel lblAliquota = new JLabel("Aliquota %:");
 		lblAliquota.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblAliquota.setBounds(549, 534, 170, 14);
+		lblAliquota.setBounds(549, 546, 170, 14);
 		contentPane.add(lblAliquota);
 		
 		JLabel lblApertura = new JLabel("Orario Apertura:");
 		lblApertura.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblApertura.setBounds(549, 576, 170, 14);
+		lblApertura.setBounds(549, 588, 170, 14);
 		contentPane.add(lblApertura);
 		
 		JLabel lblChiusura = new JLabel("Orario Chiusura:");
 		lblChiusura.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblChiusura.setBounds(549, 618, 170, 14);
+		lblChiusura.setBounds(549, 630, 170, 14);
 		contentPane.add(lblChiusura);
 		
-		txfRea = new JTextField();
-		txfRea.setColumns(10);
-		txfRea.setBounds(729, 447, 220, 20);
-		contentPane.add(txfRea);
+		textField_7 = new JTextField();
+		textField_7.setColumns(10);
+		textField_7.setBounds(729, 459, 220, 20);
+		contentPane.add(textField_7);
 		
-		txfPIva = new JTextField();
-		txfPIva.setColumns(10);
-		txfPIva.setBounds(729, 489, 220, 20);
-		contentPane.add(txfPIva);
+		textField_8 = new JTextField();
+		textField_8.setColumns(10);
+		textField_8.setBounds(729, 501, 220, 20);
+		contentPane.add(textField_8);
 		
-		txfAliquota = new JTextField();
-		txfAliquota.setColumns(10);
-		txfAliquota.setBounds(729, 531, 220, 20);
-		contentPane.add(txfAliquota);
+		textField_9 = new JTextField();
+		textField_9.setColumns(10);
+		textField_9.setBounds(729, 543, 220, 20);
+		contentPane.add(textField_9);
 		
-		txfApertura = new JTextField();
-		txfApertura.setColumns(10);
-		txfApertura.setBounds(729, 573, 220, 20);
-		contentPane.add(txfApertura);
+		textField_10 = new JTextField();
+		textField_10.setColumns(10);
+		textField_10.setBounds(729, 585, 220, 20);
+		contentPane.add(textField_10);
 		
-		txfChiusura = new JTextField();
-		txfChiusura.setColumns(10);
-		txfChiusura.setBounds(729, 615, 220, 20);
-		contentPane.add(txfChiusura);
+		textField_11 = new JTextField();
+		textField_11.setColumns(10);
+		textField_11.setBounds(729, 627, 220, 20);
+		contentPane.add(textField_11);
 	}
 
 }

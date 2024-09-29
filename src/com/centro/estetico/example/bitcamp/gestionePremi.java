@@ -1,4 +1,4 @@
-package template;
+package com.centro.estetico.example.bitcamp;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
