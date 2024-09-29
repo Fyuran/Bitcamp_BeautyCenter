@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-20">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>
@@ -141,6 +141,18 @@
 	<classpathentry kind="lib" path="lib/money-api-1.1.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/money-api-1.1-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/jakarta.annotation-api-2.0.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/jakarta.annotation-api-2.0.0-javadoc.jar!/"/>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/okhttp-4.12.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/centroEstetico/javadocs/okhttp-4.12.0-javadoc.jar!/"/>
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>

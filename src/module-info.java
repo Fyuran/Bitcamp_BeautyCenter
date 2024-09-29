@@ -12,4 +12,5 @@ module centroEstetico {
 	requires java.desktop;
 	requires jcalendar;
 	requires org.javamoney.moneta;
+	requires java.money;
 }
