@@ -1,4 +1,4 @@
-package com.centro.estetico.example.bitcamp;
+package template;
 
 import java.util.Date;
 import javax.swing.JPanel;

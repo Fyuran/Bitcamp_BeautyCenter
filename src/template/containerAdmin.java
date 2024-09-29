@@ -1,4 +1,4 @@
-package com.centro.estetico.example.bitcamp;
+package template;
 import java.awt.BorderLayout;
 
 import java.awt.EventQueue;

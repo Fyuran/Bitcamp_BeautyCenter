@@ -1,4 +1,4 @@
-package com.centro.estetico.example.bitcamp;
+package template;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
