@@ -3,9 +3,10 @@ package com.centro.estetico.bitcamp;
 import java.sql.*;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
-public class BeautyCenter implements CRUDSQL {
-	private int id = -1;
+public class BeautyCenter {
+	private int id;
 	private String name;
 	private String phone;
 	private String certifiedMail;
@@ -17,7 +18,46 @@ public class BeautyCenter implements CRUDSQL {
 	private List<VAT> infoVat;
 	private LocalTime openingHour;
 	private LocalTime closingHour;
+	private boolean isEnabled;
 	
+	private BeautyCenter(
+			int id, String name, String phone, String certifiedMail, 
+			String mail, String registeredOffice,
+			String operatingOffice, String REA, String P_IVA, 
+			LocalTime openingHour, LocalTime closingHour, boolean isEnabled
+		) {
+		this.id = id;
+		this.name = name;
+		this.phone = phone;
+		this.certifiedMail = certifiedMail;
+		this.mail = mail;
+		this.registeredOffice = registeredOffice;
+		this.operatingOffice = operatingOffice;
+		this.REA = REA;
+		this.P_IVA = P_IVA;
+		this.openingHour = openingHour;
+		this.closingHour = closingHour;
+		this.isEnabled = isEnabled;
+		infoVat = VAT.getAllVAT();
+	}
+	
+	public BeautyCenter(String name, String phone, String certifiedMail, String mail, String registeredOffice,
+			String operatingOffice, String REA, String P_IVA, 
+			LocalTime openingHour, LocalTime closingHour) {
+		this(
+			-1, name, phone, certifiedMail, mail, 
+			registeredOffice, operatingOffice, 
+			REA, P_IVA,
+			openingHour, closingHour, true
+			);
+	}
+	
+	public boolean isEnabled() {
+		return isEnabled;
+	}
+	public int getId() {
+		return id;
+	}
 	public String getName() {
 		return name;
 	}
@@ -84,55 +124,142 @@ public class BeautyCenter implements CRUDSQL {
 	public void setClosingHour(LocalTime closingHour) {
 		this.closingHour = closingHour;
 	}
-	@Override
-	public int insertData() {
-		String query = "INSERT INTO beauty_center.beauty_center("
-				+ "name, "
-				+ "phone, "
-				+ "certified_mail, "
-				+ "mail, "
-				+ "registered_office"
-				+ "operating_office"
-				+ "REA"
-				+ "P_IVA"
-				+ "opening_hour"
-				+ "closing_hour"
-				+ ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	public void setEnabled(boolean isEnabled) {
+		this.isEnabled = isEnabled;
+	}
+	public static int insertData(BeautyCenter obj) {
+		String query = "INSERT INTO beauty_centerdb.beauty_center("
+				+ "name, phone, certified_mail,"
+				+ "mail, registered_office, operating_office,"
+				+ "REA, P_IVA, opening_hour, closing_hour, is_enabled)"
+				+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		Connection conn = Main.getConnection();
 		try(PreparedStatement stat = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
 			
-			stat.setString(1, name);
-			stat.setString(2, phone);
-			stat.setString(3, certifiedMail);
-			stat.setString(4, mail);
-			stat.setString(5, registeredOffice);
-			stat.setString(6, registeredOffice);
-	
+			stat.setString(1, obj.name);
+			stat.setString(2, obj.phone);
+			stat.setString(3, obj.certifiedMail);
+			stat.setString(4, obj.mail);
+			stat.setString(5, obj.registeredOffice);
+			stat.setString(6, obj.operatingOffice);
+			stat.setString(7, obj.REA);
+			stat.setString(8, obj.P_IVA);
+			stat.setTime(9, Time.valueOf(obj.openingHour));
+			stat.setTime(10, Time.valueOf(obj.closingHour));
+			stat.setBoolean(11, obj.isEnabled);
+			
+			int insert = stat.executeUpdate();
 			
 			ResultSet generatedKeys = stat.getGeneratedKeys();
-			if(generatedKeys.next()) {			
+			if(generatedKeys.next()) {
+				obj.id = generatedKeys.getInt(1);
+			} else {
+				throw new SQLException("Could not retrieve id");
 			}
             
+			conn.commit();
+			
+			return insert;
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return -1;
+	}
+	
+	public static BeautyCenter getData(int id) {
+		String query = "SELECT * FROM beauty_centerdb.beauty_center WHERE id = ?";
+		Connection conn = Main.getConnection();
+		Optional<BeautyCenter> opt = Optional.empty();
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			stat.setInt(1, id);
+			
+			ResultSet rs = stat.executeQuery();
+			BeautyCenter bc = null;
+			if(rs.next()) {
+				bc = new BeautyCenter(
+					rs.getInt(1), rs.getString(2), rs.getString(3),
+					rs.getString(4), rs.getString(5), rs.getString(6),
+					rs.getString(7), rs.getString(8), rs.getString(9),
+					rs.getTime(10).toLocalTime(), rs.getTime(11).toLocalTime(),
+					rs.getBoolean(12)
+				);
+				opt = Optional.ofNullable(bc);
+			}
+
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
-		return 0;
+		return opt.orElseThrow();
 	}
-	@Override
-	public ResultSet getData() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	@Override
-	public int updateData() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	@Override
-	public int deleteData() {
-		// TODO Auto-generated method stub
-		return 0;
+	public static int updateData(int id, BeautyCenter obj) {
+		String query = "UPDATE beauty_centerdb.beauty_center "
+				+ "SET name = ?, phone = ?,"
+				+ "certified_mail = ?, mail = ?,"
+				+ "registered_office = ?, operating_office = ?,"
+				+ "REA = ?, P_IVA = ?,"
+				+ "opening_hour = ?, closing_hour = ?, is_enabled = ? "
+				+ "WHERE id = ?";
+		Connection conn = Main.getConnection();
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			stat.setString(1, obj.name);
+			stat.setString(2, obj.phone);
+			stat.setString(3, obj.certifiedMail);
+			stat.setString(4, obj.mail);
+			stat.setString(5, obj.registeredOffice);
+			stat.setString(6, obj.operatingOffice);
+			stat.setString(7, obj.REA);
+			stat.setString(8, obj.P_IVA);
+			stat.setTime(9, Time.valueOf(obj.openingHour));
+			stat.setTime(10, Time.valueOf(obj.closingHour));
+			stat.setBoolean(11, obj.isEnabled);
+			
+			stat.setInt(12, id); //WHERE id = ?
+			int exec = stat.executeUpdate();
+			
+			conn.commit();
+			
+			return exec;
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return -1;
 	}
 	
+	public static int deleteData(int id) {
+		String query = "DELETE FROM beauty_centerdb.beauty_center WHERE id = ?";
+		Connection conn = Main.getConnection();
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			stat.setInt(1, id); //WHERE id = ?
+			
+			int exec = stat.executeUpdate();
+			conn.commit();
+			
+			return exec;
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return -1;
+	}
 	
 }
