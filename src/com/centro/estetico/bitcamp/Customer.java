@@ -23,7 +23,7 @@ public class Customer extends User{
 		
 	}
 	
-	public Customer(int id, String name, String surname, LocalDate BoD, UserCredentials credentials, String notes, String EU_TIN, Subsctription subscription, String VAT_ID, String recipientCode) {
+	public Customer(int id, String name, String surname, LocalDate BoD, UserCredentials credentials, String notes, String EU_TIN, Subscription subscription, String VAT_ID, String recipientCode) {
 		super(id, name, surname, BoD, credentials, notes);
 		this.EU_TIN=EU_TIN;
 		this.subscription=subscription;
