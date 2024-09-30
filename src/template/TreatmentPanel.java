@@ -208,4 +208,53 @@ public class TreatmentPanel extends JPanel {
 		add(productButton);
 
 	}
+
+	public JTextField getTxtPrice() {
+		return txtPrice;
+	}
+
+	public void setTxtPrice(JTextField txtPrice) {
+		this.txtPrice = txtPrice;
+	}
+
+	public JTextField getTxfSearchBar() {
+		return txfSearchBar;
+	}
+
+	public void setTxfSearchBar(JTextField txfSearchBar) {
+		this.txfSearchBar = txfSearchBar;
+	}
+
+	public JTextField getTxfName() {
+		return txfName;
+	}
+
+	public void setTxfName(JTextField txfName) {
+		this.txfName = txfName;
+	}
+
+	public JComboBox<String> getcBoxIVA() {
+		return cBoxIVA;
+	}
+
+	public void setcBoxIVA(JComboBox<String> cBoxIVA) {
+		this.cBoxIVA = cBoxIVA;
+	}
+
+	public JTextField getTxtDuration() {
+		return txtDuration;
+	}
+
+	public void setTxtDuration(JTextField txtDuration) {
+		this.txtDuration = txtDuration;
+	}
+
+	public DefaultTableModel getTableModel() {
+		return tableModel;
+	}
+
+	public void setTableModel(DefaultTableModel tableModel) {
+		this.tableModel = tableModel;
+	}
+	
 }

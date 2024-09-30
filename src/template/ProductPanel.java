@@ -184,4 +184,45 @@ public class ProductPanel extends JPanel {
 		
 		
 	}
+
+	public JTextField getTxfSearchBar() {
+		return txfSearchBar;
+	}
+
+	public void setTxfSearchBar(JTextField txfSearchBar) {
+		this.txfSearchBar = txfSearchBar;
+	}
+
+	public JTextField getTxtName() {
+		return txtName;
+	}
+
+	public void setTxtName(JTextField txtName) {
+		this.txtName = txtName;
+	}
+
+	public JTextField getTxtMinStock() {
+		return txtMinStock;
+	}
+
+	public void setTxtMinStock(JTextField txtMinStock) {
+		this.txtMinStock = txtMinStock;
+	}
+
+	public DefaultTableModel getTableModel() {
+		return tableModel;
+	}
+
+	public void setTableModel(DefaultTableModel tableModel) {
+		this.tableModel = tableModel;
+	}
+
+	public JTextField getTxtPrice() {
+		return txtPrice;
+	}
+
+	public void setTxtPrice(JTextField txtPrice) {
+		this.txtPrice = txtPrice;
+	}
+	
 }

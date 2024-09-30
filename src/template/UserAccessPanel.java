@@ -126,4 +126,5 @@ public class UserAccessPanel extends JPanel {
 		changeUserDialog.setAlwaysOnTop(true);
 		changeUserDialog.setModalityType(Dialog.DEFAULT_MODALITY_TYPE);
 	}
+	
 }

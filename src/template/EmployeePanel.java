@@ -261,4 +261,101 @@ public class EmployeePanel extends JPanel {
 		add(txtPassword);
 
 	}
+
+	public JTextField getTxtSurname() {
+		return txtSurname;
+	}
+
+	public void setTxtSurname(JTextField txtSurname) {
+		this.txtSurname = txtSurname;
+	}
+
+	public JTextField getTxfSearchBar() {
+		return txfSearchBar;
+	}
+
+	public void setTxfSearchBar(JTextField txfSearchBar) {
+		this.txfSearchBar = txfSearchBar;
+	}
+
+	public JTextField getTxtName() {
+		return txtName;
+	}
+
+	public void setTxtName(JTextField txtName) {
+		this.txtName = txtName;
+	}
+
+	public JTextField getTxtIban() {
+		return txtIban;
+	}
+
+	public void setTxtIban(JTextField txtIban) {
+		this.txtIban = txtIban;
+	}
+
+	public DefaultTableModel getTableModel() {
+		return tableModel;
+	}
+
+	public void setTableModel(DefaultTableModel tableModel) {
+		this.tableModel = tableModel;
+	}
+
+	public JTextField getTxtMail() {
+		return txtMail;
+	}
+
+	public void setTxtMail(JTextField txtMail) {
+		this.txtMail = txtMail;
+	}
+
+	public JTextField getTxtPhone() {
+		return txtPhone;
+	}
+
+	public void setTxtPhone(JTextField txtPhone) {
+		this.txtPhone = txtPhone;
+	}
+
+	public JTextField getTxtAddress() {
+		return txtAddress;
+	}
+
+	public void setTxtAddress(JTextField txtAddress) {
+		this.txtAddress = txtAddress;
+	}
+
+	public JTextField getTxtBirthday() {
+		return txtBirthday;
+	}
+
+	public void setTxtBirthday(JTextField txtBirthday) {
+		this.txtBirthday = txtBirthday;
+	}
+
+	public JTextField getTextField() {
+		return textField;
+	}
+
+	public void setTextField(JTextField textField) {
+		this.textField = textField;
+	}
+
+	public JTextField getTxtUsername() {
+		return txtUsername;
+	}
+
+	public void setTxtUsername(JTextField txtUsername) {
+		this.txtUsername = txtUsername;
+	}
+
+	public JTextField getTxtPassword() {
+		return txtPassword;
+	}
+
+	public void setTxtPassword(JTextField txtPassword) {
+		this.txtPassword = txtPassword;
+	}
+	
 }

@@ -72,4 +72,29 @@ public class ProductSelector extends JFrame {
 		setVisible(true);
 
 	}
+
+
+
+	public JPanel getContentPane() {
+		return contentPane;
+	}
+
+
+
+	public void setContentPane(JPanel contentPane) {
+		this.contentPane = contentPane;
+	}
+
+
+
+	public JTextField getProductText() {
+		return productText;
+	}
+
+
+
+	public void setProductText(JTextField productText) {
+		this.productText = productText;
+	}
+	
 }

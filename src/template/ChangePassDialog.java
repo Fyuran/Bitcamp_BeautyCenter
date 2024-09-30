@@ -77,4 +77,35 @@ public class ChangePassDialog extends JDialog {
 		getContentPane().add(visibleCheck);
 		setVisible(true);
 	}
+
+
+	public JPasswordField getNewPasswordTxt1() {
+		return newPasswordTxt1;
+	}
+
+
+	public void setNewPasswordTxt1(JPasswordField newPasswordTxt1) {
+		this.newPasswordTxt1 = newPasswordTxt1;
+	}
+
+
+	public JPasswordField getOldPasswordTxt() {
+		return oldPasswordTxt;
+	}
+
+
+	public void setOldPasswordTxt(JPasswordField oldPasswordTxt) {
+		this.oldPasswordTxt = oldPasswordTxt;
+	}
+
+
+	public JPasswordField getNewPasswordTxt2() {
+		return newPasswordTxt2;
+	}
+
+
+	public void setNewPasswordTxt2(JPasswordField newPasswordTxt2) {
+		this.newPasswordTxt2 = newPasswordTxt2;
+	}
+	
 }

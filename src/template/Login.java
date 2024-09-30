@@ -135,4 +135,93 @@ public class Login extends JFrame {
 	public void forgottenPassword() {
 		//metodo da definire o rimuovere
 	}
+
+	public JPanel getMainPane() {
+		return mainPane;
+	}
+
+	public void setMainPane(JPanel mainPane) {
+		this.mainPane = mainPane;
+	}
+
+	public JTextField getMailText() {
+		return mailText;
+	}
+
+	public void setMailText(JTextField mailText) {
+		this.mailText = mailText;
+	}
+
+	public JLabel getUserMsgLabel() {
+		return userMsgLabel;
+	}
+
+	public void setUserMsgLabel(JLabel userMsgLabel) {
+		this.userMsgLabel = userMsgLabel;
+	}
+
+	public JLabel getPasswordMsgLabel() {
+		return passwordMsgLabel;
+	}
+
+	public void setPasswordMsgLabel(JLabel passwordMsgLabel) {
+		this.passwordMsgLabel = passwordMsgLabel;
+	}
+
+	public JLabel getPasswordLabel() {
+		return passwordLabel;
+	}
+
+	public void setPasswordLabel(JLabel passwordLabel) {
+		this.passwordLabel = passwordLabel;
+	}
+
+	public JLabel getMailLabel() {
+		return mailLabel;
+	}
+
+	public void setMailLabel(JLabel mailLabel) {
+		this.mailLabel = mailLabel;
+	}
+
+	public JButton getLoginBtn() {
+		return loginBtn;
+	}
+
+	public void setLoginBtn(JButton loginBtn) {
+		this.loginBtn = loginBtn;
+	}
+
+	public JButton getForgottenPasswordBtn() {
+		return forgottenPasswordBtn;
+	}
+
+	public void setForgottenPasswordBtn(JButton forgottenPasswordBtn) {
+		this.forgottenPasswordBtn = forgottenPasswordBtn;
+	}
+
+	public JLabel getWelcomeLbl() {
+		return welcomeLbl;
+	}
+
+	public void setWelcomeLbl(JLabel welcomeLbl) {
+		this.welcomeLbl = welcomeLbl;
+	}
+
+	public JPasswordField getPasswordText() {
+		return passwordText;
+	}
+
+	public void setPasswordText(JPasswordField passwordText) {
+		this.passwordText = passwordText;
+	}
+
+	public JCheckBox getVisibleCheck() {
+		return visibleCheck;
+	}
+
+	public void setVisibleCheck(JCheckBox visibleCheck) {
+		this.visibleCheck = visibleCheck;
+	}
+	
 }
