@@ -3,16 +3,21 @@ package com.centro.estetico.bitcamp;
 import java.math.BigDecimal;
 
 public class Product {
-	int id;
-	String name;
-	int amount;
-	int minStock;
-	BigDecimal price;
-	double vat;
-	ProductCat type;
-	boolean isEnabled;
+	private int id;
+	private String name;
+	private int amount;
+	private int minStock;
+	private BigDecimal price;
+	private double vat;
+	private ProductCat type;
+	private boolean isEnabled;
 	
 	
+	
+	public Product() {
+		
+	}
+
 	public Product(int id, String name, int amount, int minStock, BigDecimal price, double vat, ProductCat type,
 			boolean isEnabled) {
 		
