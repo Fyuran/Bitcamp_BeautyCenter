@@ -17,7 +17,7 @@ public class Customer {
 		return id;
 	}
 
-	public static Customer getData(int id) {
+	public static Optional<Customer> getData(int id) {
 		String query = "SELECT * FROM beauty_centerdb.customer WHERE id = ?";
 		Connection conn = Main.getConnection();
 		Optional<Customer> opt = Optional.empty();
@@ -32,6 +32,6 @@ public class Customer {
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
-		return opt.orElseThrow();
+		return opt;
 	}
 }
