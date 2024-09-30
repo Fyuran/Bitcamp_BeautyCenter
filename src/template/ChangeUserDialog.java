@@ -62,6 +62,11 @@ public class ChangeUserDialog extends JDialog {
 			}
 		});
 		getContentPane().add(visibleCheck);
+		
+		JLabel msgLbl = new JLabel(""); //label per i messaggi all'utente
+		msgLbl.setBounds(179, 168, 182, 16);
+		getContentPane().add(msgLbl);
+		setVisible(true);
 		setVisible(true);
 	}
 }
