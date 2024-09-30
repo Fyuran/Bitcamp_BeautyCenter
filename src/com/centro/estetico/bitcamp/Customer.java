@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Optional;
 
 public class Customer extends User{
@@ -26,7 +27,7 @@ public class Customer extends User{
 		super(id, name, surname, BoD, credentials, notes);
 		this.EU_TIN=EU_TIN;
 		this.subscription=subscription;
-		this.awards=new ArrayList<Prize>;
+		this.awards=new ArrayList<>();
 		this.VAT_ID=VAT_ID;
 		this.recipientCode=recipientCode;
 	}
