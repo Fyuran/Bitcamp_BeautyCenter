@@ -33,7 +33,7 @@ public final class BeautyCenterTest {
 		BeautyCenter.insertData(bc2);
 		BeautyCenter.deleteData(bc2.getId());
 		
-		BeautyCenter bc_get = BeautyCenter.getData(bc.getId());
+		BeautyCenter bc_get = BeautyCenter.getData(bc.getId()).orElseThrow();
 		bc_get.setName("get_Test");
 		bc_get.setOpeningHour(LocalTime.of(9, 0));
 		

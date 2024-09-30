@@ -5,11 +5,15 @@ import java.util.NoSuchElementException;
 
 public class Main {
 	private static Connection conn;
+	private static BeautyCenter bc;
 	
 	public Main(String url, String username, String password) {
 		try {
 			conn = DriverManager.getConnection(url, username, password);
 			conn.setAutoCommit(false);
+			
+			bc = BeautyCenter.getData(1).orElseThrow();
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -33,6 +37,11 @@ public class Main {
 	
 	public static void main(String[] args) {
 		Main main = new Main("jdbc:mysql://localhost:1806", "root", "bitcampPassword");
+		
+	}
+
+	public static BeautyCenter getBeautyCenter() {
+		return bc;
 	}
 }
 
