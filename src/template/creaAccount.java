@@ -278,5 +278,5 @@ public class creaAccount extends JFrame {
 		textField_11.setBounds(729, 627, 220, 20);
 		contentPane.add(textField_11);
 	}
-
+//daniele fa una prova per vedere se eclipse fa schifo o no
 }
