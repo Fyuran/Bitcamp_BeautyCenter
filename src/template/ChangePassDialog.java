@@ -75,6 +75,10 @@ public class ChangePassDialog extends JDialog {
 			}
 		});
 		getContentPane().add(visibleCheck);
+		
+		JLabel msgLbl = new JLabel(""); //label per i messaggi all'utente
+		msgLbl.setBounds(179, 261, 182, 16);
+		getContentPane().add(msgLbl);
 		setVisible(true);
 	}
 
