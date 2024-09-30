@@ -10,7 +10,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 public class Login extends JFrame {
-
+//frame obsoleto, è stato mergiato a benvenutoOperatori
 	private static final long serialVersionUID = 1L;
 	private JPanel mainPane;
 	private JTextField mailText;

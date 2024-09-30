@@ -28,7 +28,8 @@ public class TestFrame extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		new TestFrame();
+		//new TestFrame();
+		new benvenutoOperatori();
 	}
 
 }
