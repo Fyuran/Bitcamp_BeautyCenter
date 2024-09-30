@@ -31,6 +31,7 @@ public class gestioneClienti extends JPanel {
 	private JTextField txfComuneNascita;
 	private JTextField txfProvincNascita;
 	private JTextField txfNotes;
+	private int selectedRow = -1;
 
 	// Modello della tabella (scope a livello di classe per poter aggiornare la
 	// tabella)
@@ -72,8 +73,7 @@ public class gestioneClienti extends JPanel {
 		btnSearch.setOpaque(false);
 		btnSearch.setContentAreaFilled(false);
 		btnSearch.setBorderPainted(false);
-		btnSearch.setIcon(new ImageIcon(
-				"C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\searchIcon.png"));
+		btnSearch.setIcon(new ImageIcon(gestioneClienti.class.getResource("/iconeGestionale/searchIcon.png")));
 		btnSearch.setBounds(206, 8, 40, 30);
 		containerPanel.add(btnSearch);
 
@@ -87,8 +87,7 @@ public class gestioneClienti extends JPanel {
 		btnFilter.setOpaque(false);
 		btnFilter.setContentAreaFilled(false);
 		btnFilter.setBorderPainted(false);
-		btnFilter.setIcon(new ImageIcon(
-				"C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\filterIcon.png"));
+		btnFilter.setIcon(new ImageIcon(gestioneClienti.class.getResource("/iconeGestionale/filterIcon.png")));
 		btnFilter.setBounds(256, 8, 40, 30);
 		containerPanel.add(btnFilter);
 
@@ -96,9 +95,8 @@ public class gestioneClienti extends JPanel {
 		btnInsert.setOpaque(false);
 		btnInsert.setContentAreaFilled(false);
 		btnInsert.setBorderPainted(false);
-		btnInsert.setIcon(new ImageIcon(
-				"C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\InsertUser.png"));
-		btnInsert.setBounds(720, 8, 40, 30);
+		btnInsert.setIcon(new ImageIcon(gestioneClienti.class.getResource("/iconeGestionale/InsertUser.png")));
+		btnInsert.setBounds(792, 8, 40, 30);
 		containerPanel.add(btnInsert);
 
 		btnInsert.addActionListener(new ActionListener() {
@@ -115,11 +113,26 @@ public class gestioneClienti extends JPanel {
 				String provinciaNascita = txfProvincNascita.getText();
 				String note = txfNotes.getText();
 
-				//aggiungere il check dei campi in modo da non aggiungere una nuova riga
-				// Aggiungere una nuova riga alla tabella
-				Object[] rowData = { nome, cognome, codiceFiscale, telefono, email, dataNascita, sesso, comuneNascita,
-						provinciaNascita, note };
-				tableModel.addRow(rowData); // Aggiunge la riga alla tabella
+				if (selectedRow != -1) {
+					tableModel.setValueAt(nome, selectedRow, 0);
+					tableModel.setValueAt(cognome, selectedRow, 1);
+					tableModel.setValueAt(codiceFiscale, selectedRow, 2);
+					tableModel.setValueAt(telefono, selectedRow, 3);
+					tableModel.setValueAt(email, selectedRow, 4);
+					tableModel.setValueAt(dataNascita, selectedRow, 5);
+					tableModel.setValueAt(sesso, selectedRow, 6);
+					tableModel.setValueAt(comuneNascita, selectedRow, 7);
+					tableModel.setValueAt(provinciaNascita, selectedRow, 8);
+					tableModel.setValueAt(note, selectedRow, 9);
+
+					// Resetta la variabile selectedRow dopo l'aggiornamento
+					selectedRow = -1;
+				} else {
+					// Se nessuna riga è stata selezionata, inseriamo una nuova riga
+					Object[] rowData = { nome, cognome, codiceFiscale, telefono, email, dataNascita, sesso,
+							comuneNascita, provinciaNascita, note };
+					tableModel.addRow(rowData);
+				}
 
 				// Pulisci i campi dopo l'inserimento
 				txfName.setText("");
@@ -140,9 +153,8 @@ public class gestioneClienti extends JPanel {
 		btnUpdate.setOpaque(false);
 		btnUpdate.setContentAreaFilled(false);
 		btnUpdate.setBorderPainted(false);
-		btnUpdate.setIcon(new ImageIcon(
-				"C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\UpdateUser.png"));
-		btnUpdate.setBounds(770, 8, 40, 30);
+		btnUpdate.setIcon(new ImageIcon(gestioneClienti.class.getResource("/iconeGestionale/UpdateUser.png")));
+		btnUpdate.setBounds(842, 8, 40, 30);
 		containerPanel.add(btnUpdate);
 
 		btnUpdate.addActionListener(new ActionListener() {
@@ -165,22 +177,12 @@ public class gestioneClienti extends JPanel {
 			}
 		});
 
-		JButton btnDelete = new JButton("");
-		btnDelete.setOpaque(false);
-		btnDelete.setContentAreaFilled(false);
-		btnDelete.setBorderPainted(false);
-		btnDelete.setIcon(new ImageIcon(
-				"C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\deleteUser.png"));
-		btnDelete.setBounds(820, 8, 40, 30);
-		containerPanel.add(btnDelete);
-
 		JButton btnDisable = new JButton("");
 		btnDisable.setOpaque(false);
 		btnDisable.setContentAreaFilled(false);
 		btnDisable.setBorderPainted(false);
-		btnDisable.setIcon(new ImageIcon(
-				"C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\userDisable.png"));
-		btnDisable.setBounds(920, 8, 40, 30);
+		btnDisable.setIcon(new ImageIcon(gestioneClienti.class.getResource("/iconeGestionale/userDisable.png")));
+		btnDisable.setBounds(892, 8, 40, 30);
 		containerPanel.add(btnDisable);
 
 		JPanel outputPanel = new JPanel();
@@ -192,9 +194,8 @@ public class gestioneClienti extends JPanel {
 		btnHystorical.setOpaque(false);
 		btnHystorical.setContentAreaFilled(false);
 		btnHystorical.setBorderPainted(false);
-		btnHystorical.setIcon(new ImageIcon(
-				"C:\\Users\\vince\\OneDrive\\Desktop\\Java\\Centro_Estetico\\src\\icone\\StoricoUser2.png"));
-		btnHystorical.setBounds(870, 8, 40, 30);
+		btnHystorical.setIcon(new ImageIcon(gestioneClienti.class.getResource("/iconeGestionale/StoricoUser2.png")));
+		btnHystorical.setBounds(942, 8, 40, 30);
 		containerPanel.add(btnHystorical);
 
 		// label e textfield degli input
