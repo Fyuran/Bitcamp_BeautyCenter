@@ -27,12 +27,12 @@ public final class TransactionTest {
 			e.printStackTrace();
 		}
 		
-		BeautyCenter bc = BeautyCenter.getData(1);
-		Customer c1 = Customer.getData(1);
-		VAT v1 = VAT.getData(1);
+		BeautyCenter bc = BeautyCenter.getData(1).orElseThrow();
+		Customer c1 = Customer.getData(1).orElseThrow();
+		VAT v1 = VAT.getData(1).orElseThrow();
 		
-		Customer c2 = Customer.getData(2);
-		VAT v2 = VAT.getData(2);
+		Customer c2 = Customer.getData(2).orElseThrow();
+		VAT v2 = VAT.getData(2).orElseThrow();
 		
 		/*
 		 * 
@@ -50,7 +50,7 @@ public final class TransactionTest {
 		Transaction.insertData(trans2);
 		Transaction.deleteData(trans2.getId());
 		
-		Transaction tr_get = Transaction.getData(trans1.getId());
+		Transaction tr_get = Transaction.getData(trans1.getId()).orElseThrow();
 		tr_get.setDate(LocalDateTime.of(2024, 9, 29, 15, 0));
 		tr_get.setPrice(BigDecimal.valueOf(300));
 		

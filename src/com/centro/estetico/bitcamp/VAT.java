@@ -75,7 +75,7 @@ public class VAT {
 		}
 		return -1;
 	}
-	public static VAT getData(int id) {
+	public static Optional<VAT> getData(int id) {
 		String query = "SELECT * FROM beauty_centerdb.vat WHERE id = ?";
 		Connection conn = Main.getConnection();
 		Optional<VAT> opt = Optional.empty();
@@ -92,7 +92,7 @@ public class VAT {
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
-		return opt.orElseThrow();
+		return opt;
 	}
 	
 	public static List<VAT> getAllVAT() {

@@ -1,9 +1,7 @@
 package com.centro.estetico.test.bitcamp;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDateTime;
 
 import com.centro.estetico.bitcamp.Main;
 import com.centro.estetico.bitcamp.VAT;
@@ -29,7 +27,7 @@ public class VATTest {
 		VAT.insertData(vat2);
 		VAT.deleteData(vat2.getId());
 		
-		VAT vat_get = VAT.getData(vat.getId());
+		VAT vat_get = VAT.getData(vat.getId()).orElseThrow();
 		vat_get.setAmount(5);
 		
 		VAT.updateData(vat_get.getId(), vat_get);	

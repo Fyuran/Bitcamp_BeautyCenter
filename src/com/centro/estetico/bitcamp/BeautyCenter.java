@@ -173,7 +173,7 @@ public class BeautyCenter {
 		return -1;
 	}
 	
-	public static BeautyCenter getData(int id) {
+	public static Optional<BeautyCenter> getData(int id) {
 		String query = "SELECT * FROM beauty_centerdb.beauty_center WHERE id = ?";
 		Connection conn = Main.getConnection();
 		Optional<BeautyCenter> opt = Optional.empty();
@@ -196,7 +196,7 @@ public class BeautyCenter {
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
-		return opt.orElseThrow();
+		return opt;
 	}
 	public static int updateData(int id, BeautyCenter obj) {
 		String query = "UPDATE beauty_centerdb.beauty_center "

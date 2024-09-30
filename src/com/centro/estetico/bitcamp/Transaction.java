@@ -181,7 +181,7 @@ public class Transaction {
 			)
 	*/
 	
-	public static Transaction getData(int id) {
+	public static Optional<Transaction> getData(int id) {
 		String query = "SELECT * FROM beauty_centerdb.transaction WHERE id = ?";
 		Connection conn = Main.getConnection();
 		Optional<Transaction> opt = Optional.empty();
@@ -191,9 +191,9 @@ public class Transaction {
 			ResultSet rs = stat.executeQuery();
 			Transaction trans = null;
 			if(rs.next()) {
-				Customer customer = Customer.getData(rs.getInt(6));
-				VAT vat = VAT.getData(rs.getInt(5));
-				BeautyCenter beautyCenter = BeautyCenter.getData(rs.getInt(7));
+				Customer customer = Customer.getData(rs.getInt(6)).orElseThrow();
+				VAT vat = VAT.getData(rs.getInt(5)).orElseThrow();
+				BeautyCenter beautyCenter = BeautyCenter.getData(rs.getInt(7)).orElseThrow();
 				trans = new Transaction(
 					rs.getInt(1), rs.getBigDecimal(2), PayMethod.toEnum(rs.getString(4)),
 					rs.getTimestamp(3).toLocalDateTime(),
@@ -204,7 +204,7 @@ public class Transaction {
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
-		return opt.orElseThrow();
+		return opt;
 	}
 
 
