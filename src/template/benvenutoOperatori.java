@@ -109,8 +109,14 @@ public class benvenutoOperatori extends JFrame {
         forgottenPasswordBtn.setBounds(37, 133, 200, 29);
         loginDataPanel.add(forgottenPasswordBtn);
         
+
+        userMsgLabel = new JLabel("", SwingConstants.CENTER);
+        userMsgLabel.setBounds(57, 45, 190, 16);
+        loginDataPanel.add(userMsgLabel);
+        
+
         passwordMsgLabel = new JLabel("", SwingConstants.CENTER);
-        passwordMsgLabel.setBounds(57, 165, 190, 16);
+        passwordMsgLabel.setBounds(67, 150, 190, 16);
         loginDataPanel.add(passwordMsgLabel);
         
         passwordText = new JPasswordField();
@@ -146,6 +152,12 @@ public class benvenutoOperatori extends JFrame {
         loginBtn.addActionListener(e -> login());
         loginDataPanel.add(loginBtn);
         
+
+        JLabel tipsLbl = new JLabel("Eventuale label per i tips?");
+        tipsLbl.setFont(new Font("Lucida Grande", Font.PLAIN, 25));
+        tipsLbl.setBounds(469, 571, 410, 61);
+        loginDataPanell.add(tipsLbl);
+
         
         //frase scorrevole, cicla l'array di frasi con un timer settato
         descriptionTimer = new Timer(2000, new ActionListener() {
@@ -158,6 +170,7 @@ public class benvenutoOperatori extends JFrame {
         
         descriptionTimer.start();
         
+
         setVisible(true);
 
     }

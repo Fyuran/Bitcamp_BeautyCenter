@@ -39,13 +39,13 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`customer` (
   `loyalty_points` int NOT NULL DEFAULT '0',
   `is_enabled` tinyint DEFAULT '1',
   PRIMARY KEY (`id`),
-  CONSTRAINT `customer_FK1` FOREIGN KEY (`credentials_id`) REFERENCES `beauty_centerdb`.`customer` (`id`) ON UPDATE CASCADE
+  CONSTRAINT `customer_FK1` FOREIGN KEY (`credentials_id`) REFERENCES `beauty_centerdb`.`user_credentials` (`id`) ON UPDATE CASCADE
 );
   
 CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`transaction` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `price` double NOT NULL,
-  `date` datetime NOT NULL,
+  `datetime` DATETIME NOT NULL,
   `payment_method` varchar(50) DEFAULT NULL,
   `vat_id` int unsigned DEFAULT NULL,
   `customer_id` int unsigned DEFAULT NULL,
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`producttreatment` (
 
 CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservation` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `date` DATE NOT NULL,
+  `datetime` DATETIME NOT NULL,
   `is_paid` TINYINT NOT NULL DEFAULT 0,
   `treatment_id` INT UNSIGNED NULL,
   `customer_id` INT UNSIGNED NULL,
