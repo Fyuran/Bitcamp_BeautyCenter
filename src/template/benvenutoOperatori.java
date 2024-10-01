@@ -7,10 +7,28 @@ import java.awt.event.ActionListener;
 
 public class benvenutoOperatori extends JFrame {
 	private static final long serialVersionUID = 1L;
-	private JTextField mailText;
+	private JTextField txtUsername;
 	private JPasswordField passwordText;
-	private JLabel userMsgLabel;
+    private JLabel userMsgLabel;
 	private JLabel passwordMsgLabel;
+	private JLabel descriptionLabel;
+	private Timer descriptionTimer;
+	private int indexFraseCorrente = 0;
+	
+	private String[] frasi = {
+			"Con il nostro gestionale, lavorare è semplice e intuitivo!",
+		    "Gestisci le prenotazioni con facilità.",
+		    "Tieni traccia dei tuoi clienti in un unico posto.",
+		    "Aggiorna le informazioni del centro estetico in pochi clic.",
+		    "Monitora i prodotti e ricevi avvisi quando sono in esaurimento.",
+		    "Crea report dettagliati sulle attività del centro.",
+		    "Accedi alle schede dei clienti in modo rapido e sicuro.",
+		    "Personalizza i trattamenti in base alle esigenze dei tuoi clienti.",
+		    "Organizza gli orari dei dipendenti in modo efficace.",
+		    "Un strumento per migliorare la produttività del tuo centro estetico."
+	};
+	
+	
     public benvenutoOperatori() {
         setTitle("Benvenuto Personale - Gestionale Centro Estetico");
         setSize(1024, 768);
@@ -38,17 +56,17 @@ public class benvenutoOperatori extends JFrame {
        
         JPanel textPanel = new JPanel();
         textPanel.setLayout(null);
-        textPanel.setBounds(434, 365, 590, 137);
+        textPanel.setBounds(142, 316, 737, 137);
         textPanel.setBackground(Color.WHITE);
 
         JLabel welcomeLabel = new JLabel("Benvenuto nel Gestionale Centro Estetico!");
         welcomeLabel.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 24));
-        welcomeLabel.setBounds(16, 17, 516, 40);
+        welcomeLabel.setBounds(16, 17, 693, 40);
         welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         JLabel descriptionLabel = new JLabel("Con il nostro gestionale, lavorare è semplice e intuitivo!");
         descriptionLabel.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 20));
-        descriptionLabel.setBounds(16, 79, 567, 30);
+        descriptionLabel.setBounds(0, 79, 737, 30);
         descriptionLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         textPanel.add(welcomeLabel);
@@ -65,43 +83,54 @@ public class benvenutoOperatori extends JFrame {
         JPanel loginDataPanel = new JPanel();
         loginDataPanel.setLayout(null);
         loginDataPanel.setBackground(Color.WHITE);
-        loginDataPanel.setBounds(47, 317, 300, 326);
+        loginDataPanel.setBounds(363, 464, 300, 231);
         loginDataPanell.add(loginDataPanel);
         
         JLabel passwordLabel = new JLabel("Password:");
-        passwordLabel.setBounds(57, 122, 63, 16);
+        passwordLabel.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 11));
+        passwordLabel.setBounds(37, 54, 63, 16);
         loginDataPanel.add(passwordLabel);
         
-        mailText = new JTextField();
-        mailText.setColumns(10);
-        mailText.setBounds(139, 16, 130, 26);
-        loginDataPanel.add(mailText);
+        txtUsername = new JTextField();
+        txtUsername.setColumns(10);
+        txtUsername.setBounds(117, 16, 152, 26);
+        loginDataPanel.add(txtUsername);
         
-        JLabel mailLabel = new JLabel("Indirizzo mail:");
-        mailLabel.setBounds(37, 21, 90, 16);
-        loginDataPanel.add(mailLabel);
+        JLabel lblUsername = new JLabel("Username:");
+        lblUsername.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 11));
+        lblUsername.setBounds(37, 21, 69, 16);
+        loginDataPanel.add(lblUsername);
         
         JButton forgottenPasswordBtn = new JButton("Password dimenticata?");
+        forgottenPasswordBtn.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 11));
         forgottenPasswordBtn.setOpaque(false);
         forgottenPasswordBtn.setContentAreaFilled(false);
         forgottenPasswordBtn.setBorderPainted(false);
-        forgottenPasswordBtn.setBounds(37, 223, 200, 29);
+        forgottenPasswordBtn.setBounds(37, 133, 200, 29);
         loginDataPanel.add(forgottenPasswordBtn);
-        
-        userMsgLabel = new JLabel("", SwingConstants.CENTER);
-        userMsgLabel.setBounds(57, 54, 190, 16);
-        loginDataPanel.add(userMsgLabel);
         
         passwordMsgLabel = new JLabel("", SwingConstants.CENTER);
         passwordMsgLabel.setBounds(57, 165, 190, 16);
         loginDataPanel.add(passwordMsgLabel);
         
         passwordText = new JPasswordField();
-        passwordText.setBounds(132, 117, 130, 26);
+        passwordText.setBounds(117, 50, 152, 26);
         loginDataPanel.add(passwordText);
         
         JCheckBox visibleCheck = new JCheckBox("Mostra password");
-        visibleCheck.setBounds(64, 188, 152, 23);
+        visibleCheck.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 11));
+        visibleCheck.setBounds(71, 103, 152, 23);
+        visibleCheck.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(visibleCheck.isSelected()) {
+					passwordText.setEchoChar((char) 0);
+				}else {
+					passwordText.setEchoChar('•');
+				}
+			}
+		});
+        
         loginDataPanel.add(visibleCheck);
         
         JButton loginBtn = new JButton("Login");
@@ -113,22 +142,36 @@ public class benvenutoOperatori extends JFrame {
         loginBtn.setFont(new Font("Arial", Font.BOLD, 16));
         loginBtn.setFocusPainted(false);
         loginBtn.setBackground(new Color(0, 153, 0));
-        loginBtn.setBounds(47, 280, 200, 40);
+        loginBtn.setBounds(47, 173, 200, 40);
         loginBtn.addActionListener(e -> login());
         loginDataPanel.add(loginBtn);
+        
+        
+        //frase scorrevole, cicla l'array di frasi con un timer settato
+        descriptionTimer = new Timer(2000, new ActionListener() {
+        	@Override
+        	public void actionPerformed(ActionEvent e) {
+        		indexFraseCorrente = (indexFraseCorrente + 1) % frasi.length; //cicla l'array di frasi e usa il modulo% per resettarsi a 0 e ricominciare 
+        		descriptionLabel.setText(frasi[indexFraseCorrente]);
+        	}
+        });
+        
+        descriptionTimer.start();
+        
         setVisible(true);
 
     }
+    
+    
     public void login() {
 		Color errorColor = new Color(255, 0, 0, 100);
-		mailText.setBackground(Color.WHITE);
+		txtUsername.setBackground(Color.WHITE);
 		passwordText.setBackground(Color.WHITE);
-		userMsgLabel.setText("");
 		passwordMsgLabel.setText("");
-		String mail = mailText.getText();
+		String mail = txtUsername.getText();
 		char[] password = passwordText.getPassword();
 		if (mail.isBlank() || mail.isEmpty()) {
-			mailText.setBackground(errorColor);
+			txtUsername.setBackground(errorColor);
 			userMsgLabel.setText("Inserire indirizzo mail");
 		}
 		if (password.length==0){

@@ -67,6 +67,7 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 	public installazioneGuidataDatiFiscali() {
 		setTitle("Centro Estetico - Installazione Guidata- Dati Fiscali");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLocationRelativeTo(null);
 		setBounds(100, 100, 1024, 768);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -268,17 +269,17 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 		txfChiusura.setBounds(729, 615, 220, 20);
 		contentPane.add(txfChiusura);
 		
-		JButton btnNewButton = new JButton("AVANTI");
-		btnNewButton.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 13));
-		btnNewButton.setBackground(new Color(0, 204, 102));
-		btnNewButton.addActionListener(new ActionListener() {
+		JButton btnAvanti = new JButton("AVANTI");
+		btnAvanti.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 13));
+		btnAvanti.setBackground(new Color(0, 204, 102));
+		btnAvanti.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				creaAccount accountFrame = new creaAccount();
 				accountFrame.setVisible(true);
 				dispose(); //chiude la finestra corrente
 			}
 		});
-		btnNewButton.setBounds(729, 656, 220, 23);
-		contentPane.add(btnNewButton);
+		btnAvanti.setBounds(729, 656, 220, 23);
+		contentPane.add(btnAvanti);
 	}
 }

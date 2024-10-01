@@ -240,6 +240,9 @@ public class creaAccount extends JFrame {
 		JButton btnVaiLogin = new JButton("VAI AL LOGIN");
 		btnVaiLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				benvenutoOperatori benvenutoOperatori = new benvenutoOperatori();
+				benvenutoOperatori.setVisible(true);
+				dispose(); //chiude la finestra corrente
 			}
 		});
 		btnVaiLogin.setBackground(new Color(0, 204, 102));
