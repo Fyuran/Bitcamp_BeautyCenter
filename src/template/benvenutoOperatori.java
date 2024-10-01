@@ -109,8 +109,18 @@ public class benvenutoOperatori extends JFrame {
         forgottenPasswordBtn.setBounds(37, 133, 200, 29);
         loginDataPanel.add(forgottenPasswordBtn);
         
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+        userMsgLabel = new JLabel("", SwingConstants.CENTER);
+        userMsgLabel.setBounds(57, 45, 190, 16);
+        loginDataPanel.add(userMsgLabel);
+        
+=======
+>>>>>>> ef637e3cca21b1785ffac9882ab6ec4b9d35dde5
+>>>>>>> Stashed changes
         passwordMsgLabel = new JLabel("", SwingConstants.CENTER);
-        passwordMsgLabel.setBounds(57, 165, 190, 16);
+        passwordMsgLabel.setBounds(67, 150, 190, 16);
         loginDataPanel.add(passwordMsgLabel);
         
         passwordText = new JPasswordField();
@@ -146,6 +156,15 @@ public class benvenutoOperatori extends JFrame {
         loginBtn.addActionListener(e -> login());
         loginDataPanel.add(loginBtn);
         
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+        JLabel tipsLbl = new JLabel("Eventuale label per i tips?");
+        tipsLbl.setFont(new Font("Lucida Grande", Font.PLAIN, 25));
+        tipsLbl.setBounds(469, 571, 410, 61);
+        loginDataPanell.add(tipsLbl);
+=======
+>>>>>>> Stashed changes
         
         //frase scorrevole, cicla l'array di frasi con un timer settato
         descriptionTimer = new Timer(2000, new ActionListener() {
@@ -158,6 +177,10 @@ public class benvenutoOperatori extends JFrame {
         
         descriptionTimer.start();
         
+<<<<<<< Updated upstream
+=======
+>>>>>>> ef637e3cca21b1785ffac9882ab6ec4b9d35dde5
+>>>>>>> Stashed changes
         setVisible(true);
 
     }
