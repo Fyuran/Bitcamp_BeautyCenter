@@ -1,7 +1,7 @@
 
 CREATE DATABASE IF NOT EXISTS beauty_centerdb;
 
-CREATE TABLE `beauty_centerdb`.`beauty_center` (
+CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`beauty_center` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `operating_office` varchar(100) NOT NULL,
@@ -17,14 +17,14 @@ CREATE TABLE `beauty_centerdb`.`beauty_center` (
   PRIMARY KEY (`id`)
 );
   
-CREATE TABLE `beauty_centerdb`.`vat` (
+CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`vat` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `amount` float NOT NULL,
   `is_enabled` tinyint DEFAULT '1',
   PRIMARY KEY (`id`)
 );
   
-CREATE TABLE `beauty_centerdb`.`customer` (
+CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`customer` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `surname` varchar(100) NOT NULL,
@@ -42,7 +42,7 @@ CREATE TABLE `beauty_centerdb`.`customer` (
   CONSTRAINT `customer_FK1` FOREIGN KEY (`credentials_id`) REFERENCES `beauty_centerdb`.`customer` (`id`) ON UPDATE CASCADE
 );
   
-CREATE TABLE `beauty_centerdb`.`transaction` (
+CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`transaction` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `price` double NOT NULL,
   `date` datetime NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE `beauty_centerdb`.`transaction` (
   CONSTRAINT `transactionFK3` FOREIGN KEY (`beauty_id`) REFERENCES `beauty_centerdb`.`beauty_center` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE
 );
 
-CREATE TABLE `beauty_centerdb`.`product` (
+CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`product` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(100) NULL,
   `amount` INT NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE `beauty_centerdb`.`product` (
   `vat_id` INT NULL,
   `type` ENUM('ORAL_CARE', 'SKIN_CARE', 'HAIR_CARE', 'BODY_CARE', 'COSMETICS', 'PERFUMES', 'OTHER') NULL,
   `is_enabled` TINYINT NOT NULL DEFAULT 1,
-  INDEX `vat_id_idx` (`id` ASC) VISIBLE,
+  INDEX `vat_id_idx` (`id` ASC),
   PRIMARY KEY (`id`),
   CONSTRAINT `vat_id`
     FOREIGN KEY (`id`)
@@ -78,7 +78,7 @@ CREATE TABLE `beauty_centerdb`.`product` (
     ON DELETE NO ACTION
     ON UPDATE CASCADE);
     
-    CREATE TABLE `beauty_centerdb`.`treatment` (
+    CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`treatment` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `type` VARCHAR(100) NOT NULL,
   `price` FLOAT NULL,
@@ -86,14 +86,14 @@ CREATE TABLE `beauty_centerdb`.`product` (
   `duration` TIME NULL,
   `is_enabled` TINYINT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
-  INDEX `vat_id_idx` (`vat_id` ASC) VISIBLE,
+  INDEX `vat_id_idx` (`vat_id` ASC),
   CONSTRAINT `vat_id_treatment`
     FOREIGN KEY (`vat_id`)
     REFERENCES `beauty_centerdb`.`vat` (`id`)
     ON DELETE NO ACTION
     ON UPDATE CASCADE);
     
-CREATE TABLE `beauty_centerdb`.`producttreatment` (
+CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`producttreatment` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `product_id` int unsigned NOT NULL,
   `treatment_id` int unsigned NOT NULL,
@@ -104,7 +104,7 @@ CREATE TABLE `beauty_centerdb`.`producttreatment` (
   CONSTRAINT `pt_fk2` FOREIGN KEY (`treatment_id`) REFERENCES `beauty_centerdb`.`treatment` (`id`) ON UPDATE CASCADE
 );
 
-CREATE TABLE `beauty_centerdb`.`reservation` (
+CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservation` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `date` DATE NOT NULL,
   `is_paid` TINYINT NOT NULL DEFAULT 0,
@@ -113,8 +113,8 @@ CREATE TABLE `beauty_centerdb`.`reservation` (
   `state` ENUM('CREATED', 'IN_PROGRESS', 'CANCELLED') NULL,
   `is_enabled` TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
-  INDEX `reservation_fk1_idx` (`treatment_id` ASC) VISIBLE,
-  INDEX `reservation_fk2_idx` (`customer_id` ASC) VISIBLE,
+  INDEX `reservation_fk1_idx` (`treatment_id` ASC),
+  INDEX `reservation_fk2_idx` (`customer_id` ASC),
   CONSTRAINT `reservation_fk1`
     FOREIGN KEY (`treatment_id`)
     REFERENCES `beauty_centerdb`.`treatment` (`id`)
@@ -126,7 +126,7 @@ CREATE TABLE `beauty_centerdb`.`reservation` (
     ON DELETE NO ACTION
     ON UPDATE CASCADE);
     
-    CREATE TABLE `beauty_centerdb`.`user_credentials` (
+    CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`user_credentials` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(100) NULL,
   `password` VARCHAR(100) NULL,
@@ -135,10 +135,10 @@ CREATE TABLE `beauty_centerdb`.`reservation` (
   `phone` VARCHAR(20) NULL,
   `is_enabled` TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `mail_UNIQUE` (`mail` ASC) VISIBLE,
-  UNIQUE INDEX `phone_UNIQUE` (`phone` ASC) VISIBLE);
+  UNIQUE INDEX `mail_UNIQUE` (`mail` ASC) ,
+  UNIQUE INDEX `phone_UNIQUE` (`phone` ASC));
   
-  CREATE TABLE `beauty_centerdb`.`employee` (
+  CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`employee` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(100) NOT NULL,
   `surname` VARCHAR(100) NOT NULL,
@@ -151,14 +151,14 @@ CREATE TABLE `beauty_centerdb`.`reservation` (
   `notes` TEXT NULL,
   `is_enabled` TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
-  INDEX `employee_fk1_idx` (`credentials_id` ASC) VISIBLE,
+  INDEX `employee_fk1_idx` (`credentials_id` ASC),
   CONSTRAINT `employee_fk1`
     FOREIGN KEY (`credentials_id`)
     REFERENCES `beauty_centerdb`.`user_credentials` (`id`)
     ON DELETE NO ACTION
     ON UPDATE CASCADE);
     
-    CREATE TABLE `beauty_centerdb`.`shift` (
+    CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`shift` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `start` DATE NOT NULL,
   `end` DATE NOT NULL,
@@ -166,13 +166,13 @@ CREATE TABLE `beauty_centerdb`.`reservation` (
   `is_enabled` TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`));
   
-  CREATE TABLE `beauty_centerdb`.`shiftemployee` (
+  CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`shiftemployee` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `shift_id` INT UNSIGNED NOT NULL,
   `employee_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `shiftemployee_fk2_idx` (`employee_Id` ASC) VISIBLE,
-  INDEX `shiftemployee_fk1_idx` (`shift_id` ASC) VISIBLE,
+  INDEX `shiftemployee_fk2_idx` (`employee_Id` ASC),
+  INDEX `shiftemployee_fk1_idx` (`shift_id` ASC),
   CONSTRAINT `shiftemployee_fk1`
     FOREIGN KEY (`shift_id`)
     REFERENCES `beauty_centerdb`.`shift` (`id`)
@@ -184,13 +184,13 @@ CREATE TABLE `beauty_centerdb`.`reservation` (
     ON DELETE NO ACTION
     ON UPDATE CASCADE);
     
-    CREATE TABLE `beauty_centerdb`.`reservationemployee` (
+    CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservationemployee` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `reservation_id` INT UNSIGNED NOT NULL,
   `employee_id` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `reservationemployee_fk1_idx` (`reservation_id` ASC) VISIBLE,
-  INDEX `reservationemployee_fk2_idx` (`employee_id` ASC) VISIBLE,
+  INDEX `reservationemployee_fk1_idx` (`reservation_id` ASC),
+  INDEX `reservationemployee_fk2_idx` (`employee_id` ASC),
   CONSTRAINT `reservationemployee_fk1`
     FOREIGN KEY (`reservation_id`)
     REFERENCES `beauty_centerdb`.`reservation` (`id`)
@@ -202,7 +202,7 @@ CREATE TABLE `beauty_centerdb`.`reservation` (
     ON DELETE NO ACTION
     ON UPDATE CASCADE);
   
-  CREATE TABLE `beauty_centerdb`.`subscription` (
+  CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`subscription` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `subperiod` ENUM('MONTHLY', 'QUARTERLY', 'HALF_YEAR', 'YEARLY') NOT NULL,
   `price` FLOAT NOT NULL,
@@ -210,21 +210,21 @@ CREATE TABLE `beauty_centerdb`.`reservation` (
   `discount` FLOAT NOT NULL,
   `is_enabled` TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
-  INDEX `subscription_FK1_idx` (`vat_id` ASC) VISIBLE,
+  INDEX `subscription_FK1_idx` (`vat_id` ASC),
   CONSTRAINT `subscription_FK1`
     FOREIGN KEY (`vat_id`)
     REFERENCES `beauty_centerdb`.`vat` (`id`)
     ON DELETE NO ACTION
     ON UPDATE CASCADE);
     
-    CREATE TABLE `beauty_centerdb`.`customersubscription` (
+    CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`customersubscription` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `customer_id` INT UNSIGNED NOT NULL,
   `subscription_id` INT UNSIGNED NOT NULL,
   `start` DATE NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `customersubscription_FK1_idx` (`customer_id` ASC) VISIBLE,
-  INDEX `customersubscription_FK2_idx` (`subscription_id` ASC) VISIBLE,
+  INDEX `customersubscription_FK1_idx` (`customer_id` ASC),
+  INDEX `customersubscription_FK2_idx` (`subscription_id` ASC),
   CONSTRAINT `customersubscription_FK1`
     FOREIGN KEY (`customer_id`)
     REFERENCES `beauty_centerdb`.`customer` (`id`)
@@ -236,7 +236,7 @@ CREATE TABLE `beauty_centerdb`.`reservation` (
     ON DELETE NO ACTION
     ON UPDATE CASCADE);
     
-    CREATE TABLE `beauty_centerdb`.`prize` (
+    CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`prize` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(100) NOT NULL,
   `threshold` INT NOT NULL DEFAULT 0,
@@ -245,14 +245,14 @@ CREATE TABLE `beauty_centerdb`.`reservation` (
   `is_enabled` TINYINT NULL DEFAULT 1,
   PRIMARY KEY (`id`));
   
-  CREATE TABLE `beauty_centerdb`.`customerprize` (
+  CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`customerprize` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `customer_id` INT UNSIGNED NOT NULL,
   `prize_id` INT UNSIGNED NOT NULL,
   `expiration` DATE NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `customerprize_FK1_idx` (`customer_id` ASC) VISIBLE,
-  INDEX `customerprize_FK2_idx` (`prize_id` ASC) VISIBLE,
+  INDEX `customerprize_FK1_idx` (`customer_id` ASC),
+  INDEX `customerprize_FK2_idx` (`prize_id` ASC),
   CONSTRAINT `customerprize_FK1`
     FOREIGN KEY (`customer_id`)
     REFERENCES `beauty_centerdb`.`customer` (`id`)
