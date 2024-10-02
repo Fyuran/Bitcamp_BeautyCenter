@@ -263,3 +263,21 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservation` (
     REFERENCES `beauty_centerdb`.`prize` (`id`)
     ON DELETE NO ACTION
     ON UPDATE CASCADE);
+    
+    CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`treatmentemployee` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `employee_id` INT UNSIGNED NOT NULL,
+  `treatment_id` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `treatmentemployee_FK1_idx` (`employee_id` ASC) VISIBLE,
+  INDEX `treatmentemployee_FK2_idx` (`treatment_id` ASC) VISIBLE,
+  CONSTRAINT `treatmentemployee_FK1`
+    FOREIGN KEY (`employee_id`)
+    REFERENCES `beauty_centerdb`.`employee` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE,
+  CONSTRAINT `treatmentemployee_FK2`
+    FOREIGN KEY (`treatment_id`)
+    REFERENCES `beauty_centerdb`.`treatment` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE);
