@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`transaction` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
   `price` double NOT NULL,
   `datetime` DATETIME NOT NULL,
-  `payment_method` varchar(50) DEFAULT NULL,
+  `payment_method` ENUM('CURRENCY','CARD') NULL,
   `vat_id` int unsigned DEFAULT NULL,
   `customer_id` int unsigned DEFAULT NULL,
   `beauty_id` int unsigned DEFAULT NULL,
