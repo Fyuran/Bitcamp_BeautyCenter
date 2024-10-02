@@ -9,22 +9,16 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public class Customer extends User{
-	private int id;
+	
 	private String EU_TIN;//codice fiscale
 	private Subscription subscription;
 	private ArrayList<Prize> awards;
-	private String VAT_ID;//partita iva
+	private String VAT_ID;//partita iva 
 	private String recipientCode;
 	
 	
-	//La questione id ci serve?
-	public Customer(int id) {
-		this.id = id;
-		
-	}
-	
-	public Customer(int id, String name, String surname, LocalDate BoD, UserCredentials credentials, String notes, String EU_TIN, Subscription subscription, String VAT_ID, String recipientCode) {
-		super(id, name, surname, BoD, credentials, notes);
+	public Customer(int id, String name, String surname, String birthplace, boolean isFemale, LocalDate BoD,String notes,boolean isEnabled,String EU_TIN,Subscription subscription,ArrayList<Prize> awards,String VAT_ID,String recipientCode) {
+		super(id, name, surname, birthplace, isFemale, BoD, notes, isEnabled);
 		this.EU_TIN=EU_TIN;
 		this.subscription=subscription;
 		this.awards=new ArrayList<>();
@@ -32,23 +26,16 @@ public class Customer extends User{
 		this.recipientCode=recipientCode;
 	}
 	
-	//costruttore con soltanto i dati not null nel database
-	public Customer(String name, String surname) {
-		super(name, surname);
-	}
-
-	public int getId() {
-		return id;
-	}
 	
-	
-
+	//Metodi getter
 	public String getEU_TIN() {
 		return EU_TIN;
 	}
 
-	public void setEU_TIN(String eU_TIN) {
-		EU_TIN = eU_TIN;
+
+
+	public void setEU_TIN(String EU_TIN) {
+		this.EU_TIN = EU_TIN;
 	}
 
 	public Subscription getSubscription() {
@@ -82,10 +69,20 @@ public class Customer extends User{
 	public void setRecipientCode(String recipientCode) {
 		this.recipientCode = recipientCode;
 	}
-
-	public void setId(int id) {
-		this.id = id;
+	
+	
+	//Metodo ToString
+	@Override
+	public String toString() {
+		return "Customer [EU_TIN=" + EU_TIN + ", VAT_ID=" + VAT_ID + ", recipientCode=" + recipientCode + ", getId()="
+				+ getId() + ", getName()=" + getName() + ", getSurname()=" + getSurname() + ", getBirthplace()="
+				+ getBirthplace() + ", GetIsFemale()=" + GetIsFemale() + ", getBoD()=" + getBoD() + ", getNotes()="
+				+ getNotes() + ", GetIsEnabled()=" + GetIsEnabled() + ", toString()=" + super.toString()
+				+ ", getClass()=" + getClass() + "]";
 	}
+	
+	
+	
 
 	public static Optional<Customer> getData(int id) {
 		String query = "SELECT * FROM beauty_centerdb.customer WHERE id = ?";
