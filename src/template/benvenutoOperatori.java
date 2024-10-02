@@ -83,7 +83,7 @@ public class benvenutoOperatori extends JFrame {
         JPanel loginDataPanel = new JPanel();
         loginDataPanel.setLayout(null);
         loginDataPanel.setBackground(Color.WHITE);
-        loginDataPanel.setBounds(363, 464, 300, 231);
+        loginDataPanel.setBounds(363, 464, 449, 231);
         loginDataPanell.add(loginDataPanel);
         
         JLabel passwordLabel = new JLabel("Password:");
@@ -111,12 +111,12 @@ public class benvenutoOperatori extends JFrame {
         
 
         userMsgLabel = new JLabel("", SwingConstants.CENTER);
-        userMsgLabel.setBounds(57, 45, 190, 16);
+        userMsgLabel.setBounds(281, 26, 190, 16);
         loginDataPanel.add(userMsgLabel);
         
 
         passwordMsgLabel = new JLabel("", SwingConstants.CENTER);
-        passwordMsgLabel.setBounds(67, 150, 190, 16);
+        passwordMsgLabel.setBounds(281, 54, 190, 16);
         loginDataPanel.add(passwordMsgLabel);
         
         passwordText = new JPasswordField();
@@ -153,14 +153,9 @@ public class benvenutoOperatori extends JFrame {
         loginDataPanel.add(loginBtn);
         
 
-        JLabel tipsLbl = new JLabel("Eventuale label per i tips?");
-        tipsLbl.setFont(new Font("Lucida Grande", Font.PLAIN, 25));
-        tipsLbl.setBounds(469, 571, 410, 61);
-        loginDataPanell.add(tipsLbl);
-
         
         //frase scorrevole, cicla l'array di frasi con un timer settato
-        descriptionTimer = new Timer(2000, new ActionListener() {
+        descriptionTimer = new Timer(5000, new ActionListener() {
         	@Override
         	public void actionPerformed(ActionEvent e) {
         		indexFraseCorrente = (indexFraseCorrente + 1) % frasi.length; //cicla l'array di frasi e usa il modulo% per resettarsi a 0 e ricominciare 
