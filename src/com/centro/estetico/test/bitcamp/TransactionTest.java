@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.util.List;
+
 import com.centro.estetico.bitcamp.BeautyCenter;
 import com.centro.estetico.bitcamp.Customer;
 import com.centro.estetico.bitcamp.Main;
@@ -51,11 +53,13 @@ public final class TransactionTest {
 		Transaction.deleteData(trans2.getId());
 		
 		Transaction tr_get = Transaction.getData(trans1.getId()).orElseThrow();
-		tr_get.setDate(LocalDateTime.of(2024, 9, 29, 15, 0));
+		tr_get.setDateTime(LocalDateTime.of(2024, 9, 29, 15, 0));
 		tr_get.setPrice(BigDecimal.valueOf(300));
 		
 		Transaction.updateData(tr_get.getId(), tr_get);	
-
+		
+		List<Transaction> transactions = Transaction.getAllData();
+		
 	}
 
 }

@@ -2,6 +2,7 @@ package com.centro.estetico.bitcamp;
 
 import java.sql.*;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +39,7 @@ public class BeautyCenter {
 		this.openingHour = openingHour;
 		this.closingHour = closingHour;
 		this.isEnabled = isEnabled;
-		infoVat = VAT.getAllVAT();
+		infoVat = VAT.getAllData();
 	}
 	
 	public BeautyCenter(String name, String phone, String certifiedMail, String mail, String registeredOffice,
@@ -52,6 +53,23 @@ public class BeautyCenter {
 			);
 	}
 	
+	public BeautyCenter(ResultSet rs) throws SQLException {
+		this(
+			rs.getInt(1), 
+			rs.getString(2), 
+			rs.getString(3),
+			rs.getString(4), 
+			rs.getString(5), 
+			rs.getString(6),
+			rs.getString(7), 
+			rs.getString(8), 
+			rs.getString(9),
+			rs.getTime(10).toLocalTime(), 
+			rs.getTime(11).toLocalTime(),
+			rs.getBoolean(12)
+		);		
+
+	}
 	public boolean isEnabled() {
 		return isEnabled;
 	}
@@ -173,6 +191,22 @@ public class BeautyCenter {
 		return -1;
 	}
 	
+	public static List<BeautyCenter> getAllData() {
+		List<BeautyCenter> list = new ArrayList<>();
+		
+		String query = "SELECT * FROM beauty_centerdb.beauty_center";
+		Connection conn = Main.getConnection();
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				list.add(new BeautyCenter(rs));
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
 	public static Optional<BeautyCenter> getData(int id) {
 		String query = "SELECT * FROM beauty_centerdb.beauty_center WHERE id = ?";
 		Connection conn = Main.getConnection();
@@ -181,16 +215,8 @@ public class BeautyCenter {
 			stat.setInt(1, id);
 			
 			ResultSet rs = stat.executeQuery();
-			BeautyCenter bc = null;
 			if(rs.next()) {
-				bc = new BeautyCenter(
-					rs.getInt(1), rs.getString(2), rs.getString(3),
-					rs.getString(4), rs.getString(5), rs.getString(6),
-					rs.getString(7), rs.getString(8), rs.getString(9),
-					rs.getTime(10).toLocalTime(), rs.getTime(11).toLocalTime(),
-					rs.getBoolean(12)
-				);
-				opt = Optional.ofNullable(bc);
+				opt = Optional.ofNullable(new BeautyCenter(rs));
 			}
 
 		} catch(SQLException e) {

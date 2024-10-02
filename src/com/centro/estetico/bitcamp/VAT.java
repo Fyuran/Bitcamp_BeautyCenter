@@ -27,6 +27,13 @@ public class VAT {
 		this(-1, amount, true);
 	}
 
+	public VAT(ResultSet rs) throws SQLException {
+		this(
+			rs.getInt(1), 
+			rs.getDouble(2), 
+			rs.getBoolean(3)
+		);
+	}
 	public int getId() {
 		return id;
 	}
@@ -84,10 +91,7 @@ public class VAT {
 			
 			ResultSet rs = stat.executeQuery();
 			if(rs.next()) {
-				VAT vat = new VAT(
-						rs.getInt(1), rs.getDouble(2), rs.getBoolean(3)
-						);
-				opt = Optional.ofNullable(vat);				
+				opt = Optional.ofNullable(new VAT(rs));				
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
@@ -95,7 +99,7 @@ public class VAT {
 		return opt;
 	}
 	
-	public static List<VAT> getAllVAT() {
+	public static List<VAT> getAllData() {
 		List<VAT> list = new ArrayList<>();
 		
 		String query = "SELECT * FROM beauty_centerdb.vat";
@@ -103,9 +107,7 @@ public class VAT {
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
 			while(rs.next()) {
-				list.add(new VAT(
-						rs.getInt(1), rs.getDouble(2), rs.getBoolean(3)
-				));
+				list.add(new VAT(rs));
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();

@@ -7,13 +7,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class Transaction {
 	private int id;
 	private BigDecimal price;
 	private VAT vat;
-	private LocalDateTime date;
+	private LocalDateTime dateTime;
 	private PayMethod paymentMethod;
 	private Customer customer;
 	private BeautyCenter beautyCenter;
@@ -22,13 +26,13 @@ public class Transaction {
 	
 	private Transaction(
 			int id, BigDecimal price, PayMethod paymentMethod, 
-			LocalDateTime date, Customer customer,
+			LocalDateTime dateTime, Customer customer,
 			VAT vat, BeautyCenter beautyCenter, String services, boolean isEnabled
 			) {
 		this.id = id;
 		this.price = price;
 		this.paymentMethod = paymentMethod;
-		this.date = date;
+		this.dateTime = dateTime;
 		this.customer = customer;
 		this.vat = vat;
 		this.beautyCenter = beautyCenter;
@@ -38,19 +42,32 @@ public class Transaction {
 
 	public Transaction(
 			BigDecimal price, PayMethod paymentMethod, 
-			LocalDateTime date, Customer customer, 
+			LocalDateTime dateTime, Customer customer, 
 			VAT vat, BeautyCenter beautyCenter, String services
 			) {
-		this(-1, price, paymentMethod, date, customer, vat, beautyCenter, services, true);
+		this(-1, price, paymentMethod, dateTime, customer, vat, beautyCenter, services, true);
 	}
 	public Transaction(
 			BigDecimal price, PayMethod paymentMethod, 
-			LocalDateTime date, Customer customer, 
+			LocalDateTime dateTime, Customer customer, 
 			VAT vat, BeautyCenter beautyCenter
 			) {
-		this(-1, price, paymentMethod, date, customer, vat, beautyCenter, "", true);
+		this(-1, price, paymentMethod, dateTime, customer, vat, beautyCenter, "", true);
 	}
 
+	public Transaction(ResultSet rs) throws SQLException {
+		this(
+			rs.getInt(1), 
+			rs.getBigDecimal(2), 
+			PayMethod.toEnum(rs.getString(4)),
+			rs.getTimestamp(3).toLocalDateTime(), 
+			Customer.getData(rs.getInt(6)).orElseThrow(),
+			VAT.getData(rs.getInt(5)).orElseThrow(), 
+			BeautyCenter.getData(rs.getInt(7)).orElseThrow(),
+			rs.getString(8), 
+			rs.getBoolean(9)
+		);
+	}
 
 	public int getId() {
 		return id;
@@ -64,8 +81,8 @@ public class Transaction {
 		return paymentMethod;
 	}
 
-	public LocalDateTime getDate() {
-		return date;
+	public LocalDateTime getDateTime() {
+		return dateTime;
 	}
 
 	public Customer getCustomer() {
@@ -96,8 +113,8 @@ public class Transaction {
 		this.paymentMethod = paymentMethod;
 	}
 
-	public void setDate(LocalDateTime date) {
-		this.date = date;
+	public void setDateTime(LocalDateTime dateTime) {
+		this.dateTime = dateTime;
 	}
 
 	public void setCustomer(Customer customer) {
@@ -123,12 +140,12 @@ public class Transaction {
 
 	/*
 	 * 		int id, BigDecimal price, PayMethod paymentMethod, 
-			LocalDateTime date, Customer customer,
+			LocalDateTime dateTime, Customer customer,
 			VAT vat, BeautyCenter beautyCenter, boolean isEnabled
 	 */
 	public static int insertData(Transaction obj) {
 		String query = "INSERT INTO beauty_centerdb.transaction("
-				+ "price, payment_method, date,"
+				+ "price, payment_method, datetime,"
 				+ "customer_id, vat_id, beauty_id, services, is_enabled)"
 				+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		Connection conn = Main.getConnection();
@@ -136,7 +153,7 @@ public class Transaction {
 			
 			stat.setBigDecimal(1, obj.price);
 			stat.setString(2, obj.paymentMethod.getType());
-			stat.setTimestamp(3, Timestamp.valueOf(obj.date)); //DATETIME and TIMESTAMP are almost equivalent
+			stat.setTimestamp(3, Timestamp.valueOf(obj.dateTime)); //DATETIME and TIMESTAMP are almost equivalent
 			stat.setInt(4, obj.customer.getId());
 			stat.setInt(5, obj.vat.getId());
 			stat.setInt(6, obj.beautyCenter.getId());
@@ -170,16 +187,32 @@ public class Transaction {
 
 	/*		(
 			"beauty_centerdb.transaction("
-				+ "id, price, payment_method, date,"
+				+ "id, price, payment_method, dateTime,"
 				+ "customer_id, vat_id, beauty_id, services, is_enabled)"
 				+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 			)
 			(
 			int id, BigDecimal price, PayMethod paymentMethod, 
-			LocalDateTime date, Customer customer,
+			LocalDateTime dateTime, Customer customer,
 			VAT vat, BeautyCenter beautyCenter, boolean isEnabled
 			)
 	*/
+	
+	public static List<Transaction> getAllData() {
+		List<Transaction> list = new ArrayList<>();
+		
+		String query = "SELECT * FROM beauty_centerdb.transaction";
+		Connection conn = Main.getConnection();
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			ResultSet rs = stat.executeQuery();
+			while(rs.next()) {
+				list.add(new Transaction(rs));
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
 	
 	public static Optional<Transaction> getData(int id) {
 		String query = "SELECT * FROM beauty_centerdb.transaction WHERE id = ?";
@@ -191,14 +224,7 @@ public class Transaction {
 			ResultSet rs = stat.executeQuery();
 			Transaction trans = null;
 			if(rs.next()) {
-				Customer customer = Customer.getData(rs.getInt(6)).orElseThrow();
-				VAT vat = VAT.getData(rs.getInt(5)).orElseThrow();
-				BeautyCenter beautyCenter = BeautyCenter.getData(rs.getInt(7)).orElseThrow();
-				trans = new Transaction(
-					rs.getInt(1), rs.getBigDecimal(2), PayMethod.toEnum(rs.getString(4)),
-					rs.getTimestamp(3).toLocalDateTime(),
-					customer, vat, beautyCenter, rs.getString(8), rs.getBoolean(9)	
-				);
+				trans = new Transaction(rs);
 				opt = Optional.ofNullable(trans);				
 			}
 		} catch(SQLException e) {
@@ -210,7 +236,7 @@ public class Transaction {
 
 	public static int updateData(int id, Transaction obj) {
 		String query = "UPDATE beauty_centerdb.transaction "
-				+ " SET price = ?, payment_method = ?, date = ?,"
+				+ " SET price = ?, payment_method = ?, datetime = ?,"
 				+ "customer_id = ?, vat_id = ?, beauty_id = ?, services = ?, is_enabled = ? "
 				+ "WHERE id = ?";
 		Connection conn = Main.getConnection();
@@ -218,7 +244,7 @@ public class Transaction {
 			
 			stat.setBigDecimal(1, obj.price);
 			stat.setString(2, obj.paymentMethod.getType());
-			stat.setTimestamp(3, Timestamp.valueOf(obj.date)); //DATETIME and TIMESTAMP are almost equivalent
+			stat.setTimestamp(3, Timestamp.valueOf(obj.dateTime)); //DATETIME and TIMESTAMP are almost equivalent
 			stat.setInt(4, obj.customer.getId());
 			stat.setInt(5, obj.vat.getId());
 			stat.setInt(6, obj.beautyCenter.getId());
@@ -267,5 +293,12 @@ public class Transaction {
 		}
 		return -1;
 	}
-
+	
+	// "#", "€", "Data", "Pagamento", "IVA", "Cliente", "Servizi"
+	public Object[] toTableRow() {
+		DateTimeFormatter dtf = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
+		return new Object[] {
+				id, price, dateTime.format(dtf), paymentMethod.getType(), vat.getAmount(), customer.getFullName(), services	
+		};
+	}
 }
