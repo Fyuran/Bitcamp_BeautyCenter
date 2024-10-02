@@ -11,4 +11,5 @@ module centroEstetico {
 	requires PdfInvoiceCreator;
 	requires java.desktop;
 	requires jcalendar;
+	requires org.apache.pdfbox;
 }
