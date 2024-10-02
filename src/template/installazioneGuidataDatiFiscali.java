@@ -159,7 +159,7 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 		btnHystorical.setBounds(926, 8, 40, 30);
 		containerPanel.add(btnHystorical);
 
-		JLabel lblName = new JLabel("Nome:");
+		JLabel lblName = new JLabel("Nome*:");
 		lblName.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblName.setBounds(50, 448, 170, 14);
 		contentPane.add(lblName);
@@ -199,7 +199,7 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 		txfPEC.setBounds(224, 531, 220, 20);
 		contentPane.add(txfPEC);
 
-		JLabel lblSedeLegale = new JLabel("Sede Legale:");
+		JLabel lblSedeLegale = new JLabel("Sede Legale*:");
 		lblSedeLegale.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblSedeLegale.setBounds(50, 616, 170, 14);
 		contentPane.add(lblSedeLegale);
@@ -219,7 +219,7 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 		txfSedeOperativa.setBounds(224, 657, 220, 20);
 		contentPane.add(txfSedeOperativa);
 
-		JLabel lblREA = new JLabel("REA:");
+		JLabel lblREA = new JLabel("REA*:");
 		lblREA.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblREA.setBounds(549, 448, 170, 14);
 		contentPane.add(lblREA);
@@ -229,7 +229,7 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 		txfRea.setBounds(729, 447, 220, 20);
 		contentPane.add(txfRea);
 
-		JLabel lblPIva = new JLabel("Partita IVA:");
+		JLabel lblPIva = new JLabel("Partita IVA*:");
 		lblPIva.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblPIva.setBounds(549, 492, 170, 14);
 		contentPane.add(lblPIva);

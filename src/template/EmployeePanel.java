@@ -142,7 +142,7 @@ public class EmployeePanel extends JPanel {
 		containerPanel.add(btnHystorical);
 
 		// label e textfield degli input
-		JLabel lblName = new JLabel("Nome:");
+		JLabel lblName = new JLabel("Nome*:");
 		lblName.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblName.setBounds(43, 437, 170, 14);
 		add(lblName);
@@ -152,7 +152,7 @@ public class EmployeePanel extends JPanel {
 		txtName.setBounds(209, 436, 220, 20);
 		add(txtName);
 
-		JLabel lblSurname = new JLabel("Cognome:");
+		JLabel lblSurname = new JLabel("Cognome*:");
 		lblSurname.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblSurname.setBounds(43, 474, 170, 17);
 		add(lblSurname);

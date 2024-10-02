@@ -156,7 +156,7 @@ public class TreatmentPanel extends JPanel {
 		containerPanel.add(btnHystorical);
 
 		// label e textfield degli input
-		JLabel lblName = new JLabel("Nome trattamento:");
+		JLabel lblName = new JLabel("Nome trattamento*:");
 		lblName.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblName.setBounds(43, 437, 170, 14);
 		add(lblName);
@@ -176,7 +176,7 @@ public class TreatmentPanel extends JPanel {
 		txtPrice.setBounds(209, 474, 220, 20);
 		add(txtPrice);
 
-		JLabel lblIVa = new JLabel("IVA:");
+		JLabel lblIVa = new JLabel("IVA*:");
 		lblIVa.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblIVa.setBounds(43, 513, 170, 14);
 		add(lblIVa);

@@ -9,17 +9,21 @@ public class TestFrame extends JFrame {
 	EmployeePanel panelE;
 	ProductPanel panelP;
 	UserAccessPanel panelU;
+	gestioneTurni panelG;
 	public TestFrame() {
 		panelU=new UserAccessPanel();
 		panelT=new TreatmentPanel();
 		panelE=new EmployeePanel();
 		panelP=new ProductPanel();
+		panelG=new gestioneTurni();
+		
 		setSize(1075, 768);
 		JTabbedPane mainPane=new JTabbedPane();
 		mainPane.add(panelU);
 		mainPane.add(panelT);
 		mainPane.add(panelE);
 		mainPane.add(panelP);
+		mainPane.add(panelG);
 		add(mainPane);
 		
 		setName("Test Frame");
@@ -28,9 +32,9 @@ public class TestFrame extends JFrame {
 	}
 
 	public static void main(String[] args) {
-//		new TestFrame();
+		new TestFrame();
 //		new benvenutoOperatori();
-		new ReportVenditePDF();
+		//new ReportVenditePDF();
 	}
 
 }

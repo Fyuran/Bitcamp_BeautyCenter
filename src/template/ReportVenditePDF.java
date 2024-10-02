@@ -49,6 +49,7 @@ public class ReportVenditePDF {
         inputPanel.setBounds(0, 0, 800, 58);
         JTextField prodottoField = new JTextField();
         prodottoField.setBounds(0, 29, 160, 29);
+        prodottoField.setEditable(false);
         JTextField venditeField = new JTextField();
         venditeField.setBounds(160, 29, 160, 29);
         JTextField incassiField = new JTextField();

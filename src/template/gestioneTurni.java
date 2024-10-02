@@ -156,7 +156,7 @@ public class gestioneTurni extends JPanel {
 		cBoxEmployee.setBounds(515, 421, 220, 22);
 		add(cBoxEmployee);
 
-		JLabel lblInizioTurno = new JLabel("Inizio Turno:");
+		JLabel lblInizioTurno = new JLabel("Inizio Turno*:");
 		lblInizioTurno.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblInizioTurno.setBounds(321, 470, 170, 17);
 		add(lblInizioTurno);
@@ -166,7 +166,7 @@ public class gestioneTurni extends JPanel {
 		txfInizioturno.setBounds(515, 470, 220, 20);
 		add(txfInizioturno);
 
-		JLabel lblFineTurno = new JLabel("Fine Turno:");
+		JLabel lblFineTurno = new JLabel("Fine Turno*:");
 		lblFineTurno.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblFineTurno.setBounds(321, 522, 170, 14);
 		add(lblFineTurno);
