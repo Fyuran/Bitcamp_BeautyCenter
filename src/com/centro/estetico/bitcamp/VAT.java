@@ -144,7 +144,34 @@ public class VAT {
 		return -1;
 	}
 	
-	public static int deleteData(int id) {
+	public static int toggleEnabledData(int id) {
+		String query = "UPDATE beauty_centerdb.vat "
+				+ "SET is_enabled = ? "
+				+ "WHERE id = ?";
+		Connection conn = Main.getConnection();
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			VAT vat = getData(id).get();
+			stat.setBoolean(1, !vat.isEnabled); //toggle enable or disable state
+			stat.setInt(2, id); //WHERE id = ?
+			int exec = stat.executeUpdate();
+			
+			conn.commit();
+			
+			return exec;
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return -1;
+	}
+	
+	/*public static int deleteData(int id) {
 		String query = "DELETE FROM beauty_centerdb.vat WHERE id = ?";
 		Connection conn = Main.getConnection();
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
@@ -165,6 +192,29 @@ public class VAT {
 			}	
 		}
 		return -1;
+	}*/
+
+	// "#", "%"
+	public Object[] toTableRow(int index) {
+		return new Object[] {
+				index, amount
+		};
+	}
+	
+	public static List<Object[]> toTableRowAll() {
+		List<VAT> list = getAllData();
+		List<Object[]> data = new ArrayList<>(list.size());
+		for(int i = 0; i < list.size(); i++) {
+			data.add(list.get(i).toTableRow(i+1));
+		}
+		
+		return data;
+	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return amount + "%";
 	}
 	
 	

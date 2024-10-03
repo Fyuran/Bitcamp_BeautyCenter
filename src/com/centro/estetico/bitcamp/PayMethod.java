@@ -12,13 +12,20 @@ public enum PayMethod {
 	
 	public static PayMethod toEnum(String s) {
 		switch(s.toLowerCase()) {
-			case "moneta": return PayMethod.CURRENCY;
-			case "carta": return PayMethod.CARD;
+			case "currency": return PayMethod.CURRENCY;
+			case "card": return PayMethod.CARD;
 			default: return null;
 		}
 		
 	}
-	public String getType() {
+	
+	public int toSQLOrdinal() {
+		return this.ordinal() + 1;
+	}
+	
+	@Override
+	public String toString() {
 		return type;
 	}
+	
 }

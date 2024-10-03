@@ -25,7 +25,7 @@ public class VATTest {
 		
 		VAT.insertData(vat);
 		VAT.insertData(vat2);
-		VAT.deleteData(vat2.getId());
+		VAT.toggleEnabledData(vat2.getId());
 		
 		VAT vat_get = VAT.getData(vat.getId()).orElseThrow();
 		vat_get.setAmount(5);

@@ -1,6 +1,10 @@
 package com.centro.estetico.bitcamp;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Time;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -265,7 +269,33 @@ public class BeautyCenter {
 		return -1;
 	}
 	
-	public static int deleteData(int id) {
+	public static int toggleEnabledData(int id) {
+		String query = "UPDATE beauty_centerdb.beauty_center "
+				+ "SET is_enabled = ? "
+				+ "WHERE id = ?";
+		Connection conn = Main.getConnection();
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			BeautyCenter bc = getData(id).get();
+			stat.setBoolean(1, !bc.isEnabled); //toggle enable or disable state
+			stat.setInt(2, id); //WHERE id = ?
+			int exec = stat.executeUpdate();
+			
+			conn.commit();
+			
+			return exec;
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return -1;
+	}
+	/*public static int deleteData(int id) {
 		String query = "DELETE FROM beauty_centerdb.beauty_center WHERE id = ?";
 		Connection conn = Main.getConnection();
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
@@ -286,6 +316,24 @@ public class BeautyCenter {
 			}	
 		}
 		return -1;
+	}*/
+	
+	/*(String name, String phone, String certifiedMail, String mail, String registeredOffice,
+			String operatingOffice, String REA, String P_IVA, 
+			LocalTime openingHour, LocalTime closingHour)*/
+	public Object[] toTableRow(int index) {
+		return new Object[] {
+				index, name, phone, certifiedMail, mail, registeredOffice, operatingOffice, REA, P_IVA, openingHour, closingHour
+		};
 	}
 	
+	public static List<Object[]> toTableRowAll() {
+		List<BeautyCenter> list = getAllData();
+		List<Object[]> data = new ArrayList<>(list.size());
+		for(int i = 0; i < list.size(); i++) {
+			data.add(list.get(i).toTableRow(i+1));
+		}
+		
+		return data;
+	}
 }

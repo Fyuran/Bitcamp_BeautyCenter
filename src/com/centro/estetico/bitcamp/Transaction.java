@@ -152,7 +152,7 @@ public class Transaction {
 		try(PreparedStatement stat = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
 			
 			stat.setBigDecimal(1, obj.price);
-			stat.setString(2, obj.paymentMethod.getType());
+			stat.setInt(2, obj.paymentMethod.toSQLOrdinal());
 			stat.setTimestamp(3, Timestamp.valueOf(obj.dateTime)); //DATETIME and TIMESTAMP are almost equivalent
 			stat.setInt(4, obj.customer.getId());
 			stat.setInt(5, obj.vat.getId());
@@ -243,7 +243,7 @@ public class Transaction {
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
 			
 			stat.setBigDecimal(1, obj.price);
-			stat.setString(2, obj.paymentMethod.getType());
+			stat.setInt(2, obj.paymentMethod.toSQLOrdinal());
 			stat.setTimestamp(3, Timestamp.valueOf(obj.dateTime)); //DATETIME and TIMESTAMP are almost equivalent
 			stat.setInt(4, obj.customer.getId());
 			stat.setInt(5, obj.vat.getId());
@@ -270,7 +270,34 @@ public class Transaction {
 		return -1;
 	}
 
-
+	public static int toggleEnabledData(int id) {
+		String query = "UPDATE beauty_centerdb.transaction "
+				+ "SET is_enabled = ? "
+				+ "WHERE id = ?";
+		Connection conn = Main.getConnection();
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			Transaction trans = getData(id).get();
+			stat.setBoolean(1, !trans.isEnabled); //toggle enable or disable state
+			stat.setInt(2, id); //WHERE id = ?
+			int exec = stat.executeUpdate();
+			
+			conn.commit();
+			
+			return exec;
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return -1;
+	}
+	
+	/*
 	public static int deleteData(int id) {
 		String query = "DELETE FROM beauty_centerdb.transaction WHERE id = ?";
 		Connection conn = Main.getConnection();
@@ -292,13 +319,40 @@ public class Transaction {
 			}	
 		}
 		return -1;
-	}
+	}*/
 	
 	// "#", "€", "Data", "Pagamento", "IVA", "Cliente", "Servizi"
-	public Object[] toTableRow() {
+	public Object[] toTableRow(int index) {
 		DateTimeFormatter dtf = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
 		return new Object[] {
-				id, price, dateTime.format(dtf), paymentMethod.getType(), vat.getAmount(), customer.getFullName(), services	
+				index, price, dateTime.format(dtf), paymentMethod.toString(), vat.toString(), customer.getFullName(), services	
 		};
 	}
+	
+	public static List<Object[]> toTableRowAll() {
+		List<Transaction> list = getAllData();
+		List<Object[]> data = new ArrayList<>(list.size());
+		for(int i = 0; i < list.size(); i++) {
+			data.add(list.get(i).toTableRow(i+1));
+		}
+		
+		return data;
+	}
+
+	/*
+	 * (
+			int id, BigDecimal price, PayMethod paymentMethod, 
+			LocalDateTime dateTime, Customer customer,
+			VAT vat, BeautyCenter beautyCenter, String services, boolean isEnabled
+			) 
+	 */
+	@Override
+	public String toString() {
+		DateTimeFormatter dtf = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
+		return price + " "  + dateTime.format(dtf) + " " +
+				paymentMethod.toString() + " " + vat.toString() + " " + 
+				customer.getFullName() + " " + services;
+	}
+	
+	
 }

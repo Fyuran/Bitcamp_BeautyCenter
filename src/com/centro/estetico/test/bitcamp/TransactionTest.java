@@ -46,15 +46,16 @@ public final class TransactionTest {
 		 */
 		Transaction trans1 = new Transaction(BigDecimal.valueOf(50), PayMethod.CURRENCY, LocalDateTime.now(), c1, v1, bc);
 		
-		Transaction trans2 = new Transaction(BigDecimal.valueOf(100), PayMethod.CURRENCY, LocalDateTime.now(), c2, v2, bc);
+		Transaction trans2 = new Transaction(BigDecimal.valueOf(100), PayMethod.CARD, LocalDateTime.now(), c2, v2, bc);
 		
 		Transaction.insertData(trans1);
 		Transaction.insertData(trans2);
-		Transaction.deleteData(trans2.getId());
+		Transaction.toggleEnabledData(trans2.getId());
 		
 		Transaction tr_get = Transaction.getData(trans1.getId()).orElseThrow();
 		tr_get.setDateTime(LocalDateTime.of(2024, 9, 29, 15, 0));
 		tr_get.setPrice(BigDecimal.valueOf(300));
+		tr_get.setPaymentMethod(PayMethod.CARD);
 		
 		Transaction.updateData(tr_get.getId(), tr_get);	
 		
