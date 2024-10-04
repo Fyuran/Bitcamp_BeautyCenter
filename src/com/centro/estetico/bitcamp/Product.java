@@ -48,6 +48,7 @@ public class Product {
 	}
 
 	public Product(ResultSet rs) throws SQLException {
+		this.id=rs.getInt(1);
 		this.name = rs.getString(2);
 		this.amount = rs.getInt(3);
 		this.minStock = rs.getInt(4);
