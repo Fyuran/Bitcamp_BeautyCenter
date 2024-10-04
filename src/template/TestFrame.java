@@ -32,10 +32,10 @@ public class TestFrame extends JFrame {
 		
 		setSize(1075, 768);
 		JTabbedPane mainPane=new JTabbedPane();
+		mainPane.add(panelP);
 		mainPane.add(panelU);
 		mainPane.add(panelT);
 		mainPane.add(panelE);
-		mainPane.add(panelP);
 		mainPane.add(panelG);
 		add(mainPane);
 		

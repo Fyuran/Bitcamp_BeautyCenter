@@ -14,7 +14,7 @@ public class inputValidator {
 
     // Metodo per validare nomi 
     public static boolean validateName(String name) {
-        if (name == null || name.trim().isEmpty()) {
+        if (name.isBlank() || name.trim().isEmpty()) {
             errorMessage = "Il nome non può essere vuoto.";
             return false;
         }
@@ -23,6 +23,7 @@ public class inputValidator {
         if (!result) {
             errorMessage = "Il nome deve contenere solo lettere e spazi, lunghezza tra 2 e 50 caratteri.";
         }
+        System.out.println("result: "+result);
         return result;
     }
 

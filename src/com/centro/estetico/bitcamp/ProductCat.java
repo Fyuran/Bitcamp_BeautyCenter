@@ -17,5 +17,13 @@ OTHER("Altro");
 	public String getDescription() {
 		return description;
 	}
+	public static ProductCat fromDescription(String description) {
+        for (ProductCat category : ProductCat.values()) {
+            if (category.getDescription().equalsIgnoreCase(description)) {
+                return category;
+            }
+        }
+        throw new IllegalArgumentException("Nessun ProductCat trovato per la descrizione: " + description);
+    }
 }
 

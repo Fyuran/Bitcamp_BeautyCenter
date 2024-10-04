@@ -122,6 +122,26 @@ public class Product {
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
 	}
+	
+	public static boolean isNameUnique(String productName) {
+		String query="SELECT * FROM beauty_centerdb.product WHERE name=? LIMIT 1";
+		String name="";
+		Connection conn=Main.getConnection();
+		try(PreparedStatement pstmt = conn.prepareStatement(query)){
+			pstmt.setString(1, productName);
+			ResultSet rs=pstmt.executeQuery();
+			if(rs.next()) {
+				name=rs.getString("name");
+				
+			}
+			System.out.println("Nome cercato: "+productName);
+			System.out.println("Nome trovato: "+name);
+			return name.equals("");
+		}catch(SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 
 	private int getVatId() {
 		int vatId = -1;
