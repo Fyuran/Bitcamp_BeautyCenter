@@ -79,13 +79,13 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`product` (
   `amount` INT NOT NULL,
   `minimum` INT NULL DEFAULT 0,
   `price` FLOAT NOT NULL,
-  `vat_id` INT NULL,
+  `vat_id` INT UNSIGNED NULL,
   `type` ENUM('ORAL_CARE', 'SKIN_CARE', 'HAIR_CARE', 'BODY_CARE', 'COSMETICS', 'PERFUMES', 'OTHER') NULL,
   `is_enabled` TINYINT NOT NULL DEFAULT 1,
   INDEX `vat_id_idx` (`id` ASC),
   PRIMARY KEY (`id`),
   CONSTRAINT `vat_id`
-    FOREIGN KEY (`id`)
+    FOREIGN KEY (`vat_id`)
     REFERENCES `beauty_centerdb`.`vat` (`id`)
     ON DELETE NO ACTION
     ON UPDATE CASCADE);
