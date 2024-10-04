@@ -3,26 +3,32 @@ package com.centro.estetico.bitcamp;
 import java.time.LocalDate;
 
 public class Prize {
-	private int id;
-	private String name;
-	private int treshold;
-	private LocalDate expiration;
-	private double amount;
+    private int id;
+    private String name;
+    private int threshold;
+    private LocalDate expirationDate;
+    private double amount;
+    private boolean isEnabled;
 
-	public Prize(int id, String name, int treshold, LocalDate expiration, double amount) {
-		this.id = id;
-		this.name = name;
-		this.treshold = treshold;
-		this.expiration = expiration;
-		this.amount = amount;
-	}
+    // Costruttore
+    public Prize(int id, String name, int threshold, LocalDate expirationDate, double amount, boolean isEnabled) {
+        this.id = id;
+        this.name = name;
+        this.threshold = threshold;
+        this.expirationDate = expirationDate;
+        this.amount = amount;
+        this.isEnabled = isEnabled;
+    }
 
-//costruttore con solo valori not null
-	public Prize(int id, String name, int treshold) {
-		this.id = id;
-		this.name = name;
-		this.treshold = treshold;
-	}
+    // Costruttore vuoto
+    public Prize() {
+        this.id = 0;
+        this.name = "";
+        this.threshold = 0;
+        this.expirationDate = LocalDate.now();
+        this.amount = 0;
+        this.isEnabled = true;
+    }
 
 	public int getId() {
 		return id;
@@ -40,20 +46,20 @@ public class Prize {
 		this.name = name;
 	}
 
-	public int getTreshold() {
-		return treshold;
+	public int getThreshold() {
+		return threshold;
 	}
 
-	public void setTreshold(int treshold) {
-		this.treshold = treshold;
+	public void setThreshold(int threshold) {
+		this.threshold = threshold;
 	}
 
-	public LocalDate getExpiration() {
-		return expiration;
+	public LocalDate getExpirationDate() {
+		return expirationDate;
 	}
 
-	public void setExpiration(LocalDate expiration) {
-		this.expiration = expiration;
+	public void setExpirationDate(LocalDate expirationDate) {
+		this.expirationDate = expirationDate;
 	}
 
 	public double getAmount() {
@@ -63,5 +69,22 @@ public class Prize {
 	public void setAmount(double amount) {
 		this.amount = amount;
 	}
-	
+
+	public boolean isEnabled() {
+		return isEnabled;
+	}
+
+	public void setEnabled(boolean isEnabled) {
+		this.isEnabled = isEnabled;
+	}
+
+	@Override
+	public String toString() {
+		return "Prize [id=" + id + ", name=" + name + ", threshold=" + threshold + ", expirationDate=" + expirationDate
+				+ ", amount=" + amount + ", isEnabled=" + isEnabled + "]";
+	}
+    
+    
+
+
 }
