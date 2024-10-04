@@ -1,16 +1,23 @@
 package template;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.DefaultTableModel;
 
+import com.centro.estetico.bitcamp.Product;
+
 public class ProductSelector extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
-    private JTextField productText;
+    DefaultTableModel tableModel;
+    private JTable productTable;
+    private JComboBox<String> filterComboBox;
+    private JTextField filterText;
 
     public ProductSelector() {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -30,16 +37,17 @@ public class ProductSelector extends JFrame {
         filterPanel.add(filterLabel);
 
         String[] filters = {"Nome", "Categoria", "Mostra tutti"};
-        JComboBox<String> filterComboBox = new JComboBox<>(filters);
+        filterComboBox = new JComboBox<>(filters);
         filterPanel.add(filterComboBox);
 
         JLabel searchLabel = new JLabel("Inserisci filtro:");
         filterPanel.add(searchLabel);
 
-        productText = new JTextField();
-        filterPanel.add(productText);
+        filterText = new JTextField();
+        filterPanel.add(filterText);
 
         JButton searchBtn = new JButton("Cerca");
+        searchBtn.addActionListener(e->filterTable());
         filterPanel.add(searchBtn);
 
         JButton addBtn = new JButton("Aggiungi selezione");
@@ -49,13 +57,59 @@ public class ProductSelector extends JFrame {
 
         // Tabella prodotti
         String[] columnNames = {"Prodotto", "Categoria"};
-        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
-        JTable productTable = new JTable(tableModel);
+        tableModel = new DefaultTableModel(columnNames, 0);
+        productTable = new JTable(tableModel);
 
         JScrollPane productSearchScroll = new JScrollPane(productTable);
         contentPane.add(productSearchScroll, BorderLayout.CENTER); // Aggiungi la tabella al centro
-
+        populateTable();
         setVisible(true);
+    }
+    
+    public void clearTable()
+    {
+    	tableModel.getDataVector().removeAllElements();
+        revalidate();
+    }
+    
+    public void populateTable() {
+    	clearTable();
+    	List<Product> products=Product.getAllData();
+    	if(products.isEmpty()) {
+    		tableModel.addRow(new String[] {"Sembra non ci siano prodotti presenti",""});
+    		return;
+    	}
+    	for(Product p:products) {
+    		tableModel.addRow(new String[] {p.getName(),p.getType().getDescription()});
+    	}
+    }
+    public void filterTable() {
+    	clearTable();
+    	List<Product> products=Product.getAllData();
+    	if(products.isEmpty()) {
+    		tableModel.addRow(new String[] {"Sembra non ci siano prodotti presenti",""});
+    		return;
+    	}
+    	String filter=filterComboBox.getSelectedItem().toString();
+    	switch(filter) {
+    	case "Nome":
+    		for(Product p:products) {
+        		if(p.getName().toLowerCase().contains(filterText.getText().toLowerCase())) {
+        			tableModel.addRow(new String[] {p.getName(),p.getType().getDescription()});
+        		}
+    		}
+    		break;
+    	case "Categoria":
+    		for(Product p:products) {
+        		if(p.getType().getDescription().toLowerCase().contains(filterText.getText().toLowerCase())) {
+        			tableModel.addRow(new String[] {p.getName(),p.getType().getDescription()});
+        		}
+    		}
+    		break;
+    		default:
+    			populateTable();
+    	}
+    	
     }
 
   

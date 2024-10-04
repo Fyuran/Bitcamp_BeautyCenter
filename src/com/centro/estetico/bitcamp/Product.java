@@ -131,6 +131,7 @@ public class Product {
 			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
 				vatId = rs.getInt("id");
+				System.out.println(vatId);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -168,7 +169,7 @@ public class Product {
 	}
 
 	public static int insertData(Product product) {
-		String query = "INSERT INT beauty_centerdb.product(name,amount,minimum,price,vat_id,type,is_enabled) "
+		String query = "INSERT INTO beauty_centerdb.product(name,amount,minimum,price,vat_id,type,is_enabled) "
 				+ "VALUES(?,?,?,?,?,?,?)";
 		Connection conn = Main.getConnection();
 		try (PreparedStatement pstmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -177,7 +178,8 @@ public class Product {
 			pstmt.setInt(3, product.minStock);
 			pstmt.setBigDecimal(4, product.price);
 			pstmt.setInt(5, product.getVatId());
-			pstmt.setString(6, product.type.getDescription());
+			//pstmt.setInt(5, 3);
+			pstmt.setString(6, product.type.name());
 			pstmt.setBoolean(7, product.isEnabled);
 
 			int insert = pstmt.executeUpdate();
