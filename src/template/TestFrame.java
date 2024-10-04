@@ -7,6 +7,7 @@ import com.centro.estetico.bitcamp.Employee;
 
 import java.awt.*;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.EnumSet;
 
@@ -20,7 +21,7 @@ public class TestFrame extends JFrame {
 	
 	public TestFrame() {
 		Employee employee = new Employee(1, "Mario", "Rossi", "Milano", true, LocalDate.of(1990, 5, 15), "Note sul dipendente", true, 123456789L, new ArrayList<>(), LocalDate.of(2020, 1, 1), EnumSet.of(Employee.Roles.SECRETARY), null, "IT60X0542811101000000123456", "Via Roma 1", "1234567890", "mario.rossi@example.com", "mario.rossi", "password123!");
-		BeautyCenter bc = new BeautyCenter("Centro Estetico Bitcamp", "123456789", "info@bitcamp.com", "bitcamp@gmail.com", "Via Roma 1", "Via Milano 2", "REA123456", "PIVA987654321", LocalTime.of(9, 0), LocalTime.of(18, 0));
+		//BeautyCenter bc = new BeautyCenter("Centro Estetico Bitcamp", "123456789", "info@bitcamp.com", "bitcamp@gmail.com", "Via Roma 1", "Via Milano 2", "REA123456", "PIVA987654321", LocalTime.of(9, 0), LocalTime.of(18, 0));
 		
 		panelU=new UserAccessPanel(employee);
 		panelT=new TreatmentPanel();

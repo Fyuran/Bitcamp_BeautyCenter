@@ -61,35 +61,35 @@ public class UserAccessPanel extends JPanel {
 		dataPanel.add(lblSurname);
 		
 		JLabel lblRole = new JLabel("Ruolo: "+employee.getRolesAsString());
-		lblRole.setBounds(25, 127, 185, 16);
+		lblRole.setBounds(222, 87, 231, 16);
 		dataPanel.add(lblRole);
 		
 		JLabel lblAddress = new JLabel("Indirizzo: "+employee.getAddress()+", "+employee.getBirthplace());
-		lblAddress.setBounds(25, 172, 185, 16);
+		lblAddress.setBounds(25, 172, 415, 16);
 		dataPanel.add(lblAddress);
 		
 		JLabel lblIBAN = new JLabel("IBAN: "+employee.getIban());
-		lblIBAN.setBounds(25, 253, 185, 16);
+		lblIBAN.setBounds(25, 253, 353, 16);
 		dataPanel.add(lblIBAN);
 		
 		JLabel lblBirthday = new JLabel("Data di nascita: "+employee.getBoD());
-		lblBirthday.setBounds(222, 47, 185, 16);
+		lblBirthday.setBounds(25, 281, 324, 16);
 		dataPanel.add(lblBirthday);
 		
 		JLabel lblHireDate = new JLabel("Data di assunzione: "+employee.getHiredDate());
-		lblHireDate.setBounds(222, 87, 185, 16);
+		lblHireDate.setBounds(25, 313, 335, 16);
 		dataPanel.add(lblHireDate);
 		
 		JLabel lblUsername = new JLabel("Username: "+employee.getUsername());
-		lblUsername.setBounds(222, 127, 185, 16);
+		lblUsername.setBounds(222, 47, 185, 16);
 		dataPanel.add(lblUsername);
 		
 		JLabel lblMail = new JLabel("Mail: "+employee.getMail());
-		lblMail.setBounds(222, 172, 185, 16);
+		lblMail.setBounds(25, 128, 250, 16);
 		dataPanel.add(lblMail);
 		
 		JLabel lblPhone = new JLabel("Telefono: "+employee.getPhone());
-		lblPhone.setBounds(25, 212, 185, 16);
+		lblPhone.setBounds(25, 212, 324, 16);
 		dataPanel.add(lblPhone);
 		
 		

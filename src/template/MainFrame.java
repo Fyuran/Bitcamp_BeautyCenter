@@ -12,7 +12,6 @@ public class MainFrame extends JFrame{
 	private EmployeePanel employeePanel;//pan per aggiungere operatori -> Solo admin
 	private gestionePremi gestionePremi;//pan per creare premi -> Solo admin
 	private ProductPanel productPanel;//pan per creare prodotti -> Solo admin
-	private gestioneTransazioniEReport gestioneTransazioniEReport; //->Solo admin
 	private gestioneTurni gestioneTurni;//pan per settare turni ->Solo admin
 	private ReportVenditePDF reportVenditePDF;//non è un panel ma un frame, dobbiamo vedere come gestirlo
 	private TreatmentPanel treatmentPanel;//creazione trattamenti ->Solo admin
