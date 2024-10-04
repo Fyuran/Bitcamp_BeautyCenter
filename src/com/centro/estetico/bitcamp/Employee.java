@@ -114,7 +114,7 @@ public class Employee extends User {
 	    for (Roles r : role) {
 	        rolesAsString+=r.getRoleName()+", ";
 	    }
-	    return rolesAsString.length() > 0 ? rolesAsString.substring(0, rolesAsString.length() - 2) : ""; // Rimuovi l'ultima virgola e spazio
+	    return rolesAsString.length() > 0 ? rolesAsString.substring(0, rolesAsString.length() - 2) : "";
 	}
 
 	public LocalDate getTerminationDate() {
