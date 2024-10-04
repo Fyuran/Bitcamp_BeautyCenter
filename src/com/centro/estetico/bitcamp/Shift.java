@@ -7,7 +7,7 @@ public class Shift {
     private LocalDateTime start;
     private LocalDateTime end;
     private ShiftType type;
-
+    public enum ShiftType {WORK,HOLIDAYS}
     // Costruttore
     public Shift(int id, LocalDateTime start, LocalDateTime end, ShiftType type) {
         this.id = id;
@@ -15,47 +15,37 @@ public class Shift {
         this.end = end;
         this.type = type;
     }
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public LocalDateTime getStart() {
+		return start;
+	}
+	public void setStart(LocalDateTime start) {
+		this.start = start;
+	}
+	public LocalDateTime getEnd() {
+		return end;
+	}
+	public void setEnd(LocalDateTime end) {
+		this.end = end;
+	}
+	public ShiftType getType() {
+		return type;
+	}
+	public void setType(ShiftType type) {
+		this.type = type;
+	}
+	@Override
+	public String toString() {
+		return "Shift [id=" + id + ", start=" + start + ", end=" + end + ", type=" + type + "]";
+	}
 
 
-	public enum ShiftType {WORK,HOLIDAYS}
 	
 	
-    // Getter
-    public int getId() {
-        return id;
-    }
 
-    public LocalDateTime getStart() {
-        return start;
-    }
-
-    public LocalDateTime getEnd() {
-        return end;
-    }
-
-    public ShiftType getType() {
-        return type;
-    }
-
-    // Setter
-    public void setStart(LocalDateTime start) {
-        this.start = start;
-    }
-
-    public void setEnd(LocalDateTime end) {
-        this.end = end;
-    }
-
-    public void setType(ShiftType type) {
-        this.type = type;
-    }
-    @Override
-    public String toString() {
-        return "Shift{" +
-                "id=" + id +
-                ", start=" + start +
-                ", end=" + end +
-                ", type=" + type +
-                '}';
-    }
 }
