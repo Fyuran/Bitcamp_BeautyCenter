@@ -14,7 +14,15 @@ public class Employee extends User {
 								// solo per rendere leggibile l'UML
 
 	public enum Roles {
-		PERSONNEL, SECRETARY, ADMIN
+		PERSONNEL("Operatore"), SECRETARY("Segretario"), ADMIN("Admin");
+		Roles(String roleName) {
+			this.roleName=roleName;
+		}
+
+		private String roleName;
+		public String getRoleName() {
+			return roleName;
+		}
 	}
 
 	private LocalDate terminationDate;
@@ -58,7 +66,7 @@ public class Employee extends User {
 
 	    // Metodo per criptare l'IBAN
 	    private String hashIban(String iban) {
-	    	String ibanCrypt = BCrypt.withDefaults().hashToString(12, password.toCharArray());
+	    	String ibanCrypt = BCrypt.withDefaults().hashToString(12, iban.toCharArray());
 			return ibanCrypt;
 	    }
 	// Getter
@@ -100,6 +108,13 @@ public class Employee extends User {
 
 	public EnumSet<Roles> getRole() {
 		return role;
+	}
+	public String getRolesAsString() {
+	    String rolesAsString = "";
+	    for (Roles r : role) {
+	        rolesAsString+=r.getRoleName()+", ";
+	    }
+	    return rolesAsString.length() > 0 ? rolesAsString.substring(0, rolesAsString.length() - 2) : ""; // Rimuovi l'ultima virgola e spazio
 	}
 
 	public LocalDate getTerminationDate() {

@@ -4,10 +4,14 @@ import java.awt.Font;
 import java.beans.PropertyVetoException;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
+
+import com.centro.estetico.bitcamp.Employee;
+
 import javax.swing.border.EtchedBorder;
 import java.awt.Color;
 import java.awt.Dialog;
@@ -27,11 +31,15 @@ public class UserAccessPanel extends JPanel {
 	 * Create the panel.
 	 * @throws PropertyVetoException 
 	 */
-	public UserAccessPanel() {
+	public UserAccessPanel(Employee employee) {
+		if(employee==null) {
+			JOptionPane.showMessageDialog(this, "Errore di connessione");
+			System.exit(1);
+		}
 		setLayout(null);
 		setSize(1024, 768);
 		setName("Area personale");
-		JLabel titleTab = new JLabel("Benvenuto "/*+nome*/);
+		JLabel titleTab = new JLabel("Benvenuto "+employee.getName());
 		titleTab.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
 		titleTab.setBounds(415, 11, 206, 32);
 		add(titleTab);
@@ -43,44 +51,44 @@ public class UserAccessPanel extends JPanel {
 		dataPanel.setLayout(null);
 		
 		
-		JLabel lblName = new JLabel("Nome: "/*+nome*/);
+		JLabel lblName = new JLabel("Nome: "+employee.getName());
 		lblName.setBounds(25, 47, 185, 16);
 		
 		dataPanel.add(lblName);
 		
-		JLabel lblSurname = new JLabel("Cognome: "/*+cognome*/);
+		JLabel lblSurname = new JLabel("Cognome: "+employee.getSurname());
 		lblSurname.setBounds(25, 87, 185, 16);
 		dataPanel.add(lblSurname);
 		
-		JLabel lblRole = new JLabel("Ruolo: "/*+ruolo*/);
+		JLabel lblRole = new JLabel("Ruolo: "+employee.getRolesAsString());
 		lblRole.setBounds(25, 127, 185, 16);
 		dataPanel.add(lblRole);
 		
-		JLabel lblAddress = new JLabel("Indirizzo: "/*+indirizzo*/);
+		JLabel lblAddress = new JLabel("Indirizzo: "+employee.getAddress()+", "+employee.getBirthplace());
 		lblAddress.setBounds(25, 172, 185, 16);
 		dataPanel.add(lblAddress);
 		
-		JLabel lblIBAN = new JLabel("IBAN: "/*+iban*/);
+		JLabel lblIBAN = new JLabel("IBAN: "+employee.getIban());
 		lblIBAN.setBounds(25, 253, 185, 16);
 		dataPanel.add(lblIBAN);
 		
-		JLabel lblBirthday = new JLabel("Data di nascita: "/*birthday*/);
+		JLabel lblBirthday = new JLabel("Data di nascita: "+employee.getBoD());
 		lblBirthday.setBounds(222, 47, 185, 16);
 		dataPanel.add(lblBirthday);
 		
-		JLabel lblHireDate = new JLabel("Data di assunzione: "/*+hiredate*/);
+		JLabel lblHireDate = new JLabel("Data di assunzione: "+employee.getHiredDate());
 		lblHireDate.setBounds(222, 87, 185, 16);
 		dataPanel.add(lblHireDate);
 		
-		JLabel lblUsername = new JLabel("Username: "/*+username*/);
+		JLabel lblUsername = new JLabel("Username: "+employee.getUsername());
 		lblUsername.setBounds(222, 127, 185, 16);
 		dataPanel.add(lblUsername);
 		
-		JLabel lblMail = new JLabel("Mail: "/*+mail*/);
+		JLabel lblMail = new JLabel("Mail: "+employee.getMail());
 		lblMail.setBounds(222, 172, 185, 16);
 		dataPanel.add(lblMail);
 		
-		JLabel lblPhone = new JLabel("Telefono: "/*+telefono*/);
+		JLabel lblPhone = new JLabel("Telefono: "+employee.getPhone());
 		lblPhone.setBounds(25, 212, 185, 16);
 		dataPanel.add(lblPhone);
 		
