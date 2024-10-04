@@ -1,7 +1,6 @@
 package com.centro.estetico.bitcamp;
 import java.time.*;
 
-
 public abstract class User {
 	
 
@@ -15,20 +14,20 @@ public abstract class User {
 	private boolean isEnabled;
 
 	// Costruttore
-	public User(int id, String name, String surname, String birthplace, boolean isFemale, LocalDate BoD,String notes, boolean isEnabled) {
-		this.id = id;
-		this.name = name;
-		this.surname = surname;
-		this.birthplace = birthplace;
-		this.isFemale = isFemale;
-		this.BoD = BoD;
-		this.notes = notes;
-		this.isEnabled = isEnabled;
-	}
+	 public User(int id, String name, String surname, String birthplace, boolean isFemale, LocalDate BoD, String notes, boolean isEnabled) {
+	        this.id = id;
+	        this.name = name;
+	        this.surname = surname;
+	        this.birthplace = birthplace;
+	        this.isFemale = isFemale; 
+	        this.BoD = BoD;
+	        this.notes = notes;
+	        this.isEnabled = isEnabled;
+	    }
 
 
 	//Getter
-	public int getId() {
+	protected int getId() {
 	    return id;
 	}
 
@@ -44,9 +43,9 @@ public abstract class User {
 	    return birthplace;
 	}
 
-	public boolean GetIsFemale() {
-	    return isFemale;
-	}
+    public boolean getIsFemale() { 
+        return isFemale;
+    }
 
 	public LocalDate getBoD() {
 	    return BoD;
@@ -63,9 +62,7 @@ public abstract class User {
 	
 	
 	//Setter
-	public void setId(int id) {
-	    this.id = id;
-	}
+
 
 	public void setName(String name) {
 	    this.name = name;
@@ -79,9 +76,9 @@ public abstract class User {
 	    this.birthplace = birthplace;
 	}
 
-	public void setFemale(boolean female) {
-	    isFemale = female;
-	}
+	  public void setIsFemale(boolean isFemale) { 
+	        this.isFemale = isFemale;
+	    }
 
 	public void setBoD(LocalDate BoD) {
 	    this.BoD = BoD;
@@ -91,33 +88,20 @@ public abstract class User {
 	    this.notes = notes;
 	}
 
-	public void setEnabled(boolean enabled) {
+	public void setIsEnabled(boolean enabled) {
 	    isEnabled = enabled;
 	}
 	
 	
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", name=" + name + ", surname=" + surname + ", birthplace=" + birthplace
-				+ ", isFemale=" + isFemale + ", BoD=" + BoD + ", notes=" + notes + ", isEnabled=" + isEnabled + "]";
+		return "User [id=" + id + ", name=" + name + ", surname=" + 
+	surname + ", birthplace=" + birthplace
+				+ ", gender=" + isFemale + ", BoD=" + BoD + ", notes=" 
+	+ notes + ", isEnabled=" + isEnabled + "]";
 	}
-	
-	
-	
-	
-	
+
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 //Tasto destro->Source->Generate Getters e Setters ed anche il metodo ToString
