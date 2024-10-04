@@ -646,7 +646,7 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 
     // Metodo per validare gli input 
     private boolean validateInputs() {
-        return inputValidator.validateName(txfName.getText()) && inputValidator.validatePhoneNumber(txfPhone.getText())
+        return inputValidator.validateAlphanumeric(txfName.getText()) && inputValidator.validatePhoneNumber(txfPhone.getText())
                 && inputValidator.validatePEC(txfPEC.getText()) && inputValidator.validateEmail(txfEmail.getText())
                 && inputValidator.validateAlphanumeric(txfSedeLegale.getText())
                 && inputValidator.validateAlphanumeric(txfSedeOperativa.getText())
