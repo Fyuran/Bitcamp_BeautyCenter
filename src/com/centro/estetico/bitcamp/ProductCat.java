@@ -7,7 +7,7 @@ HAIR_CARE("Cura Capelli"),
 BODY_CARE("Cura del corpo"),
 COSMETICS("Cosmetici"),
 PERFUMES("Profumi"),
-OHER("Altro");
+OTHER("Altro");
 	
 	private final String description;
 

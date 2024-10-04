@@ -23,19 +23,21 @@ public class ProductTest {
         products[5] = new Product("Rossetto", 60, 15, new BigDecimal("12.00"), 22.0, ProductCat.COSMETICS, true);
         products[6] = new Product("Profumo Femminile", 15, 2, new BigDecimal("50.00"), 22.0, ProductCat.PERFUMES, true);
         products[7] = new Product("Deodorante", 35, 6, new BigDecimal("5.50"), 22.0, ProductCat.BODY_CARE, true);
-        products[8] = new Product("Scrub Corpo", 20, 3, new BigDecimal("19.99"), 5.0, ProductCat.BODY_CARE, true);
-        products[9] = new Product("Gel Antibatterico", 45, 7, new BigDecimal("4.99"), 0.0, ProductCat.OHER, true);
+        products[8] = new Product("Scrub Corpo", 20, 3, new BigDecimal("19.99"), 4.0, ProductCat.BODY_CARE, true);
+        products[9] = new Product("Gel Antibatterico", 45, 7, new BigDecimal("4.99"), 0.0, ProductCat.OTHER, true);
 
         // Insert each product into the database
-        for (Product product : products) {
-            int result = Product.insertData(product);
-            if (result > 0) {
-                System.out.println("Product inserted successfully: " + product.getName());
-            } else {
-                System.out.println("Failed to insert product: " + product.getName());
-            }
-        	System.out.println(product);
-        }
+//        for (Product product : products) {
+//            int result = Product.insertData(product);
+//            if (result > 0) {
+//                System.out.println("Product inserted successfully: " + product.getName());
+//            } else {
+//                System.out.println("Failed to insert product: " + product.getName());
+//            }
+//        	System.out.println(product);
+//        }
+
+        Product.insertData(products[9]);
     }
 
 }
