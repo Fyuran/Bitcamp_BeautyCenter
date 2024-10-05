@@ -1,33 +1,49 @@
 package com.centro.estetico.bitcamp;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Treatments {
+import template.TreatmentPanel;
+
+public class Treatment {
 	private int id;
 	private String type;
 	private BigDecimal price;
-	private double vat;
+	private VAT vat;
 	private Duration duration;
 	private List<Product> products;
 	private boolean isEnabled;
 	
-	public Treatments() {
+	public Treatment() {
 		this.duration = Duration.ofMinutes(30);
 	}
 
-	public Treatments(int id, String type, BigDecimal price, double vat, Duration duration, List<Product> products,
-			boolean isEnabled) {
+	public Treatment(ResultSet rs) throws SQLException {
+		this(
+			rs.getInt(1), 
+			rs.getString(2), 
+			rs.getBigDecimal(3),
+			rs.getInt(4), 
+			Duration.ofMillis(rs.getTime(5).getTime()), 
+			rs.getBoolean(6)
+		);		
+	}
+	
+	private Treatment(int id, String type, BigDecimal price, int vatId, Duration duration, boolean isEnabled) {
 		super();
 		this.id = id;
 		this.type = type;
 		this.price = price;
-		this.vat = vat;
+		this.vat = Main.getBeautyCenter().getInfoVat().stream().filter(vat -> vat.getId() == vatId).findFirst().orElseThrow();
 		this.duration = duration;
-		this.products = products;
+		this.products = TreatmentPanel.getAllProductsByTreatmentId(id);
 		this.isEnabled = isEnabled;
 	}
 
@@ -55,11 +71,11 @@ public class Treatments {
 		this.price = price;
 	}
 
-	public double getVat() {
+	public VAT getVat() {
 		return vat;
 	}
 
-	public void setVat(double vat) {
+	public void setVat(VAT vat) {
 		this.vat = vat;
 	}
 
@@ -111,4 +127,7 @@ public class Treatments {
 		return timeSlots;
 	}
 
+	
+	
+	
 }
