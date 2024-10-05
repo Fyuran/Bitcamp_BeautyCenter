@@ -168,6 +168,31 @@ public class Product {
 
 	}
 	
+	private static int getVatId(double vat) {
+		int vatId = -1;
+		String query = "SELECT id FROM beauty_centerdb.vat WHERE amount=? LIMIT 1";
+		Connection conn = Main.getConnection();
+		try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+			pstmt.setDouble(1, vat);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				vatId = rs.getInt("id");
+				System.out.println(vatId);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return vatId;
+
+	}
+	
 	private void setVatAmountFromId(int id) {
 		String query="SELECT amount FROM beauty_centerdb.vat WHERE id=? LIMIT 1";
 		Connection conn = Main.getConnection();
@@ -272,10 +297,53 @@ public class Product {
 			pstmt.setInt(3, product.minStock);
 			pstmt.setBigDecimal(4, product.price);
 			pstmt.setInt(5, product.getVatId() );
-			pstmt.setString(6, product.type.getDescription());
+			pstmt.setString(6, product.type.name());
+			System.out.println(product.type.getDescription());
 			pstmt.setBoolean(7, product.isEnabled);
 
 			pstmt.setInt(8, product.id); // WHERE id = ?
+
+			int exec = pstmt.executeUpdate();
+			conn.commit();
+
+			return exec;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return -1;
+	}
+	//per modificare un oggetto a partire dal nome e usando dati crudi
+	public static int updateData(int selectedId,String name, int minStock, BigDecimal price, double vat, ProductCat cat) {
+		String query = "UPDATE beauty_centerdb.product "
+				+ "SET name = ?, minimum=?,price=?,vat_id=?, type=? WHERE id = ?";
+		Connection conn = Main.getConnection();
+		try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+			pstmt.setString(1, name);
+			System.out.println("Nome modificato");
+			pstmt.setInt(2, minStock);
+			System.out.println("minstock ok modificato");
+
+			pstmt.setBigDecimal(3, price);
+			System.out.println("prezzo modificato");
+
+			pstmt.setInt(4, getVatId(vat));
+			System.out.println("vat modificato");
+
+			pstmt.setString(5, cat.name());
+			System.out.println("tipo modificato");
+			System.out.println(cat.getDescription());
+
+			pstmt.setInt(6, selectedId); // WHERE id = ?
+			System.out.println("Nome trovato");
+
 
 			int exec = pstmt.executeUpdate();
 			conn.commit();

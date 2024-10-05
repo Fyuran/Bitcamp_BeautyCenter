@@ -3,6 +3,8 @@ package template;
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import com.centro.estetico.bitcamp.Product;
@@ -21,7 +23,7 @@ import java.awt.event.ActionEvent;
 public class ProductPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private JTextField txfSearchBar;
+	private JTextField txtSearchBar;
 	private JTextField txtName;
 	private JTextField txtMinStock;
 
@@ -32,6 +34,7 @@ public class ProductPanel extends JPanel {
 	private JLabel msgLbl;
 	private JComboBox<String> ivaComboBox;
 	private JComboBox<String> categoryComboBox;
+	private int selectedId;
 
 	/**
 	 * Create the panel.
@@ -53,13 +56,43 @@ public class ProductPanel extends JPanel {
 		add(containerPanel);
 
 		// Modello della tabella con colonne
-		String[] columnNames = {"Prodotto","Categoria","Quantità","Quantità minima","Prezzo","IVA%"};
+		String[] columnNames = {"id","Prodotto","Categoria","Quantità","Quantità minima","Prezzo","IVA%"};
 		tableModel = new DefaultTableModel(columnNames, 0);
+		
+		
 		
 
 		// Creazione della tabella
 		JTable table = new JTable(tableModel);
-		table.setEnabled(false);
+		//Listener della tabella per pescare i nomi che servono
+		 table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+	            @Override
+	            public void valueChanged(ListSelectionEvent event) {
+	                if (!event.getValueIsAdjusting()) {
+	                    int selectedRow = table.getSelectedRow();
+	                    if (selectedRow != -1) {
+	                    	selectedId=Integer.parseInt(String.valueOf(table.getValueAt(selectedRow, 0)));	
+	                    	String name=String.valueOf(table.getValueAt(selectedRow, 1)); 
+	                       String category=String.valueOf(String.valueOf(table.getValueAt(selectedRow, 2)));
+	                       //int amount=(int)table.getValueAt(selectedRow, 2);
+	                       String minStock=String.valueOf(table.getValueAt(selectedRow, 4));
+	                       String price=String.valueOf(table.getValueAt(selectedRow, 5));
+	                       String vatString=String.valueOf(table.getValueAt(selectedRow, 6)+"%");
+	                       System.out.println(vatString);
+	                       //double vat=Double.parseDouble(vatString.substring(0,vatString.length()-1));
+	                       
+	                       //Il listener ascolta la riga selezionata e la usa per popolare i campi
+	                       txtName.setText(name);
+	                       categoryComboBox.setSelectedItem(category);
+	                       txtMinStock.setText(minStock);
+	                       txtPrice.setText(price);
+	                       ivaComboBox.setSelectedItem(vatString);
+	                       table.clearSelection();
+
+	                    }
+	                }
+	            }
+	        });
 
 		// Aggiungere la tabella all'interno di uno JScrollPane per lo scroll
 		JScrollPane scrollPane = new JScrollPane(table);
@@ -74,11 +107,11 @@ public class ProductPanel extends JPanel {
 		btnSearch.setBounds(206, 8, 40, 30);
 		containerPanel.add(btnSearch);
 
-		txfSearchBar = new JTextField();
-		txfSearchBar.setColumns(10);
-		txfSearchBar.setBackground(UIManager.getColor("CheckBox.background"));
-		txfSearchBar.setBounds(23, 14, 168, 24);
-		containerPanel.add(txfSearchBar);
+		txtSearchBar = new JTextField();
+		txtSearchBar.setColumns(10);
+		txtSearchBar.setBackground(UIManager.getColor("CheckBox.background"));
+		txtSearchBar.setBounds(23, 14, 168, 24);
+		containerPanel.add(txtSearchBar);
 
 		JButton btnFilter = new JButton("");
 		btnFilter.setOpaque(false);
@@ -86,6 +119,7 @@ public class ProductPanel extends JPanel {
 		btnFilter.setBorderPainted(false);
 		btnFilter.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/filterIcon.png")));
 		btnFilter.setBounds(256, 8, 40, 30);
+		btnFilter.addActionListener(e->populateTableByFilter());
 		containerPanel.add(btnFilter);
 
 		JButton btnInsert = new JButton("");
@@ -104,6 +138,7 @@ public class ProductPanel extends JPanel {
 		btnUpdate.setBorderPainted(false);
 		btnUpdate.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/Update.png")));
 		btnUpdate.setBounds(770, 8, 40, 30);
+		btnUpdate.addActionListener(e-> updateProduct());
 		containerPanel.add(btnUpdate);
 
 
@@ -114,6 +149,7 @@ public class ProductPanel extends JPanel {
 		btnDelete.setBorderPainted(false);
 		btnDelete.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/delete.png")));
 		btnDelete.setBounds(820, 8, 40, 30);
+		btnDelete.addActionListener(e->deleteProduct());
 		containerPanel.add(btnDelete);
 
 		JButton btnDisable = new JButton("");
@@ -122,6 +158,7 @@ public class ProductPanel extends JPanel {
 		btnDisable.setBorderPainted(false);
 		btnDisable.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/disable.png")));
 		btnDisable.setBounds(920, 8, 40, 30);
+		btnDisable.addActionListener(e->deleteProduct());
 		containerPanel.add(btnDisable);
 
 		JPanel outputPanel = new JPanel();
@@ -135,6 +172,7 @@ public class ProductPanel extends JPanel {
 		btnHystorical.setBorderPainted(false);
 		btnHystorical.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/cartellina.png")));
 		btnHystorical.setBounds(870, 8, 40, 30);
+		btnHystorical.addActionListener(e->populateTable());
 		containerPanel.add(btnHystorical);
 
 		// label e textfield degli input
@@ -202,6 +240,12 @@ public class ProductPanel extends JPanel {
 		
 	}
 	
+	private void clearFields() {
+		txtName.setText("");
+		txtMinStock.setText("");
+		txtPrice.setText("");
+	}
+	
 	private void populateTable() {
 		clearTable();
     	List<Product> products=Product.getAllData();
@@ -210,19 +254,41 @@ public class ProductPanel extends JPanel {
     		return;
     	}
     	for(Product p:products) {
-    		tableModel.addRow(new String[] {p.getName(),p.getType().getDescription(),
+    		if(p.isEnabled())
+    		tableModel.addRow(new String[] {String.valueOf(p.getId()),p.getName(),p.getType().getDescription(),
     				String.valueOf(p.getAmount()),String.valueOf(p.getMinStock()),String.valueOf(p.getPrice()),String.valueOf(p.getVat())});
-    		//{"Prodotto","Categoria","Quantità","Quantità minima","Prezzo","IVA%"}
+    		//{"id","Prodotto","Categoria","Quantità","Quantità minima","Prezzo","IVA%"}
     	}
 	}
 	private void clearTable() {
 		tableModel.getDataVector().removeAllElements();
         revalidate();
 	}
+	private void populateTableByFilter() {
+		msgLbl.setText("");
+		if(txtSearchBar.getText().isBlank()||txtSearchBar.getText().isEmpty()) {
+			msgLbl.setText("Inserire un filtro!");
+			return;
+		}
+		clearTable();
+    	List<Product> products=Product.getAllData();
+    	if(products.isEmpty()) {
+    		tableModel.addRow(new String[] {"Sembra non ci siano prodotti presenti",""});
+    		return;
+    	}
+    	for(Product p:products) {
+    		if(p.isEnabled()&&p.getName().toLowerCase().contains(txtSearchBar.getText().toLowerCase())) {
+    		tableModel.addRow(new String[] {String.valueOf(p.getId()),p.getName(),p.getType().getDescription(),
+    				String.valueOf(p.getAmount()),String.valueOf(p.getMinStock()),String.valueOf(p.getPrice()),String.valueOf(p.getVat())});
+    		}
+    		//{"id","Prodotto","Categoria","Quantità","Quantità minima","Prezzo","IVA%"}
+    	}
+    	txtSearchBar.setText("");
+	}
+	
 	
 	private void createProduct() {
-		System.out.println(isDataValid());
-		if(isDataValid()){
+		if(isDataValid(true)){
 			String name=txtName.getText();
 			int minStock=Integer.parseInt(txtMinStock.getText());
 			BigDecimal price=new BigDecimal(txtPrice.getText());
@@ -233,6 +299,7 @@ public class ProductPanel extends JPanel {
 			Product.insertData(product);
 			System.out.println(product);
 			msgLbl.setText(product.getName()+" inserito nel database");
+			clearFields();
 			populateTable();
 
 			//Product product=new Product(txtName.getText(),0,)
@@ -241,12 +308,38 @@ public class ProductPanel extends JPanel {
 		}
 		
 	}
-	private boolean isDataValid() {
-		msgLbl.setText("");
-		if(!Product.isNameUnique(txtName.getText())) {
-			msgLbl.setText("Prodotto già esistente nel database");
-			return false;
+	
+	private void updateProduct() {
+		if(isDataValid(false)) {
+			String name=txtName.getText();
+			int minStock=Integer.parseInt(txtMinStock.getText());
+			BigDecimal price=new BigDecimal(txtPrice.getText());
+			String vatString=ivaComboBox.getSelectedItem().toString();
+			double vat=Double.parseDouble(vatString.substring(0,vatString.length()-1));
+			ProductCat type = ProductCat.fromDescription(categoryComboBox.getSelectedItem().toString());
+			Product.updateData(selectedId,name, minStock, price, vat, type);
+			msgLbl.setText(name+" modificato correttamente");
+			clearFields();
+			populateTable();
+
 		}
+	}
+	private void deleteProduct() {
+		msgLbl.setText("");
+		Product.toggleEnabledData(selectedId);
+		msgLbl.setText("Prodotto rimosso correttamente");
+		populateTable();
+	}
+	
+	private boolean isDataValid(boolean mustNameBeUnique) {
+		msgLbl.setText("");
+		if(mustNameBeUnique) {
+			if(!Product.isNameUnique(txtName.getText())) {
+				msgLbl.setText("Prodotto già esistente nel database");
+				return false;
+			}
+		}
+		
 		System.out.println("Nome unico");
 		if(!inputValidator.validateName(txtName.getText())) {
 			msgLbl.setText(inputValidator.getErrorMessage());
@@ -296,11 +389,11 @@ public class ProductPanel extends JPanel {
 	}
 
 	public JTextField getTxfSearchBar() {
-		return txfSearchBar;
+		return txtSearchBar;
 	}
 
 	public void setTxfSearchBar(JTextField txfSearchBar) {
-		this.txfSearchBar = txfSearchBar;
+		this.txtSearchBar = txfSearchBar;
 	}
 
 	public JTextField getTxtName() {
