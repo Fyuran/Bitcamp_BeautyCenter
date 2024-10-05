@@ -12,5 +12,4 @@ module centroEstetico {
 	requires java.desktop;
 	requires jcalendar;
 	requires org.apache.pdfbox;
-	requires com.github.lgooddatepicker;
 }

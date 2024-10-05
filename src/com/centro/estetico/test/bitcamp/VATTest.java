@@ -6,8 +6,6 @@ import java.sql.Statement;
 import com.centro.estetico.bitcamp.Main;
 import com.centro.estetico.bitcamp.VAT;
 
-import DAO.VATDao;
-
 public class VATTest {
 
 	public static void main(String[] args) {
@@ -25,14 +23,14 @@ public class VATTest {
 		VAT vat = new VAT(22);
 		VAT vat2 = new VAT(15);
 		
-		VATDao.insertVAT(vat);
-		VATDao.insertVAT(vat2);
-		VATDao.toggleEnabledVAT(vat2.getId());
+		VAT.insertData(vat);
+		VAT.insertData(vat2);
+		VAT.toggleEnabledData(vat2.getId());
 		
-		VAT vat_get = VATDao.getVAT(vat.getId()).orElseThrow();
+		VAT vat_get = VAT.getData(vat.getId()).orElseThrow();
 		vat_get.setAmount(5);
 		
-		VATDao.updateVAT(vat_get.getId(), vat_get);	
+		VAT.updateData(vat_get.getId(), vat_get);	
 	}
 
 }
