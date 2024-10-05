@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 
 public class Subscription {
-    private int id;
+    private final int id;
     private Duration duration;
     private LocalDate start;
     private LocalDate end;
@@ -31,7 +31,7 @@ public class Subscription {
     }
 
     //Calcoliamo la durata
-    private static LocalDate calculateDuration(LocalDate start, Duration duration) {
+    static LocalDate calculateDuration(LocalDate start, Duration duration) {
 
         switch (duration) {
             case Monthly:
