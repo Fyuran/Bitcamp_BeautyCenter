@@ -7,17 +7,17 @@ public class Employee extends User {
     private long employeeSerial;
     private ArrayList<Shift> shift;
     private LocalDate hiredDate;
-    private Roles roles;
+  
     private LocalDate terminationDate;
     private UserCredentials userCredentials;
-    private enum Roles {
+    public enum Roles {
         PERSONNEL, SECRETARY, ADMIN
     }
-
+    public Roles roles;
    
 
 	public Employee(
-		int id, String name, String surname, String birthplace, boolean isFemale, LocalDate BoD,String notes, boolean isEnabled, 
+		final int id, String name, String surname, String birthplace, boolean isFemale, LocalDate BoD,String notes, boolean isEnabled, 
 		long employeeSerial, ArrayList<Shift> shift, LocalDate hiredDate,Roles roles, LocalDate terminationDate,
 		String username, String password, String address, String iban, String phone, String mail) {
 		super(id, name, surname, birthplace, isFemale, BoD, notes, isEnabled);
@@ -28,12 +28,19 @@ public class Employee extends User {
 		this.terminationDate = terminationDate;
 		this.userCredentials = new UserCredentials(username, password, address,iban, phone, mail);
 	}
-	public Employee(
-            String name, String surname, String birthplace, boolean isFemale, LocalDate BoD, String notes, boolean isEnabled, 
-            long employeeSerial, ArrayList<Shift> shift, LocalDate hiredDate, Roles roles, LocalDate terminationDate,
-            String username, String password, String address, String iban, String phone, String mail) {
-        this(-1, name, surname, birthplace, isFemale, BoD, notes, isEnabled, employeeSerial, shift, hiredDate, roles, terminationDate, username, password, address, iban, phone, mail);
-    }
+	
+	
+	//Costruttore vuoto
+	public Employee() {
+	    super(-1, "", "", "", false, LocalDate.now(), "", true); // valori predefiniti
+	    this.employeeSerial = 0; // valore predefinito
+	    this.shift = new ArrayList<>(); // inizializza come lista vuota
+	    this.hiredDate = LocalDate.now(); // data attuale come valore predefinito
+	    this.roles = Roles.PERSONNEL; // valore predefinito per i ruoli
+	    this.terminationDate = null; // o una data predefinita
+	    this.userCredentials = new UserCredentials("", "", "", "", "", ""); // inizializza con valori vuoti
+	}
+
 	//Rivedere il costruttore vuoto
 
 	public Roles getRole() {
@@ -46,8 +53,6 @@ public class Employee extends User {
 	public long getEmployeeSerial() {
 		return employeeSerial;
 	}
-
-
 
 	public void setEmployeeSerial(long employeeSerial) {
 		this.employeeSerial = employeeSerial;
