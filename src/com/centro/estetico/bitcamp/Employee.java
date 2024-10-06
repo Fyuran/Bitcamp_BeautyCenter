@@ -11,7 +11,22 @@ public class Employee extends User {
     private LocalDate terminationDate;
     private UserCredentials userCredentials;
     public enum Roles {
-        PERSONNEL, SECRETARY, ADMIN
+        PERSONNEL("Operatore"), SECRETARY("Receptionist"), ADMIN("Admin");
+    	String role;
+    	Roles(String role){
+    		this.role=role;
+    	}
+    	public  String getRole() {
+    		return role;
+    	}
+    	public static Roles fromString(String role) {
+            for (Roles r : Roles.values()) {
+                if (r.getRole().equalsIgnoreCase(role)) {
+                    return r;
+                }
+            }
+            throw new IllegalArgumentException("Nessun ruolo trovato per la descrizione: " + role);
+        }
     }
     public Roles roles;
    
@@ -127,6 +142,8 @@ public class Employee extends User {
 	public UserCredentials getUserCredentials() {
 		return userCredentials;
 	}
+	
+
 
 
 	@Override
