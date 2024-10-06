@@ -225,4 +225,23 @@ public class inputValidator {
   			return false;
   		}
   	}
+  	
+  	public static boolean isSerialUnique(long serial) {
+  		String query="SELECT * FROM beauty_centerdb.employee WHERE serial=? LIMIT 1";
+  		long serialKiller=-1;
+  		Connection conn=Main.getConnection();
+  		try(PreparedStatement pstmt = conn.prepareStatement(query)){
+  			pstmt.setLong(1, serial);
+  			ResultSet rs=pstmt.executeQuery();
+  			if(rs.next()) {
+  				serialKiller=rs.getInt("serial");
+  				
+  			}
+  			
+  			return serialKiller==-1;
+  		}catch(SQLException e) {
+  			e.printStackTrace();
+  			return false;
+  		}
+  	}
 }

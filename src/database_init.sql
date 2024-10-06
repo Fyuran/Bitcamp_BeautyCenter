@@ -118,10 +118,12 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`producttreatment` (
 
 CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`employee` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `serial` INT UNSIGNED NULL,
   `name` VARCHAR(100) NOT NULL,
   `surname` VARCHAR(100) NOT NULL,
   `is_female` TINYINT NULL DEFAULT 0,
   `birthday` DATE NULL,
+  `birthplace` VARCHAR(100) NULL,
   `role` ENUM('PERSONNEL', 'SECRETARY', 'ADMIN') NULL,
   `hired` DATE NULL,
   `termination` DATE NULL,

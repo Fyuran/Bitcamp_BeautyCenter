@@ -3,12 +3,15 @@ package template;
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.MaskFormatter;
 
 import com.centro.estetico.bitcamp.Employee;
 import com.centro.estetico.bitcamp.Main;
 import com.centro.estetico.bitcamp.Product;
+import com.centro.estetico.bitcamp.Shift;
 import com.centro.estetico.bitcamp.Employee.Roles;
 
 import utils.inputValidator;
@@ -45,9 +48,10 @@ public class EmployeePanel extends JPanel {
 	private JTextField txtBirthplace;
 	private JRadioButton femaleRadioBtn;
 	private JRadioButton maleRadioBtn;
-	private boolean isFemale;
+	private boolean isFemale;//boolean che cambia a seconda di ciò che viene selezionato nel radiobutton. è una porcata metterlo qui? Sì. Però al momento è la soluzione più veloce. -Daniele
 	private JTextArea txtNotes;
 	private JComboBox<String> roleComboBox;
+	private int selectedId;
 
 	/**
 	 * Create the panel.
@@ -74,6 +78,34 @@ public class EmployeePanel extends JPanel {
 
 		// Creazione della tabella
 		JTable table = new JTable(tableModel);
+		//Listener della tabella per pescare i nomi che servono
+		 table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+	            @Override
+	            public void valueChanged(ListSelectionEvent event) {
+	            	DateTimeFormatter format=DateTimeFormatter.ofPattern("dd-MM-yyyy");
+	                if (!event.getValueIsAdjusting()) {
+	                    int selectedRow = table.getSelectedRow();
+	                    if (selectedRow != -1) {
+	                    	selectedId=Integer.parseInt(String.valueOf(table.getValueAt(selectedRow, 0)));	
+	                    	String name=String.valueOf(table.getValueAt(selectedRow, 1));
+	                    	String surname=String.valueOf(table.getValueAt(selectedRow, 2));
+	                    	String BoDString=String.valueOf(table.getValueAt(selectedRow, 3));
+	                    	LocalDate BoD=LocalDate.parse(BoDString, format);
+	                    	String roleString=String.valueOf(table.getValueAt(selectedRow, 4));
+	                    	Roles role=Roles.fromString(roleString);
+	                    	String username=String.valueOf(table.getValueAt(selectedRow, 5));
+	                    	
+
+	                    	
+	                    	//{ "ID", "Nome", "Cognome", "Data di nascita", "Data assunzione", "Ruolo", "Username" };
+	                       
+	                       //Il listener ascolta la riga selezionata e la usa per popolare i campi
+	                       
+
+	                    }
+	                }
+	            }
+	        });
 
 		// Aggiungere la tabella all'interno di uno JScrollPane per lo scroll
 		JScrollPane scrollPane = new JScrollPane(table);
@@ -329,6 +361,7 @@ public class EmployeePanel extends JPanel {
 
 	private void populateTable() {
 		clearTable();
+		clearFields();
 		ArrayList<Employee> employees = EmployeeDao.getAllEmployees();
 		if (employees.isEmpty()) {
 			tableModel.addRow(new String[] { "Sembra non ci siano prodotti presenti", "" });
@@ -351,18 +384,38 @@ public class EmployeePanel extends JPanel {
 		if(!isDataValid())return;
 		String name=txtName.getText();
 		String surname=txtSurname.getText();
-		LocalDate birthday=LocalDate.parse(txtBirthday.getText(), format);
-	
-		String iban=txtIban.getText();
+		String birthplace=txtBirthplace.getText();
+		//isFemale
+		LocalDate BoD=LocalDate.parse(txtBirthday.getText(), format);	
+		String notes=txtNotes.getText();
+		//isEnabled
+		long employeeSerial=Employee.generateSerial();
+		//shifts
+		//hiredDate
+		Roles role=Roles.fromString(roleComboBox.getSelectedItem().toString());
+		//terminationDate
 		String username=txtUsername.getText();
 		String password=txtPassword.getText();
 		String address=txtAddress.getText();
-		String birthplace=txtBirthplace.getText();
-		String mail=txtMail.getText();
+		String iban=txtIban.getText();
 		String phone=txtPhone.getText();
-		Roles role=Roles.fromString(roleComboBox.getSelectedItem().toString());
+		String mail=txtMail.getText();
+
+			
+		Employee employee=new Employee(name,surname,birthplace,isFemale,BoD,notes,true,employeeSerial,null,LocalDate.now(),
+				role,null,username,password,address,iban,phone,mail);
+		EmployeeDao.insertData(employee);
+		msgLbl.setText("Nuovo utente creato correttamente");
+		populateTable();
 		
-				
+
+	}
+	
+	public void deleteEmployee() {
+		msgLbl.setText("");
+		EmployeeDao.toggleEnabledData(selectedId);
+		msgLbl.setText("Utente rimosso correttamente");
+		populateTable();
 	}
 
 	private boolean isDataValid() {

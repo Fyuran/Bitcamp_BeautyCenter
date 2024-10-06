@@ -1,7 +1,11 @@
 package com.centro.estetico.bitcamp;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Random;
+
+import utils.inputValidator;
 
 public class Employee extends User {
     private long employeeSerial;
@@ -32,7 +36,7 @@ public class Employee extends User {
    
 
 	public Employee(
-		final int id, String name, String surname, String birthplace, boolean isFemale, LocalDate BoD,String notes, boolean isEnabled, 
+		int id, String name, String surname, String birthplace, boolean isFemale, LocalDate BoD,String notes, boolean isEnabled, 
 		long employeeSerial, ArrayList<Shift> shift, LocalDate hiredDate,Roles roles, LocalDate terminationDate,
 		String username, String password, String address, String iban, String phone, String mail) {
 		super(id, name, surname, birthplace, isFemale, BoD, notes, isEnabled);
@@ -43,6 +47,21 @@ public class Employee extends User {
 		this.terminationDate = terminationDate;
 		this.userCredentials = new UserCredentials(username, password, address,iban, phone, mail);
 	}
+	//costruttore senza id
+	public Employee(
+			String name, String surname, String birthplace, boolean isFemale, LocalDate BoD,String notes, boolean isEnabled, 
+			long employeeSerial, ArrayList<Shift> shift, LocalDate hiredDate,Roles roles, LocalDate terminationDate,
+			String username, String password, String address, String iban, String phone, String mail) {
+			super(name, surname, birthplace, isFemale, BoD, notes, isEnabled);
+			this.employeeSerial = employeeSerial;
+			this.shift = new ArrayList<>();
+			this.hiredDate = hiredDate;
+			this.roles = roles;
+			this.terminationDate = terminationDate;
+			this.userCredentials = new UserCredentials(username, password, address,iban, phone, mail);
+		}
+	
+	
 	
 	
 	//Costruttore vuoto
@@ -142,9 +161,19 @@ public class Employee extends User {
 	public UserCredentials getUserCredentials() {
 		return userCredentials;
 	}
+	public String getBoDString() {
+		DateTimeFormatter format=DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		return super.getBoD().format(format);
+	}
 	
-
-
+	private static long generateSerial() {
+		Random rand=new Random();
+		long serial=rand.nextLong(900000)+100000;//generazione casuale di un numero a 6 cifre
+		//check che il serial sia univoco. Se non lo è, ripete la funzione
+		return inputValidator.isSerialUnique(serial)?serial:generateSerial();
+	}
+	
+	
 
 	@Override
 	public String toString() {
