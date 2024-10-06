@@ -19,16 +19,18 @@ public class TestFrame extends JFrame {
 	ProductPanel panelP;
 	UserAccessPanel panelU;
 	gestioneTurni panelG;
+	VATPanel panelV;
 	
 	public TestFrame() {
 		//Employee employee = new Employee(1, "Mario", "Rossi", "Milano", true, LocalDate.of(1990, 5, 15), "Note sul dipendente", true, 123456789L, new ArrayList<>(), LocalDate.of(2020, 1, 1), EnumSet.of(Employee.Roles.SECRETARY), null, "IT60X0542811101000000123456", "Via Roma 1", "1234567890", "mario.rossi@example.com", "mario.rossi", "password123!");
 		
-		Main main = new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
+		Main main = new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "admin");
 		//panelU=new UserAccessPanel(null);
 		panelT=new TreatmentPanel();
 		panelE=new EmployeePanel();
 		panelP=new ProductPanel();
 		panelG=new gestioneTurni();
+		panelV=new VATPanel();
 		
 		setSize(1075, 768);
 		JTabbedPane mainPane=new JTabbedPane();
@@ -37,6 +39,7 @@ public class TestFrame extends JFrame {
 		mainPane.add(panelT);
 		mainPane.add(panelE);
 		mainPane.add(panelG);
+		mainPane.add(panelV);
 		add(mainPane);
 		
 		setName("Test Frame");

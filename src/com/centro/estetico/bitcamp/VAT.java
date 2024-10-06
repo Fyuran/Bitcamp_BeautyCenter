@@ -109,6 +109,7 @@ public class VAT {
 			while(rs.next()) {
 				list.add(new VAT(rs));
 			}
+			System.out.println(list);
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
@@ -125,7 +126,7 @@ public class VAT {
 			stat.setDouble(1, obj.amount);
 			stat.setBoolean(2, obj.isEnabled);
 			
-			stat.setInt(3, obj.id); //WHERE id = ?
+			stat.setInt(3, id); //WHERE id = ?
 			
 			int exec = stat.executeUpdate();
 			conn.commit();
@@ -169,6 +170,22 @@ public class VAT {
 			}	
 		}
 		return -1;
+	}
+	
+	public static boolean existByAmount(double amount) {
+		String query = "SELECT COUNT(*) FROM beauty_centerdb.vat WHERE ABS(vat.amount - ?) < 0.000001";
+		Connection conn = Main.getConnection();
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			stat.setDouble(1, amount);
+			ResultSet rs = stat.executeQuery();
+			if(rs.next()) {
+				return rs.getInt(1) == 0 ? false : true;
+			}
+			return true;
+		}catch(SQLException e) {
+			e.printStackTrace();
+			return true;
+		}
 	}
 	
 	/*public static int deleteData(int id) {
