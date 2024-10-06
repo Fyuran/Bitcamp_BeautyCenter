@@ -25,8 +25,8 @@ public class TestFrame extends JFrame {
 		
 		Main main = new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
 		//panelU=new UserAccessPanel(null);
-		panelT=new TreatmentPanel();
 		panelE=new EmployeePanel();
+		panelT=new TreatmentPanel();
 		panelP=new ProductPanel();
 		panelG=new gestioneTurni();
 		
