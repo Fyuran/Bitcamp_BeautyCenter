@@ -1,7 +1,19 @@
 package template;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.math.BigDecimal;
+import java.util.List;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 
@@ -9,14 +21,9 @@ import com.centro.estetico.bitcamp.Product;
 import com.centro.estetico.bitcamp.ProductCat;
 import com.centro.estetico.bitcamp.VAT;
 
+import DAO.ProductDAO;
+import DAO.VATDao;
 import utils.inputValidator;
-
-import java.awt.event.ActionListener;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.awt.event.ActionEvent;
-
 
 public class ProductPanel extends JPanel {
 
@@ -53,9 +60,8 @@ public class ProductPanel extends JPanel {
 		add(containerPanel);
 
 		// Modello della tabella con colonne
-		String[] columnNames = {"Prodotto","Categoria","Quantità","Quantità minima","Prezzo","IVA%"};
+		String[] columnNames = { "Prodotto", "Categoria", "Quantità", "Quantità minima", "Prezzo", "IVA%" };
 		tableModel = new DefaultTableModel(columnNames, 0);
-		
 
 		// Creazione della tabella
 		JTable table = new JTable(tableModel);
@@ -94,9 +100,8 @@ public class ProductPanel extends JPanel {
 		btnInsert.setBorderPainted(false);
 		btnInsert.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/Insert.png")));
 		btnInsert.setBounds(720, 8, 40, 30);
-		btnInsert.addActionListener(e->createProduct());
+		btnInsert.addActionListener(e -> createProduct());
 		containerPanel.add(btnInsert);
-
 
 		JButton btnUpdate = new JButton("");
 		btnUpdate.setOpaque(false);
@@ -105,8 +110,6 @@ public class ProductPanel extends JPanel {
 		btnUpdate.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/Update.png")));
 		btnUpdate.setBounds(770, 8, 40, 30);
 		containerPanel.add(btnUpdate);
-
-
 
 		JButton btnDelete = new JButton("");
 		btnDelete.setOpaque(false);
@@ -151,8 +154,7 @@ public class ProductPanel extends JPanel {
 		JLabel lblCategory = new JLabel("Categoria:");
 		lblCategory.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblCategory.setBounds(43, 474, 170, 17);
-		add(lblCategory);		
-		
+		add(lblCategory);
 
 		JLabel lblMinStock = new JLabel("Quantità minima:");
 		lblMinStock.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
@@ -163,92 +165,97 @@ public class ProductPanel extends JPanel {
 		txtMinStock.setColumns(10);
 		txtMinStock.setBounds(209, 512, 220, 20);
 		add(txtMinStock);
-		
+
 		txtPrice = new JTextField();
 		txtPrice.setColumns(10);
 		txtPrice.setBounds(749, 432, 220, 20);
 		add(txtPrice);
-		
+
 		JLabel lblIVA = new JLabel("IVA:");
 		lblIVA.setBounds(531, 475, 170, 14);
 		add(lblIVA);
-		
+
 		JLabel lblPrice = new JLabel("Prezzo:");
 		lblPrice.setBounds(531, 437, 170, 14);
 		add(lblPrice);
-		
+
 		categoryComboBox = new JComboBox<>();
 		for (ProductCat cat : ProductCat.values()) {
-		    categoryComboBox.addItem(cat.getDescription());
+			categoryComboBox.addItem(cat.getDescription());
 		}
 		categoryComboBox.setBounds(209, 468, 220, 27);
 		add(categoryComboBox);
-		
-		List<VAT> ivas=VAT.getAllData();
-		int i=0;
-		String[]ivasToString=new String[ivas.size()];
-		for(VAT iva:ivas) {
-			ivasToString[i]=iva.toString();
+
+		List<VAT> ivas = VATDao.getAllVAT();
+		int i = 0;
+		String[] ivasToString = new String[ivas.size()];
+		for (VAT iva : ivas) {
+			ivasToString[i] = iva.toString();
 			i++;
 		}
 		ivaComboBox = new JComboBox<String>(ivasToString);
 		ivaComboBox.setBounds(749, 471, 220, 27);
 		add(ivaComboBox);
-		
+
 		msgLbl = new JLabel("");
 		msgLbl.setBounds(389, 606, 625, 16);
 		add(msgLbl);
 		populateTable();
-		
+
 	}
-	
+
 	private void populateTable() {
 		clearTable();
-    	List<Product> products=Product.getAllData();
-    	if(products.isEmpty()) {
-    		tableModel.addRow(new String[] {"Sembra non ci siano prodotti presenti",""});
-    		return;
-    	}
-    	for(Product p:products) {
-    		tableModel.addRow(new String[] {p.getName(),p.getType().getDescription(),
-    				String.valueOf(p.getAmount()),String.valueOf(p.getMinStock()),String.valueOf(p.getPrice()),String.valueOf(p.getVat())});
-    		//{"Prodotto","Categoria","Quantità","Quantità minima","Prezzo","IVA%"}
-    	}
+		List<Product> products = ProductDAO.getAllProducts();
+		if (products.isEmpty()) {
+			tableModel.addRow(new String[] { "Sembra non ci siano prodotti presenti", "" });
+			return;
+		}
+		for (Product p : products) {
+			tableModel.addRow(new String[] { p.getName(), p.getType().getDescription(), String.valueOf(p.getAmount()),
+					String.valueOf(p.getMinStock()), String.valueOf(p.getPrice()), String.valueOf(p.getVat()) });
+			// {"Prodotto","Categoria","Quantità","Quantità minima","Prezzo","IVA%"}
+		}
 	}
+
 	private void clearTable() {
 		tableModel.getDataVector().removeAllElements();
-        revalidate();
+		revalidate();
 	}
-	
+
 	private void createProduct() {
 		System.out.println(isDataValid());
-		if(isDataValid()){
-			String name=txtName.getText();
-			int minStock=Integer.parseInt(txtMinStock.getText());
-			BigDecimal price=new BigDecimal(txtPrice.getText());
-			String vatString=ivaComboBox.getSelectedItem().toString();
-			double vat=Double.parseDouble(vatString.substring(0,vatString.length()-1));
+		if (isDataValid()) {
+			String name = txtName.getText();
+			int minStock = Integer.parseInt(txtMinStock.getText());
+			BigDecimal price = new BigDecimal(txtPrice.getText());
+			String vatString = ivaComboBox.getSelectedItem().toString();
+			double vatAmount = Double.parseDouble(vatString.substring(0, vatString.length() - 1));
+			VAT vat = VATDao.getVATByAmount((float) vatAmount).get();
 			ProductCat type = ProductCat.fromDescription(categoryComboBox.getSelectedItem().toString());
-			Product product=new Product(name,0,minStock,price,vat,type,true);
-			Product.insertData(product);
+			//Product(String name, int amount, int minStock, BigDecimal price, VAT vat, ProductCat type)
+			Product product = new Product(name, 0, minStock, price, vat, type);
+			product = ProductDAO.insertProduct(product).get();
 			System.out.println(product);
-			msgLbl.setText(product.getName()+" inserito nel database");
+			msgLbl.setText(product.getName() + " inserito nel database");
 			populateTable();
 
-			//Product product=new Product(txtName.getText(),0,)
-					//(nameText., int amount, int minStock, BigDecimal price, double vat, ProductCat type,
-					//boolean isEnabled)
+			// Product product=new Product(txtName.getText(),0,)
+			// (nameText., int amount, int minStock, BigDecimal price, double vat,
+			// ProductCat type,
+			// boolean isEnabled)
 		}
-		
+
 	}
+
 	private boolean isDataValid() {
 		msgLbl.setText("");
-		if(!Product.isNameUnique(txtName.getText())) {
+		if (!Product.isNameUnique(txtName.getText())) {
 			msgLbl.setText("Prodotto già esistente nel database");
 			return false;
 		}
 		System.out.println("Nome unico");
-		if(!inputValidator.validateName(txtName.getText())) {
+		if (!inputValidator.validateName(txtName.getText())) {
 			msgLbl.setText(inputValidator.getErrorMessage());
 			return false;
 		}
@@ -256,42 +263,42 @@ public class ProductPanel extends JPanel {
 		String minStockText = txtMinStock.getText();
 		System.out.println(minStockText);
 		if (minStockText.isEmpty()) {
-	        msgLbl.setText("La quantità minima non può essere vuota");
-	        return false;
-	    }
+			msgLbl.setText("La quantità minima non può essere vuota");
+			return false;
+		}
 		System.out.println("Quantità min non vuota");
 
 		try {
-			int minStock=Integer.parseInt(txtMinStock.getText());
-			if(minStock<=0) {
+			int minStock = Integer.parseInt(txtMinStock.getText());
+			if (minStock <= 0) {
 				msgLbl.setText("La quantità minima deve essere un numero valido");
 				System.out.println("try");
 			}
-			
-		}catch(NumberFormatException e) {
+
+		} catch (NumberFormatException e) {
 			e.printStackTrace();
 			msgLbl.setText("La quantità minima deve essere un numero valido");
 			System.out.println("catch");
 			return false;
 		}
 		System.out.println("Quantità minima valida");
-		 String priceText = txtPrice.getText().trim();
-		    if (priceText.isEmpty()) {
-		        msgLbl.setText("Il prezzo non può essere vuoto");
-		        return false;
-		    }
-		    System.out.println("Prezzo non vuoto");
+		String priceText = txtPrice.getText().trim();
+		if (priceText.isEmpty()) {
+			msgLbl.setText("Il prezzo non può essere vuoto");
+			return false;
+		}
+		System.out.println("Prezzo non vuoto");
 		try {
-			double price=Double.parseDouble(txtPrice.getText());
-			if(price<=0) {
+			double price = Double.parseDouble(txtPrice.getText());
+			if (price <= 0) {
 				msgLbl.setText("Il prezzo deve essere un numero valido");
 			}
-		}catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			e.printStackTrace();
 			return false;
 		}
 		System.out.println("Prezzo valido");
-		
+
 		return true;
 	}
 

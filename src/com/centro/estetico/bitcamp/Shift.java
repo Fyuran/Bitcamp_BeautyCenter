@@ -3,11 +3,11 @@ package com.centro.estetico.bitcamp;
 import java.time.LocalDateTime;
 
 public class Shift {
-    private int id;
+    private final int id;
     private LocalDateTime start;
     private LocalDateTime end;
     private ShiftType type;
-    public enum ShiftType {WORK,HOLIDAYS}
+    
     // Costruttore
     public Shift(int id, LocalDateTime start, LocalDateTime end, ShiftType type) {
         this.id = id;
@@ -18,9 +18,7 @@ public class Shift {
 	public int getId() {
 		return id;
 	}
-	public void setId(int id) {
-		this.id = id;
-	}
+
 	public LocalDateTime getStart() {
 		return start;
 	}

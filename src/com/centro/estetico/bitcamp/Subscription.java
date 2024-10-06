@@ -1,60 +1,61 @@
 package com.centro.estetico.bitcamp;
 
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
+
+import DAO.VATDao;
 
 
 public class Subscription {
-    private int id;
-    private Duration duration;
+    private final int id;
+    private SubPeriod subperiod;
     private LocalDate start;
     private LocalDate end;
     private BigDecimal price;
-    private double vat;
+    private VAT vat;
     private double discount;
     private boolean isEnabled;
    
-  
-    public enum Duration {
-        Monthly, Quarterly, HalfYear, Year;
-    }
-
-    public Subscription(int id, Duration duration,LocalDate start, BigDecimal price, double vat, double discount, boolean isEnabled) {
+    private Subscription(int id, SubPeriod subperiod, LocalDate start, BigDecimal price, VAT vat, double discount, boolean isEnabled) {
         this.id = id;
-        this.duration = duration;
+        this.subperiod = subperiod;
         this.start=start;
-        this.end = calculateDuration(start, duration);
+        this.end = plusSubPeriod(start, subperiod);
         this.price = price;
         this.vat = vat;    
         this.discount = discount;
         this.isEnabled = isEnabled;
     }
-
-    //Calcoliamo la durata
-    private static LocalDate calculateDuration(LocalDate start, Duration duration) {
-
-        switch (duration) {
-            case Monthly:
-                return start.plusMonths(1);
-            case Quarterly:
-                return start.plusMonths(3);
-            case HalfYear:
-                return start.plusMonths(6);
-            case Year:
-                return start.plusMonths(12);
-            default:
-                throw new IllegalArgumentException("Durata non valida: " + duration);
-        }
+    
+    public Subscription(ResultSet rs) throws SQLException {
+    	this(
+			rs.getInt(1), 
+			SubPeriod.valueOf(rs.getString(2)), 
+			rs.getDate(3).toLocalDate(),
+			rs.getBigDecimal(4), 
+			VATDao.getVAT(rs.getInt(5)).get(), 
+			rs.getDouble(6),
+			rs.getBoolean(7)
+		);
     }
     
-    
+    public Subscription(int id, Subscription obj) {
+		this(id, obj.subperiod, obj.start, obj.price, obj.vat, obj.discount, obj.isEnabled);
+	}
+
+	//Calcoliamo la durata
+    private static LocalDate plusSubPeriod(LocalDate start, SubPeriod subperiod) {
+    	return start.plusMonths(subperiod.getMonths());
+    }
     
     // Getter e Setter
 
     public void setStart(LocalDate start) {
         this.start = start;
         //A questo punto cambia anche la fine
-        this.end = calculateDuration(start, this.duration);
+        this.end = plusSubPeriod(start, subperiod);
     }
 
     public void setDiscount(double discount) {
@@ -70,12 +71,12 @@ public class Subscription {
 	}
 
 
-	public Duration getDuration() {
-		return duration;
+	public SubPeriod getSubPeriod() {
+		return subperiod;
 	}
 
-	public void setDuration(Duration duration) {
-		this.duration = duration;
+	public void setSubPeriod(SubPeriod subperiod) {
+		this.subperiod = subperiod;
 	}
 
 	public LocalDate getEnd() {
@@ -94,11 +95,11 @@ public class Subscription {
 		this.price = price;
 	}
 
-	public double getVat() {
+	public VAT getVat() {
 		return vat;
 	}
 
-	public void setVat(double vat) {
+	public void setVat(VAT vat) {
 		this.vat = vat;
 	}
 
@@ -120,16 +121,14 @@ public class Subscription {
 
 	@Override
 	public String toString() {
-		return "Subscription [id=" + id + ", duration=" + duration + ", start=" + start + ", end=" + end + ", price="
-				+ price + ", vat=" + vat + ", discount=" + discount + ", isEnabled=" + isEnabled + ", getClass()="
-				+ getClass() + ", hashCode()=" + hashCode() + ", toString()=" + super.toString() + "]";
+		return "Subscription [id=" + id + ", subperiod=" + subperiod + ", start=" + start + ", end=" + end + ", price="
+				+ price + ", vat=" + vat + ", discount=" + discount + ", isEnabled=" + isEnabled + "]";
 	}
    
-    
-    
-    
-    
-    
-    
+	public Object[] toTableRow() {
+		return new Object[] {
+				id, subperiod, start, end, price, vat, discount, isEnabled
+		};
+	}  
     
 }

@@ -1,19 +1,27 @@
 package com.centro.estetico.bitcamp;
 
 public enum SubPeriod {
-MONTLY(1),
-QUARTERLY(3),
-HALF_YEAR(6),
-YEARLY(12);
-	private int property;
-	 SubPeriod(int property) {
-		this.property=property;
+	MONTHLY(1, "Mensile"),
+	QUARTERLY(3, "Trimestrale"),
+	HALF_YEAR(6, "Semestrale"),
+	YEARLY(12, "Annuale");
+	
+	private final int months;
+	private final String name;
+	
+	SubPeriod(int property, String name) {
+		this.months = property;
+		this.name = name;
 	}
-	public int getProperty() {
-		return property;
+	
+	public int getMonths() {
+		return months;
 	}
-	public void setProperty(int property) {
-		this.property = property;
+	
+	public String getName() {
+		return name;
 	}
-	 
+	public int toSQLOrdinal() {
+		return this.ordinal() + 1;
+	}
 }

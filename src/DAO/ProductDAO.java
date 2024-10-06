@@ -9,19 +9,25 @@ import java.util.List;
 import java.util.Optional;
 
 import com.centro.estetico.bitcamp.Main;
-import com.centro.estetico.bitcamp.VAT;
+import com.centro.estetico.bitcamp.Product;
 
-public abstract class VATDao {
-	
+public abstract class ProductDAO {
 	private static Connection conn = Main.getConnection();
 	
-	public static Optional<VAT> insertVAT(VAT obj) {
-		String query = "INSERT INTO beauty_centerdb.vat(amount, is_enabled) VALUES (?, ?)";
+	public static Optional<Product> insertProduct(Product obj) {
+		String query = "INSERT INTO beauty_centerdb.product("
+				+ "name, amount, minimum, price, vat_id, type, is_enabled) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?)";
 		
 		try(PreparedStatement stat = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
 			
-			stat.setDouble(1, obj.getAmount());
-			stat.setBoolean(2, obj.isEnabled());
+			stat.setString(1, obj.getName());
+			stat.setInt(2, obj.getAmount());
+			stat.setInt(3, obj.getMinStock());
+			stat.setBigDecimal(4, obj.getPrice());
+			stat.setInt(5, obj.getVat().getId());
+			stat.setInt(6, obj.getType().toSQLOrdinal());
+			stat.setBoolean(7, obj.isEnabled());
 			
 			stat.executeUpdate();
 			conn.commit();
@@ -29,11 +35,10 @@ public abstract class VATDao {
 			ResultSet generatedKeys = stat.getGeneratedKeys();
 			if(generatedKeys.next()) {
 				int id = generatedKeys.getInt(1);
-				return Optional.ofNullable(new VAT(id, obj));
+				return Optional.ofNullable(new Product(id, obj));
 			} else {
 				throw new SQLException("Could not retrieve id");
 			}
-           
 		} catch(SQLException e) {
 			e.printStackTrace();
 			if(conn != null) {
@@ -47,111 +52,70 @@ public abstract class VATDao {
 		return Optional.empty();
 	}
 	
-	public static Optional<VAT> getVAT(int id) {
-		String query = "SELECT * FROM beauty_centerdb.vat WHERE id = ?";
+	public static Optional<Product> getProduct(int id) {
+		String query = "SELECT * FROM beauty_centerdb.product WHERE id = ?";
 		
-		Optional<VAT> opt = Optional.empty();
+		Optional<Product> opt = Optional.empty();
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			stat.setInt(1, id);  //WHERE id = ?
+			stat.setInt(1, id);
 			
 			ResultSet rs = stat.executeQuery();
 			conn.commit();
 			if(rs.next()) {
-				opt = Optional.ofNullable(new VAT(rs));				
+				opt = Optional.ofNullable(new Product(rs));
 			}
-		} catch(SQLException e) {
-			e.printStackTrace();
-			if(conn != null) {
-				try {
-					conn.rollback();
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
-			}	
-		}
-		return opt;
-	}
-	
-	public static Optional<VAT> getVATByAmount(float amount) {
-		String query = "SELECT * FROM beauty_centerdb.vat WHERE amount = ?";
-		
-		Optional<VAT> opt = Optional.empty();
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			stat.setFloat(1, amount);  //WHERE id = ?
-			
-			ResultSet rs = stat.executeQuery();
-			conn.commit();
-			if(rs.next()) {
-				opt = Optional.ofNullable(new VAT(rs));				
-			}
-		} catch(SQLException e) {
-			e.printStackTrace();
-			if(conn != null) {
-				try {
-					conn.rollback();
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
-			}	
-		}
-		return opt;
-	}
-	
-	public static List<VAT> getAllVAT() {
-		List<VAT> list = new ArrayList<>();
-		
-		String query = "SELECT * FROM beauty_centerdb.vat";
-		
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			ResultSet rs = stat.executeQuery();
-			conn.commit();
-			while(rs.next()) {
-				list.add(new VAT(rs));
-			}
-		} catch(SQLException e) {
-			e.printStackTrace();
-			if(conn != null) {
-				try {
-					conn.rollback();
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
-			}	
-		}
-		return list;
-	}
 
-	public static int updateVAT(int id, VAT obj) {
-		String query = "UPDATE beauty_centerdb.vat "
-				+ "SET amount = ?, is_enabled = ? "
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return opt;
+	}
+	
+	public static int updateData(int id, Product obj) {
+		String query = "UPDATE beauty_centerdb.product "
+				+ "SET name = ?, amount = ?, minimum = ?, "
+				+ "price = ?, vat_id = ?, type = ?, "
+				+ "is_enabled = ? " 
 				+ "WHERE id = ?";
 		
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			
-			stat.setDouble(1, obj.getAmount());
-			stat.setBoolean(2, obj.isEnabled());
-			
-			stat.setInt(3, obj.getId()); //WHERE id = ?
-			
+		try (PreparedStatement stat = conn.prepareStatement(query)) {
+
+			stat.setString(1, obj.getName());
+			stat.setInt(2, obj.getAmount());
+			stat.setInt(3, obj.getMinStock());
+			stat.setBigDecimal(4, obj.getPrice());
+			stat.setInt(5, obj.getVat().getId() );
+			stat.setInt(6, obj.getType().toSQLOrdinal());
+			stat.setBoolean(7, obj.isEnabled());
+
+			stat.setInt(8, obj.getId()); // WHERE id = ?
+
 			int exec = stat.executeUpdate();
 			conn.commit();
-			
+
 			return exec;
-		} catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if (conn != null) {
 				try {
 					conn.rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
-			}	
+			}
 		}
 		return -1;
 	}
-	
-	public static int toggleEnabledVAT(VAT obj) {
-		String query = "UPDATE beauty_centerdb.vat "
+
+	public static int toggleEnabledProduct(Product obj) {
+		String query = "UPDATE beauty_centerdb.product "
 				+ "SET is_enabled = ? "
 				+ "WHERE id = ?";
 		
@@ -178,8 +142,9 @@ public abstract class VATDao {
 		return -1;
 	}
 	
-	public static int deleteVAT(int id) {
-		String query = "DELETE FROM beauty_centerdb.vat WHERE id = ?";
+	
+	public static int deleteProduct(int id) {
+		String query = "DELETE FROM beauty_centerdb.product WHERE id = ?";
 		
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
 			stat.setInt(1, id); //WHERE id = ?
@@ -201,10 +166,32 @@ public abstract class VATDao {
 		return -1;
 	}
 	
-	
+	public static List<Product> getAllProducts() {
+		List<Product> list = new ArrayList<>();
+		
+		String query = "SELECT * FROM beauty_centerdb.product";
+		
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			ResultSet rs = stat.executeQuery();
+			conn.commit();
+			while(rs.next()) {
+				list.add(new Product(rs));
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return list;
+	}
 	
 	public static List<Object[]> toTableRowAll() {
-		List<VAT> list = getAllVAT();
+		List<Product> list = getAllProducts();
 		List<Object[]> data = new ArrayList<>(list.size());
 		for(int i = 0; i < list.size(); i++) {
 			data.add(list.get(i).toTableRow());

@@ -1,35 +1,35 @@
 package template;
 
-import java.awt.EventQueue;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import java.awt.Font;
 import java.awt.Color;
-import javax.swing.border.LineBorder;
-import javax.swing.table.DefaultTableModel;
-
-import com.centro.estetico.bitcamp.Employee.Roles;
-import utils.inputValidator;
-import DAO.AccountDAO;
-
-import javax.swing.JButton;
-import javax.swing.JTextField;
-import javax.swing.ImageIcon;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.awt.event.ActionEvent;
-import javax.swing.UIManager;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.table.DefaultTableModel;
+
+import com.centro.estetico.bitcamp.Roles;
+
+import DAO.UserCredentialsDAO;
+import utils.inputValidator;
 
 public class creaAccount extends JFrame {
 
@@ -44,7 +44,6 @@ public class creaAccount extends JFrame {
     private JButton btnConfermaModifica;
     private JButton btnAnnulla;
     private JButton btnHystorical;
-    private AccountDAO accountDAO;
     private int selectedRow = -1;
     private JTable table;
     private DefaultTableModel tableModel;
@@ -72,10 +71,7 @@ public class creaAccount extends JFrame {
             }
 
             System.out.println("Connessione al database riuscita.");
-            conn.setAutoCommit(false); 
-            
-            
-            accountDAO = new AccountDAO(conn);
+            conn.setAutoCommit(false);    
             
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Errore durante la connessione al database: " + e.getMessage());
@@ -196,7 +192,7 @@ public class creaAccount extends JFrame {
             if (selectedRow >= 0) {
                 int accountId = (int) tableModel.getValueAt(selectedRow, 0);
                 try {
-                    boolean success = accountDAO.disableAccount(accountId);
+                    boolean success = UserCredentialsDAO.disableAccount(accountId);
                     if (success) {
                         tableModel.removeRow(selectedRow);
                         selectedRow = -1;
@@ -284,7 +280,7 @@ public class creaAccount extends JFrame {
             Roles role = (Roles) cBoxRuolo.getSelectedItem();
 
             try {
-                boolean success = accountDAO.createAccount(username, password, role);
+                boolean success = UserCredentialsDAO.createAccount(username, password, role);
                 if (success) {
                     JOptionPane.showMessageDialog(null, "Account creato con successo!");
                     searchAccounts();
@@ -317,7 +313,7 @@ public class creaAccount extends JFrame {
 		    int accountId = (int) tableModel.getValueAt(selectedRow, 0);
 
 		    try {
-		        boolean success = accountDAO.updateAccount(accountId, username, password, role);
+		        boolean success = UserCredentialsDAO.updateAccount(accountId, username, password, role);
 		        if (success) {
 		            JOptionPane.showMessageDialog(null, "Account aggiornato con successo!");
 		            // Aggiorna la tabella degli account
@@ -385,10 +381,10 @@ public class creaAccount extends JFrame {
 	        List<Object[]> accounts;
 	        if (searchText.isEmpty()) {
 	            // Se la barra di ricerca è vuota, mostra tutti gli account attivi
-	            accounts = accountDAO.searchActiveAccounts();
+	            accounts = UserCredentialsDAO.searchActiveAccounts();
 	        } else {
 	            // Altrimenti, cerca in base all'username o al ruolo
-	            accounts = accountDAO.searchAccounts(searchText);
+	            accounts = UserCredentialsDAO.searchAccounts(searchText);
 	        }
 	        
 	        tableModel.setRowCount(0);
@@ -406,7 +402,7 @@ public class creaAccount extends JFrame {
 	 // Metodo per cercare tutti gli account attivi e popolare la tabella
     private void searchActiveAccounts() {
         try {
-            List<Object[]> accounts = accountDAO.searchActiveAccounts();
+            List<Object[]> accounts = UserCredentialsDAO.searchActiveAccounts();
             // Svuota la tabella
             tableModel.setRowCount(0);
             // Popola la tabella con tutti gli account attivi

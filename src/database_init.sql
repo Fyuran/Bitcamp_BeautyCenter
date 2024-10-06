@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`employee` (
   `surname` VARCHAR(100) NOT NULL,
   `is_female` TINYINT NULL DEFAULT 0,
   `birthday` DATE NULL,
+  `birthplace` VARCHAR(200) NOT NULL,
   `role` ENUM('PERSONNEL', 'SECRETARY', 'ADMIN') NULL,
   `hired` DATE NULL,
   `termination` DATE NULL,
