@@ -26,7 +26,7 @@ public class TestFrame extends JFrame {
 		
 		Main main = new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
 		//panelU=new UserAccessPanel(null);
-		//panelE=new EmployeePanel();
+		panelE=new EmployeePanel();
 		panelT=new TreatmentPanel();
 		panelP=new ProductPanel();
 		panelG=new gestioneTurni();
@@ -37,7 +37,7 @@ public class TestFrame extends JFrame {
 		mainPane.add(panelP);
 		//mainPane.add(panelU);
 		mainPane.add(panelT);
-		//mainPane.add(panelE);
+		mainPane.add(panelE);
 		mainPane.add(panelG);
 		mainPane.add(panelV);
 		add(mainPane);
