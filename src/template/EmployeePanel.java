@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -18,6 +19,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.MaskFormatter;
 
@@ -26,6 +29,8 @@ import com.centro.estetico.bitcamp.Main;
 import com.centro.estetico.bitcamp.Product;
 import com.centro.estetico.bitcamp.Roles;
 import com.centro.estetico.bitcamp.Shift;
+import com.centro.estetico.bitcamp.UserCredentials;
+import com.centro.estetico.bitcamp.UserDetails;
 
 import DAO.EmployeeDAO;
 import utils.inputValidator;
@@ -93,11 +98,38 @@ public class EmployeePanel extends JPanel {
 		add(containerPanel);
 
 		// Modello della tabella con colonne
-		String[] columnNames = {"Nome","Cognome","Data di nascita","Data assunzione","Ruolo","Username"};
-		tableModel = new DefaultTableModel(columnNames, 0);
-
+		String[] columnNames = { "ID","Numero seriale", "Nome", "Cognome", "Data di nascita", "Data assunzione", "Ruolo", "Username" };		tableModel = new DefaultTableModel(columnNames, 0);
 		// Creazione della tabella
-		JTable table = new JTable(tableModel);
+				JTable table = new JTable(tableModel);
+		//Listener della tabella per pescare i nomi che servono
+		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+	            @Override
+	            public void valueChanged(ListSelectionEvent event) {
+	            	DateTimeFormatter format=DateTimeFormatter.ofPattern("dd-MM-yyyy");
+	                if (!event.getValueIsAdjusting()) {
+	                    int selectedRow = table.getSelectedRow();
+	                    if (selectedRow != -1) {
+	                    	selectedId=Integer.parseInt(String.valueOf(table.getValueAt(selectedRow, 0)));	
+	                    	String name=String.valueOf(table.getValueAt(selectedRow, 1));
+	                    	String surname=String.valueOf(table.getValueAt(selectedRow, 2));
+	                    	String BoDString=String.valueOf(table.getValueAt(selectedRow, 3));
+	                    	LocalDate BoD=LocalDate.parse(BoDString, format);
+	                    	String roleString=String.valueOf(table.getValueAt(selectedRow, 4));
+	                    	Roles role=Roles.toEnum(roleString);
+	                    	String username=String.valueOf(table.getValueAt(selectedRow, 5));
+	                    	
+
+	                    	
+	                    	//{ "ID", "Nome", "Cognome", "Data di nascita", "Data assunzione", "Ruolo", "Username" };
+	                       
+	                       //Il listener ascolta la riga selezionata e la usa per popolare i campi
+	                       
+
+	                    }
+	                }
+	            }
+	        });
+		
 
 		// Aggiungere la tabella all'interno di uno JScrollPane per lo scroll
 		JScrollPane scrollPane = new JScrollPane(table);
@@ -304,6 +336,56 @@ public class EmployeePanel extends JPanel {
 		txtPassword.setColumns(10);
 		txtPassword.setBounds(209, 632, 220, 20);
 		add(txtPassword);
+		
+		msgLbl = new JLabel("");
+		msgLbl.setBounds(389, 606, 625, 16);
+		add(msgLbl);
+		
+		JLabel lblBirthPlace = new JLabel("Città di nascita:");
+		lblBirthPlace.setBounds(531, 475, 170, 14);
+		add(lblBirthPlace);
+		
+		txtBirthplace = new JTextField();
+		txtBirthplace.setColumns(10);
+		txtBirthplace.setBounds(749, 474, 220, 20);
+		add(txtBirthplace);
+		
+		maleRadioBtn = new JRadioButton("Uomo");
+		maleRadioBtn.setBounds(517, 629, 141, 23);
+		maleRadioBtn.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(maleRadioBtn.isSelected()) {
+					isFemale=false;
+				}
+			}
+		});
+		add(maleRadioBtn);
+		
+		femaleRadioBtn = new JRadioButton("Donna");
+		femaleRadioBtn.setBounds(588, 629, 141, 23);
+		femaleRadioBtn.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(femaleRadioBtn.isSelected()) {
+					isFemale=true;
+				}
+			}
+		});
+		add(femaleRadioBtn);
+		
+		
+		ButtonGroup genderBtnGroup=new ButtonGroup();
+		genderBtnGroup.add(femaleRadioBtn);
+		genderBtnGroup.add(maleRadioBtn);
+		
+		JLabel notesLbl = new JLabel("Note:");
+		notesLbl.setBounds(531, 664, 61, 16);
+		add(notesLbl);
+		
+		txtNotes = new JTextArea();
+		txtNotes.setBounds(749, 664, 220, 72);
+		add(txtNotes);
 
 	}
 
@@ -393,10 +475,16 @@ public class EmployeePanel extends JPanel {
 		String phone=txtPhone.getText();
 		String mail=txtMail.getText();
 
-			
-		Employee employee=new Employee(name,surname,birthplace,isFemale,BoD,notes,true,employeeSerial,null,LocalDate.now(),
-				role,null,username,password,address,iban,phone,mail);
-		EmployeeDao.insertEmployee(employee);
+		UserDetails det=new UserDetails(name, surname, isFemale, BoD,birthplace,notes);
+		UserCredentials cred=new UserCredentials(username, password,address, iban, phone, mail);
+		Employee employee=new Employee(det,cred,employeeSerial,role,null,LocalDate.now(),null);
+		
+		//UserDetails details, UserCredentials userCredentials,
+        //long employeeSerial, Roles role, List<Shift> turns, LocalDate hiredDate, LocalDate terminationDate)
+		
+		
+
+		EmployeeDAO.insertEmployee(employee);
 		msgLbl.setText("Nuovo utente creato correttamente");
 		populateTable();
 		
