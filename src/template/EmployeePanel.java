@@ -25,6 +25,7 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.awt.event.ActionEvent;
 
 public class EmployeePanel extends JPanel {
@@ -48,6 +49,7 @@ public class EmployeePanel extends JPanel {
 	private JTextField txtBirthplace;
 	private JRadioButton femaleRadioBtn;
 	private JRadioButton maleRadioBtn;
+	private JTextField txtSearchBar;
 	private boolean isFemale;//boolean che cambia a seconda di ciò che viene selezionato nel radiobutton. è una porcata metterlo qui? Sì. Però al momento è la soluzione più veloce. -Daniele
 	private JTextArea txtNotes;
 	private JComboBox<String> roleComboBox;
@@ -136,6 +138,7 @@ public class EmployeePanel extends JPanel {
 		btnFilter.setBorderPainted(false);
 		btnFilter.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/filterIcon.png")));
 		btnFilter.setBounds(256, 8, 40, 30);
+		btnFilter.addActionListener(e->populateTableByFilter());
 		containerPanel.add(btnFilter);
 
 		JButton btnInsert = new JButton("");
@@ -383,6 +386,31 @@ public class EmployeePanel extends JPanel {
 			}
 		}
 
+	}
+	private void populateTableByFilter() {
+		msgLbl.setText("");
+		if(txtSearchBar.getText().isBlank()||txtSearchBar.getText().isEmpty()) {
+			msgLbl.setText("Inserire un filtro!");
+			return;
+		}
+		clearTable();
+		clearFields();
+		List<Employee> employees=EmployeeDao.getAllData();
+    	if(employee.isEmpty()) {
+    		tableModel.addRow(new String[] {"Sembra non ci siano operatori presenti",""});
+    		return;
+    	}
+    	for (Employee employee : employees) {
+			if (employee.getTerminationDate() == null&&employee.getSurname().equals(txtSearchBar.getText())) {
+				tableModel.addRow(new String[] { String.valueOf(employee.getId()),String.valueOf(employee.getEmployeeSerial(), employee.getName(),
+						employee.getSurname(), String.valueOf(employee.getBoD()), employee.getRole().toString(),
+						employee.getUserCredentials().getUsername()) });
+				// {"ID","Nome","Cognome","Data di nascita","Data
+				// assunzione","Ruolo","Username"};
+			}
+		}
+
+    	txtSearchBar.setText("");
 	}
 
 	private void createEmployee() {
