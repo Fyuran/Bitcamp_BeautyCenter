@@ -1,13 +1,13 @@
 package com.centro.estetico.bitcamp;
 
 public enum ProductCat {
-ORAL_CARE("Cura Orale"),
-SKIN_CARE("Cura Pelle"),
-HAIR_CARE("Cura Capelli"),
-BODY_CARE("Cura del corpo"),
-COSMETICS("Cosmetici"),
-PERFUMES("Profumi"),
-OTHER("Altro");
+	ORAL_CARE("Cura Orale"),
+	SKIN_CARE("Cura Pelle"),
+	HAIR_CARE("Cura Capelli"),
+	BODY_CARE("Cura del corpo"),
+	COSMETICS("Cosmetici"),
+	PERFUMES("Profumi"),
+	OTHER("Altro");
 	
 	private final String description;
 
@@ -25,5 +25,9 @@ OTHER("Altro");
         }
         throw new IllegalArgumentException("Nessun ProductCat trovato per la descrizione: " + description);
     }
+	
+	public int toSQLOrdinal() {
+		return this.ordinal() + 1;
+	}
 }
 

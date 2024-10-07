@@ -14,8 +14,9 @@ import com.codingerror.service.CodingErrorPdfInvoiceCreator;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import it.kamaladafrica.codicefiscale.CodiceFiscale;
+import it.kamaladafrica.codicefiscale.internal.BelfiorePart;
 import it.kamaladafrica.codicefiscale.internal.DatePart;
-import it.kamaladafrica.codicefiscale.internal.Part;
+
 
 public class Example {
  public static void main(String[] args) {
@@ -29,7 +30,7 @@ public class Example {
 		
 		//Codice Fiscale----------------------------
 		CodiceFiscale cf = CodiceFiscale.of("RSSMRA75C22H501I");
-		Part firstnamePart = cf.getBelfiore();
+		BelfiorePart firstnamePart = cf.getBelfiore();
 		System.out.println(firstnamePart.getValue()); // MRA
 
 		DatePart datePart = cf.getDate();

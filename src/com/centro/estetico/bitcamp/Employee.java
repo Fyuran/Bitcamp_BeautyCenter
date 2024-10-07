@@ -1,102 +1,63 @@
 package com.centro.estetico.bitcamp;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.List;
 
-import utils.inputValidator;
+import DAO.UserCredentialsDAO;
 
 public class Employee extends User {
     private long employeeSerial;
-    private ArrayList<Shift> shift;
+    private Roles role;
+    private List<Shift> turns;
     private LocalDate hiredDate;
-  
     private LocalDate terminationDate;
-    private UserCredentials userCredentials;
-    public enum Roles {
-        PERSONNEL("Operatore"), SECRETARY("Receptionist"), ADMIN("Admin");
-    	String role;
-    	Roles(String role){
-    		this.role=role;
-    	}
-    	public  String getRole() {
-    		return role;
-    	}
-    	public static Roles fromString(String role) {
-            for (Roles r : Roles.values()) {
-                if (r.getRole().equalsIgnoreCase(role)) {
-                    return r;
-                }
-            }
-            throw new IllegalArgumentException("Nessun ruolo trovato per la descrizione: " + role);
-        }
-    }
-    public Roles roles;
-   
-
-	public Employee(
-		int id, String name, String surname, String birthplace, boolean isFemale, LocalDate BoD,String notes, boolean isEnabled, 
-		long employeeSerial, ArrayList<Shift> shift, LocalDate hiredDate,Roles roles, LocalDate terminationDate,
-		String username, String password, String address, String iban, String phone, String mail) {
-		super(id, name, surname, birthplace, isFemale, BoD, notes, isEnabled);
+    
+    //User(int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled)
+    //UserDetails(String name, String surname, boolean isFemale, LocalDate BoD, String birthplace, String notes)
+	private Employee(
+			int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled,
+			
+			long employeeSerial, Roles role, List<Shift> turns, LocalDate hiredDate, LocalDate terminationDate) {
+		super(id, details, userCredentials, isEnabled);
 		this.employeeSerial = employeeSerial;
-		this.shift = new ArrayList<>();
+		this.turns = turns;
 		this.hiredDate = hiredDate;
-		this.roles = roles;
+		this.role = role;
 		this.terminationDate = terminationDate;
-		this.userCredentials = new UserCredentials(username, password, address,iban, phone, mail);
+		
 	}
 	//costruttore senza password
 	public Employee(
-			int id, String name, String surname, String birthplace, boolean isFemale, LocalDate BoD,String notes, boolean isEnabled, 
-			long employeeSerial, ArrayList<Shift> shift, LocalDate hiredDate,Roles roles, LocalDate terminationDate,
-			String username, String address, String iban, String phone, String mail) {
-			super(id, name, surname, birthplace, isFemale, BoD, notes, isEnabled);
-			this.employeeSerial = employeeSerial;
-			this.shift = new ArrayList<>();
-			this.hiredDate = hiredDate;
-			this.roles = roles;
-			this.terminationDate = terminationDate;
-			this.userCredentials = new UserCredentials(username, address,iban, phone, mail);
-		}
-	//costruttore senza id
-	public Employee(
-			String name, String surname, String birthplace, boolean isFemale, LocalDate BoD,String notes, boolean isEnabled, 
-			long employeeSerial, ArrayList<Shift> shift, LocalDate hiredDate,Roles roles, LocalDate terminationDate,
-			String username, String password, String address, String iban, String phone, String mail) {
-			super(name, surname, birthplace, isFemale, BoD, notes, isEnabled);
-			this.employeeSerial = employeeSerial;
-			this.shift = new ArrayList<>();
-			this.hiredDate = hiredDate;
-			this.roles = roles;
-			this.terminationDate = terminationDate;
-			this.userCredentials = new UserCredentials(username, password, address,iban, phone, mail);
-		}
+			UserDetails details, UserCredentials userCredentials,
+            long employeeSerial, Roles role, List<Shift> turns, LocalDate hiredDate, LocalDate terminationDate) {
+		this(-1, details, userCredentials, true, employeeSerial, role, turns, hiredDate, terminationDate);
+    }
 	
-	
-	
-	
-	//Costruttore vuoto
-	public Employee() {
-	    super(-1, "", "", "", false, LocalDate.now(), "", true); // valori predefiniti
-	    this.employeeSerial = 0; // valore predefinito
-	    this.shift = new ArrayList<>(); // inizializza come lista vuota
-	    this.hiredDate = LocalDate.now(); // data attuale come valore predefinito
-	    this.roles = Roles.PERSONNEL; // valore predefinito per i ruoli
-	    this.terminationDate = null; // o una data predefinita
-	    this.userCredentials = new UserCredentials("", "", "", "", "", ""); // inizializza con valori vuoti
+	public Employee(ResultSet rs) throws SQLException {
+		this(
+				rs.getInt(1),
+				new UserDetails(
+					rs.getString(2), rs.getString(3),
+					rs.getBoolean(4), rs.getDate(5).toLocalDate(), 
+					rs.getString(6), rs.getString(11)
+				),
+				UserCredentialsDAO.getUserCredentials(rs.getInt(9)).get(),
+				rs.getBoolean(12),
+				rs.getLong(13),
+				Roles.valueOf(rs.getString(6)),
+				new ArrayList<Shift>(), //TODO: Add DAO for Shift
+				rs.getDate(8).toLocalDate(),
+				rs.getDate(9).toLocalDate()
+			);
 	}
-
-	//Rivedere il costruttore vuoto
-
-	public Roles getRole() {
-        return roles;
-    }
-
-    public void setRole(Roles roles) {
-        this.roles = roles;
-    }
+	
+	public Employee(int id, Employee obj) {
+		this(id, obj.getDetails(),  obj.getUserCredentials(), obj.isEnabled(), obj.employeeSerial, obj.role, obj.turns, obj.hiredDate, obj.terminationDate);
+	}
 	public long getEmployeeSerial() {
 		return employeeSerial;
 	}
@@ -105,102 +66,62 @@ public class Employee extends User {
 		this.employeeSerial = employeeSerial;
 	}
 
-
-
-	public ArrayList<Shift> getShift() {
-		return shift;
+	public List<Shift> getShift() {
+		return turns;
 	}
 
-
-
-	public void setShift(ArrayList<Shift> shift) {
-		this.shift = shift;
+	public void setShift(List<Shift> turns) {
+		this.turns = turns;
 	}
-
-
 
 	public LocalDate getHiredDate() {
 		return hiredDate;
 	}
 
-
-
 	public void setHiredDate(LocalDate hiredDate) {
 		this.hiredDate = hiredDate;
 	}
 
-
-
-	public Roles getRoles() {
-		return roles;
+	public Roles getRole() {
+		return role;
 	}
 
-
-
-	public void setRoles(Roles roles) {
-		this.roles = roles;
+	public void setRole(Roles role) {
+		this.role = role;
 	}
-
-
 
 	public LocalDate getTerminationDate() {
 		return terminationDate;
 	}
 
-
-
 	public void setTerminationDate(LocalDate terminationDate) {
 		this.terminationDate = terminationDate;
 	}
-
-
 	// Metodo per aggiungere un turno
-    public void addShift(Shift shift) {
-        if (shift != null) {
-            this.shift.add(shift); // Aggiungi il turno alla lista
+    public void addShift(Shift turns) {
+        if (turns != null) {
+            this.turns.add(turns); // Aggiungi il turno alla lista
         }
     }
 
     // Metodo per rimuovere un turno
-    public void removeShift(Shift shift) {
-        this.shift.remove(shift); // Rimuovi il turno dalla lista
+    public void removeShift(Shift turns) {
+        this.turns.remove(turns); // Rimuovi il turno dalla lista
     }
 
-    // Getter per gli shift
-    public ArrayList<Shift> getShifts() {
-        return shift;
+    // Getter per gli turns
+    public List<Shift> getShifts() {
+        return turns;
     }
-
-	public UserCredentials getUserCredentials() {
-		return userCredentials;
-	}
-	public String getBoDString() {
-		DateTimeFormatter format=DateTimeFormatter.ofPattern("dd-MM-yyyy");
-		return super.getBoD().format(format);
-	}
-	
-	public static long generateSerial() {
-		Random rand=new Random();
-		long serial=rand.nextLong(900000)+100000;//generazione casuale di un numero a 6 cifre
-		//check che il serial sia univoco. Se non lo è, ripete la funzione
-		return inputValidator.isSerialUnique(serial)?serial:generateSerial();
-	}
-	
-	
 
 	@Override
 	public String toString() {
-		return "Employee [employeeSerial=" + employeeSerial + ", shift=" + shift + ", hiredDate=" + hiredDate
-				+ ", roles=" + roles + ", terminationDate=" + terminationDate + ", userCredentials=" + userCredentials
-				+ ", getId()=" + getId() + ", getName()=" + getName() + ", getSurname()=" + getSurname()
-				+ ", getBirthplace()=" + getBirthplace() + ", getIsFemale()=" + getIsFemale() + ", getBoD()=" + getBoD()
-				+ ", getNotes()=" + getNotes() + ", GetIsEnabled()=" + GetIsEnabled() + ", toString()="
-				+ super.toString() + ", getClass()=" + getClass() + ", hashCode()=" + hashCode() + "]";
+		return "Employee [employeeSerial=" + employeeSerial + ", role=" + role + ", turns=" + turns + ", hiredDate="
+				+ hiredDate + ", terminationDate=" + terminationDate + ", toString()=" + super.toString() + "]";
 	}
-
-
-
-
-
-
+	public Object[] toTableRow() {
+		return new Object[] {
+				getId(), getName(), getSurname(), getBoD(), getBirthplace(), employeeSerial, role, turns, hiredDate, terminationDate, getNotes()
+		};
+	}
 }

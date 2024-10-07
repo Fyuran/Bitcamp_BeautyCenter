@@ -1,30 +1,21 @@
 package template;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
-
-import com.centro.estetico.bitcamp.BeautyCenter;
-import com.centro.estetico.bitcamp.Main;
-import com.centro.estetico.bitcamp.Product;
-import com.centro.estetico.bitcamp.Treatment;
-import com.centro.estetico.bitcamp.VAT;
-
-import java.awt.event.ActionListener;
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.Time;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.awt.event.ActionEvent;
 
 public class TreatmentPanel extends JPanel {
 
@@ -34,8 +25,6 @@ public class TreatmentPanel extends JPanel {
 	private JTextField txfName;
 	private JComboBox<String> cBoxIVA;
 	private JTextField txtDuration;
-	private List<Product> products;
-	private JLabel msgLbl;
 
 	// Modello della tabella (scope a livello di classe per poter aggiornare la
 	// tabella)
@@ -45,13 +34,12 @@ public class TreatmentPanel extends JPanel {
 	 * Create the panel.
 	 */
 	public TreatmentPanel() {
-		products=new ArrayList<>();
 		setLayout(null);
 		setSize(1024, 768);
 		setName("Trattamenti");
 		JLabel titleTab = new JLabel("GESTIONE TRATTAMENTI");
 		titleTab.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
-		titleTab.setBounds(415, 11, 206, 32);
+		titleTab.setBounds(415, 11, 220, 32);
 		add(titleTab);
 
 		JPanel containerPanel = new JPanel();
@@ -202,13 +190,8 @@ public class TreatmentPanel extends JPanel {
 		lblIVa.setBounds(43, 513, 170, 14);
 		add(lblIVa);
 
-		List<VAT> ivas=VAT.getAllData();
-		int i=0;
-		String[]ivasToString=new String[ivas.size()];
-		for(VAT iva:ivas) {
-			ivasToString[i]=iva.toString();
-			i++;
-		}		cBoxIVA = new JComboBox<String>(ivasToString);
+		String[] IVAs = { "Seleziona IVA" };
+		cBoxIVA = new JComboBox<String>(IVAs);
 		cBoxIVA.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 11));
 		cBoxIVA.setBounds(209, 511, 220, 22);
 		add(cBoxIVA);
@@ -228,13 +211,10 @@ public class TreatmentPanel extends JPanel {
 		productButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new ProductSelector(TreatmentPanel.this);
+				new ProductSelector();
 			}
 		});
 		add(productButton);
-		msgLbl = new JLabel("");
-		msgLbl.setBounds(389, 606, 625, 16);
-		add(msgLbl);
 
 	}
 
@@ -286,232 +266,4 @@ public class TreatmentPanel extends JPanel {
 		this.tableModel = tableModel;
 	}
 	
-	//inserisci trattamento
-	public static int insertData(Treatment treatment) {
-		String query = "INSERT INTO beauty_centerdb.treatment (type, price, vat_id, duration, is_enabled) VALUES (?, ?, ?, ?, ?)";
-		Connection conn = Main.getConnection();
-		try (PreparedStatement stat = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
-			Time time = Time.valueOf(LocalTime.ofSecondOfDay(treatment.getDuration().toSeconds()));
-			stat.setString(1, treatment.getType());
-			stat.setBigDecimal(2, treatment.getPrice());
-			stat.setInt(3, treatment.getVat().getId());
-			stat.setTime(4, time);
-			stat.setBoolean(5, treatment.isEnabled());
-			int insert = stat.executeUpdate();
-			if(insert != 1) {
-				throw new SQLException("Cannot insert treatment");
-			}
-			ResultSet generatedKeys = stat.getGeneratedKeys();
-			if(generatedKeys.next()) {
-				treatment.setId(generatedKeys.getInt(1));
-			} else {
-				throw new SQLException("Could not retrieve id");
-			}
-			insertData(treatment.getId(), treatment.getProducts());
-			
-			conn.commit();
-			
-			return insert;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			if(conn != null) {
-				try {
-					conn.rollback();
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
-			}
-			return -1;
-		}
-	}
-	
-	//inserisce prodotto nel trattamento
-	private static void insertData(int idTreatment, List<Product> products) throws SQLException {
-		String query = "INSERT INTO beauty_centerdb.producttreatment (product_id, treatment_id) VALUES (?, ?)";
-		Connection conn = Main.getConnection();
-		try (PreparedStatement stat = conn.prepareStatement(query)) {
-			for (Product product : products) {
-				int productId = product.getId();
-				if(productId <= 0) {
-					throw new SQLException("Invalid productId: " + productId);
-				}
-	            stat.setInt(1, product.getId());
-	            stat.setInt(2, idTreatment);
-	            stat.addBatch();
-	        }
-			stat.executeBatch(); 
-		} catch (SQLException e) {
-			throw e;
-		}
-	}
-	
-	public static Optional<Treatment> getData(int id) {
-		String query = "SELECT * FROM beauty_centerdb.treatment WHERE id = ?";
-		Connection conn = Main.getConnection();
-		Optional<Treatment> opt = Optional.empty();
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			stat.setInt(1, id);
-			
-			ResultSet rs = stat.executeQuery();
-			if(rs.next()) {
-				opt = Optional.ofNullable(new Treatment(rs));
-			}
-
-		} catch(SQLException e) {
-			e.printStackTrace();
-		}
-		return opt;
-	}
-	
-	public static List<Treatment> getAllData() {
-		List<Treatment> list = new ArrayList<>();
-		
-		String query = "SELECT * FROM beauty_centerdb.treatment";
-		Connection conn = Main.getConnection();
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			ResultSet rs = stat.executeQuery();
-			while(rs.next()) {
-				list.add(new Treatment(rs));
-			}
-		} catch(SQLException e) {
-			e.printStackTrace();
-		}
-		return list;
-	}
-	
-	public static List<Treatment> getAllData(String type) {
-		List<Treatment> list = new ArrayList<>();
-		
-		String query = "SELECT * FROM beauty_centerdb.treatment WHERE treatment.type LIKE ?";
-		Connection conn = Main.getConnection();
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			stat.setString(1, "%"+type.trim()+"%");
-			ResultSet rs = stat.executeQuery();
-			while(rs.next()) {
-				list.add(new Treatment(rs));
-			}
-		} catch(SQLException e) {
-			e.printStackTrace();
-		}
-		return list;
-	}
-	
-	public static List<Product> getAllProductsByTreatmentId(int treatmentId) {
-		List<Product> list = new ArrayList<>();
-		
-		String query = "SELECT * FROM beauty_centerdb.product "
-				+ "WHERE product.id IN ( "
-				+ "	SELECT product_id FROM beauty_centerdb.producttreatment "
-				+ "    WHERE treatment_id = ? "
-				+ ")";
-		Connection conn = Main.getConnection();
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			stat.setInt(1, treatmentId);
-			ResultSet rs = stat.executeQuery();
-			while(rs.next()) {
-				list.add(new Product(rs));
-			}
-		} catch(SQLException e) {
-			e.printStackTrace();
-		}
-		return list;
-	}
-	
-	public static int updateData(int id, Treatment treatment) {
-		String query = "UPDATE beauty_centerdb.treatment "
-				+ "SET type = ?, "
-				+ "price = ?,"
-				+ "vat_id = ?, "
-				+ "duration = ?,"
-				+ "is_enabled = ? "
-				+ "WHERE id = ?";
-		Connection conn = Main.getConnection();
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			Time time = Time.valueOf(LocalTime.ofSecondOfDay(treatment.getDuration().toSeconds()));
-			stat.setString(1, treatment.getType());
-			stat.setBigDecimal(2, treatment.getPrice());
-			stat.setInt(3, treatment.getVat().getId());
-			stat.setTime(4, time);
-			stat.setBoolean(5, treatment.isEnabled());
-			stat.setInt(6, id);
-			int exec = stat.executeUpdate();
-			if(exec != 1) {
-				throw new SQLException("Cannot update treatment with id " + id);
-			}
-			deleteAllProductsByTreatmentId(id);
-			insertData(id, treatment.getProducts());
-			conn.commit();
-			
-			return exec;
-		} catch(SQLException e) {
-			e.printStackTrace();
-			if(conn != null) {
-				try {
-					conn.rollback();
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
-			}
-			return -1;
-		}
-	}
-	
-	private static void deleteAllProductsByTreatmentId(int treatmentId) throws SQLException {
-		String query = "DELETE FROM beauty_centerdb.producttreatment "
-				+ "WHERE treatment_id = ?";
-		Connection conn = Main.getConnection();
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			stat.setInt(1, treatmentId);
-			stat.executeUpdate();
-		} catch(SQLException e) {
-			e.printStackTrace();
-			throw e;
-		}
-	}
-	
-	public static int toggleEnabledData(int id) {
-		String query = "UPDATE beauty_centerdb.treatment "
-				+ "SET is_enabled = ? "
-				+ "WHERE id = ?";
-		Connection conn = Main.getConnection();
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			Optional<Treatment> optTreatment = getData(id);
-			if (optTreatment.isEmpty()) {
-				throw new NoSuchElementException("Treatment with id " + id + " not found");
-			}
-			Treatment treatment = optTreatment.get();
-			stat.setBoolean(1, !treatment.isEnabled()); //toggle enable or disable state
-			stat.setInt(2, id); //WHERE id = ?
-			int exec = stat.executeUpdate();
-			if(exec != 1) {
-				throw new SQLException("Cannot update treatment with id " + id);
-			}
-			conn.commit();
-			return exec;
-			
-		} catch(SQLException | NoSuchElementException e) {
-			e.printStackTrace();
-			if(conn != null) {
-				try {
-					conn.rollback();
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
-			}
-			return -1;
-		}
-		
-	}
-	public void getProducts(List<Integer> productIds) {
-		products.clear();
-		for(int id:productIds) {
-//			Product p=ProductDao.getProduct(id);
-//			products.add(p);
-			System.out.println(id);
-		}
-		for(Product p:products) {
-			System.out.println(p);
-		}
-		msgLbl.setText("Prodotti selezionati correttamente");
-	}
 }

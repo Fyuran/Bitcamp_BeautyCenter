@@ -23,9 +23,9 @@ public class VATTest {
 		VAT vat = new VAT(22);
 		VAT vat2 = new VAT(15);
 		
-		VAT.insertData(vat);
-		VAT.insertData(vat2);
-		VAT.toggleEnabledData(vat2.getId());
+		vat = VATDao.insertVAT(vat).get();
+		vat2 = VATDao.insertVAT(vat2).get();
+		VATDao.toggleEnabledVAT(vat2);
 		
 		VAT vat_get = VAT.getData(vat.getId()).orElseThrow();
 		vat_get.setAmount(5);

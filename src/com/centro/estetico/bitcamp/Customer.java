@@ -1,64 +1,99 @@
 package com.centro.estetico.bitcamp;
-import java.time.LocalDate;
-import java.util.ArrayList;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import DAO.PrizeDAO;
+import DAO.SubscriptionDAO;
+import DAO.UserCredentialsDAO;
 
 public class Customer extends User {
-
-	
-
-	// LA TENIAMO PULITA
-	private String EU_TIN;// codice fiscale
-	private Subscription subscription;
-	private ArrayList<Prize> prize; // Premi
-	private String VAT;
+	private Subscription subscription; //can be null
+	private List<Prize> prizes; //can be null
+	private String P_IVA;
 	private String recipientCode;
-
-	public Customer(int id, String name, String surname, String birthplace, boolean isFemale, LocalDate BoD,
-			String notes, boolean isEnabled, Subscription subscription, ArrayList<Prize> prize, String VAT,
-			String recipientCode) {
-		super(-1, name, surname, birthplace, isFemale, BoD, notes, isEnabled);
-		// Il codice fiscale lo calcola in automatico
+	private int loyaltyPoints;
+	
+	//User(int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled)
+	//UserDetails(String name, String surname, boolean isFemale, LocalDate BoD, String birthplace, String notes)
+	private Customer(
+			int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled,
+			
+			String P_IVA, String recipientCode, int loyaltyPoints, Subscription subscription, List<Prize> prizes  
+		) {
+		super(id, details, userCredentials, isEnabled);
 		this.subscription = subscription;
-		this.prize = prize != null ? prize : new ArrayList<>();
-		this.VAT = VAT;
+		this.prizes = prizes;
+		this.P_IVA = P_IVA;
 		this.recipientCode = recipientCode;
-		this.EU_TIN = calculateEU_TIN(name, surname, birthplace, isFemale, BoD);
+		
+		this.loyaltyPoints = loyaltyPoints;
 	}
 
-	private static String calculateEU_TIN(String name, String surname, String birthplace, boolean isFemale,
-			LocalDate BoD) {
-		String EU_TIN = "";// Calcolo del codice fiscale
-		return EU_TIN;
-
+	public Customer(ResultSet rs) throws SQLException {
+		this(
+				rs.getInt(1),
+				new UserDetails(
+					rs.getString(2), rs.getString(3),
+					rs.getBoolean(4), rs.getDate(5).toLocalDate(), 
+					rs.getString(6), rs.getString(11)
+				),
+				UserCredentialsDAO.getUserCredentials(rs.getInt(8)).get(),
+				rs.getBoolean(13),
+				rs.getString(9),
+				rs.getString(10),
+				rs.getInt(12),
+				SubscriptionDAO.getSubscriptionOfCustomer(rs.getInt(1)).orElse(null),
+				PrizeDAO.getAllPrizesAssignedToCustomer(rs.getInt(1))
+			);
+	}
+	
+	public Customer(UserDetails details, UserCredentials userCredentials, String P_IVA, String recipientCode,
+			int loyaltyPoints, Subscription subscription, List<Prize> prizes) {
+		this(-1, details, userCredentials, true, P_IVA, recipientCode, loyaltyPoints, subscription, prizes);
+	}
+	
+	public Customer(int id, Customer obj) {
+		this(obj.getId(), obj.getDetails(), obj.getUserCredentials(), obj.isEnabled(), obj.P_IVA, obj.recipientCode, obj.loyaltyPoints,
+			obj.subscription, obj.prizes
+		);
 	}
 
 	//Getter e setter
-	public String getEuTin() {
-		return EU_TIN;
-	}
-
 	public Subscription getSubscription() {
 		return subscription;
 	}
-
+	
 	public void setSubscription(Subscription subscription) {
 		this.subscription = subscription;
 	}
 
-	public ArrayList<Prize> getPrize() {
-		return prize;
+	public List<Prize> getPrizes() {
+		return prizes;
 	}
 
-	public void setPrize(ArrayList<Prize> prize) {
-		this.prize = prize;
+	public void addPrizes(Prize...prizes) {
+		for(Prize prize : prizes) {
+			if(prize != null) {
+				this.prizes.add(prize);				
+			}
+		}
 	}
 
-	public String getVAT() {
-		return VAT;
+	public void removePrizes(Prize...prizes) {
+		for(Prize prize : prizes) {
+			if(prize != null) {
+				this.prizes.remove(prize);
+			}
+		}
+	}
+	
+	public String getP_IVA() {
+		return P_IVA;
 	}
 
-	public void setVAT(String VAT) {
-		this.VAT = VAT;
+	public void setP_IVA(String P_IVA) {
+		this.P_IVA = P_IVA;
 	}
 
 	public String getRecipientCode() {
@@ -69,15 +104,29 @@ public class Customer extends User {
 		this.recipientCode = recipientCode;
 	}
 
+	public int getLoyaltyPoints() {
+		return loyaltyPoints;
+	}
+
+	public void addLoyaltyPoints(int loyaltyPoints) {
+		this.loyaltyPoints += loyaltyPoints;
+	}
+
 	@Override
 	public String toString() {
-		return "Customer [EU_TIN=" + EU_TIN + ", subscription=" + subscription + ", prize=" + prize + ", VAT=" + VAT
-				+ ", recipientCode=" + recipientCode + ", getId()=" + getId() + ", getName()=" + getName()
-				+ ", getSurname()=" + getSurname() + ", getBirthplace()=" + getBirthplace() + ", getIsFemale()="
-				+ getIsFemale() + ", getBoD()=" + getBoD() + ", getNotes()=" + getNotes() + ", GetIsEnabled()="
-				+ GetIsEnabled() + ", toString()=" + super.toString() + ", getClass()=" + getClass() + ", hashCode()="
-				+ hashCode() + "]";
+		return "Customer [subscription=" + subscription + ", prizes=" + prizes + ", P_IVA=" + P_IVA + ", recipientCode="
+				+ recipientCode + ", loyaltyPoints=" + loyaltyPoints + ", " + super.toString() + "]";
+	}
+
+	public String getFullName() {
+		return getName() + " " + getSurname();
 	}
 	
+	//(String name, String surname, boolean isFemale, LocalDate BoD, String birthplace, String notes)
+	public Object[] toTableRow() {
+		return new Object[] {
+				getId(), getName(), getSurname(), getBoD(), getBirthplace(), P_IVA, recipientCode, loyaltyPoints, getNotes()
+		};
+	}
 	
 }

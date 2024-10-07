@@ -1,123 +1,156 @@
 package com.centro.estetico.bitcamp;
-import java.time.*;
 
-public abstract class User {
-	
+import java.time.LocalDate;
 
-	private int id;
-	//tutto molto bello ma non possiamo avere un attributo id che sia final,
-	//perché abbiamo bisogno di un costruttore che sia privo di id.
-	//l'oggetto user si crea senza id, poi si aggiunge al database, e quando si prende dal database, a quel 
-	//punto si mette l'id del database. Se non non ha senso. Se ho torto, chiunque sia a leggere qui,
-	//sei libero di correggere e venire a cazziarmi. Amo avere torto. -Daniele
-	private String name;
-	private String surname;
-	private String birthplace;
-	private boolean isFemale;
-	private LocalDate BoD;
-	private String notes;
+import it.kamaladafrica.codicefiscale.CodiceFiscale;
+
+public abstract class  User {
+	private final int id;
+	private UserDetails details;
+	private UserCredentials userCredentials;
 	private boolean isEnabled;
-
-	// Costruttore
-	 public User(int id, String name, String surname, String birthplace, boolean isFemale, LocalDate BoD, String notes, boolean isEnabled) {
-	        this.id = id;
-	        this.name = name;
-	        this.surname = surname;
-	        this.birthplace = birthplace;
-	        this.isFemale = isFemale; 
-	        this.BoD = BoD;
-	        this.notes = notes;
-	        this.isEnabled = isEnabled;
-	    }
-	// Costruttore senza id
-		 public User( String name, String surname, String birthplace, boolean isFemale, LocalDate BoD, String notes, boolean isEnabled) {
-		        this.name = name;
-		        this.surname = surname;
-		        this.birthplace = birthplace;
-		        this.isFemale = isFemale; 
-		        this.BoD = BoD;
-		        this.notes = notes;
-		        this.isEnabled = isEnabled;
-		    }
-	 
 	
+	protected User(int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled) {
+		this.id = id;
+		this.details = details;
+		this.userCredentials = userCredentials;
+		this.isEnabled = isEnabled;
+	}
 
-	//Getter
-	protected int getId() {
-	    return id;
+	public int getId() {
+		return id;
+	}
+
+	public UserDetails getDetails() {
+		return details;
+	}
+
+	public UserCredentials getUserCredentials() {
+		return userCredentials;
+	}
+
+	public boolean isEnabled() {
+		return isEnabled;
+	}
+	
+	public void setDetails(UserDetails details) {
+		this.details = details;
+	}
+
+	public void setUserCredentials(UserCredentials userCredentials) {
+		this.userCredentials = userCredentials;
+	}
+
+	public void setEnabled(boolean isEnabled) {
+		this.isEnabled = isEnabled;
 	}
 
 	public String getName() {
-	    return name;
+	    return details.getName();
 	}
 
 	public String getSurname() {
-	    return surname;
+	    return details.getSurname();
 	}
 
 	public String getBirthplace() {
-	    return birthplace;
+	    return details.getBirthplace();
 	}
 
-    public boolean getIsFemale() { 
-        return isFemale;
+    public boolean isFemale() { 
+        return details.isFemale();
     }
 
 	public LocalDate getBoD() {
-	    return BoD;
+	    return details.getBoD();
 	}
 
 	public String getNotes() {
-	    return notes;
+	    return details.getNotes();
 	}
 
-	public boolean GetIsEnabled() {
-	    return isEnabled;
+	public CodiceFiscale getEU_TIN() {
+		return details.getEU_TIN();
 	}
-
-	
 	
 	//Setter
-
-
 	public void setName(String name) {
-	    this.name = name;
+		details.setName(name);
 	}
 
 	public void setSurname(String surname) {
-	    this.surname = surname;
+		details.setSurname(surname);
 	}
 
 	public void setBirthplace(String birthplace) {
-	    this.birthplace = birthplace;
+	    details.setBirthplace(birthplace);
 	}
 
-	  public void setIsFemale(boolean isFemale) { 
-	        this.isFemale = isFemale;
-	    }
+	public void setIsFemale(boolean isFemale) { 
+        details.setIsFemale(isFemale);
+    }
 
 	public void setBoD(LocalDate BoD) {
-	    this.BoD = BoD;
+	    details.setBoD(BoD);
 	}
 
 	public void setNotes(String notes) {
-	    this.notes = notes;
-	}
-
-	public void setIsEnabled(boolean enabled) {
-	    isEnabled = enabled;
+	    details.setNotes(notes);
 	}
 	
+	public int getUserCredentialsId() {
+		return id;
+	}
+
+	public String getUsername() {
+		return userCredentials.getUsername();
+	}
+
+	public void setUsername(String username) {
+		userCredentials.setUsername(username);
+	}
+
+	public String getAddress() {
+		return userCredentials.getAddress();
+	}
+
+	public void setAddress(String address) {
+		userCredentials.setAddress(address);
+	}
+
+	public String getIban() {
+		return userCredentials.getIban();
+	}
+
+	public void setIban(String iban) {
+		userCredentials.setIban(iban);
+	}
+
+	public String getPhone() {
+		return userCredentials.getPhone();
+	}
+
+	public void setPhone(String phone) {
+		userCredentials.setPhone(phone);
+	}
+
+	public String getMail() {
+		return userCredentials.getMail();
+	}
+
+	public void setMail(String mail) {
+		userCredentials.setMail(mail);
+	}
 	
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", name=" + name + ", surname=" + 
-	surname + ", birthplace=" + birthplace
-				+ ", gender=" + isFemale + ", BoD=" + BoD + ", notes=" 
-	+ notes + ", isEnabled=" + isEnabled + "]";
+		return "User [id=" + id + ", details=" + details.toString() + ", userCredentials=" + userCredentials.toString() + ", isEnabled="
+				+ isEnabled + "]";
 	}
-
+	
+	public Object[] toTableRow() {
+		return new Object[] {
+				id, getName(), getSurname(), getBoD(), getBirthplace(), getNotes()
+		};
+	}
 }
-
-
-//Tasto destro->Source->Generate Getters e Setters ed anche il metodo ToString

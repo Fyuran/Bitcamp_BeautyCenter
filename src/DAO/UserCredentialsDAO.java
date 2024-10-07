@@ -6,24 +6,200 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import com.centro.estetico.bitcamp.Employee.Roles;
+import com.centro.estetico.bitcamp.Main;
+import com.centro.estetico.bitcamp.Roles;
+import com.centro.estetico.bitcamp.UserCredentials;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
-public class AccountDAO {
-    private Connection conn;
 
-    // Costruttore per connessione
-    public AccountDAO(Connection conn) {
-        if (conn == null) {
-            throw new IllegalArgumentException("La connessione al database non può essere null");
-        }
-        this.conn = conn;
-    }
+public abstract class UserCredentialsDAO {
+	private static Connection conn = Main.getConnection();
 
+	public static Optional<UserCredentials> insertUserCredentials(UserCredentials obj) {
+		String query = "INSERT INTO `beauty_centerdb`.`user_credentials`(`username`, `password`, `mail`, `iban`, `phone`, `is_enabled`)"
+				+ "VALUES(?, ?, ?, ?, ?, ?, ?);";
+		
+		try(PreparedStatement stat = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
+			//(String username, String password, String address, String iban, String phone, String mail)
+			stat.setString(1, obj.getUsername());
+			stat.setString(2, obj.getPassword());
+			stat.setString(3, obj.getAddress());
+			stat.setString(4, obj.getIban());
+			stat.setString(5, obj.getPhone());
+			stat.setString(6, obj.getMail());
+			
+			stat.executeUpdate();
+			conn.commit();
+			
+			ResultSet generatedKeys = stat.getGeneratedKeys();
+			if(generatedKeys.next()) {
+				int id = generatedKeys.getInt(1);
+				return Optional.ofNullable(new UserCredentials(id, obj));
+			} else {
+				throw new SQLException("Could not retrieve id");
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return Optional.empty();
+	}
+	
+	public static Optional<UserCredentials> getUserCredentials(int id) {
+		String query = "SELECT * FROM beauty_centerdb.user_credentials WHERE id = ?";
+		
+		Optional<UserCredentials> opt = Optional.empty();
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			stat.setInt(1, id);  //WHERE id = ?
+			
+			ResultSet rs = stat.executeQuery();
+			conn.commit();
+			if(rs.next()) {
+				opt = Optional.ofNullable(new UserCredentials(rs));				
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return opt;
+	}
+
+	public static List<UserCredentials> getAllUserCredentials() {
+		List<UserCredentials> list = new ArrayList<>();
+		
+		String query = "SELECT * FROM beauty_centerdb.user_credentials";
+		
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			ResultSet rs = stat.executeQuery();
+			conn.commit();
+			while(rs.next()) {
+				list.add(new UserCredentials(rs));
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return list;
+	}
+	
+	public static int updateUserCredentials(int id, UserCredentials obj) {
+		String query = "UPDATE `beauty_centerdb`.`user_credentials` SET `username` = ?, "
+				+ "`password` = ?, `mail` = ?, `iban` = ?, `phone` = ?, `is_enabled` = ? "
+				+ "WHERE `id` = ?;";
+		
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			
+			stat.setString(1, obj.getUsername());
+			stat.setString(2, obj.getPassword());
+			stat.setString(3, obj.getAddress());
+			stat.setString(4, obj.getIban());
+			stat.setString(5, obj.getPhone());
+			stat.setString(6, obj.getMail());
+			
+			stat.setInt(7, id);  //WHERE id = ?
+			
+			int exec = stat.executeUpdate();
+			conn.commit();
+			
+			return exec;
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return -1;
+	}
+
+	public static int toggleUserCredentials(UserCredentials obj) {
+		String query = "UPDATE beauty_centerdb.user_credentials "
+				+ "SET is_enabled = ? "
+				+ "WHERE id = ?";
+		
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			boolean toggle = !obj.isEnabled(); //toggle enable or disable state
+			obj.setEnabled(toggle);
+			stat.setBoolean(1, toggle); 
+			stat.setInt(2, obj.getId()); //WHERE id = ?
+			int exec = stat.executeUpdate();
+			
+			conn.commit();
+			
+			return exec;
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return -1;
+	}
+	
+	
+	public static int deleteUserCredentials(int id) {
+		String query = "DELETE FROM beauty_centerdb.user_credentials WHERE id = ?";
+		
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			stat.setInt(1, id); //WHERE id = ?
+			
+			int exec = stat.executeUpdate();
+			conn.commit();
+			
+			return exec;
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return -1;
+	}
+	
+	public static List<Object[]> toTableRowAll() {
+		List<UserCredentials> list = getAllUserCredentials();
+		List<Object[]> data = new ArrayList<>(list.size());
+		for(int i = 0; i < list.size(); i++) {
+			data.add(list.get(i).toTableRow());
+		}
+		
+		return data;
+	}
+	
     // Metodo per creare un nuovo account con i dati divisi nelle due tabelle
-    public boolean createAccount(String username, String password, Roles role) throws SQLException {
+    public static boolean createAccount(String username, String password, Roles role) throws SQLException {
         String createAccountQuery = "INSERT INTO user_credentials (username, password, is_enabled) VALUES (?, ?, ?)";
         String createEmployeeQuery = "INSERT INTO employee (credentials_id, role, name, surname, is_enabled) VALUES (?, ?, ?, ?, ?)";
         boolean success = false;
@@ -78,7 +254,7 @@ public class AccountDAO {
     }
 
  // Metodo per aggiornare un account esistente
-    public boolean updateAccount(int accountId, String username, String password, Roles role) throws SQLException {
+    public static boolean updateAccount(int accountId, String username, String password, Roles role) throws SQLException {
         String updateAccountQuery = "UPDATE user_credentials SET username = ?, password = ? WHERE id = ?";
         String updateEmployeeQuery = "UPDATE employee SET role = ? WHERE credentials_id = ?";
 
@@ -110,7 +286,7 @@ public class AccountDAO {
 
     
  // Metodo per disabilitare un account
-    public boolean disableAccount(int accountId) throws SQLException {
+    public static boolean disableAccount(int accountId) throws SQLException {
         String disableUserQuery = "UPDATE user_credentials SET is_enabled = 0 WHERE id = ?";
         String disableEmployeeQuery = "UPDATE employee SET is_enabled = 0 WHERE credentials_id = ?";
 
@@ -142,7 +318,7 @@ public class AccountDAO {
 
 
  // Metodo per cercare tutti gli account attivi
-    public List<Object[]> searchActiveAccounts() throws SQLException {
+    public static List<Object[]> searchActiveAccounts() throws SQLException {
         List<Object[]> accountData = new ArrayList<>();
         String query = "SELECT user_credentials.id, username, role " +
                        "FROM user_credentials " +
@@ -164,7 +340,7 @@ public class AccountDAO {
     }
     
  // Metodo per cercare account attivi in base all'username o al ruolo
-    public List<Object[]> searchAccounts(String searchText) throws SQLException {
+    public static List<Object[]> searchAccounts(String searchText) throws SQLException {
         List<Object[]> accountData = new ArrayList<>();
         String query = "SELECT user_credentials.id, username, role FROM user_credentials " +
                        "JOIN employee ON user_credentials.id = employee.credentials_id " +
@@ -189,7 +365,7 @@ public class AccountDAO {
     }
 
     // Metodo per verificare la password
-    public boolean verifyPassword(String username, String password) throws SQLException {
+    public static boolean verifyPassword(String username, String password) throws SQLException {
         String query = "SELECT password FROM user_credentials WHERE username = ? AND is_enabled = 1";
         
         try (PreparedStatement preparedStatement = conn.prepareStatement(query)) {

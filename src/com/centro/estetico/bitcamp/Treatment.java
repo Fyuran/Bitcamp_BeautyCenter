@@ -1,8 +1,6 @@
 package com.centro.estetico.bitcamp;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
@@ -10,7 +8,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import template.TreatmentPanel;
+import DAO.TreatmentDAO;
+import DAO.VATDao;
 
 public class Treatment {
 	private int id;
@@ -20,39 +19,39 @@ public class Treatment {
 	private Duration duration;
 	private List<Product> products;
 	private boolean isEnabled;
-	
-	public Treatment() {
-		this.duration = Duration.ofMinutes(30);
-	}
 
 	public Treatment(ResultSet rs) throws SQLException {
 		this(
 			rs.getInt(1), 
 			rs.getString(2), 
 			rs.getBigDecimal(3),
-			rs.getInt(4), 
-			Duration.ofMillis(rs.getTime(5).getTime()), 
+			VATDao.getVAT(rs.getInt(4)).get(), 
+			Duration.ofMillis(rs.getTime(5).getTime()),
+			TreatmentDAO.getProductsOfTreatment(rs.getInt(1)),
 			rs.getBoolean(6)
 		);		
 	}
 	
-	private Treatment(int id, String type, BigDecimal price, int vatId, Duration duration, boolean isEnabled) {
-		super();
+	private Treatment(int id, String type, BigDecimal price, VAT vat, Duration duration, List<Product> products, boolean isEnabled) {
 		this.id = id;
 		this.type = type;
 		this.price = price;
-		this.vat = Main.getBeautyCenter().getInfoVat().stream().filter(vat -> vat.getId() == vatId).findFirst().orElseThrow();
+		this.vat = vat;
 		this.duration = duration;
-		this.products = TreatmentPanel.getAllProductsByTreatmentId(id);
+		this.products = products;
 		this.isEnabled = isEnabled;
 	}
-
+	
+	public Treatment(String type, BigDecimal price, VAT vat, Duration duration, List<Product> products, boolean isEnabled) {
+		this(-1, type, price, vat, duration, products, isEnabled);
+	}
+	
+	public Treatment(int id, Treatment obj) {
+		this(id, obj.type, obj.price, obj.vat, obj.duration, obj.products, obj.isEnabled);
+	}
+	
 	public int getId() {
 		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
 	}
 
 	public String getType() {
@@ -91,10 +90,6 @@ public class Treatment {
 		return products;
 	}
 
-	public void setProducts(List<Product> products) {
-		this.products = products;
-	}
-
 	public boolean isEnabled() {
 		return isEnabled;
 	}
@@ -127,7 +122,26 @@ public class Treatment {
 		return timeSlots;
 	}
 
-	
-	
+	public Object[] toTableRow() {
+		return new Object[] {
+				id, type, price, vat, duration, products, isEnabled
+		};
+	}
+
+	public void addProducts(Product...products) {
+		for(Product product : products) {
+			if(products != null) {
+				this.products.add(product);				
+			}
+		}
+	}
+
+	public void removeProducts(Product...products) {
+		for(Product product : products) {
+			if(products != null) {
+				this.products.remove(product);
+			}
+		}
+	}
 	
 }

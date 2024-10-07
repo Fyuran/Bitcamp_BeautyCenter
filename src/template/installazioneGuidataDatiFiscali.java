@@ -1,34 +1,36 @@
 package template;
 
-import java.awt.EventQueue;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import java.awt.Font;
-import javax.swing.JTextField;
 import java.awt.Color;
-import javax.swing.border.LineBorder;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ImageIcon;
-import javax.swing.UIManager;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.awt.event.ActionEvent;
 
-import template.creaAccount;
-import utils.inputValidator;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.table.DefaultTableModel;
+
 import com.centro.estetico.bitcamp.BeautyCenter;
 import com.centro.estetico.bitcamp.Main;
 import com.centro.estetico.bitcamp.VAT;
+
+import DAO.BeautyCenterDAO;
+import DAO.VATDao;
+import utils.inputValidator;
 import utils.placeholderHelper;
 
 public class installazioneGuidataDatiFiscali extends JFrame {
@@ -170,7 +172,7 @@ public class installazioneGuidataDatiFiscali extends JFrame {
                     return;
                 }
 
-                List<BeautyCenter> beautyCenters = BeautyCenter.getAllData();
+                List<BeautyCenter> beautyCenters = BeautyCenterDAO.getAllBeautyCenters();
 
                 // Filtra i dati in base alla ricerca per nome o partita IVA
                 for (BeautyCenter bc : beautyCenters) {
@@ -258,7 +260,7 @@ public class installazioneGuidataDatiFiscali extends JFrame {
             if (selectedRow >= 0) {
                 try {
                     int id = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
-                    int result = BeautyCenter.toggleEnabledData(id);
+                    int result = BeautyCenterDAO.toggleEnabledBeautyCenter(id);
                     if (result != -1) {
                         tableModel.removeRow(selectedRow);
                         selectedRow = -1;
@@ -286,7 +288,7 @@ public class installazioneGuidataDatiFiscali extends JFrame {
         // Listener per il pulsante "Hystorical"
         btnHystorical.addActionListener(e -> {
             tableModel.setRowCount(0); 
-            List<BeautyCenter> beautyCenters = BeautyCenter.getAllData();
+            List<BeautyCenter> beautyCenters = BeautyCenterDAO.getAllBeautyCenters();
 
             for (BeautyCenter bc : beautyCenters) {
                 try {
@@ -489,8 +491,8 @@ public class installazioneGuidataDatiFiscali extends JFrame {
 
                 // Crea un nuovo oggetto VAT e inserisci nel database
                 VAT selectedVat = new VAT(selectedVatRate);
-                int vatId = VAT.insertData(selectedVat);
-                if (vatId == -1) {
+                VAT vat = VATDao.insertVAT(selectedVat).orElse(null);
+                if (vat == null) {
                     JOptionPane.showMessageDialog(null, "Errore durante l'inserimento del VAT.");
                     return;
                 }
@@ -502,8 +504,8 @@ public class installazioneGuidataDatiFiscali extends JFrame {
                 vatList.add(selectedVat);
                 beautyCenter.setInfoVat(vatList);
 
-                int result = BeautyCenter.insertData(beautyCenter);
-                if (result != -1) {
+                BeautyCenter result = BeautyCenterDAO.insertBeautyCenter(beautyCenter).orElse(null);
+                if (result != null) {
                     Object[] rowData = { beautyCenter.getId(), name, phone, certifiedMail, email, registeredOffice,
                             operatingOffice, rea, pIva, openingHour.toString(), closingHour.toString(), selectedVatRate };
                     tableModel.addRow(rowData);
@@ -559,7 +561,7 @@ public class installazioneGuidataDatiFiscali extends JFrame {
                 // Imposta una lista VAT vuota per evitare problemi 
                 updatedBeautyCenter.setInfoVat(new ArrayList<>());
 
-                int result = BeautyCenter.updateData(id, updatedBeautyCenter);
+                int result = BeautyCenterDAO.updateBeautyCenter(id, updatedBeautyCenter);
                 if (result != -1) {
                     Object[] rowData = { id, name, phone, certifiedMail, email, registeredOffice, operatingOffice,
                             rea, pIva, openingHour.toString(), closingHour.toString() };

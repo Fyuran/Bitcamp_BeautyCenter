@@ -14,6 +14,8 @@ public enum PayMethod {
 		switch(s.toLowerCase()) {
 			case "currency": return PayMethod.CURRENCY;
 			case "card": return PayMethod.CARD;
+			case "moneta": return PayMethod.CURRENCY;
+			case "carta": return PayMethod.CARD;
 			default: return null;
 		}
 		
