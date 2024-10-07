@@ -123,8 +123,8 @@ public class UserCredentials {
 
 	@Override
 	public String toString() {
-		return "UserCredentials [username=" + username + ", password=" + password + ", address=" + address + ", iban="
-				+ iban + ", phone=" + phone + ", mail=" + mail + "]";
+		return "UserCredentials [id=" + id + ", username=" + username + ", password=" + password + ", address="
+				+ address + ", iban=" + iban + ", phone=" + phone + ", mail=" + mail + ", isEnabled=" + isEnabled + "]";
 	}
 
 	public void setEnabled(boolean isEnabled) {

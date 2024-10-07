@@ -142,7 +142,7 @@ public class Transaction {
 	public Object[] toTableRow() {
 		DateTimeFormatter dtf = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
 		return new Object[] {
-				id, price, dateTime.format(dtf), paymentMethod.toString(), vat.toString(), customer.getFullName(), services	
+				id, price, dateTime.format(dtf), paymentMethod, vat, customer, services, isEnabled
 		};
 	}
 	

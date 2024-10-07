@@ -94,7 +94,7 @@ public class TransactionPanel extends JPanel {
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 				int row, int column) {
 
-			boolean isEnabled = (boolean) table.getValueAt(row, 7);
+			boolean isEnabled = (boolean) model.getValueAt(row, 7);
 
 			if (!isEnabled) {// if isEnabled
 				setBackground(Color.LIGHT_GRAY);
@@ -127,7 +127,7 @@ public class TransactionPanel extends JPanel {
 		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
 				boolean cellHasFocus) {
 			Customer customer = (Customer) value;
-			setText(customer.getFullName() + " " + customer.getEU_TIN());
+			setText(customer.getFullName() + " " + customer.getEU_TIN().getValue());
 
 			if (isSelected) {
 				setBackground(list.getSelectionBackground());
@@ -218,20 +218,20 @@ public class TransactionPanel extends JPanel {
 					return;
 				int row = table.getSelectedRow();
 				lbOutput.setText("");
-				BigDecimal price = (BigDecimal) table.getValueAt(row, 1); // price
+				BigDecimal price = (BigDecimal) model.getValueAt(row, 1); // price
 				priceTextField.setText(price.toString());
 
 				DateTimeFormatter dtf = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
-				LocalDateTime dateTime = LocalDateTime.parse((String) table.getValueAt(row, 2), dtf);
+				LocalDateTime dateTime = LocalDateTime.parse((String) model.getValueAt(row, 2), dtf);
 				dateTimePicker.setDateTimePermissive(dateTime);
 
-				PayMethod payMethod = (PayMethod) table.getValueAt(row, 3);
+				PayMethod payMethod = (PayMethod) model.getValueAt(row, 3);
 				choicePaymentMethod.select(payMethod.ordinal());
 
-				VAT vat = (VAT) table.getValueAt(row, 4);
+				VAT vat = (VAT) model.getValueAt(row, 4);
 				choiceVAT.select(vat.toString());
 
-				Customer customer = (Customer) table.getValueAt(row, 5);
+				Customer customer = (Customer) model.getValueAt(row, 5);
 				for (Object obj : customerListModel.toArray()) {
 					if (obj instanceof Customer c) {
 						if (c.getFullName().equals(customer.getFullName())) {
@@ -240,7 +240,7 @@ public class TransactionPanel extends JPanel {
 					}
 				}
 
-				String services = (String) table.getValueAt(row, 6);
+				String services = (String) model.getValueAt(row, 6);
 				servicesTextArea.setText(services);
 
 			}
@@ -256,7 +256,7 @@ public class TransactionPanel extends JPanel {
 		btnSearch.setContentAreaFilled(false);
 		btnSearch.setBorderPainted(false);
 		btnSearch.setIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/searchIcon.png")));
-		btnSearch.setBounds(206, 8, 40, 30);
+		btnSearch.setBounds(206, 8, 40, 40);
 		menuPanel.add(btnSearch);
 		btnSearch.setRolloverEnabled(true);
 		btnSearch.setRolloverIcon(
@@ -274,7 +274,7 @@ public class TransactionPanel extends JPanel {
 		btnFilter.setContentAreaFilled(false);
 		btnFilter.setBorderPainted(false);
 		btnFilter.setIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/filterIcon.png")));
-		btnFilter.setBounds(256, 8, 40, 30);
+		btnFilter.setBounds(256, 8, 40, 40);
 		menuPanel.add(btnFilter);
 		btnFilter.setRolloverEnabled(true);
 		btnFilter.setRolloverIcon(
@@ -285,7 +285,7 @@ public class TransactionPanel extends JPanel {
 		btnInsert.setContentAreaFilled(false);
 		btnInsert.setBorderPainted(false);
 		btnInsert.setIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/Insert.png")));
-		btnInsert.setBounds(792, 8, 40, 30);
+		btnInsert.setBounds(792, 8, 40, 40);
 		menuPanel.add(btnInsert);
 		btnInsert.setRolloverEnabled(true);
 		btnInsert.setRolloverIcon(
@@ -296,7 +296,7 @@ public class TransactionPanel extends JPanel {
 		btnUpdate.setContentAreaFilled(false);
 		btnUpdate.setBorderPainted(false);
 		btnUpdate.setIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/Update.png")));
-		btnUpdate.setBounds(842, 8, 40, 30);
+		btnUpdate.setBounds(842, 8, 40, 40);
 		menuPanel.add(btnUpdate);
 		btnUpdate.setRolloverEnabled(true);
 		btnUpdate.setRolloverIcon(
@@ -307,7 +307,7 @@ public class TransactionPanel extends JPanel {
 		btnDisable.setContentAreaFilled(false);
 		btnDisable.setBorderPainted(false);
 		btnDisable.setIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/disable.png")));
-		btnDisable.setBounds(892, 8, 40, 30);
+		btnDisable.setBounds(892, 8, 40, 40);
 		menuPanel.add(btnDisable);
 		btnDisable.setRolloverEnabled(true);
 		btnDisable.setRolloverIcon(
@@ -323,23 +323,23 @@ public class TransactionPanel extends JPanel {
 		btnRefresh.setOpaque(false);
 		btnRefresh.setContentAreaFilled(false);
 		btnRefresh.setBorderPainted(false);
-		btnRefresh.setBounds(942, 8, 40, 30);
+		btnRefresh.setBounds(942, 8, 40, 40);
 		menuPanel.add(btnRefresh);
 		btnRefresh.setRolloverEnabled(true);
-		btnRefresh.setRolloverIcon(
-				new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/Refresh_rollOver.png"))); // #646464
+		btnRefresh.setRolloverIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/Refresh_rollOver.png"))); // #646464
 
 		JButton btnDelete = new JButton("");
-		if (false) // TODO Implement login status
+		if (false) // TODO: Implement login status
 			btnDelete.setVisible(false);
-		btnDelete.setIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/deleteRecord.png")));
-		btnDelete.setRolloverEnabled(true);
+		btnDelete.setIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/delete.png")));
 		btnDelete.setOpaque(false);
 		btnDelete.setContentAreaFilled(false);
 		btnDelete.setBorderPainted(false);
-		btnDelete.setBounds(742, 8, 40, 30);
+		btnDelete.setBounds(742, 8, 40, 40);
 		menuPanel.add(btnDelete);
-
+		btnDelete.setRolloverEnabled(true);
+		btnDelete.setRolloverIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/delete_rollOver.png")));
+		
 		lbOutput = new JLabel("");
 		lbOutput.setForeground(new Color(0, 153, 51));
 		lbOutput.setFont(new Font("Tahoma", Font.BOLD, 16));
@@ -374,7 +374,7 @@ public class TransactionPanel extends JPanel {
 				int row = table.getSelectedRow();
 				if (row == -1)
 					throw new IllegalArgumentException("no row selected");
-				final int id = (int) table.getValueAt(row, 0);
+				final int id = (int) model.getValueAt(row, 0);
 				BigDecimal price = BigDecimal.valueOf(Double.parseDouble(priceTextField.getText()));
 				LocalDateTime dateTime = dateTimePicker.getDateTimePermissive();
 				PayMethod paymentMethod = PayMethod.toEnum(choicePaymentMethod.getSelectedItem());
@@ -398,12 +398,13 @@ public class TransactionPanel extends JPanel {
 				if (row == -1)
 					throw new IllegalArgumentException("no row selected");
 				int col = 7;
-				boolean currentFlag = (boolean) table.getValueAt(row, col);
+				boolean currentFlag = (boolean) model.getValueAt(row, col);
 				table.setValueAt(!currentFlag, row, col);
 				table.repaint();
 				Transaction trans = transactions.get(row);
 				trans.setEnabled(!currentFlag);
 				TransactionDAO.updateTransaction(trans.getId(), trans);
+				lbOutput.setText("Transazione disabilitata");
 			} catch (Exception ex) {
 				JOptionPane.showMessageDialog(new JFrame(), "Errori dati da disabilitare", "Errore di disabilitazione",
 						JOptionPane.ERROR_MESSAGE);
@@ -415,8 +416,9 @@ public class TransactionPanel extends JPanel {
 				int row = table.getSelectedRow();
 				if (row == -1)
 					throw new IllegalArgumentException("no row selected");
-				final int id = (int) table.getValueAt(row, 0);
+				final int id = (int) model.getValueAt(row, 0);
 				TransactionDAO.deleteTransaction(id);
+				lbOutput.setText("Transazione cancellata");
 				fillRows();
 			} catch (Exception ex) {
 				JOptionPane.showMessageDialog(new JFrame(), "Impossibile cancellare", "Errore di database",

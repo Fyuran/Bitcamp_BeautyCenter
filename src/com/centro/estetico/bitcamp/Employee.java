@@ -111,13 +111,12 @@ public class Employee extends User {
     public List<Shift> getShifts() {
         return turns;
     }
-	
+
 	@Override
 	public String toString() {
-		return "Employee [employeeSerial=" + employeeSerial + ", turns=" + turns + ", hiredDate=" + hiredDate
-				+ ", role=" + role + ", terminationDate=" + terminationDate + "]";
+		return "Employee [employeeSerial=" + employeeSerial + ", role=" + role + ", turns=" + turns + ", hiredDate="
+				+ hiredDate + ", terminationDate=" + terminationDate + ", toString()=" + super.toString() + "]";
 	}
-
 	public Object[] toTableRow() {
 		return new Object[] {
 				getId(), getName(), getSurname(), getBoD(), getBirthplace(), employeeSerial, role, turns, hiredDate, terminationDate, getNotes()

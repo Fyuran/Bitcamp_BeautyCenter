@@ -7,7 +7,7 @@ import com.centro.estetico.bitcamp.Main;
 
 import template.TransactionPanel;
 
-public class gestioneTransazioniTest {
+public class TransactionPanelTest {
 
 	public static void main(String[] args) {
 		

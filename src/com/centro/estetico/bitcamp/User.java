@@ -144,8 +144,8 @@ public abstract class  User {
 	
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", isEnabled=" + isEnabled + ", details=" + details + ", userCredentials="
-				+ userCredentials + "]";
+		return "User [id=" + id + ", details=" + details.toString() + ", userCredentials=" + userCredentials.toString() + ", isEnabled="
+				+ isEnabled + "]";
 	}
 	
 	public Object[] toTableRow() {
