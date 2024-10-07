@@ -478,13 +478,12 @@ public class EmployeePanel extends JPanel {
 		UserDetails det=new UserDetails(name, surname, isFemale, BoD,birthplace,notes);
 		UserCredentials cred=new UserCredentials(username, password,address, iban, phone, mail);
 		Employee employee=new Employee(det,cred,employeeSerial,role,null,LocalDate.now(),null);
+		EmployeeDAO.insertEmployee(employee);
+		
 		
 		//UserDetails details, UserCredentials userCredentials,
         //long employeeSerial, Roles role, List<Shift> turns, LocalDate hiredDate, LocalDate terminationDate)
 		
-		
-
-		EmployeeDAO.insertEmployee(employee);
 		msgLbl.setText("Nuovo utente creato correttamente");
 		populateTable();
 		
@@ -495,6 +494,7 @@ public class EmployeePanel extends JPanel {
 		if(isDataValid()) {
 			DateTimeFormatter format=DateTimeFormatter.ofPattern("dd-MM-yyyy");
 			if(!isDataValid())return;
+			int id=selectedId;
 			String name=txtName.getText();
 			String surname=txtSurname.getText();
 			String birthplace=txtBirthplace.getText();
@@ -502,26 +502,29 @@ public class EmployeePanel extends JPanel {
 			LocalDate BoD=LocalDate.parse(txtBirthday.getText(), format);	
 			String notes=txtNotes.getText();
 			//isEnabled
-			//selectedSerial
+			long employeeSerial=selectedSerial;
 			//shifts
 			//hiredDate
-			Roles role=Roles.fromString(roleComboBox.getSelectedItem().toString());
+			Roles role=Roles.toEnum(roleComboBox.getSelectedItem().toString());
 			//terminationDate
 			String username=txtUsername.getText();
+			String password=txtPassword.getText();
 			String address=txtAddress.getText();
 			String iban=txtIban.getText();
 			String phone=txtPhone.getText();
 			String mail=txtMail.getText();
-			Employee employee=new Employee(selectedId,name,surname,birthplace,isFemale,BoD,notes,true,selectedSerial,null,LocalDate.now(),
-				role,null,username,address,iban,phone,mail);
-			EmployeeDao.updateEmployee(id, employee);
+
+			UserDetails det=new UserDetails(name, surname, isFemale, BoD,birthplace,notes);
+			UserCredentials cred=new UserCredentials(username, password,address, iban, phone, mail);
+			Employee employee=new Employee(det,cred,employeeSerial,role,null,LocalDate.now(),null);
+			EmployeeDAO.updateEmployee(id, employee);
 			msgLbl.setText(name+" "+surname+" modificato correttamente");
 		}
 	}
 	
 	public void deleteEmployee() {
 		msgLbl.setText("");
-		EmployeeDao.toggleEnabledData(selectedId);
+		EmployeeDAO.toggleEnabledEmployee(selectedId);
 		msgLbl.setText("Utente rimosso correttamente");
 		populateTable();
 	}
@@ -581,8 +584,6 @@ public class EmployeePanel extends JPanel {
 		return true;
 	}
 
-=======
->>>>>>> 9247530cbe5b56c59c0f7db81cea8f7b49801a80
 	public JTextField getTxtSurname() {
 		return txtSurname;
 	}

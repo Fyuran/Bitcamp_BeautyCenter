@@ -177,6 +177,33 @@ public abstract class EmployeeDAO {
 		return -1;
 	}
 	
+	public static int toggleEnabledEmployee(int id) {
+		String query = "UPDATE beauty_centerdb.employee "
+				+ "SET is_enabled = ? "
+				+ "WHERE id = ?";
+		
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			
+			stat.setBoolean(1, false); 
+			stat.setInt(2, id); //WHERE id = ?
+			int exec = stat.executeUpdate();
+			
+			conn.commit();
+			
+			return exec;
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return -1;
+	}
+	
 	
 	public static int deleteEmployee(int id) {
 		String query = "DELETE FROM beauty_centerdb.employee WHERE id = ?";
