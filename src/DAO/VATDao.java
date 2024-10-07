@@ -177,6 +177,9 @@ public abstract class VATDao {
 		}
 		return -1;
 	}
+	public static int toggleEnabledVAT(int id) {
+		return toggleEnabledVAT(getVAT(id).get());
+	}
 	
 	public static int deleteVAT(int id) {
 		String query = "DELETE FROM beauty_centerdb.vat WHERE id = ?";
@@ -201,7 +204,21 @@ public abstract class VATDao {
 		return -1;
 	}
 	
-	
+	public static boolean existByAmount(double amount) {
+		String query = "SELECT COUNT(*) FROM beauty_centerdb.vat WHERE ABS(vat.amount - ?) < 0.000001";
+		Connection conn = Main.getConnection();
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			stat.setDouble(1, amount);
+			ResultSet rs = stat.executeQuery();
+			if(rs.next()) {
+				return rs.getInt(1) == 0 ? false : true;
+			}
+			return true;
+		}catch(SQLException e) {
+			e.printStackTrace();
+			return true;
+		}
+	}
 	
 	public static List<Object[]> toTableRowAll() {
 		List<VAT> list = getAllVAT();
