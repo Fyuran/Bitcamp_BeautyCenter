@@ -3,7 +3,6 @@ package com.centro.estetico.bitcamp;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +29,6 @@ public class Employee extends User {
 		this.terminationDate = terminationDate;
 		
 	}
-	//costruttore senza password
 	public Employee(
 			UserDetails details, UserCredentials userCredentials,
             long employeeSerial, Roles role, List<Shift> turns, LocalDate hiredDate, LocalDate terminationDate) {

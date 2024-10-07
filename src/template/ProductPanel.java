@@ -15,8 +15,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import com.centro.estetico.bitcamp.Product;
@@ -30,7 +28,7 @@ import utils.inputValidator;
 public class ProductPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private JTextField txtSearchBar;
+	private JTextField txfSearchBar;
 	private JTextField txtName;
 	private JTextField txtMinStock;
 
@@ -41,7 +39,6 @@ public class ProductPanel extends JPanel {
 	private JLabel msgLbl;
 	private JComboBox<String> ivaComboBox;
 	private JComboBox<String> categoryComboBox;
-	private int selectedId;
 
 	/**
 	 * Create the panel.
@@ -68,35 +65,7 @@ public class ProductPanel extends JPanel {
 
 		// Creazione della tabella
 		JTable table = new JTable(tableModel);
-		//Listener della tabella per pescare i nomi che servono
-		 table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-	            @Override
-	            public void valueChanged(ListSelectionEvent event) {
-	                if (!event.getValueIsAdjusting()) {
-	                    int selectedRow = table.getSelectedRow();
-	                    if (selectedRow != -1) {
-	                    	selectedId=Integer.parseInt(String.valueOf(table.getValueAt(selectedRow, 0)));	
-	                    	String name=String.valueOf(table.getValueAt(selectedRow, 1)); 
-	                       String category=String.valueOf(String.valueOf(table.getValueAt(selectedRow, 2)));
-	                       //int amount=(int)table.getValueAt(selectedRow, 2);
-	                       String minStock=String.valueOf(table.getValueAt(selectedRow, 4));
-	                       String price=String.valueOf(table.getValueAt(selectedRow, 5));
-	                       String vatString=String.valueOf(table.getValueAt(selectedRow, 6)+"%");
-	                       System.out.println(vatString);
-	                       //double vat=Double.parseDouble(vatString.substring(0,vatString.length()-1));
-	                       
-	                       //Il listener ascolta la riga selezionata e la usa per popolare i campi
-	                       txtName.setText(name);
-	                       categoryComboBox.setSelectedItem(category);
-	                       txtMinStock.setText(minStock);
-	                       txtPrice.setText(price);
-	                       ivaComboBox.setSelectedItem(vatString);
-	                       table.clearSelection();
-
-	                    }
-	                }
-	            }
-	        });
+		table.setEnabled(false);
 
 		// Aggiungere la tabella all'interno di uno JScrollPane per lo scroll
 		JScrollPane scrollPane = new JScrollPane(table);
@@ -111,11 +80,11 @@ public class ProductPanel extends JPanel {
 		btnSearch.setBounds(206, 8, 40, 30);
 		containerPanel.add(btnSearch);
 
-		txtSearchBar = new JTextField();
-		txtSearchBar.setColumns(10);
-		txtSearchBar.setBackground(UIManager.getColor("CheckBox.background"));
-		txtSearchBar.setBounds(23, 14, 168, 24);
-		containerPanel.add(txtSearchBar);
+		txfSearchBar = new JTextField();
+		txfSearchBar.setColumns(10);
+		txfSearchBar.setBackground(UIManager.getColor("CheckBox.background"));
+		txfSearchBar.setBounds(23, 14, 168, 24);
+		containerPanel.add(txfSearchBar);
 
 		JButton btnFilter = new JButton("");
 		btnFilter.setOpaque(false);
@@ -123,7 +92,6 @@ public class ProductPanel extends JPanel {
 		btnFilter.setBorderPainted(false);
 		btnFilter.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/filterIcon.png")));
 		btnFilter.setBounds(256, 8, 40, 30);
-		btnFilter.addActionListener(e->populateTableByFilter());
 		containerPanel.add(btnFilter);
 
 		JButton btnInsert = new JButton("");
@@ -141,7 +109,6 @@ public class ProductPanel extends JPanel {
 		btnUpdate.setBorderPainted(false);
 		btnUpdate.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/Update.png")));
 		btnUpdate.setBounds(770, 8, 40, 30);
-		btnUpdate.addActionListener(e-> updateProduct());
 		containerPanel.add(btnUpdate);
 
 		JButton btnDelete = new JButton("");
@@ -150,7 +117,6 @@ public class ProductPanel extends JPanel {
 		btnDelete.setBorderPainted(false);
 		btnDelete.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/delete.png")));
 		btnDelete.setBounds(820, 8, 40, 30);
-		btnDelete.addActionListener(e->deleteProduct());
 		containerPanel.add(btnDelete);
 
 		JButton btnDisable = new JButton("");
@@ -159,7 +125,6 @@ public class ProductPanel extends JPanel {
 		btnDisable.setBorderPainted(false);
 		btnDisable.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/disable.png")));
 		btnDisable.setBounds(920, 8, 40, 30);
-		btnDisable.addActionListener(e->deleteProduct());
 		containerPanel.add(btnDisable);
 
 		JPanel outputPanel = new JPanel();
@@ -173,7 +138,6 @@ public class ProductPanel extends JPanel {
 		btnHystorical.setBorderPainted(false);
 		btnHystorical.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/cartellina.png")));
 		btnHystorical.setBounds(870, 8, 40, 30);
-		btnHystorical.addActionListener(e->populateTable());
 		containerPanel.add(btnHystorical);
 
 		// label e textfield degli input
@@ -290,23 +254,6 @@ public class ProductPanel extends JPanel {
 			msgLbl.setText("Prodotto già esistente nel database");
 			return false;
 		}
-	}
-	private void deleteProduct() {
-		msgLbl.setText("");
-		Product.toggleEnabledData(selectedId);
-		msgLbl.setText("Prodotto rimosso correttamente");
-		populateTable();
-	}
-	
-	private boolean isDataValid(boolean mustNameBeUnique) {
-		msgLbl.setText("");
-		if(mustNameBeUnique) {
-			if(!Product.isNameUnique(txtName.getText())) {
-				msgLbl.setText("Prodotto già esistente nel database");
-				return false;
-			}
-		}
-		
 		System.out.println("Nome unico");
 		if (!inputValidator.validateName(txtName.getText())) {
 			msgLbl.setText(inputValidator.getErrorMessage());
@@ -356,11 +303,11 @@ public class ProductPanel extends JPanel {
 	}
 
 	public JTextField getTxfSearchBar() {
-		return txtSearchBar;
+		return txfSearchBar;
 	}
 
 	public void setTxfSearchBar(JTextField txfSearchBar) {
-		this.txtSearchBar = txfSearchBar;
+		this.txfSearchBar = txfSearchBar;
 	}
 
 	public JTextField getTxtName() {
