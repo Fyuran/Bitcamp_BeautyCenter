@@ -1,10 +1,13 @@
 package com.centro.estetico.bitcamp;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import DAO.UserCredentialsDAO;
 
@@ -111,6 +114,30 @@ public class Employee extends User {
     public List<Shift> getShifts() {
         return turns;
     }
+    public static long generateSerial() {
+    	Random rand=new Random();
+    	long serial=rand.nextInt(100000)+900000;
+    	return isSerialUnique(serial)?serial:generateSerial();
+    }
+    private static boolean isSerialUnique(long serial) {
+    		String query="SELECT * FROM beauty_centerdb.employee WHERE serial=? LIMIT 1";
+    		long serialToCheck=-1;
+    		Connection conn=Main.getConnection();
+    		try(PreparedStatement pstmt = conn.prepareStatement(query)){
+    			pstmt.setLong(1, serial);
+    			ResultSet rs=pstmt.executeQuery();
+    			if(rs.next()) {
+    				serial=rs.getLong("serial");
+    				
+    			}
+    			
+    			return serialToCheck==-1;
+    		}catch(SQLException e) {
+    			e.printStackTrace();
+    			return false;
+    		}
+    	}
+    
 
 	@Override
 	public String toString() {

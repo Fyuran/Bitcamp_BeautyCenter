@@ -11,21 +11,23 @@ import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.MaskFormatter;
 
-<<<<<<< HEAD
 import com.centro.estetico.bitcamp.Employee;
 import com.centro.estetico.bitcamp.Main;
 import com.centro.estetico.bitcamp.Product;
+import com.centro.estetico.bitcamp.Roles;
 import com.centro.estetico.bitcamp.Shift;
-import com.centro.estetico.bitcamp.Employee.Roles;
 
+import DAO.EmployeeDAO;
 import utils.inputValidator;
 
 import java.awt.event.ActionListener;
@@ -39,8 +41,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.ActionEvent;
-=======
->>>>>>> 9247530cbe5b56c59c0f7db81cea8f7b49801a80
+
 
 public class EmployeePanel extends JPanel {
 
@@ -60,7 +61,6 @@ public class EmployeePanel extends JPanel {
 	private JTextField textField;
 	private JTextField txtUsername;
 	private JTextField txtPassword;
-<<<<<<< HEAD
 	private JLabel msgLbl;
 	private JTextField txtBirthplace;
 	private JRadioButton femaleRadioBtn;
@@ -71,8 +71,7 @@ public class EmployeePanel extends JPanel {
 	private JComboBox<String> roleComboBox;
 	private int selectedId;
 	private long selectedSerial;
-=======
->>>>>>> 9247530cbe5b56c59c0f7db81cea8f7b49801a80
+
 
 	/**
 	 * Create the panel.
@@ -281,7 +280,7 @@ public class EmployeePanel extends JPanel {
 		lblRole.setBounds(531, 597, 170, 14);
 		add(lblRole);
 		
-		String[]roles={"Admin","Receptionist","Operatore"};
+		String[]roles={"admin","front-desk","personale"};
 		JComboBox<String> roleComboBox = new JComboBox<String>(roles);
 		roleComboBox.setBounds(749, 597, 220, 27);
 		add(roleComboBox);
@@ -330,16 +329,16 @@ public class EmployeePanel extends JPanel {
 	private void populateTable() {
 		clearTable();
 		clearFields();
-		ArrayList<Employee> employees = EmployeeDao.getAllEmployees();
+		List<Employee> employees = EmployeeDAO.getAllEmployees();
 		if (employees.isEmpty()) {
 			tableModel.addRow(new String[] { "Sembra non ci siano prodotti presenti", "" });
 			return;
 		}
 		for (Employee employee : employees) {
 			if (employee.getTerminationDate() == null) {
-				tableModel.addRow(new String[] { String.valueOf(employee.getId()),String.valueOf(employee.getEmployeeSerial(), employee.getName(),
+				tableModel.addRow(new String[] { String.valueOf(employee.getId()),String.valueOf(employee.getEmployeeSerial()), employee.getName(),
 						employee.getSurname(), String.valueOf(employee.getBoD()), employee.getRole().toString(),
-						employee.getUserCredentials().getUsername()) });
+						employee.getUserCredentials().getUsername() });
 				// {"ID","Nome","Cognome","Data di nascita","Data
 				// assunzione","Ruolo","Username"};
 			}
@@ -354,16 +353,16 @@ public class EmployeePanel extends JPanel {
 		}
 		clearTable();
 		clearFields();
-		List<Employee> employees=EmployeeDao.getAllData();
-    	if(employee.isEmpty()) {
+		List<Employee> employees=EmployeeDAO.getAllEmployees();
+    	if(employees.isEmpty()) {
     		tableModel.addRow(new String[] {"Sembra non ci siano operatori presenti",""});
     		return;
     	}
     	for (Employee employee : employees) {
 			if (employee.getTerminationDate() == null&&employee.getSurname().equals(txtSearchBar.getText())) {
-				tableModel.addRow(new String[] { String.valueOf(employee.getId()),String.valueOf(employee.getEmployeeSerial(), employee.getName(),
+				tableModel.addRow(new String[] { String.valueOf(employee.getId()),String.valueOf(employee.getEmployeeSerial()), employee.getName(),
 						employee.getSurname(), String.valueOf(employee.getBoD()), employee.getRole().toString(),
-						employee.getUserCredentials().getUsername()) });
+						employee.getUserCredentials().getUsername() });
 				// {"ID","Nome","Cognome","Data di nascita","Data
 				// assunzione","Ruolo","Username"};
 			}
@@ -385,7 +384,7 @@ public class EmployeePanel extends JPanel {
 		long employeeSerial=Employee.generateSerial();
 		//shifts
 		//hiredDate
-		Roles role=Roles.fromString(roleComboBox.getSelectedItem().toString());
+		Roles role=Roles.toEnum(roleComboBox.getSelectedItem().toString());
 		//terminationDate
 		String username=txtUsername.getText();
 		String password=txtPassword.getText();
