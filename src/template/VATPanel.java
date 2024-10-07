@@ -19,6 +19,8 @@ import javax.swing.table.DefaultTableModel;
 
 import com.centro.estetico.bitcamp.VAT;
 
+import DAO.VATDao;
+
 public class VATPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
@@ -173,7 +175,7 @@ public class VATPanel extends JPanel {
 
 	private void populateTable() {
 		clearTable();
-		List<VAT> vats = VAT.getAllData();
+		List<VAT> vats = VATDao.getAllVAT();
 		if (vats.isEmpty()) {
 			tableModel.addRow(new String[] { "Sembra non ci siano aliquote presenti", "" });
 			return;
@@ -196,7 +198,7 @@ public class VATPanel extends JPanel {
 			return;
 		}
 		clearTable();
-		List<VAT> vats = VAT.getAllData();
+		List<VAT> vats = VATDao.getAllVAT();
 		if (vats.isEmpty()) {
 			tableModel.addRow(new String[] { "Sembra non ci siano aliquote presenti", "" });
 			return;
@@ -213,7 +215,7 @@ public class VATPanel extends JPanel {
 		if (isDataValid()) {
 			double amount = getAmountFromString(txtAmount.getText());
 			VAT vat = new VAT(amount);
-			VAT.insertData(vat);
+			vat = VATDao.insertVAT(vat).get();
 			System.out.println(vat);
 			msgLbl.setText("Aliquota inserita nel database");
 			populateTable();
@@ -223,7 +225,7 @@ public class VATPanel extends JPanel {
 	private void updateVat() {
 		if (isDataValid() && selectedId > 0) {
 			double amount = getAmountFromString(txtAmount.getText());
-			VAT.updateData(selectedId, new VAT(amount));
+			VATDao.updateVAT(selectedId, new VAT(amount));
 			msgLbl.setText("Aliquota modificata correttamente");
 			populateTable();
 		}
@@ -241,7 +243,7 @@ public class VATPanel extends JPanel {
 	private void disableVat() {
 		if(selectedId > 0) {
 			msgLbl.setText("");
-			VAT.toggleEnabledData(selectedId);
+			VATDao.toggleEnabledVAT(selectedId);
 			msgLbl.setText("Stato Aliquota modificato");
 			populateTable();
 		}
@@ -250,10 +252,10 @@ public class VATPanel extends JPanel {
 	private boolean isDataValid() {
 		try {
 			double amount = getAmountFromString(txtAmount.getText());
-			if (amount <= 0 || amount >= 1) {
-				msgLbl.setText("L'aliquota deve essere compresa tra 0 e 1 esclusi");
+			if (amount <= 0.1 || amount >= 100) {
+				msgLbl.setText("L'aliquota deve essere compresa tra 0.1 e 100 esclusi");
 				return false;
-			} else if(VAT.existByAmount(amount)) {
+			} else if(VATDao.existByAmount(amount)) {
 				msgLbl.setText("Aliquota già presente nel database");
 				return false;
 			}
