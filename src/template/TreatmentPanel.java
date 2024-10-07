@@ -9,6 +9,7 @@ import com.centro.estetico.bitcamp.BeautyCenter;
 import com.centro.estetico.bitcamp.Main;
 import com.centro.estetico.bitcamp.Product;
 import com.centro.estetico.bitcamp.Treatment;
+import com.centro.estetico.bitcamp.VAT;
 
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
@@ -33,6 +34,8 @@ public class TreatmentPanel extends JPanel {
 	private JTextField txfName;
 	private JComboBox<String> cBoxIVA;
 	private JTextField txtDuration;
+	private List<Product> products;
+	private JLabel msgLbl;
 
 	// Modello della tabella (scope a livello di classe per poter aggiornare la
 	// tabella)
@@ -42,6 +45,7 @@ public class TreatmentPanel extends JPanel {
 	 * Create the panel.
 	 */
 	public TreatmentPanel() {
+		products=new ArrayList<>();
 		setLayout(null);
 		setSize(1024, 768);
 		setName("Trattamenti");
@@ -198,8 +202,13 @@ public class TreatmentPanel extends JPanel {
 		lblIVa.setBounds(43, 513, 170, 14);
 		add(lblIVa);
 
-		String[] IVAs = { "Seleziona IVA" };
-		cBoxIVA = new JComboBox<String>(IVAs);
+		List<VAT> ivas=VAT.getAllData();
+		int i=0;
+		String[]ivasToString=new String[ivas.size()];
+		for(VAT iva:ivas) {
+			ivasToString[i]=iva.toString();
+			i++;
+		}		cBoxIVA = new JComboBox<String>(ivasToString);
 		cBoxIVA.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 11));
 		cBoxIVA.setBounds(209, 511, 220, 22);
 		add(cBoxIVA);
@@ -219,10 +228,13 @@ public class TreatmentPanel extends JPanel {
 		productButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new ProductSelector();
+				new ProductSelector(TreatmentPanel.this);
 			}
 		});
 		add(productButton);
+		msgLbl = new JLabel("");
+		msgLbl.setBounds(389, 606, 625, 16);
+		add(msgLbl);
 
 	}
 
@@ -489,5 +501,17 @@ public class TreatmentPanel extends JPanel {
 			return -1;
 		}
 		
+	}
+	public void getProducts(List<Integer> productIds) {
+		products.clear();
+		for(int id:productIds) {
+//			Product p=ProductDao.getProduct(id);
+//			products.add(p);
+			System.out.println(id);
+		}
+		for(Product p:products) {
+			System.out.println(p);
+		}
+		msgLbl.setText("Prodotti selezionati correttamente");
 	}
 }
