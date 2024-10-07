@@ -52,6 +52,7 @@ public class EmployeePanel extends JPanel {
 	private JTextArea txtNotes;
 	private JComboBox<String> roleComboBox;
 	private int selectedId;
+	private long selectedSerial;
 
 	/**
 	 * Create the panel.
@@ -73,7 +74,7 @@ public class EmployeePanel extends JPanel {
 		add(containerPanel);
 
 		// Modello della tabella con colonne
-		String[] columnNames = { "ID", "Nome", "Cognome", "Data di nascita", "Data assunzione", "Ruolo", "Username" };
+		String[] columnNames = { "ID","Numero seriale", "Nome", "Cognome", "Data di nascita", "Data assunzione", "Ruolo", "Username" };
 		tableModel = new DefaultTableModel(columnNames, 0);
 
 		// Creazione della tabella
@@ -86,20 +87,23 @@ public class EmployeePanel extends JPanel {
 	                if (!event.getValueIsAdjusting()) {
 	                    int selectedRow = table.getSelectedRow();
 	                    if (selectedRow != -1) {
-	                    	selectedId=Integer.parseInt(String.valueOf(table.getValueAt(selectedRow, 0)));	
-	                    	String name=String.valueOf(table.getValueAt(selectedRow, 1));
-	                    	String surname=String.valueOf(table.getValueAt(selectedRow, 2));
-	                    	String BoDString=String.valueOf(table.getValueAt(selectedRow, 3));
-	                    	LocalDate BoD=LocalDate.parse(BoDString, format);
-	                    	String roleString=String.valueOf(table.getValueAt(selectedRow, 4));
-	                    	Roles role=Roles.fromString(roleString);
-	                    	String username=String.valueOf(table.getValueAt(selectedRow, 5));
+	                    	selectedId=Integer.parseInt(String.valueOf(table.getValueAt(selectedRow, 0)));
+	                    	selectedSerial=Long.parseLong(String.valueOf(table.getValueAt(selectedRow, 1)));
+	                    	String name=String.valueOf(table.getValueAt(selectedRow, 2));
+	                    	String surname=String.valueOf(table.getValueAt(selectedRow, 3));
+	                    	String BoDString=String.valueOf(table.getValueAt(selectedRow, 4));
+	                    	String roleString=String.valueOf(table.getValueAt(selectedRow, 5));
+	                    	String username=String.valueOf(table.getValueAt(selectedRow, 6));
 	                    	
+	                    	
+	                    	txtName.setText(name);
+	                    	txtSurname.setText(surname);
+	                    	txtBirthday.setText(BoDString);
+	                    	roleComboBox.setSelectedItem(roleString);
+	                    	txtUsername.setText(username);
 
 	                    	
-	                    	//{ "ID", "Nome", "Cognome", "Data di nascita", "Data assunzione", "Ruolo", "Username" };
-	                       
-	                       //Il listener ascolta la riga selezionata e la usa per popolare i campi
+	              
 	                       
 
 	                    }
@@ -149,6 +153,7 @@ public class EmployeePanel extends JPanel {
 		btnUpdate.setBorderPainted(false);
 		btnUpdate.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/Update.png")));
 		btnUpdate.setBounds(770, 8, 40, 30);
+		btnUpdate.addActionListener(e-> updateEmployee());
 		containerPanel.add(btnUpdate);
 
 		JButton btnDelete = new JButton("");
@@ -178,6 +183,7 @@ public class EmployeePanel extends JPanel {
 		btnHystorical.setBorderPainted(false);
 		btnHystorical.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/cartellina.png")));
 		btnHystorical.setBounds(870, 8, 40, 30);
+		btnHystorical.addActionListener(e-> populateTable());
 		containerPanel.add(btnHystorical);
 
 		// label e textfield degli input
@@ -233,7 +239,6 @@ public class EmployeePanel extends JPanel {
 		add(txtPhone);
 
 		txtAddress = new JTextField();
-		txtAddress.setColumns(10);
 		txtAddress.setBounds(749, 432, 220, 20);
 		add(txtAddress);
 
@@ -337,6 +342,7 @@ public class EmployeePanel extends JPanel {
 		txtNotes = new JTextArea();
 		txtNotes.setBounds(749, 664, 220, 72);
 		add(txtNotes);
+		populateTable();
 
 	}
 
@@ -369,9 +375,9 @@ public class EmployeePanel extends JPanel {
 		}
 		for (Employee employee : employees) {
 			if (employee.getTerminationDate() == null) {
-				tableModel.addRow(new String[] { String.valueOf(employee.getEmployeeSerial(), employee.getName(),
+				tableModel.addRow(new String[] { String.valueOf(employee.getId()),String.valueOf(employee.getEmployeeSerial(), employee.getName(),
 						employee.getSurname(), String.valueOf(employee.getBoD()), employee.getRole().toString(),
-						employee.getUserCredentials().getUser()) });
+						employee.getUserCredentials().getUsername()) });
 				// {"ID","Nome","Cognome","Data di nascita","Data
 				// assunzione","Ruolo","Username"};
 			}
@@ -404,11 +410,39 @@ public class EmployeePanel extends JPanel {
 			
 		Employee employee=new Employee(name,surname,birthplace,isFemale,BoD,notes,true,employeeSerial,null,LocalDate.now(),
 				role,null,username,password,address,iban,phone,mail);
-		EmployeeDao.insertData(employee);
+		EmployeeDao.insertEmployee(employee);
 		msgLbl.setText("Nuovo utente creato correttamente");
 		populateTable();
 		
 
+	}
+	
+	public void updateEmployee() {
+		if(isDataValid()) {
+			DateTimeFormatter format=DateTimeFormatter.ofPattern("dd-MM-yyyy");
+			if(!isDataValid())return;
+			String name=txtName.getText();
+			String surname=txtSurname.getText();
+			String birthplace=txtBirthplace.getText();
+			//isFemale
+			LocalDate BoD=LocalDate.parse(txtBirthday.getText(), format);	
+			String notes=txtNotes.getText();
+			//isEnabled
+			//selectedSerial
+			//shifts
+			//hiredDate
+			Roles role=Roles.fromString(roleComboBox.getSelectedItem().toString());
+			//terminationDate
+			String username=txtUsername.getText();
+			String address=txtAddress.getText();
+			String iban=txtIban.getText();
+			String phone=txtPhone.getText();
+			String mail=txtMail.getText();
+			Employee employee=new Employee(selectedId,name,surname,birthplace,isFemale,BoD,notes,true,selectedSerial,null,LocalDate.now(),
+				role,null,username,address,iban,phone,mail);
+			EmployeeDao.updateEmployee(id, employee);
+			msgLbl.setText(name+" "+surname+" modificato correttamente");
+		}
 	}
 	
 	public void deleteEmployee() {

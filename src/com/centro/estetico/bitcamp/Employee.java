@@ -47,6 +47,19 @@ public class Employee extends User {
 		this.terminationDate = terminationDate;
 		this.userCredentials = new UserCredentials(username, password, address,iban, phone, mail);
 	}
+	//costruttore senza password
+	public Employee(
+			int id, String name, String surname, String birthplace, boolean isFemale, LocalDate BoD,String notes, boolean isEnabled, 
+			long employeeSerial, ArrayList<Shift> shift, LocalDate hiredDate,Roles roles, LocalDate terminationDate,
+			String username, String address, String iban, String phone, String mail) {
+			super(id, name, surname, birthplace, isFemale, BoD, notes, isEnabled);
+			this.employeeSerial = employeeSerial;
+			this.shift = new ArrayList<>();
+			this.hiredDate = hiredDate;
+			this.roles = roles;
+			this.terminationDate = terminationDate;
+			this.userCredentials = new UserCredentials(username, address,iban, phone, mail);
+		}
 	//costruttore senza id
 	public Employee(
 			String name, String surname, String birthplace, boolean isFemale, LocalDate BoD,String notes, boolean isEnabled, 
@@ -166,7 +179,7 @@ public class Employee extends User {
 		return super.getBoD().format(format);
 	}
 	
-	private static long generateSerial() {
+	public static long generateSerial() {
 		Random rand=new Random();
 		long serial=rand.nextLong(900000)+100000;//generazione casuale di un numero a 6 cifre
 		//check che il serial sia univoco. Se non lo è, ripete la funzione

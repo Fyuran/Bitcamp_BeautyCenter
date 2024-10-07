@@ -226,6 +226,7 @@ public class inputValidator {
   		}
   	}
   	
+  	//check che un serial generato casualmente non sia ripetuto
   	public static boolean isSerialUnique(long serial) {
   		String query="SELECT * FROM beauty_centerdb.employee WHERE serial=? LIMIT 1";
   		long serialKiller=-1;
