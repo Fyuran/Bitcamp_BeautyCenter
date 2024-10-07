@@ -1,8 +1,10 @@
 package template;
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
 
 import com.centro.estetico.bitcamp.BeautyCenter;
 import com.centro.estetico.bitcamp.Employee;
+import com.centro.estetico.bitcamp.Roles;
 public class MainFrame extends JFrame{
 
 	private static final long serialVersionUID = 1L;
@@ -33,7 +35,7 @@ public class MainFrame extends JFrame{
 		mainPane.add(reservationForm);
 		mainPane.add(gestioneClienti);
 		
-		if(employee.getRolesAsString().equalsIgnoreCase("admin")){
+		if(employee.getRole() == Roles.ADMIN){
 			buildAdminFrame(employee);
 		}
 			add(mainPane);

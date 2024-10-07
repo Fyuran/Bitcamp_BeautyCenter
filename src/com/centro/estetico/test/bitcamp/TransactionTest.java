@@ -13,6 +13,11 @@ import com.centro.estetico.bitcamp.PayMethod;
 import com.centro.estetico.bitcamp.Transaction;
 import com.centro.estetico.bitcamp.VAT;
 
+import DAO.BeautyCenterDAO;
+import DAO.CustomerDAO;
+import DAO.TransactionDAO;
+import DAO.VATDao;
+
 public final class TransactionTest {
 
 	public static void main(String[] args) {
@@ -29,12 +34,12 @@ public final class TransactionTest {
 			e.printStackTrace();
 		}
 		
-		BeautyCenter bc = BeautyCenter.getData(1).orElseThrow();
-		Customer c1 = Customer.getData(1).orElseThrow();
-		VAT v1 = VAT.getData(1).orElseThrow();
+		BeautyCenter bc = BeautyCenterDAO.getBeautyCenter(1).orElseThrow();
+		Customer c1 = CustomerDAO.getCustomer(1).orElseThrow();
+		VAT v1 = VATDao.getVAT(1).orElseThrow();
 		
-		Customer c2 = Customer.getData(2).orElseThrow();
-		VAT v2 = VAT.getData(2).orElseThrow();
+		Customer c2 = CustomerDAO.getCustomer(2).orElseThrow();
+		VAT v2 = VATDao.getVAT(2).orElseThrow();
 		
 		/*
 		 * 
@@ -48,18 +53,18 @@ public final class TransactionTest {
 		
 		Transaction trans2 = new Transaction(BigDecimal.valueOf(100), PayMethod.CARD, LocalDateTime.now(), c2, v2, bc);
 		
-		Transaction.insertData(trans1);
-		Transaction.insertData(trans2);
-		Transaction.toggleEnabledData(trans2.getId());
+		trans1 = TransactionDAO.insertTransaction(trans1).get();
+		trans2 = TransactionDAO.insertTransaction(trans2).get();
+		TransactionDAO.toggleEnabledTransaction(trans2);
 		
-		Transaction tr_get = Transaction.getData(trans1.getId()).orElseThrow();
+		Transaction tr_get = TransactionDAO.getTransaction(trans1.getId()).orElseThrow();
 		tr_get.setDateTime(LocalDateTime.of(2024, 9, 29, 15, 0));
 		tr_get.setPrice(BigDecimal.valueOf(300));
 		tr_get.setPaymentMethod(PayMethod.CARD);
 		
-		Transaction.updateData(tr_get.getId(), tr_get);	
+		TransactionDAO.updateTransaction(tr_get.getId(), tr_get);	
 		
-		List<Transaction> transactions = Transaction.getAllData();
+		List<Transaction> transactions = TransactionDAO.getAllTransactions();
 		
 	}
 

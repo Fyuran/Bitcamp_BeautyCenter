@@ -1,12 +1,6 @@
 package utils;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.regex.Pattern;
-
-import com.centro.estetico.bitcamp.Main;
 
 public class inputValidator {
 
@@ -126,26 +120,6 @@ public class inputValidator {
         }
         return result;
     }
-    
-    //metodo per validare iban
-    public static boolean validateIban(String iban, boolean isIbanMandatory) {
-    	if(isIbanMandatory) {
-    		if(iban.trim().isEmpty()||iban==null) {
-    			errorMessage="L'IBAN deve essere lungo 27 caratteri";
-        		return false;
-    		}
-    	}
-    	if(iban.trim().length()!=27||iban.trim().length()!=0) {
-    		errorMessage="L'IBAN deve essere lungo 27 caratteri";
-    		return false;
-    	}
-    	String regex="IT\\d{2}[ ][a-zA-Z]\\d{3}[ ]\\d{4}[ ]\\d{4}[ ]\\d{4}[ ]\\d{4}[ ]\\d{3}|IT\\d{2}[a-zA-Z]\\d{22}\n";
-    	boolean result=Pattern.matches(regex,iban.trim());
-    	if(!result) {
-    		errorMessage="Formato IBAN non valido";
-    	}
-    	return result;
-    }
 
     // Metodo per validare date (formato dd/MM/yyyy)
     public static boolean validateDate(String date) {
@@ -206,43 +180,4 @@ public class inputValidator {
         }
         return result;
     }
-  //controllo che lo username sia unico:
-  	public static boolean isUserUnique(String username) {
-  		String query="SELECT * FROM beauty_centerdb.user_credentials WHERE username=? LIMIT 1";
-  		String name="";
-  		Connection conn=Main.getConnection();
-  		try(PreparedStatement pstmt = conn.prepareStatement(query)){
-  			pstmt.setString(1, username);
-  			ResultSet rs=pstmt.executeQuery();
-  			if(rs.next()) {
-  				name=rs.getString("username");
-  				
-  			}
-  			
-  			return name.equals("");
-  		}catch(SQLException e) {
-  			e.printStackTrace();
-  			return false;
-  		}
-  	}
-  	
-  	//check che un serial generato casualmente non sia ripetuto
-  	public static boolean isSerialUnique(long serial) {
-  		String query="SELECT * FROM beauty_centerdb.employee WHERE serial=? LIMIT 1";
-  		long serialKiller=-1;
-  		Connection conn=Main.getConnection();
-  		try(PreparedStatement pstmt = conn.prepareStatement(query)){
-  			pstmt.setLong(1, serial);
-  			ResultSet rs=pstmt.executeQuery();
-  			if(rs.next()) {
-  				serialKiller=rs.getInt("serial");
-  				
-  			}
-  			
-  			return serialKiller==-1;
-  		}catch(SQLException e) {
-  			e.printStackTrace();
-  			return false;
-  		}
-  	}
 }

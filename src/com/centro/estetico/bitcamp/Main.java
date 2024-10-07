@@ -1,7 +1,11 @@
 package com.centro.estetico.bitcamp;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.NoSuchElementException;
+
+import DAO.BeautyCenterDAO;
 
 public class Main {
 	private static Connection conn;
@@ -12,7 +16,7 @@ public class Main {
 			conn = DriverManager.getConnection(url, username, password);
 			conn.setAutoCommit(false);
 			
-			bc = BeautyCenter.getData(1).orElseThrow();
+			bc = BeautyCenterDAO.getBeautyCenter(1).orElseThrow();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();

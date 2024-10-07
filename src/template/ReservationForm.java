@@ -1,23 +1,23 @@
 package template;
 
-import java.util.Date;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import java.awt.Font;
-import javax.swing.JTextField;
 import java.awt.Color;
-import javax.swing.border.LineBorder;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Date;
+
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.ImageIcon;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JRadioButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.UIManager;
-import javax.swing.JTable;
-import com.toedter.calendar.JCalendar;
+import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
+
+import com.toedter.calendar.JCalendar;
 
 public class ReservationForm extends JPanel {
 
@@ -158,7 +158,7 @@ public class ReservationForm extends JPanel {
 		btnNewButton.setBounds(133, 423, 85, 21);
 		add(btnNewButton);
 		
-		JComboBox comboBox = new JComboBox();
+		JComboBox<Object> comboBox = new JComboBox<>();
 		comboBox.setBounds(133, 469, 85, 21);
 		add(comboBox);
 				
@@ -186,7 +186,7 @@ public class ReservationForm extends JPanel {
 		getVisibleInvisibleCalendarButton.setBounds(133, 512, 85, 21);
 		add(getVisibleInvisibleCalendarButton);
 		
-		JList list = new JList();
+		JList<Object> list = new JList<>();
 		list.setBounds(513, 409, 79, 222);
 		add(list);
 			

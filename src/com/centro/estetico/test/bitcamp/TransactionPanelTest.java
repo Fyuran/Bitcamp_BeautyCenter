@@ -5,18 +5,18 @@ import javax.swing.SwingUtilities;
 
 import com.centro.estetico.bitcamp.Main;
 
-import template.gestioneTransazioni;
+import template.TransactionPanel;
 
-public class gestioneTransazioniTest {
+public class TransactionPanelTest {
 
 	public static void main(String[] args) {
 		
 	    SwingUtilities.invokeLater(new Runnable() {
 	        public void run() {
 	        	Main main = new Main("jdbc:mysql://localhost:1806", "root", "bitcampPassword");
-	        	gestioneTransazioni panel = new gestioneTransazioni();
 	            JFrame frame = new JFrame();
-	            frame.setSize(1040, 850);
+	            TransactionPanel panel = new TransactionPanel(frame);
+	            frame.setSize(1040, 900);
 	            frame.getContentPane().add(panel);
 	            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	            frame.setVisible(true);

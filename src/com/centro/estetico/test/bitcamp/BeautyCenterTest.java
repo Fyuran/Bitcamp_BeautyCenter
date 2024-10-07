@@ -7,6 +7,8 @@ import java.time.LocalTime;
 import com.centro.estetico.bitcamp.BeautyCenter;
 import com.centro.estetico.bitcamp.Main;
 
+import DAO.BeautyCenterDAO;
+
 public final class BeautyCenterTest {
 	
 	public static void main(String[] args) {
@@ -29,15 +31,15 @@ public final class BeautyCenterTest {
 				"DELETEME", "DELETE", "DELETE", "DELETE", 
 				"DELETE", "DELETE", "DELETE", "DELETE", LocalTime.of(8, 0), LocalTime.of(20, 0));
 		
-		BeautyCenter.insertData(bc);
-		BeautyCenter.insertData(bc2);
-		BeautyCenter.toggleEnabledData(bc2.getId());
+		bc = BeautyCenterDAO.insertBeautyCenter(bc).get();
+		bc2 = BeautyCenterDAO.insertBeautyCenter(bc2).get();
+		BeautyCenterDAO.toggleEnabledBeautyCenter(bc2);
 		
-		BeautyCenter bc_get = BeautyCenter.getData(bc.getId()).orElseThrow();
+		BeautyCenter bc_get = BeautyCenterDAO.getBeautyCenter(bc.getId()).orElseThrow();
 		bc_get.setName("get_Test");
 		bc_get.setOpeningHour(LocalTime.of(9, 0));
 		
-		BeautyCenter.updateData(bc.getId(), bc_get);	
+		BeautyCenterDAO.updateBeautyCenter(bc.getId(), bc_get);	
 		
 	}
 

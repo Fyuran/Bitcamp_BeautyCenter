@@ -1,13 +1,12 @@
 package template;
 
 import java.awt.EventQueue;
+import java.awt.Font;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 import javax.swing.JTabbedPane;
-import java.awt.Font;
-import javax.swing.border.LineBorder;
-import java.awt.Color;
+import javax.swing.border.EmptyBorder;
 
 public class containerAdmin extends JFrame {
 

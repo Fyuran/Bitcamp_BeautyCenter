@@ -1,41 +1,59 @@
 package com.centro.estetico.bitcamp;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Optional;
 
 public class Prize {
-    private int id;
+    private final int id;
     private String name;
     private int threshold;
-    private LocalDate expirationDate;
+    private Optional<LocalDate> expirationDate; //can be null
+    private PrizeType type;
     private double amount;
     private boolean isEnabled;
 
     // Costruttore
-    public Prize(int id, String name, int threshold, LocalDate expirationDate, double amount, boolean isEnabled) {
+    private Prize(int id, String name, int threshold, PrizeType type, Optional<LocalDate> expirationDate, double amount, boolean isEnabled) {
         this.id = id;
         this.name = name;
         this.threshold = threshold;
+        this.type = type;
         this.expirationDate = expirationDate;
         this.amount = amount;
         this.isEnabled = isEnabled;
     }
-
+    
+    public Prize(String name, int threshold, PrizeType type, LocalDate expirationDate, double amount) {
+    	this(-1, name, threshold, type, Optional.of(expirationDate), amount, true);
+    }
+    
     // Costruttore vuoto
     public Prize() {
-        this.id = 0;
-        this.name = "";
-        this.threshold = 0;
-        this.expirationDate = LocalDate.now();
-        this.amount = 0;
-        this.isEnabled = true;
+        this(-1, "PLACEHOLDER", 0, PrizeType.DISCOUNT, Optional.empty(), 0, true);
     }
+    
+    public Prize(ResultSet rs) throws SQLException {
+		this(
+			rs.getInt(1), 
+			rs.getString(2), 
+			rs.getInt(3),
+			PrizeType.toEnum(rs.getString(4)),
+			Optional.empty(),
+			rs.getDouble(5), 
+			rs.getBoolean(6)
+		);	
+    }
+    
+	public Prize(int id, Prize obj) {
+		this(id, obj.name, obj.threshold, obj.type, obj.expirationDate, obj.amount, obj.isEnabled);
+	}
 
 	public int getId() {
 		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
 	}
 
 	public String getName() {
@@ -55,13 +73,30 @@ public class Prize {
 	}
 
 	public LocalDate getExpirationDate() {
-		return expirationDate;
+		return expirationDate.orElse(null);
+	}
+
+	public PrizeType getType() {
+		return type;
+	}
+
+	public void setType(PrizeType type) {
+		this.type = type;
 	}
 
 	public void setExpirationDate(LocalDate expirationDate) {
-		this.expirationDate = expirationDate;
+		this.expirationDate = Optional.of(expirationDate);
 	}
-
+	
+	public void assignToCustomer(Customer customer) {
+		customer.addPrizes(this);
+	}
+	
+	public int addPointsToCustomer(Customer customer, int points) {
+		customer.addLoyaltyPoints(points);
+		return customer.getLoyaltyPoints();
+	}
+	
 	public double getAmount() {
 		return amount;
 	}
@@ -80,11 +115,16 @@ public class Prize {
 
 	@Override
 	public String toString() {
-		return "Prize [id=" + id + ", name=" + name + ", threshold=" + threshold + ", expirationDate=" + expirationDate
-				+ ", amount=" + amount + ", isEnabled=" + isEnabled + "]";
+		DateTimeFormatter dtf = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
+		return "Prize [id=" + id + ", name=" + name + ", type=" + type.toString() + ", threshold=" + threshold + 
+				", expirationDate=" + expirationDate.orElse(null).format(dtf) +
+				", amount=" + amount + ", isEnabled=" + isEnabled + "]";
 	}
     
     
-
-
+	public Object[] toTableRow() {
+		return new Object[] {
+				id, name, threshold, type, expirationDate, amount, isEnabled
+		};
+	}
 }

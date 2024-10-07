@@ -1,16 +1,25 @@
 package template;
 
-import javax.swing.*;
-
-import DAO.AccountDAO;
-import utils.inputValidator;
-
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Color;
+import java.awt.Font;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.Timer;
+
+import DAO.UserCredentialsDAO;
+import utils.inputValidator;
 
 public class benvenutoOperatori extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -21,7 +30,6 @@ public class benvenutoOperatori extends JFrame {
     private JLabel descriptionLabel;
     private Timer descriptionTimer;
     private int indexFraseCorrente = 0;
-    private AccountDAO accountDAO; 
     private Connection conn; 
 
     private String[] frasi = {
@@ -46,7 +54,6 @@ public class benvenutoOperatori extends JFrame {
         // Connessione al database
         try {
             conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "root");
-            accountDAO = new AccountDAO(conn);
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Errore durante la connessione al database: " + e.getMessage());
             e.printStackTrace();
@@ -177,7 +184,7 @@ public class benvenutoOperatori extends JFrame {
 
         // Verifica delle credenziali
         try {
-            boolean isAuthenticated = accountDAO.verifyPassword(username, password);
+            boolean isAuthenticated = UserCredentialsDAO.verifyPassword(username, password);
             if (isAuthenticated) {
                 JOptionPane.showMessageDialog(null, "Benvenuto " + username + "!", "Accesso Riuscito", JOptionPane.INFORMATION_MESSAGE);
                 
