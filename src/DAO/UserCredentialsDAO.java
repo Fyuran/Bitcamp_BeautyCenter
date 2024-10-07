@@ -136,7 +136,7 @@ public abstract class UserCredentialsDAO {
 		return -1;
 	}
 
-	public static int toggleUserCredentials(UserCredentials obj) {
+	public static int toggleEnabledUserCredentials(UserCredentials obj) {
 		String query = "UPDATE beauty_centerdb.user_credentials "
 				+ "SET is_enabled = ? "
 				+ "WHERE id = ?";
@@ -163,7 +163,9 @@ public abstract class UserCredentialsDAO {
 		}
 		return -1;
 	}
-	
+	public static int toggleEnabledUserCredentials(int id) {
+		return toggleEnabledUserCredentials(getUserCredentials(id).get());
+	}
 	
 	public static int deleteUserCredentials(int id) {
 		String query = "DELETE FROM beauty_centerdb.user_credentials WHERE id = ?";

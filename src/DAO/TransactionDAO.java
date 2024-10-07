@@ -183,7 +183,9 @@ public abstract class TransactionDAO {
 		}
 		return -1;
 	}
-	
+	public static int toggleEnabledTransaction(int id) {
+		return toggleEnabledTransaction(getTransaction(id).get());
+	}
 	
 	public static int deleteTransaction(int id) {
 		String query = "DELETE FROM beauty_centerdb.transaction WHERE id = ?";

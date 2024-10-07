@@ -272,6 +272,9 @@ public abstract class TreatmentDAO {
 		}
 		return -1;
 	}
+	public static int toggleEnabledTreatment(int id) {
+		return toggleEnabledTreatment(getTreatment(id).get());
+	}
 	
 	public static int deleteTreatment(int id) {
 		String query = "DELETE FROM beauty_centerdb.treatment WHERE id = ?";

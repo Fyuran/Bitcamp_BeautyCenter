@@ -138,7 +138,9 @@ public abstract class SubscriptionDAO {
 		}
 		return -1;
 	}
-	
+	public static int toggleEnabledSubscription(int id) {
+		return toggleEnabledSubscription(getSubscription(id).get());
+	}
 	
 	public static int deleteSubscription(int id) {
 		String query = "DELETE FROM beauty_centerdb.subscription WHERE id = ?";

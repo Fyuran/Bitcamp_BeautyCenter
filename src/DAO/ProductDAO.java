@@ -141,7 +141,9 @@ public abstract class ProductDAO {
 		}
 		return -1;
 	}
-	
+	public static int toggleEnabledProduct(int id) {
+		return toggleEnabledProduct(getProduct(id).get());
+	}
 	
 	public static int deleteProduct(int id) {
 		String query = "DELETE FROM beauty_centerdb.product WHERE id = ?";

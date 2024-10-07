@@ -161,7 +161,9 @@ public abstract class PrizeDAO {
 		}
 		return -1;
 	}
-	
+	public static int toggleEnabledPrize(int id) {
+		return toggleEnabledPrize(getPrize(id).get());
+	}
 	
 	public static int deletePrize(int id) {
 		String query = "DELETE FROM beauty_centerdb.transaction WHERE id = ?";

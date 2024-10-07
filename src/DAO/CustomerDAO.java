@@ -175,7 +175,9 @@ public abstract class CustomerDAO {
 		}
 		return -1;
 	}
-	
+	public static int toggleEnabledCustomer(int id) {
+		return toggleEnabledCustomer(getCustomer(id).get());
+	}
 	
 	public static int deleteCustomer(int id) {
 		String query = "DELETE FROM beauty_centerdb.customer WHERE id = ?";
