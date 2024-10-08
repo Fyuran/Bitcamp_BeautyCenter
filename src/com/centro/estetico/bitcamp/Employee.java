@@ -46,7 +46,7 @@ public class Employee extends User {
 					rs.getBoolean(4), rs.getDate(5).toLocalDate(), 
 					rs.getString(6), rs.getString(11)
 				),
-				UserCredentialsDAO.getUserCredentials(rs.getInt(9)).get(),
+				UserCredentialsDAO.getUserCredentials(rs.getInt(10)).get(),
 				rs.getBoolean(12),
 				rs.getLong(13),
 				Roles.valueOf(rs.getString(6)),
