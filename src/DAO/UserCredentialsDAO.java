@@ -20,16 +20,16 @@ public abstract class UserCredentialsDAO {
 
 	public static Optional<UserCredentials> insertUserCredentials(UserCredentials obj) {
 		String query = "INSERT INTO `beauty_centerdb`.`user_credentials`(`username`, `password`, `mail`, `iban`, `phone`, `is_enabled`)"
-				+ "VALUES(?, ?, ?, ?, ?, ?, ?);";
+				+ "VALUES(?, ?, ?, ?, ?, ?);";
 		
 		try(PreparedStatement stat = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
 			//(String username, String password, String address, String iban, String phone, String mail)
 			stat.setString(1, obj.getUsername());
 			stat.setString(2, obj.getPassword());
-			stat.setString(3, obj.getAddress());
+			stat.setString(3, obj.getMail());
 			stat.setString(4, obj.getIban());
 			stat.setString(5, obj.getPhone());
-			stat.setString(6, obj.getMail());
+			stat.setBoolean(6, obj.isEnabled());
 			
 			stat.executeUpdate();
 			conn.commit();

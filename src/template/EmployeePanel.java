@@ -27,12 +27,14 @@ import javax.swing.text.MaskFormatter;
 import com.centro.estetico.bitcamp.Employee;
 import com.centro.estetico.bitcamp.Main;
 import com.centro.estetico.bitcamp.Product;
+import com.centro.estetico.bitcamp.ProductCat;
 import com.centro.estetico.bitcamp.Roles;
 import com.centro.estetico.bitcamp.Shift;
 import com.centro.estetico.bitcamp.UserCredentials;
 import com.centro.estetico.bitcamp.UserDetails;
 
 import DAO.EmployeeDAO;
+import DAO.UserCredentialsDAO;
 import utils.inputValidator;
 
 import java.awt.event.ActionListener;
@@ -97,36 +99,54 @@ public class EmployeePanel extends JPanel {
 		add(containerPanel);
 
 		// Modello della tabella con colonne
-		String[] columnNames = { "ID","Numero seriale", "Nome", "Cognome", "Data di nascita", "Data assunzione", "Ruolo", "Username" };		tableModel = new DefaultTableModel(columnNames, 0);
+		String[] columnNames = { "ID","Numero seriale", "Nome", "Cognome", 
+				"Data di nascita", "Data assunzione", "Ruolo", "Username","Indirizzo",
+				"Città di provenienza","Mail","Telefono","IBAN" };		
+		tableModel = new DefaultTableModel(columnNames, 0);
 		// Creazione della tabella
 				JTable table = new JTable(tableModel);
-		//Listener della tabella per pescare i nomi che servono
-		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-	            @Override
-	            public void valueChanged(ListSelectionEvent event) {
-	            	DateTimeFormatter format=DateTimeFormatter.ofPattern("dd-MM-yyyy");
-	                if (!event.getValueIsAdjusting()) {
-	                    int selectedRow = table.getSelectedRow();
-	                    if (selectedRow != -1) {
-	                    	selectedId=Integer.parseInt(String.valueOf(table.getValueAt(selectedRow, 0)));	
-	                    	String name=String.valueOf(table.getValueAt(selectedRow, 1));
-	                    	String surname=String.valueOf(table.getValueAt(selectedRow, 2));
-	                    	String BoDString=String.valueOf(table.getValueAt(selectedRow, 3));
-	                    	String roleString=String.valueOf(table.getValueAt(selectedRow, 4));
-	                    	Roles role=Roles.toEnum(roleString);
-	                    	String username=String.valueOf(table.getValueAt(selectedRow, 5));
-	                    	
+				//Listener della tabella per pescare i nomi che servono
+				 table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			            @Override
+			            public void valueChanged(ListSelectionEvent event) {
+			                if (!event.getValueIsAdjusting()) {
+			                    int selectedRow = table.getSelectedRow();
+			                    if (selectedRow != -1) {
+			                    	selectedId=Integer.parseInt(String.valueOf(table.getValueAt(selectedRow, 0)));	
+			                    	String name=String.valueOf(table.getValueAt(selectedRow, 2));
+			                    	String surname=String.valueOf(table.getValueAt(selectedRow, 3));
+			                    	String BoDString=String.valueOf(table.getValueAt(selectedRow, 4));
+			                    	String roleString=String.valueOf(table.getValueAt(selectedRow, 6));
+			                    	Roles role=Roles.toEnum(roleString);
+			                    	String username=String.valueOf(table.getValueAt(selectedRow, 7));
+			                    	String address=String.valueOf(table.getValueAt(selectedRow, 8));
+			                    	String birthplace=String.valueOf(table.getValueAt(selectedRow, 9));
+			                    	String mail=String.valueOf(table.getValueAt(selectedRow, 10));
+			                    	String phone=String.valueOf(table.getValueAt(selectedRow, 11));
+			                    	String iban=String.valueOf(table.getValueAt(selectedRow, 12));
 
-	                    	
-	                    	//{ "ID", "Nome", "Cognome", "Data di nascita", "Data assunzione", "Ruolo", "Username" };
-	                       
-	                       //Il listener ascolta la riga selezionata e la usa per popolare i campi
-	                       
 
-	                    }
-	                }
-	            }
-	        });
+			                    	
+
+			                    	txtName.setText(name);
+			                    	txtSurname.setText(surname);
+			                    	txtBirthday.setText(BoDString);
+			                    	roleComboBox.setSelectedItem(roleString);
+			                    	txtUsername.setText(username);
+			                    	txtAddress.setText(address);
+			                    	txtBirthplace.setText(birthplace);
+			                    	txtMail.setText(mail);
+			                    	txtPhone.setText(phone);
+			                    	
+			                    	//{ "ID", "Nome", "Cognome", "Data di nascita", "Data assunzione", "Ruolo", "Username" };
+			                       
+			                       //Il listener ascolta la riga selezionata e la usa per popolare i campi
+			                       
+
+			                    }
+			                }
+			            }
+			        });
 		
 
 		// Aggiungere la tabella all'interno di uno JScrollPane per lo scroll
@@ -140,6 +160,12 @@ public class EmployeePanel extends JPanel {
 		btnSearch.setBorderPainted(false);
 		btnSearch.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/searchIcon.png")));
 		btnSearch.setBounds(206, 8, 40, 30);
+		btnSearch.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println(txtName.getText());
+			}
+		});
 		containerPanel.add(btnSearch);
 
 		txfSearchBar = new JTextField();
@@ -163,19 +189,10 @@ public class EmployeePanel extends JPanel {
 		btnInsert.setBorderPainted(false);
 		btnInsert.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/Insert.png")));
 		btnInsert.setBounds(720, 8, 40, 30);
+		btnInsert.addActionListener(e->createEmployee());
 		containerPanel.add(btnInsert);
 
-		btnInsert.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-
-				// Pulisci i campi dopo l'inserimento
-				txtName.setText("");
-				txtSurname.setText("");
-				txtIban.setText("");
-			}
-
-		});
+		
 
 		JButton btnUpdate = new JButton("");
 		btnUpdate.setOpaque(false);
@@ -183,6 +200,7 @@ public class EmployeePanel extends JPanel {
 		btnUpdate.setBorderPainted(false);
 		btnUpdate.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/Update.png")));
 		btnUpdate.setBounds(770, 8, 40, 30);
+		btnUpdate.addActionListener(e->updateEmployee());
 		containerPanel.add(btnUpdate);
 
 
@@ -300,8 +318,10 @@ public class EmployeePanel extends JPanel {
 		lblRole.setBounds(531, 597, 170, 14);
 		add(lblRole);
 		
-		String[]roles={"admin","front-desk","personale"};
-		JComboBox<String> roleComboBox = new JComboBox<String>(roles);
+		roleComboBox = new JComboBox<String>();
+		for (Roles r : Roles.values()) {
+			roleComboBox.addItem(r.toString());
+		}
 		roleComboBox.setBounds(749, 597, 220, 27);
 		add(roleComboBox);
 		
@@ -406,11 +426,23 @@ public class EmployeePanel extends JPanel {
 		}
 		for (Employee employee : employees) {
 			if (employee.getTerminationDate() == null) {
-				tableModel.addRow(new String[] { String.valueOf(employee.getId()),String.valueOf(employee.getEmployeeSerial()), employee.getName(),
-						employee.getSurname(), String.valueOf(employee.getBoD()), employee.getRole().toString(),
-						employee.getUserCredentials().getUsername() });
-				// {"ID","Nome","Cognome","Data di nascita","Data
-				// assunzione","Ruolo","Username"};
+				tableModel.addRow(new String[] {
+						String.valueOf(employee.getId()),
+						String.valueOf(employee.getEmployeeSerial()),
+						employee.getName(),
+						employee.getSurname(),
+						String.valueOf(employee.getBoD()),
+						String.valueOf(employee.getHiredDate()),
+						employee.getRole().toString(),
+						employee.getUserCredentials().getUsername(), 
+						employee.getBirthplace(),
+						employee.getMail(),
+						employee.getPhone(),
+						employee.getIban()
+						
+						});
+//				{ "ID","Numero seriale", "Nome", "Cognome", "Data di nascita", "Data assunzione", 
+//					"Ruolo", "Username","Indirizzo","Città di provenienza","Mail","Telefono" };
 			}
 		}
 
@@ -422,7 +454,6 @@ public class EmployeePanel extends JPanel {
 			return;
 		}
 		clearTable();
-		clearFields();
 		List<Employee> employees=EmployeeDAO.getAllEmployees();
     	if(employees.isEmpty()) {
     		tableModel.addRow(new String[] {"Sembra non ci siano operatori presenti",""});
@@ -443,7 +474,7 @@ public class EmployeePanel extends JPanel {
 
 	private void createEmployee() {
 		DateTimeFormatter format=DateTimeFormatter.ofPattern("dd-MM-yyyy");
-		if(!isDataValid())return;
+		if(isDataValid()) {
 		String name=txtName.getText();
 		String surname=txtSurname.getText();
 		String birthplace=txtBirthplace.getText();
@@ -465,6 +496,7 @@ public class EmployeePanel extends JPanel {
 
 		UserDetails det=new UserDetails(name, surname, isFemale, BoD,birthplace,notes);
 		UserCredentials cred=new UserCredentials(username, password,address, iban, phone, mail);
+		UserCredentialsDAO.insertUserCredentials(cred);
 		Employee employee=new Employee(det,cred,employeeSerial,role,null,LocalDate.now(),null);
 		EmployeeDAO.insertEmployee(employee);
 		
@@ -474,6 +506,7 @@ public class EmployeePanel extends JPanel {
 		
 		msgLbl.setText("Nuovo utente creato correttamente");
 		populateTable();
+		}
 		
 
 	}
@@ -521,6 +554,7 @@ public class EmployeePanel extends JPanel {
 		DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		// checkNome
 		if (!inputValidator.validateName(txtName.getText())) {
+			System.out.println(txtName.getText());
 			msgLbl.setText(inputValidator.getErrorMessage());
 			return false;
 		}

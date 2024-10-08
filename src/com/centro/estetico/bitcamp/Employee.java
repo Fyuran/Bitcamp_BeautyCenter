@@ -117,24 +117,24 @@ public class Employee extends User {
     public static long generateSerial() {
     	Random rand=new Random();
     	long serial=rand.nextInt(100000)+900000;
-    	return serial;
+    	return isSerialUnique(serial)?serial:generateSerial();
     }
     
     //funzione da correggere, ho fallito male
-//    private static boolean isSerialUnique(long serial) {
-//    		String query="SELECT * FROM beauty_centerdb.employee WHERE serial=? LIMIT 1";
-//    		Connection conn=Main.getConnection();
-//    		try(PreparedStatement pstmt = conn.prepareStatement(query)){
-//    			pstmt.setLong(1, serial);
-//    			ResultSet rs=pstmt.executeQuery();
-//    			
-//    			
-//    			return !rs.next();
-//    			}catch(SQLException e) {
-//    			e.printStackTrace();
-//    			return false;
-//    		}
-//    	}
+    private static boolean isSerialUnique(long serial) {
+    		String query="SELECT * FROM beauty_centerdb.employee WHERE serial=? LIMIT 1";
+    		Connection conn=Main.getConnection();
+    		try(PreparedStatement pstmt = conn.prepareStatement(query)){
+    			pstmt.setLong(1, serial);
+    			ResultSet rs=pstmt.executeQuery();
+    			
+    			return !rs.next();
+    			}catch(SQLException e) {
+    			e.printStackTrace();
+    			return false;
+    		}
+    	}
+   
     
 
 	@Override
