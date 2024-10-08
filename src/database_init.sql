@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`beauty_center` (
   
 CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`vat` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
-  `amount` float NOT NULL,
+  `amount` DOUBLE NOT NULL,
   `is_enabled` tinyint DEFAULT '1',
   PRIMARY KEY (`id`)
 );
@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`customer` (
   `notes` text,
   `loyalty_points` int NOT NULL DEFAULT '0',
   `is_enabled` tinyint DEFAULT '1',
+  `serial` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `customer_FK1` FOREIGN KEY (`credentials_id`) REFERENCES `beauty_centerdb`.`user_credentials` (`id`) ON UPDATE CASCADE
 );

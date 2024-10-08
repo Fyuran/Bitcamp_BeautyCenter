@@ -77,7 +77,7 @@ public abstract class VATDao {
 		
 		Optional<VAT> opt = Optional.empty();
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			stat.setFloat(1, amount);  //WHERE id = ?
+			stat.setDouble(1, amount);  //WHERE id = ?
 			
 			ResultSet rs = stat.executeQuery();
 			conn.commit();
