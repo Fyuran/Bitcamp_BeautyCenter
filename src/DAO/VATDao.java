@@ -72,12 +72,12 @@ public abstract class VATDao {
 		return opt;
 	}
 	
-	public static Optional<VAT> getVATByAmount(float amount) {
+	public static Optional<VAT> getVATByAmount(double amount) {
 		String query = "SELECT * FROM beauty_centerdb.vat WHERE amount = ?";
 		
 		Optional<VAT> opt = Optional.empty();
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			stat.setFloat(1, amount);  //WHERE id = ?
+			stat.setDouble(1, amount);  //WHERE id = ?
 			
 			ResultSet rs = stat.executeQuery();
 			conn.commit();
