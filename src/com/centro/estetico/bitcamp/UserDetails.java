@@ -91,6 +91,7 @@ public class UserDetails {
 			city = cities.findByName(birthplace);
 		} catch(IllegalArgumentException e) {
 			e.printStackTrace();
+			return null;
 		}
 		
 		Person person =	Person.builder()
