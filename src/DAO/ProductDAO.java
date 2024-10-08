@@ -88,6 +88,7 @@ public abstract class ProductDAO {
 		try (PreparedStatement stat = conn.prepareStatement(query)) {
 
 			stat.setString(1, obj.getName());
+			System.out.println(obj.getName());
 			stat.setInt(2, obj.getAmount());
 			stat.setInt(3, obj.getMinStock());
 			stat.setBigDecimal(4, obj.getPrice());
@@ -95,7 +96,7 @@ public abstract class ProductDAO {
 			stat.setInt(6, obj.getType().toSQLOrdinal());
 			stat.setBoolean(7, obj.isEnabled());
 
-			stat.setInt(8, obj.getId()); // WHERE id = ?
+			stat.setInt(8, id); // WHERE id = ?
 
 			int exec = stat.executeUpdate();
 			conn.commit();
