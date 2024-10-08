@@ -130,6 +130,7 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`employee` (
   `credentials_id` INT UNSIGNED NULL,
   `notes` TEXT NULL,
   `is_enabled` TINYINT NOT NULL DEFAULT 1,
+  `serial` LONG NOT NULL,
   `treatment_id` INT UNSIGNED NULL,
   PRIMARY KEY (`id`),
   INDEX `employee_fk1_idx` (`credentials_id` ASC),

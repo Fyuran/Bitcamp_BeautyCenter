@@ -18,7 +18,7 @@ public abstract class EmployeeDAO {
 	public static Optional<Employee> insertEmployee(Employee obj) {
 		String query = "INSERT INTO beauty_centerdb.employee("
 				+ "name, surname, is_female, birthday, birthplace, role, hired, termination, credentials_id, notes, is_enabled, serial) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
 		
 		try(PreparedStatement stat = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
 			

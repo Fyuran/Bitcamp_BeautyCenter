@@ -49,10 +49,10 @@ public class Employee extends User {
 				UserCredentialsDAO.getUserCredentials(rs.getInt(10)).get(),
 				rs.getBoolean(12),
 				rs.getLong(13),
-				Roles.valueOf(rs.getString(6)),
+				Roles.valueOf(rs.getString(7)),
 				new ArrayList<Shift>(), //TODO: Add DAO for Shift
-				rs.getDate(8).toLocalDate(),
-				rs.getDate(9).toLocalDate()
+				rs.getDate(8) != null ? rs.getDate(8).toLocalDate() : null,  
+				rs.getDate(9) != null ? rs.getDate(9).toLocalDate() : null 
 			);
 	}
 	
@@ -117,26 +117,24 @@ public class Employee extends User {
     public static long generateSerial() {
     	Random rand=new Random();
     	long serial=rand.nextInt(100000)+900000;
-    	return isSerialUnique(serial)?serial:generateSerial();
+    	return serial;
     }
-    private static boolean isSerialUnique(long serial) {
-    		String query="SELECT * FROM beauty_centerdb.employee WHERE serial=? LIMIT 1";
-    		long serialToCheck=-1;
-    		Connection conn=Main.getConnection();
-    		try(PreparedStatement pstmt = conn.prepareStatement(query)){
-    			pstmt.setLong(1, serial);
-    			ResultSet rs=pstmt.executeQuery();
-    			if(rs.next()) {
-    				serial=rs.getLong("serial");
-    				
-    			}
-    			
-    			return serialToCheck==-1;
-    		}catch(SQLException e) {
-    			e.printStackTrace();
-    			return false;
-    		}
-    	}
+    
+    //funzione da correggere, ho fallito male
+//    private static boolean isSerialUnique(long serial) {
+//    		String query="SELECT * FROM beauty_centerdb.employee WHERE serial=? LIMIT 1";
+//    		Connection conn=Main.getConnection();
+//    		try(PreparedStatement pstmt = conn.prepareStatement(query)){
+//    			pstmt.setLong(1, serial);
+//    			ResultSet rs=pstmt.executeQuery();
+//    			
+//    			
+//    			return !rs.next();
+//    			}catch(SQLException e) {
+//    			e.printStackTrace();
+//    			return false;
+//    		}
+//    	}
     
 
 	@Override

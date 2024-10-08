@@ -1,23 +1,24 @@
 package com.centro.estetico.test.bitcamp;
 
-public class EmployeeTest {
-
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
-
-}
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-public class EmployeeGenerator {
-    public static void main(String[] args) {
-        // Supponiamo di avere un EmployeeDAO con il metodo insertEmployee.
-        EmployeeDAO employeeDAO = new EmployeeDAO();
+import com.centro.estetico.bitcamp.Employee;
+import com.centro.estetico.bitcamp.Main;
+import com.centro.estetico.bitcamp.Roles;
+import com.centro.estetico.bitcamp.Shift;
+import com.centro.estetico.bitcamp.UserCredentials;
+import com.centro.estetico.bitcamp.UserDetails;
+
+import DAO.EmployeeDAO;
+
+public class EmployeeTest {
+
+	public static void main(String[] args) {
+		Main main=new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
+		 // Supponiamo di avere un EmployeeDAO con il metodo insertEmployee.
+
 
         // Generare 10 Employee
         for (int i = 0; i < 10; i++) {
@@ -26,7 +27,7 @@ public class EmployeeGenerator {
             String surname = "EmployeeSurname" + i;
             boolean isFemale = (i % 2 == 0);
             LocalDate bod = LocalDate.of(1990, (i % 12) + 1, (i % 28) + 1);
-            String birthplace = "City" + i;
+            String birthplace = "Roma";
             String notes = "Note" + i;
 
             UserDetails details = new UserDetails(name, surname, isFemale, bod, birthplace, notes);
@@ -45,25 +46,29 @@ public class EmployeeGenerator {
             long serial = Employee.generateSerial();
 
             // Impostazione di un ruolo casuale per ogni dipendente
-            Roles role = (i % 2 == 0) ? Roles.ADMIN : Roles.OPERATOR;
+            Roles role = (i % 2 == 0) ? Roles.ADMIN : Roles.PERSONNEL;
 
             // Aggiungere turni (in questo esempio una lista vuota)
             List<Shift> shifts = new ArrayList<>();
 
             // Impostare le date di assunzione e di termine (termine può essere null)
-            LocalDate hiredDate = LocalDate.now().minusYears(i);
-            LocalDate terminationDate = null; // Consideriamo che non sia ancora terminato
+            LocalDate hiredDate = LocalDate.of(1950, 11, 11);
+            LocalDate terminationDate = LocalDate.of(2050, 10, 9);// Consideriamo che non sia ancora terminato
 
             // Creare l'oggetto Employee
             Employee employee = new Employee(details, userCredentials, serial, role, shifts, hiredDate, terminationDate);
 
             // Inserire l'Employee nel database
             try {
-                employeeDAO.insertEmployee(employee);
+                EmployeeDAO.insertEmployee(employee);
                 System.out.println("Employee " + i + " inserito con successo.");
             } catch (Exception e) {
-                System.err.println("Errore durante l'inserimento di Employee " + i + ": " + e.getMessage());
+                 e.printStackTrace();
             }
         }
-    }
+	}
+
 }
+
+
+
