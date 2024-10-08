@@ -63,7 +63,6 @@ public class EmployeePanel extends JPanel {
 	private JTextField txtPhone;
 	private JTextField txtAddress;
 	private JTextField txtBirthday;
-	private JTextField textField;
 	private JTextField txtUsername;
 	private JTextField txtPassword;
 	private JLabel msgLbl;
@@ -113,7 +112,6 @@ public class EmployeePanel extends JPanel {
 	                    	String name=String.valueOf(table.getValueAt(selectedRow, 1));
 	                    	String surname=String.valueOf(table.getValueAt(selectedRow, 2));
 	                    	String BoDString=String.valueOf(table.getValueAt(selectedRow, 3));
-	                    	LocalDate BoD=LocalDate.parse(BoDString, format);
 	                    	String roleString=String.valueOf(table.getValueAt(selectedRow, 4));
 	                    	Roles role=Roles.toEnum(roleString);
 	                    	String username=String.valueOf(table.getValueAt(selectedRow, 5));
@@ -267,7 +265,7 @@ public class EmployeePanel extends JPanel {
 		
 		txtPhone = new JTextField();
 		txtPhone.setColumns(10);
-		txtPhone.setBounds(749, 470, 220, 20);
+		txtPhone.setBounds(749, 551, 220, 20);
 		add(txtPhone);
 		
 		txtAddress = new JTextField();
@@ -280,7 +278,7 @@ public class EmployeePanel extends JPanel {
 		add(lblMail);
 		
 		JLabel lblPhone = new JLabel("Telefono:");
-		lblPhone.setBounds(531, 475, 170, 14);
+		lblPhone.setBounds(531, 554, 170, 14);
 		add(lblPhone);
 		
 		JLabel lblAddress = new JLabel("Indirizzo:");
@@ -297,16 +295,6 @@ public class EmployeePanel extends JPanel {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
-		JLabel lblMail_1 = new JLabel("Mail:");
-		lblMail_1.setBounds(531, 554, 170, 14);
-		add(lblMail_1);
-		
-		textField = new JTextField();
-		textField.setColumns(10);
-		textField.setBounds(749, 553, 220, 20);
-		add(textField);
 		
 		JLabel lblRole = new JLabel("Ruolo:");
 		lblRole.setBounds(531, 597, 170, 14);
@@ -386,7 +374,7 @@ public class EmployeePanel extends JPanel {
 		txtNotes = new JTextArea();
 		txtNotes.setBounds(749, 664, 220, 72);
 		add(txtNotes);
-
+		populateTable();
 	}
 
 	private void clearTable() {
@@ -656,13 +644,7 @@ public class EmployeePanel extends JPanel {
 		this.txtBirthday = txtBirthday;
 	}
 
-	public JTextField getTextField() {
-		return textField;
-	}
-
-	public void setTextField(JTextField textField) {
-		this.textField = textField;
-	}
+	
 
 	public JTextField getTxtUsername() {
 		return txtUsername;

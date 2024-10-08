@@ -48,7 +48,7 @@ public class TestFrame extends JFrame {
 				121321451251L, Roles.PERSONNEL, new ArrayList<Shift>(), LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 1)
 				);
 
-		new Main("jdbc:mysql://localhost:1806/beauty_centerdb", "root", "bitcampPassword");
+		new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
 		panelU = new UserAccessPanel(employee);
 		panelT = new TreatmentPanel();
 		panelE = new EmployeePanel();

@@ -29,16 +29,12 @@ public class ProductTest {
         products[8] = new Product("Scrub Corpo", 20, 3, new BigDecimal("19.99"), VATDao.getVAT(1).get(), ProductCat.BODY_CARE);
         products[9] = new Product("Gel Antibatterico", 45, 7, new BigDecimal("4.99"), VATDao.getVAT(1).get(), ProductCat.OTHER);
 
-        // Insert each product into the database
-//        for (Product product : products) {
-//            int result = Product.insertData(product);
-//            if (result > 0) {
-//                System.out.println("Product inserted successfully: " + product.getName());
-//            } else {
-//                System.out.println("Failed to insert product: " + product.getName());
-//            }
-//        	System.out.println(product);
-//        }
+         //Insert each product into the database
+        for (Product product : products) {
+            ProductDAO.insertProduct(product);
+           
+        	System.out.println(product);
+        }
 
         ProductDAO.insertProduct(products[9]);
     }

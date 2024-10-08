@@ -15,6 +15,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import com.centro.estetico.bitcamp.Product;
@@ -39,6 +41,7 @@ public class ProductPanel extends JPanel {
 	private JLabel msgLbl;
 	private JComboBox<String> ivaComboBox;
 	private JComboBox<String> categoryComboBox;
+	private int selectedId;
 
 	/**
 	 * Create the panel.
@@ -60,12 +63,40 @@ public class ProductPanel extends JPanel {
 		add(containerPanel);
 
 		// Modello della tabella con colonne
-		String[] columnNames = { "Prodotto", "Categoria", "Quantità", "Quantità minima", "Prezzo", "IVA%" };
+		String[] columnNames = { "ID","Prodotto", "Categoria", "Quantità", "Quantità minima", "Prezzo", "IVA%" };
 		tableModel = new DefaultTableModel(columnNames, 0);
 
 		// Creazione della tabella
 		JTable table = new JTable(tableModel);
-		table.setEnabled(false);
+		//Listener della tabella per pescare i nomi che servono
+		 table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+	            @Override
+	            public void valueChanged(ListSelectionEvent event) {
+	                if (!event.getValueIsAdjusting()) {
+	                    int selectedRow = table.getSelectedRow();
+	                    if (selectedRow != -1) {
+	                    	selectedId=Integer.parseInt(String.valueOf(table.getValueAt(selectedRow, 0)));	
+	                    	String name=String.valueOf(table.getValueAt(selectedRow, 1)); 
+	                       String category=String.valueOf(String.valueOf(table.getValueAt(selectedRow, 2)));
+	                       //int amount=(int)table.getValueAt(selectedRow, 2);
+	                       String minStock=String.valueOf(table.getValueAt(selectedRow, 4));
+	                       String price=String.valueOf(table.getValueAt(selectedRow, 5));
+	                       String vatString=String.valueOf(table.getValueAt(selectedRow, 6)+"%");
+	                       System.out.println(vatString);
+	                       //double vat=Double.parseDouble(vatString.substring(0,vatString.length()-1));
+	                       
+	                       //Il listener ascolta la riga selezionata e la usa per popolare i campi
+	                       txtName.setText(name);
+	                       categoryComboBox.setSelectedItem(category);
+	                       txtMinStock.setText(minStock);
+	                       txtPrice.setText(price);
+	                       ivaComboBox.setSelectedItem(vatString);
+	                       table.clearSelection();
+
+	                    }
+	                }
+	            }
+	        });
 
 		// Aggiungere la tabella all'interno di uno JScrollPane per lo scroll
 		JScrollPane scrollPane = new JScrollPane(table);
@@ -212,7 +243,7 @@ public class ProductPanel extends JPanel {
 			return;
 		}
 		for (Product p : products) {
-			tableModel.addRow(new String[] { p.getName(), p.getType().getDescription(), String.valueOf(p.getAmount()),
+			tableModel.addRow(new String[] {String.valueOf(p.getId()), p.getName(), p.getType().getDescription(), String.valueOf(p.getAmount()),
 					String.valueOf(p.getMinStock()), String.valueOf(p.getPrice()), String.valueOf(p.getVat()) });
 			// {"Prodotto","Categoria","Quantità","Quantità minima","Prezzo","IVA%"}
 		}
