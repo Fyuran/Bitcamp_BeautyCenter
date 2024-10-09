@@ -6,11 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import com.centro.estetico.bitcamp.Employee;
 import com.centro.estetico.bitcamp.Main;
+import com.centro.estetico.bitcamp.Roles;
 
 public abstract class EmployeeDAO {
 	private static Connection conn = Main.getConnection();
@@ -105,6 +108,18 @@ public abstract class EmployeeDAO {
 			}	
 		}
 		return list;
+	}
+	
+	public static List<Employee> getEmployeesByRole(Roles role) {
+		return filterEmployeesBy(e -> e.getRole().equals(role));
+	}
+	
+	public static List<Employee> filterEmployeesBy(Predicate<? super Employee> pred) {
+		List<Employee> employees = getAllEmployees();
+		if(!employees.isEmpty()) {
+			return employees.stream().filter(pred).toList();			
+		}
+		return Collections.emptyList();
 	}
 	
 	public static int updateEmployee(int id, Employee obj) {
