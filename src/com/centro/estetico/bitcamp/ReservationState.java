@@ -1,4 +1,4 @@
-package com.centro.estetico.enums;
+package com.centro.estetico.bitcamp;
 
 public enum ReservationState {
 	CREATED,

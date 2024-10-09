@@ -1,4 +1,4 @@
-package com.centro.estetico.bitcamp.repository;
+package DAO;
 
 import java.util.Map;
 
@@ -13,24 +13,23 @@ import java.sql.*;
 import com.centro.estetico.bitcamp.*;
 import java.time.LocalDate;
 import java.time.Duration;
+import java.util.Optional;
 
 public class DAOReservation {
-	private final String url = "jdbc:mysql://localhost:3306/beauty_centerdb";
-	private final String username = "root";
-	private final String password = "Bitcamp_0";
+	private static Connection connection = Main.getConnection();
+
 
 	public Map<Integer, Reservation> getAll() {// throws Exception{
 		String query = "SELECT c.id as customer_id, c.name AS customer_name, c.surname AS customer_surname, r.id as reservation_id, r.date, "
 				+ "e.id AS employee_id, e.name AS employee_name, e.surname AS employee_surname, t.id as treatment_id,"
 				+ "t.type, t.duration " + "FROM reservation r JOIN customer c "
 				+ "ON r.customer_id = c.id JOIN employee e "
-				+ "ON r.employee_id = e.id JOIN treatment t ON r.treatment_id = t.id WHERE r.is_enabled = ?;";
+				+ "ON r.employee_id = e.id JOIN treatment t ON r.treatment_id = t.id WHERE r.is_enabled = ? ORDER BY r.date ASC;";
 		;
 
 		Map<Integer, Reservation> reservations = new HashMap<Integer, Reservation>();
 
 		try {
-			Connection connection = DriverManager.getConnection(url, username, password);
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setInt(1, 1);
 			ResultSet rs = pstmt.executeQuery();
@@ -42,38 +41,36 @@ public class DAOReservation {
 				Reservation reservation = new Reservation();
 				reservation.setId(rs.getInt("reservation_id"));
 				reservation.setDateTime(rs.getTimestamp("date").toLocalDateTime());
+				
+				int idTreatment = rs.getInt("treatment_id");
+				Optional<Treatment> optionalTreatment = TreatmentDAO.getTreatment(idTreatment);
 
-				Treatment treatment = new Treatment();
-				treatment.setId(rs.getInt("treatment_id"));
-				treatment.setType(rs.getString("type"));
+				if (optionalTreatment.isPresent()) {
+				    Treatment treatment = optionalTreatment.get();
+				    reservation.setTreatment(treatment);				    
+				}
+								
+				int idCustomer = rs.getInt("customer_id");
+				Optional<Customer> optionalCustomer = CustomerDAO.getCustomer(idCustomer);
 
-				// durata trattamento
-				Time durationTime = rs.getTime("duration");
-				Duration duration = Duration.ofHours(durationTime.toLocalTime().getHour())
-						.plusMinutes(durationTime.toLocalTime().getMinute())
-						.plusSeconds(durationTime.toLocalTime().getSecond());
-
-				treatment.setDuration(duration);
-
-				Customer customer = new Customer();
-				customer.setId(rs.getInt("customer_id"));
-				customer.setName(rs.getString("customer_name"));
-				customer.setSurname(rs.getString("customer_surname"));
-
-				Employee employee = new Employee();
-				employee.setId(rs.getInt("employee_id"));
-				employee.setName(rs.getString("employee_name"));
-				employee.setSurname(rs.getString("employee_surname"));
-
-				reservation.setCustomer(customer);
-				reservation.setTreatment(treatment);
-				reservation.setEmployee(employee);
+				if (optionalTreatment.isPresent()) {
+				    Customer customer = optionalCustomer.get();
+				    reservation.setCustomer(customer);				    
+				}
+				
+				int idEmployee = rs.getInt("employee_id");				
+				Optional<Employee> optionalEmployee = EmployeeDAO.getEmployee(idEmployee);
+				
+				if (optionalEmployee.isPresent()) {
+				    Employee employee = optionalEmployee.get();
+				    reservation.setEmployee(employee);				    
+				}
 
 				reservations.put(id, reservation);
 			}
-
+			rs.close();
 			pstmt.close();
-			connection.close();
+			//connection.close();*/
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -92,8 +89,7 @@ public class DAOReservation {
 				+ "WHERE r.treatment_id = ? AND DATE(r.date) = ?;";
 		List<Reservation> reservations = new ArrayList<Reservation>();
 
-		try {
-			Connection connection = DriverManager.getConnection(url, username, password);
+		try {			
 			PreparedStatement pstmt = connection.prepareStatement(query);
 
 			pstmt.setInt(1, treatment.getId());
@@ -105,18 +101,21 @@ public class DAOReservation {
 				reservation.setId(rs.getInt("reservation_id"));
 				reservation.setDateTime(rs.getTimestamp("date").toLocalDateTime());
 
-				Employee employee = new Employee();
-				employee.setId(rs.getInt("beautician_id"));
-				employee.setName(rs.getString("beautician_name"));
-				employee.setSurname(rs.getString("beautician_surname"));
-
-				reservation.setEmployee(employee);
+				int idEmployee = rs.getInt("beautician_id");
+				Optional<Employee> optionalEmployee = EmployeeDAO.getEmployee(idEmployee);
+				
+				if (optionalEmployee.isPresent()) {
+				    Employee employee = optionalEmployee.get();
+				    reservation.setEmployee(employee);				    
+				}
+				
 				reservation.setTreatment(treatment);
 
 				reservations.add(reservation);
 			}
+			rs.close();
 			pstmt.close();
-			connection.close();
+			//connection.close();*/
 		}
 
 		catch (Exception ex) {
@@ -135,8 +134,7 @@ public class DAOReservation {
 				+ "ON r.employee_id = e.id JOIN treatment t ON r.treatment_id = t.id WHERE r.is_enabled = ? AND r.id = ?;";
 		Reservation reservation = new Reservation();
 
-		try {
-			Connection connection = DriverManager.getConnection(url, username, password);
+		try {			
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setInt(1, 1);
 			pstmt.setInt(2, reservationId);
@@ -149,35 +147,35 @@ public class DAOReservation {
 				reservation.setId(rs.getInt("reservation_id"));
 				reservation.setDateTime(rs.getTimestamp("date").toLocalDateTime());
 
-				Treatment treatment = new Treatment();
-				treatment.setId(rs.getInt("treatment_id"));
-				treatment.setType(rs.getString("type"));
+				int idTreatment = rs.getInt("treatment_id");
+				Optional<Treatment> optionalTreatment = TreatmentDAO.getTreatment(idTreatment);
 
-				// durata trattamento
-				Time durationTime = rs.getTime("duration");
-				Duration duration = Duration.ofHours(durationTime.toLocalTime().getHour())
-						.plusMinutes(durationTime.toLocalTime().getMinute())
-						.plusSeconds(durationTime.toLocalTime().getSecond());
+				if (optionalTreatment.isPresent()) {
+				    Treatment treatment = optionalTreatment.get();
+				    reservation.setTreatment(treatment);				    
+				}
+				
 
-				treatment.setDuration(duration);
+				int idCustomer = rs.getInt("customer_id");
+				Optional<Customer> optionalCustomer = CustomerDAO.getCustomer(idCustomer);
 
-				Customer customer = new Customer();
-				customer.setId(rs.getInt("customer_id"));
-				customer.setName(rs.getString("customer_name"));
-				customer.setSurname(rs.getString("customer_surname"));
+				if (optionalTreatment.isPresent()) {
+				    Customer customer = optionalCustomer.get();
+				    reservation.setCustomer(customer);				    
+				}
 
-				Employee employee = new Employee();
-				employee.setId(rs.getInt("employee_id"));
-				employee.setName(rs.getString("employee_name"));
-				employee.setSurname(rs.getString("employee_surname"));
+				int idEmployee = rs.getInt("employee_id");
+				Optional<Employee> optionalEmployee = EmployeeDAO.getEmployee(idEmployee);
+				
+				if (optionalEmployee.isPresent()) {
+				    Employee employee = optionalEmployee.get();
+				    reservation.setEmployee(employee);				    
+				}
 
-				reservation.setCustomer(customer);
-				reservation.setTreatment(treatment);
-				reservation.setEmployee(employee);
 			}
-
+			rs.close();
 			pstmt.close();
-			connection.close();
+			//connection.close();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -188,8 +186,7 @@ public class DAOReservation {
 		String query = "INSERT INTO reservation(date, is_paid, treatment_id, customer_id, employee_id, state)"
 				+ "VALUES(?,?,?,?,?,?)";
 
-		try {
-			Connection connection = DriverManager.getConnection(url, username, password);
+		try {			
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setTimestamp(1, java.sql.Timestamp.valueOf(reservation.getDateTime()));
 			pstmt.setBoolean(2, reservation.isPaid());
@@ -201,7 +198,7 @@ public class DAOReservation {
 			pstmt.execute();
 
 			pstmt.close();
-			connection.close();
+			//connection.close();
 		}
 
 		catch (Exception ex) {
@@ -213,8 +210,7 @@ public class DAOReservation {
 		String query = "UPDATE reservation set date = ?, is_paid = ?, treatment_id = ?, customer_id = ?,"
 				+ "employee_id = ?, state = ? WHERE id = ?";
 
-		try {
-			Connection connection = DriverManager.getConnection(url, username, password);
+		try {			
 			PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setTimestamp(1, Timestamp.valueOf(reservation.getDateTime()));
 			pstmt.setBoolean(2, reservation.isPaid());
@@ -226,7 +222,7 @@ public class DAOReservation {
 			pstmt.execute();
 
 			pstmt.close();
-			connection.close();
+			//connection.close();*/
 		}
 
 		catch (Exception ex) {
@@ -244,8 +240,7 @@ public class DAOReservation {
 		
 		Map<Integer, Reservation> reservations = new HashMap<Integer, Reservation>();
 
-		try {
-			Connection connection = DriverManager.getConnection(url, username, password);
+		try {			
 			PreparedStatement pstmt = connection.prepareStatement(query);
 
 			pstmt.setString(1, "%" + textToSearch + "%");
@@ -258,31 +253,29 @@ public class DAOReservation {
 				reservation.setId(rs.getInt("reservation_id"));
 				reservation.setDateTime(rs.getTimestamp("date").toLocalDateTime());
 
-				Treatment treatment = new Treatment();
-				treatment.setId(rs.getInt("treatment_id"));
-				treatment.setType(rs.getString("type"));
+				int idTreatment = rs.getInt("treatment_id");
+				Optional<Treatment> optionalTreatment = TreatmentDAO.getTreatment(idTreatment);
 
-				// durata trattamento
-				Time durationTime = rs.getTime("duration");
-				Duration duration = Duration.ofHours(durationTime.toLocalTime().getHour())
-						.plusMinutes(durationTime.toLocalTime().getMinute())
-						.plusSeconds(durationTime.toLocalTime().getSecond());
+				if (optionalTreatment.isPresent()) {
+				    Treatment treatment = optionalTreatment.get();
+				    reservation.setTreatment(treatment);				    
+				}
+								
+				int idCustomer = rs.getInt("customer_id");
+				Optional<Customer> optionalCustomer = CustomerDAO.getCustomer(idCustomer);
 
-				treatment.setDuration(duration);
-
-				Customer customer = new Customer();
-				customer.setId(rs.getInt("customer_id"));
-				customer.setName(rs.getString("customer_name"));
-				customer.setSurname(rs.getString("customer_surname"));
-
-				Employee employee = new Employee();
-				employee.setId(rs.getInt("employee_id"));
-				employee.setName(rs.getString("employee_name"));
-				employee.setSurname(rs.getString("employee_surname"));
-
-				reservation.setCustomer(customer);
-				reservation.setTreatment(treatment);
-				reservation.setEmployee(employee);
+				if (optionalTreatment.isPresent()) {
+				    Customer customer = optionalCustomer.get();
+				    reservation.setCustomer(customer);				    
+				}
+				
+				int idEmployee = rs.getInt("employee_id");
+				Optional<Employee> optionalEmployee = EmployeeDAO.getEmployee(idEmployee);
+				
+				if (optionalEmployee.isPresent()) {
+				    Employee employee = optionalEmployee.get();
+				    reservation.setEmployee(employee);				    
+				}
 				
 				reservations.put(reservation.getId(), reservation);
 			}
@@ -292,5 +285,20 @@ public class DAOReservation {
 			ex.printStackTrace();
 		}
 		return reservations;
+	}
+	
+	public void disable(Reservation reservation) {
+		String query = "UPDATE reservation SET is_enabled = ? WHERE id = ?";
+		
+		try {
+			PreparedStatement pstmt = connection.prepareStatement(query);
+			pstmt.setInt(1, 0);
+			pstmt.setInt(2, reservation.getId());
+			pstmt.execute();
+			pstmt.close();
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 }

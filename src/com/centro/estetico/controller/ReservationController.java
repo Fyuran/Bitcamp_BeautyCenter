@@ -1,16 +1,16 @@
-package com.centro.estetico.bitcamp.controller;
-
+package com.centro.estetico.controller;
+import wrappersForDisplayMember.*;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 
+import com.centro.estetico.bitcamp.*;
 import javax.swing.JComboBox;
 import javax.swing.JList;
 
-import com.centro.estetico.bitcamp.repository.*;
-import com.centro.estetico.enums.IsCreatingOrUpdating;
+//import DAO;
 import com.centro.estetico.bitcamp.Customer;
 import com.centro.estetico.bitcamp.Employee;
 import com.centro.estetico.bitcamp.Reservation;
@@ -19,21 +19,24 @@ import com.toedter.calendar.JCalendar;
 
 public class ReservationController {
 	
-	private DAOReservation daoReservation;
-	public ReservationController(DAOReservation daoReservation) {
+	private DAO.DAOReservation daoReservation;
+	public ReservationController(DAO.DAOReservation daoReservation) {
 		this.daoReservation = daoReservation;
 	}
 
 	public void sendDataToDB(JComboBox customersComboBox, JComboBox treatmentsComboBox, JCalendar calendar, 
 			JList beauticiansList, JList timeList, Reservation reservation, IsCreatingOrUpdating icou) {
 
-		Customer customer = (Customer) customersComboBox.getSelectedItem();
+		CustomerWrapper cw = (CustomerWrapper) customersComboBox.getSelectedItem();
+		Customer customer = cw.getCustomer();
 
 		if (customer == null) {
 			throw new IllegalArgumentException("Seleziona un cliente");
 		}
 
-		Treatment treatment = (Treatment) treatmentsComboBox.getSelectedItem();
+		TreatmentWrapper tw = (TreatmentWrapper) treatmentsComboBox.getSelectedItem();
+		Treatment treatment = tw.getTreatment();
+		
 		if (treatment == null) {
 			throw new IllegalArgumentException("Seleziona un trattamento");
 		}
@@ -53,7 +56,8 @@ public class ReservationController {
 		LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
 		
 		
-		Employee employee = (Employee) beauticiansList.getSelectedValue();
+		EmployeeWrapper ew = (EmployeeWrapper) beauticiansList.getSelectedValue();
+		Employee employee = ew.getEmployee();
 		if (employee == null) {
 			throw new IllegalArgumentException("Seleziona un estetista");
 		}

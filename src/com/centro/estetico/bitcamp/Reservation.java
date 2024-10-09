@@ -1,6 +1,6 @@
 package com.centro.estetico.bitcamp;
 import java.time.*;
-import com.centro.estetico.enums.ReservationState;
+
 
 public class Reservation {
 	private int id;
