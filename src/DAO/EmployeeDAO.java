@@ -153,7 +153,7 @@ public abstract class EmployeeDAO {
 		String query = "UPDATE beauty_centerdb.employee "
 				+ "SET is_enabled = ? "
 				+ "WHERE id = ?";
-		
+		UserCredentialsDAO.toggleEnabledUserCredentials(obj.getUserCredentials());
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
 			boolean toggle = !obj.isEnabled(); //toggle enable or disable state
 			obj.setEnabled(toggle);

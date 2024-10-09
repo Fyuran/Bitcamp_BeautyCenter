@@ -54,7 +54,7 @@ public class EmployeePanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField txtSurname;
-	private JTextField txfSearchBar;
+	private JTextField txtSearchBar;
 	private JTextField txtName;
 	private JTextField txtIban;
 
@@ -71,7 +71,6 @@ public class EmployeePanel extends JPanel {
 	private JTextField txtBirthplace;
 	private JRadioButton femaleRadioBtn;
 	private JRadioButton maleRadioBtn;
-	private JTextField txtSearchBar;
 	private boolean isFemale;//boolean che cambia a seconda di ciò che viene selezionato nel radiobutton. è una porcata metterlo qui? Sì. Però al momento è la soluzione più veloce. -Daniele
 	private JTextArea txtNotes;
 	private JComboBox<String> roleComboBox;
@@ -113,6 +112,7 @@ public class EmployeePanel extends JPanel {
 			                    int selectedRow = table.getSelectedRow();
 			                    if (selectedRow != -1) {
 			                    	selectedId=Integer.parseInt(String.valueOf(table.getValueAt(selectedRow, 0)));	
+			                    	System.out.println("ID selezionato: "+selectedId);
 			                    	String name=String.valueOf(table.getValueAt(selectedRow, 2));
 			                    	String surname=String.valueOf(table.getValueAt(selectedRow, 3));
 			                    	String BoDString=String.valueOf(table.getValueAt(selectedRow, 4));
@@ -168,11 +168,11 @@ public class EmployeePanel extends JPanel {
 		});
 		containerPanel.add(btnSearch);
 
-		txfSearchBar = new JTextField();
-		txfSearchBar.setColumns(10);
-		txfSearchBar.setBackground(UIManager.getColor("CheckBox.background"));
-		txfSearchBar.setBounds(23, 14, 168, 24);
-		containerPanel.add(txfSearchBar);
+		txtSearchBar = new JTextField();
+		txtSearchBar.setColumns(10);
+		txtSearchBar.setBackground(UIManager.getColor("CheckBox.background"));
+		txtSearchBar.setBounds(23, 14, 168, 24);
+		containerPanel.add(txtSearchBar);
 
 		JButton btnFilter = new JButton("");
 		btnFilter.setOpaque(false);
@@ -211,6 +211,7 @@ public class EmployeePanel extends JPanel {
 		btnDelete.setBorderPainted(false);
 		btnDelete.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/delete.png")));
 		btnDelete.setBounds(820, 8, 40, 30);
+		btnDelete.addActionListener(e->deleteEmployee());
 		containerPanel.add(btnDelete);
 
 		JButton btnDisable = new JButton("");
@@ -232,6 +233,7 @@ public class EmployeePanel extends JPanel {
 		btnHystorical.setBorderPainted(false);
 		btnHystorical.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/cartellina.png")));
 		btnHystorical.setBounds(870, 8, 40, 30);
+		btnHystorical.addActionListener(e->populateTable());
 		containerPanel.add(btnHystorical);
 
 		// label e textfield degli input
@@ -299,7 +301,7 @@ public class EmployeePanel extends JPanel {
 		lblPhone.setBounds(531, 554, 170, 14);
 		add(lblPhone);
 		
-		JLabel lblAddress = new JLabel("Indirizzo:");
+		JLabel lblAddress = new JLabel("Indirizzo:"); 
 		lblAddress.setBounds(531, 437, 170, 14);
 		add(lblAddress);
 		
@@ -346,7 +348,7 @@ public class EmployeePanel extends JPanel {
 		add(txtPassword);
 		
 		msgLbl = new JLabel("");
-		msgLbl.setBounds(389, 606, 625, 16);
+		msgLbl.setBounds(236, 413, 625, 16);
 		add(msgLbl);
 		
 		JLabel lblBirthPlace = new JLabel("Città di nascita:");
@@ -421,11 +423,12 @@ public class EmployeePanel extends JPanel {
 		clearFields();
 		List<Employee> employees = EmployeeDAO.getAllEmployees();
 		if (employees.isEmpty()) {
-			tableModel.addRow(new String[] { "Sembra non ci siano prodotti presenti", "" });
+			tableModel.addRow(new String[] { "Sembra non ci siano impiegati presenti", "" });
 			return;
 		}
 		for (Employee employee : employees) {
-			if (employee.getTerminationDate() == null) {
+			System.out.println(employee.getAddress());
+			if (employee.getTerminationDate() == null&&employee.isEnabled()) {
 				tableModel.addRow(new String[] {
 						String.valueOf(employee.getId()),
 						String.valueOf(employee.getEmployeeSerial()),
@@ -463,10 +466,20 @@ public class EmployeePanel extends JPanel {
     		return;
     	}
     	for (Employee employee : employees) {
-			if (employee.getTerminationDate() == null&&employee.getSurname().equals(txtSearchBar.getText())) {
-				tableModel.addRow(new String[] { String.valueOf(employee.getId()),String.valueOf(employee.getEmployeeSerial()), employee.getName(),
-						employee.getSurname(), String.valueOf(employee.getBoD()), employee.getRole().toString(),
-						employee.getUserCredentials().getUsername() });
+			if (employee.isEnabled()&&employee.getTerminationDate() == null&&employee.getSurname().equalsIgnoreCase(txtSearchBar.getText())) {
+				tableModel.addRow(new String[] { String.valueOf(employee.getId()),
+						String.valueOf(employee.getEmployeeSerial()),
+						employee.getName(),
+						employee.getSurname(),
+						String.valueOf(employee.getBoD()),
+						String.valueOf(employee.getHiredDate()),
+						employee.getRole().toString(),
+						employee.getUserCredentials().getUsername(), 
+						employee.getAddress(),
+						employee.getBirthplace(),
+						employee.getMail(),
+						employee.getPhone(),
+						employee.getIban() });
 				// {"ID","Nome","Cognome","Data di nascita","Data
 				// assunzione","Ruolo","Username"};
 			}
@@ -546,10 +559,12 @@ public class EmployeePanel extends JPanel {
 			Employee employee=new Employee(det,cred,employeeSerial,role,null,LocalDate.now(),null);
 			EmployeeDAO.updateEmployee(id, employee);
 			msgLbl.setText(name+" "+surname+" modificato correttamente");
+			populateTable();
 		}
 	}
 	
 	public void deleteEmployee() {
+		
 		msgLbl.setText("");
 		EmployeeDAO.toggleEnabledEmployee(selectedId);
 		msgLbl.setText("Utente rimosso correttamente");
@@ -621,11 +636,11 @@ public class EmployeePanel extends JPanel {
 	}
 
 	public JTextField getTxfSearchBar() {
-		return txfSearchBar;
+		return txtSearchBar;
 	}
 
 	public void setTxfSearchBar(JTextField txfSearchBar) {
-		this.txfSearchBar = txfSearchBar;
+		this.txtSearchBar = txfSearchBar;
 	}
 
 	public JTextField getTxtName() {
