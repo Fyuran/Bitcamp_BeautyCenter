@@ -78,6 +78,30 @@ public abstract class UserCredentialsDAO {
 		}
 		return opt;
 	}
+	public static Optional<UserCredentials> getUserCredentials(String username) {
+		String query = "SELECT * FROM beauty_centerdb.user_credentials WHERE username = ? LIMIT 1";
+		
+		Optional<UserCredentials> opt = Optional.empty();
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			stat.setString(1, username);  
+			
+			ResultSet rs = stat.executeQuery();
+			conn.commit();
+			if(rs.next()) {
+				opt = Optional.ofNullable(new UserCredentials(rs));				
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return opt;
+	}
 
 	public static List<UserCredentials> getAllUserCredentials() {
 		List<UserCredentials> list = new ArrayList<>();

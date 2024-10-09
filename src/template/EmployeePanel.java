@@ -435,10 +435,13 @@ public class EmployeePanel extends JPanel {
 						String.valueOf(employee.getHiredDate()),
 						employee.getRole().toString(),
 						employee.getUserCredentials().getUsername(), 
+						employee.getAddress(),
 						employee.getBirthplace(),
 						employee.getMail(),
 						employee.getPhone(),
 						employee.getIban()
+
+						
 						
 						});
 //				{ "ID","Numero seriale", "Nome", "Cognome", "Data di nascita", "Data assunzione", 
@@ -496,13 +499,16 @@ public class EmployeePanel extends JPanel {
 
 		UserDetails det=new UserDetails(name, surname, isFemale, BoD,birthplace,notes);
 		UserCredentials cred=new UserCredentials(username, password,address, iban, phone, mail);
+		
+		
+		
 		UserCredentialsDAO.insertUserCredentials(cred);
-		Employee employee=new Employee(det,cred,employeeSerial,role,null,LocalDate.now(),null);
+		UserCredentials credentialsWithId=UserCredentialsDAO.getUserCredentials(username).get();
+		Employee employee=new Employee(det,credentialsWithId,employeeSerial,role,null,LocalDate.now(),null);
 		EmployeeDAO.insertEmployee(employee);
+		System.out.println(employee);
 		
 		
-		//UserDetails details, UserCredentials userCredentials,
-        //long employeeSerial, Roles role, List<Shift> turns, LocalDate hiredDate, LocalDate terminationDate)
 		
 		msgLbl.setText("Nuovo utente creato correttamente");
 		populateTable();
