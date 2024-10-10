@@ -224,4 +224,16 @@ public class inputValidator {
   			return false;
   		}
   	}
+  	public static boolean isTreatmentNameUnique(String name) {
+		String query="SELECT * FROM beauty_centerdb.treatment WHERE type=? LIMIT 1";
+		Connection conn=Main.getConnection();
+		try(PreparedStatement pstmt = conn.prepareStatement(query)){
+			pstmt.setString(1, name);
+			ResultSet rs=pstmt.executeQuery();
+			return !rs.next();
+		}catch(SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 }

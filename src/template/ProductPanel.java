@@ -26,6 +26,7 @@ import com.centro.estetico.bitcamp.ProductCat;
 import com.centro.estetico.bitcamp.VAT;
 
 import DAO.ProductDAO;
+import DAO.TreatmentDAO;
 import DAO.VATDao;
 import utils.inputValidator;
 
@@ -154,6 +155,7 @@ public class ProductPanel extends JPanel {
 		btnDelete.setBorderPainted(false);
 		btnDelete.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/delete.png")));
 		btnDelete.setBounds(820, 8, 40, 30);
+		btnDelete.addActionListener(e->deleteProduct());
 		containerPanel.add(btnDelete);
 
 		JButton btnDisable = new JButton("");
@@ -390,6 +392,12 @@ public class ProductPanel extends JPanel {
 
 		}
 
+	}
+	private void deleteProduct() {
+		msgLbl.setText("");
+		ProductDAO.toggleEnabledProduct(selectedId);
+		msgLbl.setText("Trattamento rimosso correttamente");
+		populateTable();
 	}
 
 	private void clearFields() {

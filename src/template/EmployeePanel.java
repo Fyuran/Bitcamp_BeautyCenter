@@ -427,7 +427,6 @@ public class EmployeePanel extends JPanel {
 			return;
 		}
 		for (Employee employee : employees) {
-			System.out.println(employee.getAddress());
 			if (employee.getTerminationDate() == null&&employee.isEnabled()) {
 				tableModel.addRow(new String[] {
 						String.valueOf(employee.getId()),

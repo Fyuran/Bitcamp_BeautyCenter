@@ -2,6 +2,7 @@ package template;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -12,7 +13,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import com.centro.estetico.bitcamp.Product;
@@ -27,8 +31,11 @@ public class ProductSelector extends JFrame {
 	private JTable productTable;
 	private JComboBox<String> filterComboBox;
 	private JTextField filterText;
+	private ArrayList<Integer> productIds;
+    private TreatmentPanel parentPanel;
 
-	public ProductSelector() {
+	public ProductSelector(TreatmentPanel parentPanel) {
+		this.parentPanel=parentPanel;
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(500, 100, 450, 600);
 		setTitle("Selezione Prodotti");
@@ -60,15 +67,34 @@ public class ProductSelector extends JFrame {
 		filterPanel.add(searchBtn);
 
 		JButton addBtn = new JButton("Aggiungi selezione");
+        addBtn.addActionListener(e->sendProduct());
 		filterPanel.add(addBtn);
 
 		contentPane.add(filterPanel, BorderLayout.NORTH); // Aggiungi il pannello filtri in alto
 
 		// Tabella prodotti
-		String[] columnNames = { "Prodotto", "Categoria" };
+        String[] columnNames = {"ID","Prodotto", "Categoria"};
 		tableModel = new DefaultTableModel(columnNames, 0);
 		productTable = new JTable(tableModel);
 
+		 productTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+	    	productIds=new ArrayList<>();
+	        productTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+	            @Override
+	            public void valueChanged(ListSelectionEvent event) {
+	                productIds.clear(); 
+	                if (!event.getValueIsAdjusting()) {
+	                    int[] selectedRows = productTable.getSelectedRows(); // Per tenere conto di tutte le righe selezionate
+	                	for (int selectedRow : selectedRows) {
+	                        int productId = Integer.parseInt(String.valueOf(productTable.getValueAt(selectedRow, 0)));
+	                        productIds.add(productId); // Aggiungi ogni ID selezionato alla lista
+	                    }
+	                    System.out.println("ID selezionati: " + productIds); // Debug
+	                }
+	            }
+	        });
+
+		
 		JScrollPane productSearchScroll = new JScrollPane(productTable);
 		contentPane.add(productSearchScroll, BorderLayout.CENTER); // Aggiungi la tabella al centro
 		populateTable();
@@ -88,7 +114,7 @@ public class ProductSelector extends JFrame {
 			return;
 		}
 		for (Product p : products) {
-			tableModel.addRow(new String[] { p.getName(), p.getType().getDescription() });
+    		tableModel.addRow(new String[] {String.valueOf(p.getId()),p.getName(),p.getType().getDescription()});
 		}
 	}
 
@@ -120,5 +146,9 @@ public class ProductSelector extends JFrame {
 		}
 
 	}
+	public void sendProduct() {
+    	parentPanel.getProducts(productIds);
+    	this.dispose();
+    }
 
 }
