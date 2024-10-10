@@ -92,7 +92,8 @@ public class TreatmentPanel extends JPanel {
 						String price = String.valueOf(String.valueOf(table.getValueAt(selectedRow, 2)));
 						String vat = String.valueOf(table.getValueAt(selectedRow, 3) + "%");
 						String duration = String.valueOf(table.getValueAt(selectedRow, 4));
-						List<Product> products=TreatmentDAO.getProductsOfTreatment(selectedId);
+						products=TreatmentDAO.getProductsOfTreatment(selectedId);
+						System.out.println(products.size());
 						populateProductsTable(products);
 
 						System.out.println(vat);
@@ -319,11 +320,14 @@ public class TreatmentPanel extends JPanel {
 			Duration duration = Duration.ofMinutes(durationInt);
 			// prodottiSelezionati
 			// isEnabled
-			for(Product p:products) {
-				System.out.println(p);
-			}
+
 			Treatment t = new Treatment(name, price, vat, duration, products, true);
-			TreatmentDAO.insertTreatment(t);
+			
+			Treatment tUpdated=TreatmentDAO.insertTreatment(t).get();
+			//per aggiungere i prodotti nella tabella tratmentproduct
+			for(Product p:products) {
+				TreatmentDAO.addProductToTreatment(tUpdated, p);
+			}
 			msgLbl.setText(name + " inserito correttamente");
 			populateTable();
 		}
@@ -374,15 +378,24 @@ public class TreatmentPanel extends JPanel {
 		if (isDataValid(false)) {
 			String name = txtName.getText();
 			BigDecimal price = new BigDecimal(txtPrice.getText());
-			double vatDouble = Double.parseDouble(cBoxIVA.getSelectedItem().toString());
-			VAT vat = VATDao.getVATByAmount(vatDouble).get();
+			String vatString=String.valueOf(cBoxIVA.getSelectedItem().toString());
+			double vatAmount = Double.parseDouble(vatString.substring(0, vatString.length() - 1));
+			VAT vat = VATDao.getVATByAmount(vatAmount).get();
 			int durationInt = Integer.parseInt(txtDuration.getText());
 			Duration duration = Duration.ofMinutes(durationInt);
 			// prodottiSelezionati
 			// isEnabled
-
+			Treatment oldTreatment=TreatmentDAO.getTreatment(selectedId).get();
+			for(Product p:oldTreatment.getProducts()) {
+				TreatmentDAO.removeProductFromTreatment(oldTreatment, p);
+			}
 			Treatment t = new Treatment(name, price, vat, duration, products, true);
+
 			TreatmentDAO.updateTreatment(selectedId, t);
+			//per aggiungere i prodotti nella tabella tratmentproduct
+			for(Product p:products) {
+				TreatmentDAO.addProductToTreatment(oldTreatment, p);
+			}
 			clearFields();
 			populateTable();
 
