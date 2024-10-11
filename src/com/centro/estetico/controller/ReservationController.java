@@ -1,82 +1,115 @@
 package com.centro.estetico.controller;
-import wrappersForDisplayMember.*;
-import java.time.Instant;
+
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Map;
+
+import java.util.List;
+
 import java.time.LocalTime;
-import java.time.ZoneId;
 
-import com.centro.estetico.bitcamp.*;
-import javax.swing.JComboBox;
-import javax.swing.JList;
 
-//import DAO;
-import com.centro.estetico.bitcamp.Customer;
+import com.centro.estetico.useCases.*;
+import DAO.DAOReservation;
+
 import com.centro.estetico.bitcamp.Employee;
 import com.centro.estetico.bitcamp.Reservation;
 import com.centro.estetico.bitcamp.Treatment;
-import com.toedter.calendar.JCalendar;
+
 
 public class ReservationController {
+
+	//private DAOReservation daoReservation;
+	private GetReservationUseCase getReservationUseCase;
+	private CreateReservationUseCase createReservationUseCase;
+	private UpdateReservationUseCase updateReservationUseCase;
+	private DeleteReservationUseCase deleteReservationUseCase;
+
+	public ReservationController(GetReservationUseCase getReservationUseCase) {
+		//this.daoReservation = daoReservation;
+		this.getReservationUseCase = getReservationUseCase;
+	}
 	
-	private DAO.DAOReservation daoReservation;
-	public ReservationController(DAO.DAOReservation daoReservation) {
-		this.daoReservation = daoReservation;
+	public ReservationController(CreateReservationUseCase createReservationUseCase) {
+		//this.daoReservation = daoReservation;
+		this.createReservationUseCase = createReservationUseCase;
+	} 
+	
+	public ReservationController(UpdateReservationUseCase updateReservationUseCase) {
+		//this.daoReservation = daoReservation;
+		this.updateReservationUseCase = updateReservationUseCase;
+	} 
+	
+	public ReservationController(DeleteReservationUseCase deleteReservationUseCase) {
+		//this.daoReservation = daoReservation;
+		this.deleteReservationUseCase = deleteReservationUseCase;
+	} 
+	
+	public void add(Reservation reservation)throws Exception{
+		validateInputs(reservation);		
+		createReservationUseCase.execute(reservation);
+	}
+	
+	public void update(Reservation reservation)throws Exception {
+		validateInputs(reservation);
+		updateReservationUseCase.execute(reservation);
 	}
 
-	public void sendDataToDB(JComboBox customersComboBox, JComboBox treatmentsComboBox, JCalendar calendar, 
-			JList beauticiansList, JList timeList, Reservation reservation, IsCreatingOrUpdating icou) {
-
-		CustomerWrapper cw = (CustomerWrapper) customersComboBox.getSelectedItem();
-		Customer customer = cw.getCustomer();
-
-		if (customer == null) {
+	public void delete(Reservation reservation)throws Exception {
+		deleteReservationUseCase.execute(reservation);
+	}
+	
+	public Map<Integer, Reservation> getReservations()throws Exception{		
+		return getReservationUseCase.getReservations();
+	}
+	
+	public Reservation getReservation(int id) throws Exception{
+		if(id <= 0) {
+			throw new Exception("Id non valido");
+		}
+		else {
+			return getReservationUseCase.getReservation(id);
+		}		
+	}
+	
+	public Map<Integer, Reservation> getSearchedReservations(String text)throws Exception{
+		return getReservationUseCase.getSearchedReservations(text);
+	}
+	
+	public Map<LocalTime, List<Employee>> getEmployees(LocalDate date, List<LocalTime> hours, Treatment treatment)throws Exception {
+		validateInputsForEmployees(date, hours, treatment);
+		return getReservationUseCase.getEmployees(date, hours, treatment);
+	}
+	
+	
+	private void validateInputs(Reservation reservation) {
+		if(reservation == null) {
+			throw new IllegalArgumentException("Oggetto non valido");
+		}
+		if (reservation.getCustomer() == null) {
 			throw new IllegalArgumentException("Seleziona un cliente");
 		}
-
-		TreatmentWrapper tw = (TreatmentWrapper) treatmentsComboBox.getSelectedItem();
-		Treatment treatment = tw.getTreatment();
-		
+		if (reservation.getTreatment() == null) {
+			throw new IllegalArgumentException("Seleziona un trattamento");
+		}
+		if (reservation.getEmployee() == null) {
+			throw new IllegalArgumentException("Seleziona un estetista");
+		}
+		if (reservation.getDateTime() == null) {
+			throw new IllegalArgumentException("Seleziona data e ora");
+		}
+	}
+	
+	private void validateInputsForEmployees(LocalDate date, List<LocalTime> hours, Treatment treatment) {
 		if (treatment == null) {
 			throw new IllegalArgumentException("Seleziona un trattamento");
 		}
 		
-		// giorno e ora
-		Instant instant = calendar.getDate().toInstant();
-		if (instant == null) {
+		if (date == null) {
 			throw new IllegalArgumentException("Seleziona una data");
 		}
-		ZoneId zoneId = ZoneId.systemDefault();
-		LocalDate localDate = LocalDate.ofInstant(instant, zoneId);
-		LocalTime localTime = (LocalTime) timeList.getSelectedValue();
-
-		if (localTime == null) {
-			throw new IllegalArgumentException("Seleziona un orario");
-		}
-		LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
 		
-		
-		EmployeeWrapper ew = (EmployeeWrapper) beauticiansList.getSelectedValue();
-		Employee employee = ew.getEmployee();
-		if (employee == null) {
-			throw new IllegalArgumentException("Seleziona un estetista");
+		if (hours == null || hours.size()<=0) {
+			throw new IllegalArgumentException("orari non disponibili");
 		}
-
-		
-		reservation.setCustomer(customer);
-		reservation.setTreatment(treatment);
-		reservation.setEmployee(employee);
-		reservation.setDateTime(localDateTime);
-		// reservation.setState();
-		// reservation.setPaid();
-		
-		if(icou == IsCreatingOrUpdating.CREATE) {
-			daoReservation.insert(reservation);
-		}
-		else {
-			daoReservation.update(reservation);
-		}
-				
 	}
-
 }

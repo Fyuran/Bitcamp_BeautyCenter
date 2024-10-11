@@ -18,6 +18,16 @@ public class Reservation {
 		this.state = ReservationState.CREATED;
 	}
 	
+	public Reservation(Customer customer, Treatment treatment, Employee employee, LocalDateTime datetime) {
+		this.customer = customer;
+		this.treatment = treatment;
+		this.employee = employee;
+		this.dateTime = datetime;
+		this.isPaid = false;
+		this.isEnabled = true;
+		this.state = ReservationState.CREATED;
+	}
+	
 	public boolean isEnabled() {
 		return isEnabled;
 	}

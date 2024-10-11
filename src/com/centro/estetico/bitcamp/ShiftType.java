@@ -17,8 +17,7 @@ public enum ShiftType {
 			case "work": return ShiftType.WORK;
 			case "holidays": return ShiftType.HOLIDAYS;
 			default: return null;
-		}
-		
+		}		
 	}
 	
 	public int toSQLOrdinal() {
