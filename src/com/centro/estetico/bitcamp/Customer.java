@@ -16,7 +16,7 @@ public class Customer extends User {
 	
 	//User(int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled)
 	//UserDetails(String name, String surname, boolean isFemale, LocalDate BoD, String birthplace, String notes)
-	private Customer(
+	public Customer(
 			int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled,
 			
 			String P_IVA, String recipientCode, int loyaltyPoints, Subscription subscription, List<Prize> prizes  

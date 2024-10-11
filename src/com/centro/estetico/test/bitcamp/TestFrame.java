@@ -17,6 +17,7 @@ import template.EmployeePanel;
 import template.ProductPanel;
 import template.TreatmentPanel;
 import template.UserAccessPanel;
+import template.gestioneClienti;
 import template.gestioneTurni;
 
 public class TestFrame extends JFrame {
@@ -26,6 +27,7 @@ public class TestFrame extends JFrame {
 	ProductPanel panelP;
 	UserAccessPanel panelU;
 	gestioneTurni panelG;
+	gestioneClienti panelC;
 
 	/*
 	 * Employee( 
@@ -49,6 +51,7 @@ public class TestFrame extends JFrame {
 				);
 
 		new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
+		panelC=new gestioneClienti();
 		panelU = new UserAccessPanel(employee);
 		panelT = new TreatmentPanel();
 		panelE = new EmployeePanel();
@@ -57,6 +60,7 @@ public class TestFrame extends JFrame {
 
 		setSize(1075, 768);
 		JTabbedPane mainPane = new JTabbedPane();
+		mainPane.add(panelC);
 		mainPane.add(panelP);
 		mainPane.add(panelU);
 		mainPane.add(panelT);
