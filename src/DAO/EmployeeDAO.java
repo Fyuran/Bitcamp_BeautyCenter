@@ -6,11 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import com.centro.estetico.bitcamp.Employee;
 import com.centro.estetico.bitcamp.Main;
+import com.centro.estetico.bitcamp.Roles;
 
 public abstract class EmployeeDAO {
 	private static Connection conn = Main.getConnection();
@@ -25,11 +28,11 @@ public abstract class EmployeeDAO {
 			stat.setString(1, obj.getName());
 			stat.setString(2, obj.getSurname());
 			stat.setBoolean(3, obj.isFemale());
-			stat.setDate(4, Date.valueOf(obj.getBoD()));
+			stat.setDate(4, obj.getBoD() != null ? Date.valueOf(obj.getBoD()) : null);
 			stat.setString(5, obj.getBirthplace());
 			stat.setInt(6, obj.getRole().toSQLOrdinal());
-			stat.setDate(7, Date.valueOf(obj.getHiredDate()));
-			stat.setDate(8, Date.valueOf(obj.getTerminationDate()));
+			stat.setDate(7, obj.getHiredDate() != null ? Date.valueOf(obj.getHiredDate()) : null);
+			stat.setDate(8, obj.getTerminationDate() != null ? Date.valueOf(obj.getTerminationDate()) : null);
 			stat.setInt(9, obj.getUserCredentials().getId());
 			stat.setString(10, obj.getNotes());
 			stat.setBoolean(11, obj.isEnabled());
@@ -107,6 +110,18 @@ public abstract class EmployeeDAO {
 		return list;
 	}
 	
+	public static List<Employee> getEmployeesByRole(Roles role) {
+		return filterEmployeesBy(e -> e.getRole().equals(role));
+	}
+	
+	public static List<Employee> filterEmployeesBy(Predicate<? super Employee> pred) {
+		List<Employee> employees = getAllEmployees();
+		if(!employees.isEmpty()) {
+			return employees.stream().filter(pred).toList();			
+		}
+		return Collections.emptyList();
+	}
+	
 	public static int updateEmployee(int id, Employee obj) {
 		String query = "UPDATE `beauty_centerdb`.`employee` "
 				+ "SET `name` = ?, `surname` = ?, "
@@ -153,7 +168,7 @@ public abstract class EmployeeDAO {
 		String query = "UPDATE beauty_centerdb.employee "
 				+ "SET is_enabled = ? "
 				+ "WHERE id = ?";
-		
+		UserCredentialsDAO.toggleEnabledUserCredentials(obj.getUserCredentials());
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
 			boolean toggle = !obj.isEnabled(); //toggle enable or disable state
 			obj.setEnabled(toggle);
