@@ -23,11 +23,11 @@ public class TestFrame extends JFrame {
 	UserAccessPanel panelU;
 	gestioneTurni panelG;
 	VATPanel panelV;
-	
+	ReportPanel panelR;
 	
 	public TestFrame() {
-		Main main = new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
-		Employee employee=EmployeeDAO.getEmployee(24).get();
+		Main main = new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "admin");
+		Employee employee=EmployeeDAO.getEmployee(1).get();
 
 		//panelU=new UserAccessPanel(null);
 		panelE=new EmployeePanel();
@@ -36,7 +36,7 @@ public class TestFrame extends JFrame {
 		panelG=new gestioneTurni();
 		panelV=new VATPanel();
 		panelU=new UserAccessPanel(employee);
-		
+		panelR=new ReportPanel();
 		setSize(1075, 768);
 		JTabbedPane mainPane=new JTabbedPane();
 		mainPane.add(panelP);
@@ -45,6 +45,8 @@ public class TestFrame extends JFrame {
 		mainPane.add(panelE);
 		mainPane.add(panelG);
 		mainPane.add(panelV);
+		mainPane.add(panelR);
+		
 		add(mainPane);
 		
 		setName("Test Frame");
