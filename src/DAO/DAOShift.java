@@ -121,9 +121,34 @@ public class DAOShift {
 		
 		return shifts;
 	}
+	//Con questo metodo sto compiendo crimini che non voglio ripetere e di cui non voglio parlare - Daniele
+	public static List<Shift> loadShiftsForEmployeeWhitID(int employeeId){
+		List<Shift> shifts = new ArrayList<>();
+
+		String query = "SELECT * FROM shiftemployee WHERE employee_id=?";
+		
+		try(PreparedStatement pstmt = connection.prepareStatement(query)) {
+					
+			pstmt.setInt(1, employeeId);
+
+			ResultSet rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				int shiftId=rs.getInt("shift_id");
+				Shift shift = getShift(shiftId);
+	
+				shifts.add(shift);
+			}
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+		
+		return shifts;
+	}
 
 	
-	public void insert(Shift shift, Employee employee) {
+	public  void insert(Shift shift, Employee employee) {
 		int id = -1;
 		String query = "INSERT INTO shift(start, end, type) values(?, ?, ?)";
 		
@@ -162,6 +187,23 @@ public class DAOShift {
 		
 		catch(Exception ex) {
 			
+		}
+	}
+	public static Shift getShift(int id) {
+		String query="SELECT * FROM shift WHERE id=? LIMIT 1";
+		try(PreparedStatement pstmt = connection.prepareStatement(query)){
+			pstmt.setInt(1, id);
+			
+			ResultSet rs = pstmt.executeQuery();
+			if(rs.next()) {
+				return new Shift(rs);
+			}
+			return null;
+		}
+		
+		catch(Exception ex) {
+			ex.printStackTrace();
+			return null;
 		}
 	}
 
