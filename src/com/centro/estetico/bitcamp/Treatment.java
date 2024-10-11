@@ -1,12 +1,11 @@
 package com.centro.estetico.bitcamp;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +27,7 @@ public class Treatment {
 			rs.getString(2), 
 			rs.getBigDecimal(3),
 			VATDao.getVAT(rs.getInt(4)).get(), 
-			Duration.ofMillis(rs.getTime(5).getTime()),
+			Duration.ofMillis(Math.abs(rs.getTime(5).getTime())),
 			TreatmentDAO.getProductsOfTreatment(rs.getInt(1)),
 			rs.getBoolean(6)
 		);		
@@ -100,6 +99,15 @@ public class Treatment {
 		this.isEnabled = isEnabled;
 	}
 
+	
+	public LocalTime getLocalTimeFromDuration() {
+		return LocalTime.of((int) duration.toHoursPart(), (int) duration.toMinutesPart(), (int) duration.toSecondsPart());
+	}
+	
+	public String durationToPattern(String pattern) { //ex HH:mm:ss
+		LocalTime time = getLocalTimeFromDuration();
+		return time.format(DateTimeFormatter.ofPattern(pattern));			
+	}
 	@Override
 	public String toString() {
 		return "Treatments [id=" + id + ", type=" + type + ", price=" + price + ", vat=" + vat + ", duration="
