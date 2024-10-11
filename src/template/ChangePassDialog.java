@@ -2,12 +2,20 @@ package template;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
+
+import com.centro.estetico.bitcamp.Employee;
+import com.centro.estetico.bitcamp.Roles;
+
+import DAO.UserCredentialsDAO;
 
 public class ChangePassDialog extends JDialog {
 
@@ -15,16 +23,18 @@ public class ChangePassDialog extends JDialog {
 	private JPasswordField newPasswordTxt1;
 	private JPasswordField oldPasswordTxt;
 	private JPasswordField newPasswordTxt2;
+	private Employee activeUser;
 
 
 	/**
 	 * Create the frame.
 	 */
-	public ChangePassDialog() {
+	public ChangePassDialog(Employee activeUser) {
 		setBounds(100, 100, 400, 500);
 		getContentPane().setLayout(null);
 		setTitle("Cambia password");
-		
+		this.activeUser=activeUser;
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		JLabel lblOldPassword = new JLabel("Vecchia password:");
 		lblOldPassword.setBounds(6, 91, 116, 16);
 		getContentPane().add(lblOldPassword);
@@ -42,6 +52,14 @@ public class ChangePassDialog extends JDialog {
 		getContentPane().add(newPasswordTxt1);
 		
 		JButton confirmBtn = new JButton("Conferma");
+		confirmBtn.addActionListener(e->{
+			try {
+				updatePassword();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
 		confirmBtn.setBounds(38, 256, 117, 29);
 		
 		getContentPane().add(confirmBtn);
@@ -76,6 +94,32 @@ public class ChangePassDialog extends JDialog {
 		msgLbl.setBounds(179, 261, 182, 16);
 		getContentPane().add(msgLbl);
 		setVisible(true);
+	}
+	private void updatePassword() throws SQLException {
+		if(!isDataValid()) return;
+		int id=activeUser.getId();
+		String username=activeUser.getUsername();
+		String newPassword=String.valueOf(newPasswordTxt1.getPassword());
+		Roles role=activeUser.getRole();
+		UserCredentialsDAO.updateAccount(id, username, newPassword, role);
+        JOptionPane.showMessageDialog(this, "Password modificata correttamente");
+        dispose();
+
+	}
+	private boolean isDataValid() throws SQLException {
+		String oldPassword=String.valueOf(oldPasswordTxt.getPassword());
+		char[]newPassword1=newPasswordTxt1.getPassword();
+		char[]newPassword2=newPasswordTxt2.getPassword();
+		System.out.println(oldPassword);
+		if(!UserCredentialsDAO.verifyPassword(activeUser.getUsername(),oldPassword)) {
+            JOptionPane.showMessageDialog(this, "Vecchia password errata");
+            return false;
+		}
+		if(newPassword1!=newPassword2) {
+			JOptionPane.showMessageDialog(this, "Le password non coincidono");
+            return false;
+		}
+		return true;
 	}
 
 

@@ -172,16 +172,16 @@ public class UserAccessPanel extends JPanel {
 	}
 
 	public void changePassword() {
-		ChangePassDialog changePassDialog = new ChangePassDialog();
+		ChangePassDialog changePassDialog = new ChangePassDialog(activeUser);
 		changePassDialog.setAlwaysOnTop(true);
-		changePassDialog.setModalityType(Dialog.DEFAULT_MODALITY_TYPE);
+		
 
 	}
 
 	public void changeUsername() {
-		ChangeUserDialog changeUserDialog = new ChangeUserDialog();
+		ChangeUserDialog changeUserDialog = new ChangeUserDialog(this,activeUser);
 		changeUserDialog.setAlwaysOnTop(true);
-		changeUserDialog.setModalityType(Dialog.DEFAULT_MODALITY_TYPE);
+		
 	}
 
 }

@@ -27,7 +27,7 @@ public class TestFrame extends JFrame {
 	
 	public TestFrame() {
 		Main main = new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
-		Employee employee=EmployeeDAO.getEmployee(21).get();
+		Employee employee=EmployeeDAO.getEmployee(24).get();
 
 		//panelU=new UserAccessPanel(null);
 		panelE=new EmployeePanel();

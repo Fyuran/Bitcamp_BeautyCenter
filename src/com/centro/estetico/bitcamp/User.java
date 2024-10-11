@@ -99,7 +99,7 @@ public abstract class  User {
 	}
 	
 	public int getUserCredentialsId() {
-		return id;
+		return userCredentials.getId();
 	}
 
 	public String getUsername() {
