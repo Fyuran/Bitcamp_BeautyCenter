@@ -243,10 +243,6 @@ public class ReportPanel extends JPanel {
 		
 		clearTable();
 		List<Transaction> transactions = TransactionDAO.getAllTransactions();
-		if (transactions.isEmpty()) {
-			tableModel.addRow(new String[] { "Sembra non ci siano transazioni presenti", "" });
-			return;
-		}
 		
 		List<Transaction> filteredTransactions = new ArrayList<Transaction>();
 		for (Transaction t : transactions) {
@@ -269,6 +265,10 @@ public class ReportPanel extends JPanel {
 				filteredTransactions.add(t);
 				tableModel.addRow(new String[] { String.valueOf(t.getId()), String.valueOf(t.getPrice()), t.getCustomer().getName() + " " + t.getCustomer().getSurname(), String.valueOf(t.getDateTime()), String.valueOf(t.getPaymentMethod()), String.valueOf(t.getServices())});
 			}
+		}
+		if (filteredTransactions.isEmpty()) {
+			tableModel.addRow(new String[] { "Sembra non ci siano transazioni presenti che soddifino i filtri richiesti", "" });
+			return;
 		}
 		calculateReport(filteredTransactions);
 	}
