@@ -22,7 +22,18 @@ public class Subscription {
         this.id = id;
         this.subperiod = subperiod;
         this.start=start;
-        this.end = plusSubPeriod(start, subperiod);
+        this.end = start==null?null:plusSubPeriod(start, subperiod);
+        this.price = price;
+        this.vat = vat;    
+        this.discount = discount;
+        this.isEnabled = isEnabled;
+    }
+    
+    public Subscription(SubPeriod subperiod, LocalDate start, BigDecimal price, VAT vat, double discount, boolean isEnabled) {
+        this.id = -1;
+        this.subperiod = subperiod;
+        this.start=start;
+        this.end = start==null?null:plusSubPeriod(start, subperiod);
         this.price = price;
         this.vat = vat;    
         this.discount = discount;
@@ -33,11 +44,18 @@ public class Subscription {
     	this(
 			rs.getInt(1), 
 			SubPeriod.valueOf(rs.getString(2)), 
-			rs.getDate(3).toLocalDate(),
-			rs.getBigDecimal(4), 
-			VATDao.getVAT(rs.getInt(5)).get(), 
-			rs.getDouble(6),
-			rs.getBoolean(7)
+			null,
+			rs.getBigDecimal(3), 
+			VATDao.getVAT(rs.getInt(4)).get(), 
+			rs.getDouble(5),
+			rs.getBoolean(6)
+			//nel database manca un campo per lo startdate!
+//			 `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+//			  `subperiod` ENUM('MONTHLY', 'QUARTERLY', 'HALF_YEAR', 'YEARLY') NOT NULL,
+//			  `price` FLOAT NOT NULL,
+//			  `vat_id` INT UNSIGNED NULL,
+//			  `discount` FLOAT NOT NULL,
+//			  `is_enabled` TINYINT NOT NULL DEFAULT 1,
 		);
     }
     

@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -293,7 +294,7 @@ public class TreatmentPanel extends JPanel {
 		for (Treatment t : treatments) {
 			if (t.isEnabled()) {
 				tableModel.addRow(new String[] { String.valueOf(t.getId()), t.getType(), String.valueOf(t.getPrice()),
-						t.getVat().toString(), String.valueOf(t.getDuration()) });
+						t.getVat().toString(), String.valueOf(t.getDuration().toMinutes()) });
 			}
 			// { "ID","Nome trattamento", "Prezzo", "IVA%", "Durata" };
 		}
@@ -318,6 +319,9 @@ public class TreatmentPanel extends JPanel {
 			VAT vat = VATDao.getVATByAmount(vatAmount).get();
 			int durationInt = Integer.parseInt(txtDuration.getText());
 			Duration duration = Duration.ofMinutes(durationInt);
+			
+			
+//			
 			// prodottiSelezionati
 			// isEnabled
 

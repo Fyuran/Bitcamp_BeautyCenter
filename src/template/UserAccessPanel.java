@@ -22,6 +22,8 @@ import javax.swing.table.DefaultTableModel;
 import com.centro.estetico.bitcamp.Employee;
 import com.centro.estetico.bitcamp.Shift;
 
+import DAO.EmployeeDAO;
+
 public class UserAccessPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
@@ -174,6 +176,7 @@ public class UserAccessPanel extends JPanel {
 	public void changePassword() {
 		ChangePassDialog changePassDialog = new ChangePassDialog(activeUser);
 		changePassDialog.setAlwaysOnTop(true);
+		updateActiveUser();
 		
 
 	}
@@ -181,7 +184,12 @@ public class UserAccessPanel extends JPanel {
 	public void changeUsername() {
 		ChangeUserDialog changeUserDialog = new ChangeUserDialog(this,activeUser);
 		changeUserDialog.setAlwaysOnTop(true);
+		updateActiveUser();
+		updateData();
 		
+	}
+	public void updateActiveUser() {
+		this.activeUser=EmployeeDAO.getEmployee(activeUser.getId()).get();
 	}
 
 }

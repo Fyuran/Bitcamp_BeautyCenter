@@ -22,13 +22,18 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.text.MaskFormatter;
 
 import com.centro.estetico.bitcamp.Customer;
+import com.centro.estetico.bitcamp.Employee;
 import com.centro.estetico.bitcamp.Prize;
 import com.centro.estetico.bitcamp.Subscription;
 import com.centro.estetico.bitcamp.SubPeriod; // Assicurati di importare SubPeriod
 import com.centro.estetico.bitcamp.UserDetails; // Importa UserDetails
+import com.centro.estetico.bitcamp.VAT;
 import com.centro.estetico.bitcamp.UserCredentials; // Importa UserCredentials
 import DAO.CustomerDAO;
+import DAO.EmployeeDAO;
+import DAO.SubscriptionDAO;
 import DAO.UserCredentialsDAO;
+import DAO.VATDao;
 
 import javax.swing.ImageIcon;
 
@@ -46,6 +51,7 @@ public class gestioneClienti extends JPanel {
 	private JTextField txfNotes;
 	private JTextField txfPIVA;
 	private JTextField txfRecipientCode;
+	private DateTimeFormatter format;
 
 	// Campi per l'abbonamento
 	private JComboBox<SubPeriod> cBoxSubPeriod; // Per il periodo dell'abbonamento
@@ -58,6 +64,8 @@ public class gestioneClienti extends JPanel {
 	public gestioneClienti() {
 		setLayout(null);
 		setSize(1024, 768);
+		setName("Clienti");
+		format = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 		JLabel titleTab = new JLabel("GESTIONE CLIENTI");
 		titleTab.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
@@ -71,7 +79,7 @@ public class gestioneClienti extends JPanel {
 		add(containerPanel);
 
 		String[] columnNames = {"ID", "Nome", "Cognome", "Telefono", "Email", "Data di Nascita", "Sesso",
-				"Comune di Nascita", "P_IVA", "Codice Ricezione", "Punti Fedeltà", "Abbonamento", "Note" };
+				"Comune di Nascita", "Codice fiscale", "Codice Ricezione", "Punti Fedeltà", "Abbonamento", "Note" };
 		tableModel = new DefaultTableModel(columnNames, 0);
 
 		table = new JTable(tableModel);
@@ -104,9 +112,17 @@ public class gestioneClienti extends JPanel {
 		txfEmail.setBounds(440, 400, 120, 25);
 		add(txfEmail);
 
-		txfBirthdate = new JTextField();
-		txfBirthdate.setText("BirthDate");
-		txfBirthdate.setBounds(570, 400, 120, 25);
+		
+		MaskFormatter dateMaskBirthDay;
+		try {// per settare il formato data
+			dateMaskBirthDay = new MaskFormatter("##/##/####");
+			txfBirthdate = new JFormattedTextField(dateMaskBirthDay);
+			txfBirthdate.setColumns(10);			
+			txfBirthdate.setBounds(570, 400, 120, 25);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		add(txfBirthdate);
 
 		txfComuneNascita = new JTextField();
@@ -142,10 +158,10 @@ public class gestioneClienti extends JPanel {
 		txfStartDate = new JTextField();
 		txfStartDate.setText("StartDate");
 		txfStartDate.setBounds(180, 500, 120, 25);
-		MaskFormatter dateMask;
+		MaskFormatter dateMaskStattDate;
 		try {// per settare il formato data
-			dateMask = new MaskFormatter("##/##/####");
-			txfStartDate = new JFormattedTextField(dateMask);
+			dateMaskStattDate = new MaskFormatter("##/##/####");
+			txfStartDate = new JFormattedTextField(dateMaskStattDate);
 			txfStartDate.setColumns(10);
 			txfStartDate.setBounds(209, 506, 220, 20);
 			add(txfStartDate);
@@ -173,79 +189,102 @@ public class gestioneClienti extends JPanel {
 		// Pulsante per abilitare/disabilitare il cliente selezionato
 		JButton btnToggleStatus = new JButton("Abilita/Disabilita");
 		btnToggleStatus.setIcon(new ImageIcon(gestioneClienti.class.getResource("/iconeGestionale/userDisable.png")));
-		btnToggleStatus.setBounds(580, 650, 120, 25);
+		btnToggleStatus.setBounds(740, 550, 120, 25);
 		add(btnToggleStatus);
 
 		// Carica i dati nella tabella
 		loadCustomerData();
 
 		// Eventi dei pulsanti
-		btnSave.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				saveOrUpdateCustomer();
-			}
-		});
+		btnSave.addActionListener(e->addCustomer());
 
-		btnDelete.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				deleteCustomer();
-			}
-		});
+		btnDelete.addActionListener(e->deleteCustomer());
 
-		btnToggleStatus.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				toggleCustomerStatus();
-			}
-		});
+		btnToggleStatus.addActionListener(e->toggleCustomerStatus());
 	}
 
 	// Metodo per caricare i dati dalla DAO alla tabella
 	private void loadCustomerData() {
-		tableModel.setRowCount(0);
-		List<Object[]> customers = CustomerDAO.toTableRowAll();
-		for (Object[] row : customers) {
-			tableModel.addRow(row);
+		clearTable();
+//		clearFields();
+		List<Customer> customers = CustomerDAO.getAllCustomers();
+		if (customers.isEmpty()) {
+			tableModel.addRow(new String[] { "Sembra non ci siano impiegati presenti", "" });
+			return;
 		}
+		for (Customer c : customers) {
+			if (c.isEnabled()) {
+				tableModel.addRow(new String[] {
+						String.valueOf(c.getId()),
+						c.getName(),
+						c.getSurname(),
+						c.getPhone(),
+						c.getMail(),
+						c.getBoD().format(format),
+						c.isFemale()?"Donna":"Uomo",
+						c.getBirthplace(),
+						c.getEU_TIN().getValue(),
+						c.getRecipientCode(),
+						String.valueOf(c.getLoyaltyPoints()),
+						c.getSubscription()==null?"Nessun abbonamento":String.valueOf(c.getSubscription().getId()),
+						c.getNotes()
+						
+						});
+//				{"ID", "Nome", "Cognome", "Telefono", "Email", "Data di Nascita", "Sesso",
+//				"Comune di Nascita", "P_IVA", "Codice Ricezione", "Punti Fedeltà", "Abbonamento", "Note" };
+			}
+		}
+
 	}
 
 	// Metodo per salvare o aggiornare il cliente
-	private void saveOrUpdateCustomer() {
+	private void addCustomer() {
 		// Recupero dei dati dall'interfaccia
+		
 		String name = txfName.getText();
 		String surname = txfSurname.getText();
-		String birthdate = txfBirthdate.getText(); // Assicurati che il formato sia corretto
-		String comuneNascita = txfComuneNascita.getText();
-		String notes = txfNotes.getText();
+		
+		//Subscription sub=Subscription
+		
 		String piva = txfPIVA.getText();
 		String recipientCode = txfRecipientCode.getText();
 		int loyaltyPoints = 0;
-
-		// Campi per l'abbonamento
-		/*
-		 * 
-		 * SubPeriod subPeriod = (SubPeriod) cBoxSubPeriod.getSelectedItem(); LocalDate
-		 * startDate = LocalDate.parse(birthdate, format);
-		 */
-		// VAT vat = (VAT) cBoxVAT.getSelectedItem(); // Rimuovi questa riga
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		// Salva o aggiorna il cliente nel database
-		UserDetails userDetails = new UserDetails(name, surname, cBoxGenre.getSelectedItem().equals("Femmina"),
-				LocalDate.parse(birthdate, format), comuneNascita, notes);
-
-		// Crea UserCredentials
-		String username = "cojonedemmerda";
-		String password = "";
 		
-		UserCredentials userCredentials = new UserCredentials(username, password, "", "Guardate, sono un iban!", "123bipbop", "stocazzo@merda.com");
-		UserCredentials updatedCred=UserCredentialsDAO.insertUserCredentials(userCredentials).get();																									// parametri
-																									// necessari
+		//Creazione subperiod
+		System.out.println(cBoxSubPeriod.getSelectedItem().toString());
+		SubPeriod subP=SubPeriod.toEnum(cBoxSubPeriod.getSelectedItem().toString());
+		String startSubDateString=txfStartDate.getText();
+		LocalDate startSubDate=LocalDate.parse(startSubDateString, format);
+		BigDecimal price=new BigDecimal(10);
+		VAT vat=VATDao.getVAT(1).get();
+		double discount=Double.parseDouble(txfDiscount.getText());
+		Subscription sub=new Subscription(subP,startSubDate,price,vat,discount,true);
+		Subscription updatedSub=SubscriptionDAO.insertSubscription(sub).get();
+		
+		
+		String username=name+surname+"123";
+		String password="customerPassword123";
+		String address="Via dei cojoni 123";
+		String iban=null;
+		String phone=txfPhone.getText();
+		String mail=txfEmail.getText();
+		
+		UserCredentials cred=new UserCredentials(username,password,address,iban,phone,mail);
+		UserCredentials updatedCred=UserCredentialsDAO.insertUserCredentials(cred).get();
+		
+		
+		
+		boolean isFemale=cBoxGenre.getSelectedItem().equals("Femmina");
+		String birthdate = txfBirthdate.getText(); // Assicurati che il formato sia corretto
+		LocalDate birthDay=LocalDate.parse(birthdate, format);
+		String comuneNascita = txfComuneNascita.getText();
+		String notes = txfNotes.getText();
+		UserDetails det=new UserDetails(name,surname,isFemale,birthDay,comuneNascita,notes);
+		
+		Customer c=new Customer(det,updatedCred,piva,recipientCode,loyaltyPoints,updatedSub,null);
 
-		Customer customer = new Customer(-1, userDetails, updatedCred, true, piva, recipientCode, loyaltyPoints,
-				null, new ArrayList<>()); // Modifica a secondo della logica di inserimento/aggiornamento
-		CustomerDAO.insertCustomer(customer); // Implementa la logica di inserimento/aggiornamento
+		
+		CustomerDAO.insertCustomer(c); // Implementa la logica di inserimento/aggiornamento
 		loadCustomerData();
 	}
 
@@ -263,9 +302,13 @@ public class gestioneClienti extends JPanel {
 	private void toggleCustomerStatus() {
 		int selectedRow = table.getSelectedRow();
 		if (selectedRow >= 0) {
-			int customerId = (int) tableModel.getValueAt(selectedRow, 0);
+			int customerId = Integer.parseInt(String.valueOf(tableModel.getValueAt(selectedRow, 0)));
 			CustomerDAO.toggleEnabledCustomer(customerId); // Implementa questa logica nel tuo DAO
 			loadCustomerData();
 		}
+	}
+	private void clearTable() {
+		tableModel.getDataVector().removeAllElements();
+		revalidate();
 	}
 }

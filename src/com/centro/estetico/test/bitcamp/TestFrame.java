@@ -13,6 +13,7 @@ import com.centro.estetico.bitcamp.Shift;
 import com.centro.estetico.bitcamp.UserCredentials;
 import com.centro.estetico.bitcamp.UserDetails;
 
+import DAO.EmployeeDAO;
 import template.EmployeePanel;
 import template.ProductPanel;
 import template.TreatmentPanel;
@@ -41,16 +42,10 @@ public class TestFrame extends JFrame {
 	 * 
 	 */
 	public TestFrame() {
-		Employee employee = new Employee(
-				
-				new UserDetails("Mario", "Rossi", false, LocalDate.of(1990, 5, 15), "Milano",
-				"Note sul dipendente"),
-				new UserCredentials("mario.rossi", "password123!", "Via Roma 1", "IT60X0542811101000000123456",
-				"1234567890", "mario.rossi@example.com"),
-				121321451251L, Roles.PERSONNEL, new ArrayList<Shift>(), LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 1)
-				);
 
 		new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
+		Employee employee = EmployeeDAO.getEmployee(26).get();
+
 		panelC=new gestioneClienti();
 		panelU = new UserAccessPanel(employee);
 		panelT = new TreatmentPanel();

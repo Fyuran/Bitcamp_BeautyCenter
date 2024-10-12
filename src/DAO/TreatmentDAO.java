@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,9 +26,18 @@ public abstract class TreatmentDAO {
 			stat.setString(1, obj.getType());
 			stat.setBigDecimal(2, obj.getPrice());
 			stat.setInt(3, obj.getVat().getId());
-			stat.setInt(4, (int) obj.getDuration().toSeconds());
+			LocalTime localTime=LocalTime.MIDNIGHT.plus(obj.getDuration());
+			java.sql.Time sqlTime = java.sql.Time.valueOf(localTime);
+			stat.setTime(4, sqlTime);
 			stat.setBoolean(5, obj.isEnabled());
 
+			//
+//			The conversion back would be:
+//
+//			java.sql.Time sqlTime = ..;
+//			LocalTime localTime = sqlTime.toLocalTime();
+//			Duration duration = Duration.between(LocalTime.MIDNIGHT, localTime);
+			
 			stat.executeUpdate();
 			conn.commit();
 
@@ -231,7 +241,7 @@ public abstract class TreatmentDAO {
 			stat.setInt(4, (int) obj.getDuration().toSeconds());
 			stat.setBoolean(5, obj.isEnabled());
 
-			stat.setInt(6, obj.getId()); // WHERE id = ?
+			stat.setInt(6, id); // WHERE id = ?
 
 			int exec = stat.executeUpdate();
 			conn.commit();

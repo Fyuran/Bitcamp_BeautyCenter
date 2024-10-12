@@ -108,9 +108,10 @@ public class ChangeUserDialog extends JDialog {
 	private boolean isDataValid() throws SQLException {
 		if(!inputValidator.isUserUnique(txtNewUsername.getText())){
 			JOptionPane.showMessageDialog(this, "Nuovo username già in uso");
-            return false;
+            return false; 
 		}
-		if(UserCredentialsDAO.verifyPassword(activeUser.getUsername(), String.valueOf(txtPassword.getPassword()))) {
+		if(!UserCredentialsDAO.verifyPassword(activeUser.getUsername(), txtPassword.getPassword())) {
+			System.out.println(activeUser.getUsername());
 			JOptionPane.showMessageDialog(this, "Password errata");
             return false;
 		}

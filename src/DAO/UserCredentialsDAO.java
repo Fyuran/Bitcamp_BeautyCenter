@@ -409,5 +409,25 @@ public abstract class UserCredentialsDAO {
         }
         return false; // Restituisce false se l'utente non viene trovato o se la verifica fallisce
     }
+
+//stesso metodo overloadato con char[]
+public static boolean verifyPassword(String username, char[] password) throws SQLException {
+    String query = "SELECT password FROM user_credentials WHERE username = ? AND is_enabled = 1";
+    
+    try (PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+        preparedStatement.setString(1, username);
+        
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            if (resultSet.next()) {
+                String storedPassword = resultSet.getString("password");
+                
+                // Verifica della password con BCrypt
+                BCrypt.Result result = BCrypt.verifyer().verify(password, storedPassword);
+                return result.verified;
+            }
+        }
+    }
+    return false; // Restituisce false se l'utente non viene trovato o se la verifica fallisce
+}
 }
 

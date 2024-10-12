@@ -108,14 +108,14 @@ public class ChangePassDialog extends JDialog {
 	}
 	private boolean isDataValid() throws SQLException {
 		String oldPassword=String.valueOf(oldPasswordTxt.getPassword());
-		char[]newPassword1=newPasswordTxt1.getPassword();
-		char[]newPassword2=newPasswordTxt2.getPassword();
+		String newPassword1=String.valueOf(newPasswordTxt1.getPassword());
+		String newPassword2=String.valueOf(newPasswordTxt2.getPassword());
 		System.out.println(oldPassword);
 		if(!UserCredentialsDAO.verifyPassword(activeUser.getUsername(),oldPassword)) {
             JOptionPane.showMessageDialog(this, "Vecchia password errata");
             return false;
 		}
-		if(newPassword1!=newPassword2) {
+		if(!newPassword1.equals(newPassword2)) {
 			JOptionPane.showMessageDialog(this, "Le password non coincidono");
             return false;
 		}
