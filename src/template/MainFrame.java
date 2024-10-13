@@ -1,68 +1,66 @@
 package template;
+
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 
 import com.centro.estetico.bitcamp.BeautyCenter;
 import com.centro.estetico.bitcamp.Employee;
 import com.centro.estetico.bitcamp.Roles;
-public class MainFrame extends JFrame{
+
+// EmployeePanel per aggiungere operatori -> Solo admin
+// gestionePremi per creare premi -> Solo admin
+// ProductPanel per creare prodotti -> Solo admin
+// gestioneTurni per settare turni -> Solo admin
+// reportVenditePDF non è un panel ma un frame, dobbiamo vedere come gestirlo
+// TreatmentPanel  creazione trattamenti -> Solo admin
+
+// UserAccessPanel area personale -> Disponibile a tutti
+// ReservationForm  prenotazione appuntamenti - >Disponibile a tutti
+// gestioneClienti per aggiungere clienti ->Disponibile a tutti
+
+public class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private JTabbedPane mainPane;
-	//crea account è un frame, bisogna correggerlo
-	private creaAccount creaAccount; //pan per creare account -> Solo admin
-	private EmployeePanel employeePanel;//pan per aggiungere operatori -> Solo admin
-	private gestionePremi gestionePremi;//pan per creare premi -> Solo admin
-	private ProductPanel productPanel;//pan per creare prodotti -> Solo admin
-	private gestioneTurni gestioneTurni;//pan per settare turni ->Solo admin
-	private ReportVenditePDF reportVenditePDF;//non è un panel ma un frame, dobbiamo vedere come gestirlo
-	private TreatmentPanel treatmentPanel;//creazione trattamenti ->Solo admin
-	
-	private UserAccessPanel userAccessPanel;//area personale ->Disponibile a tutti
-	private ReservationForm reservationForm;//prenotazione appuntamenti ->Disponibile a tutti
-	private gestioneClienti gestioneClienti;//pan per aggiungere clienti ->Disponibile a tutti
+	private static JTabbedPane mainPane;
+	private static Employee sessionUser;
+	private static JFrame mainFrame;
 	
 	public MainFrame(Employee employee, BeautyCenter bc) {
-		this.mainPane=new JTabbedPane();
+		mainPane = new JTabbedPane();
+		sessionUser = employee;
+		mainFrame = this;
+		
 		setSize(1024, 768);
 		setLocationRelativeTo(null);
-		setName("Gestione "+(bc==null?"Centro Estetico":bc.getName()));
-		userAccessPanel=new UserAccessPanel(employee);
-		reservationForm=new ReservationForm();
-		gestioneClienti=new gestioneClienti();
-		
-		mainPane.add(userAccessPanel);
-		mainPane.add(reservationForm);
-		mainPane.add(gestioneClienti);
-		
-		if(employee.getRole() == Roles.ADMIN){
-			buildAdminFrame(employee);
-		}
-			add(mainPane);
-			setVisible(true);
-		
-		
+		setName("Gestione " + (bc == null ? "Centro Estetico" : bc.getName()));
 
+		mainPane.add(new UserAccessPanel(employee));
+		mainPane.add(new ReservationForm());
+		mainPane.add(new gestioneClienti());
+
+		if (employee.getRole() == Roles.ADMIN) {
+			buildAdminFrame();
+		}
+		add(mainPane);
+		setVisible(true);
 
 	}
-	
-	public void buildAdminFrame(Employee admin) {
-		//creaAccount=new creaAccount();
-		employeePanel=new EmployeePanel();
-		gestionePremi=new gestionePremi();
-		productPanel=new ProductPanel();
-		//gestioneTransazioniEReport=new gestioneTransazioniEReport();
-		gestioneTurni=new gestioneTurni();
-		//reportVenditePDF=new ReportVenditePDF();
-		treatmentPanel=new TreatmentPanel();
-		//aggiungere nomi alle tab appuntamenti, clienti, premi e turni
-		
-		//mainPane.add(creaAccount);
-		mainPane.add(employeePanel);
-		mainPane.add(gestionePremi);
-		mainPane.add(productPanel);
-		//mainPane.add(gestioneTransazioniEReport);
-		mainPane.add(gestioneTurni);
-		mainPane.add(treatmentPanel);
+
+	public static void buildAdminFrame() {
+		mainPane.add(new EmployeePanel());
+		mainPane.add(new gestionePremi());
+		mainPane.add(new ProductPanel());
+		mainPane.add(new gestioneTurni());
+		mainPane.add(new TreatmentPanel());
+		mainPane.add(new TransactionPanel());
+		mainPane.add(new SubscriptionPanel());
+	}
+
+	public static JFrame getMainFrame() {
+		return mainFrame;
+	}
+
+	public static Employee getSessionUser() {
+		return sessionUser;
 	}
 }
