@@ -24,17 +24,19 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`vat` (
   PRIMARY KEY (`id`)
 );
 
-   CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`user_credentials` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `username` VARCHAR(100) NULL,
-  `password` VARCHAR(100) NULL,
-  `mail` VARCHAR(100) NULL,
-  `iban` VARCHAR(40) NULL,
-  `phone` VARCHAR(20) NULL,
-  `is_enabled` TINYINT NOT NULL DEFAULT 1,
+CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`user_credentials` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) DEFAULT NULL,
+  `password` varchar(100) DEFAULT NULL,
+  `address` varchar(100) DEFAULT NULL,
+  `iban` varchar(40) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `mail` varchar(100) DEFAULT NULL,
+  `is_enabled` tinyint NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `mail_UNIQUE` (`mail` ASC) ,
-  UNIQUE INDEX `phone_UNIQUE` (`phone` ASC));
+  UNIQUE KEY `mail_UNIQUE` (`mail`),
+  UNIQUE KEY `phone_UNIQUE` (`phone`)
+);
   
 CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`customer` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
