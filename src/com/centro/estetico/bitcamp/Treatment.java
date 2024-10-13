@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import DAO.BeautyCenterDAO;
 import DAO.TreatmentDAO;
 import DAO.VATDao;
 
@@ -105,8 +106,8 @@ public class Treatment {
 	}
 
 	public LocalTime getLocalTimeFromDuration() {
-		return LocalTime.of((int) duration.toHoursPart(), (int) duration.toMinutesPart(),
-				(int) duration.toSecondsPart());
+		return LocalTime.of(duration.toHoursPart(), duration.toMinutesPart(),
+				duration.toSecondsPart());
 	}
 
 	public String durationToPattern(String pattern) { // ex HH:mm:ss
@@ -125,8 +126,8 @@ public class Treatment {
 
 		try {
 
-			LocalTime openingHour = Main.getBeautyCenter().getOpeningHour();
-			LocalTime closingHour = Main.getBeautyCenter().getClosingHour();
+			LocalTime openingHour = BeautyCenterDAO.getBeautyCenter(1).get().getOpeningHour();
+			LocalTime closingHour = BeautyCenterDAO.getBeautyCenter(1).get().getClosingHour();
 
 			for (LocalTime time = openingHour; !time.plus(duration).isAfter(closingHour); time = time.plus(duration)) {
 

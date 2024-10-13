@@ -1,16 +1,16 @@
 package com.centro.estetico.bitcamp;
 
 public enum Roles {
-    PERSONNEL("Personale"), 
-    SECRETARY("Front-desk"), 
+    PERSONNEL("Personale"),
+    SECRETARY("Front-desk"),
     ADMIN("Amministratore");
-	
+
 	private final String type;
-	
+
 	private Roles(String s) {
 		this.type = s;
 	}
-	
+
 	public static Roles toEnum(String s) {
 		switch(s.toLowerCase()) {
 			case "personale": return Roles.PERSONNEL;
@@ -21,15 +21,15 @@ public enum Roles {
 			case "admin": return Roles.ADMIN;
 			default: return null;
 		}
-		
+
 	}
-	
+
 	public int toSQLOrdinal() {
 		return this.ordinal() + 1;
 	}
-	
-	
-	
+
+
+
 	@Override
 	public String toString() {
 		return type;

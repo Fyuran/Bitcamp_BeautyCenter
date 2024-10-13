@@ -4,9 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
-import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -26,7 +24,6 @@ import com.centro.estetico.bitcamp.ProductCat;
 import com.centro.estetico.bitcamp.VAT;
 
 import DAO.ProductDAO;
-import DAO.TreatmentDAO;
 import DAO.VATDao;
 import utils.inputValidator;
 
@@ -232,19 +229,19 @@ public class ProductPanel extends JPanel {
 			ivasToString[i] = iva.toString();
 			i++;
 		}
-		ivaComboBox = new JComboBox<String>(ivasToString);
+		ivaComboBox = new JComboBox<>(ivasToString);
 		ivaComboBox.setBounds(749, 471, 220, 27);
 		add(ivaComboBox);
 
 		msgLbl = new JLabel("");
 		msgLbl.setBounds(389, 606, 625, 16);
 		add(msgLbl);
-		
+
 		JLabel amountLbl = new JLabel("Quantità:");
 		amountLbl.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		amountLbl.setBounds(531, 514, 170, 14);
 		add(amountLbl);
-		
+
 		txtAmount = new JTextField();
 		txtAmount.setColumns(10);
 		txtAmount.setBounds(749, 511, 220, 20);
@@ -297,7 +294,7 @@ public class ProductPanel extends JPanel {
 			// boolean isEnabled)
 		}
 
-	} 
+	}
 
 	private boolean isDataValid(boolean mustNameBeUnique) {
 		msgLbl.setText("");

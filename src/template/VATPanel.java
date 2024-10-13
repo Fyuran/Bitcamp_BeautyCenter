@@ -140,7 +140,7 @@ public class VATPanel extends JPanel {
 		btnHystorical.setBounds(870, 8, 40, 30);
 		btnHystorical.addActionListener(e -> populateTable());
 		containerPanel.add(btnHystorical);
-		
+
 		JButton btnDisable = new JButton("");
 		btnDisable.setOpaque(false);
 		btnDisable.setContentAreaFilled(false);
@@ -239,7 +239,7 @@ public class VATPanel extends JPanel {
 //			populateTable();
 //		}
 //	}
-	
+
 	private void disableVat() {
 		if(selectedId > 0) {
 			msgLbl.setText("");
@@ -284,8 +284,8 @@ public class VATPanel extends JPanel {
 	}
 
 	private double getAmountFromString(String amountString) {
-		return amountString.endsWith("%") 
-			? Double.parseDouble(amountString.substring(0, amountString.length() - 1)) 
+		return amountString.endsWith("%")
+			? Double.parseDouble(amountString.substring(0, amountString.length() - 1))
 			: Double.parseDouble(amountString);
 	}
 }

@@ -13,20 +13,20 @@ public class Customer extends User {
 	private String P_IVA;
 	private String recipientCode;
 	private int loyaltyPoints;
-	
+
 	//User(int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled)
 	//UserDetails(String name, String surname, boolean isFemale, LocalDate BoD, String birthplace, String notes)
 	public Customer(
 			int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled,
-			
-			String P_IVA, String recipientCode, int loyaltyPoints, Subscription subscription, List<Prize> prizes  
+
+			String P_IVA, String recipientCode, int loyaltyPoints, Subscription subscription, List<Prize> prizes
 		) {
 		super(id, details, userCredentials, isEnabled);
 		this.subscription = subscription;
 		this.prizes = prizes;
 		this.P_IVA = P_IVA;
 		this.recipientCode = recipientCode;
-		
+
 		this.loyaltyPoints = loyaltyPoints;
 	}
 
@@ -35,7 +35,7 @@ public class Customer extends User {
 				rs.getInt(1),
 				new UserDetails(
 					rs.getString(2), rs.getString(3),
-					rs.getBoolean(4), rs.getDate(5).toLocalDate(), 
+					rs.getBoolean(4), rs.getDate(5).toLocalDate(),
 					rs.getString(6), rs.getString(11)
 				),
 				UserCredentialsDAO.getUserCredentials(rs.getInt(8)).get(),
@@ -47,12 +47,12 @@ public class Customer extends User {
 				PrizeDAO.getAllPrizesAssignedToCustomer(rs.getInt(1))
 			);
 	}
-	
+
 	public Customer(UserDetails details, UserCredentials userCredentials, String P_IVA, String recipientCode,
 			int loyaltyPoints, Subscription subscription, List<Prize> prizes) {
 		this(-1, details, userCredentials, true, P_IVA, recipientCode, loyaltyPoints, subscription, prizes);
 	}
-	
+
 	public Customer(int id, Customer obj) {
 		this(obj.getId(), obj.getDetails(), obj.getUserCredentials(), obj.isEnabled(), obj.P_IVA, obj.recipientCode, obj.loyaltyPoints,
 			obj.subscription, obj.prizes
@@ -63,7 +63,7 @@ public class Customer extends User {
 	public Subscription getSubscription() {
 		return subscription;
 	}
-	
+
 	public void setSubscription(Subscription subscription) {
 		this.subscription = subscription;
 	}
@@ -75,7 +75,7 @@ public class Customer extends User {
 	public void addPrizes(Prize...prizes) {
 		for(Prize prize : prizes) {
 			if(prize != null) {
-				this.prizes.add(prize);				
+				this.prizes.add(prize);
 			}
 		}
 	}
@@ -87,7 +87,7 @@ public class Customer extends User {
 			}
 		}
 	}
-	
+
 	public String getP_IVA() {
 		return P_IVA;
 	}
@@ -121,12 +121,13 @@ public class Customer extends User {
 	public String getFullName() {
 		return getName() + " " + getSurname();
 	}
-	
+
 	//(String name, String surname, boolean isFemale, LocalDate BoD, String birthplace, String notes)
+	@Override
 	public Object[] toTableRow() {
 		return new Object[] {
 				getId(), getName(), getSurname(), getBoD(), getBirthplace(), P_IVA, recipientCode, loyaltyPoints, getNotes()
 		};
 	}
-	
+
 }

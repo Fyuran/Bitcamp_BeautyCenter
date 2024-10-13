@@ -21,9 +21,9 @@ public class Transaction {
 	private BeautyCenter beautyCenter;
 	private String services;
 	private boolean isEnabled;
-	
+
 	private Transaction(
-			int id, BigDecimal price, PayMethod paymentMethod, 
+			int id, BigDecimal price, PayMethod paymentMethod,
 			LocalDateTime dateTime, Customer customer,
 			VAT vat, BeautyCenter beautyCenter, String services, boolean isEnabled
 			) {
@@ -37,21 +37,21 @@ public class Transaction {
 		this.services = services;
 		this.isEnabled = isEnabled;
 	}
-	
+
 	public Transaction(int id, Transaction obj) {
 		this(id, obj.price, obj.paymentMethod, obj.dateTime, obj.customer, obj.vat, obj.beautyCenter, obj.services, obj.isEnabled);
 	}
-	
+
 	public Transaction(
-			BigDecimal price, PayMethod paymentMethod, 
-			LocalDateTime dateTime, Customer customer, 
+			BigDecimal price, PayMethod paymentMethod,
+			LocalDateTime dateTime, Customer customer,
 			VAT vat, BeautyCenter beautyCenter, String services
 			) {
 		this(-1, price, paymentMethod, dateTime, customer, vat, beautyCenter, services, true);
 	}
 	public Transaction(
-			BigDecimal price, PayMethod paymentMethod, 
-			LocalDateTime dateTime, Customer customer, 
+			BigDecimal price, PayMethod paymentMethod,
+			LocalDateTime dateTime, Customer customer,
 			VAT vat, BeautyCenter beautyCenter
 			) {
 		this(-1, price, paymentMethod, dateTime, customer, vat, beautyCenter, "", true);
@@ -59,14 +59,14 @@ public class Transaction {
 
 	public Transaction(ResultSet rs) throws SQLException {
 		this(
-			rs.getInt(1), 
-			rs.getBigDecimal(2), 
+			rs.getInt(1),
+			rs.getBigDecimal(2),
 			PayMethod.toEnum(rs.getString(4)),
-			rs.getTimestamp(3).toLocalDateTime(), 
+			rs.getTimestamp(3).toLocalDateTime(),
 			CustomerDAO.getCustomer(rs.getInt(6)).orElseThrow(),
-			VATDao.getVAT(rs.getInt(5)).orElseThrow(), 
+			VATDao.getVAT(rs.getInt(5)).orElseThrow(),
 			BeautyCenterDAO.getBeautyCenter(rs.getInt(7)).orElseThrow(),
-			rs.getString(8), 
+			rs.getString(8),
 			rs.getBoolean(9)
 		);
 	}
@@ -134,7 +134,7 @@ public class Transaction {
 	public void setServices(String services) {
 		this.services = services;
 	}
-	
+
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
 	}
@@ -145,15 +145,15 @@ public class Transaction {
 				id, price, dateTime.format(dtf), paymentMethod, vat, customer, services, isEnabled
 		};
 	}
-	
+
 
 	@Override
 	public String toString() {
 		DateTimeFormatter dtf = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
 		return price + " "  + dateTime.format(dtf) + " " +
-				paymentMethod.toString() + " " + vat.toString() + " " + 
+				paymentMethod.toString() + " " + vat.toString() + " " +
 				customer.getFullName() + " " + services;
 	}
-	
-	
+
+
 }

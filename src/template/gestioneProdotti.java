@@ -92,6 +92,7 @@ public class gestioneProdotti extends JPanel {
 		containerPanel.add(btnInsert);
 
 		btnInsert.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 
 
@@ -158,29 +159,29 @@ public class gestioneProdotti extends JPanel {
 		txtMinStock.setColumns(10);
 		txtMinStock.setBounds(209, 512, 220, 20);
 		add(txtMinStock);
-		
+
 		txtPrice = new JTextField();
 		txtPrice.setColumns(10);
 		txtPrice.setBounds(749, 432, 220, 20);
 		add(txtPrice);
-		
+
 		JLabel lblIVA = new JLabel("IVA:");
 		lblIVA.setBounds(531, 475, 170, 14);
 		add(lblIVA);
-		
+
 		JLabel lblPrice = new JLabel("Prezzo:");
 		lblPrice.setBounds(531, 437, 170, 14);
 		add(lblPrice);
-		
+
 		String[] categories= {"Cura orale","Cura pelle","Cura capelli","Cura del corpo","Cosmetici","Profumi","Altro"};
-		JComboBox<String> categoryComboBox = new JComboBox<String>(categories);
+		JComboBox<String> categoryComboBox = new JComboBox<>(categories);
 		categoryComboBox.setBounds(209, 468, 220, 27);
 		add(categoryComboBox);
-		
-		JComboBox<String> IvaCOmboBox = new JComboBox<String>();
+
+		JComboBox<String> IvaCOmboBox = new JComboBox<>();
 		IvaCOmboBox.setBounds(749, 471, 220, 27);
 		add(IvaCOmboBox);
-		
-		
+
+
 	}
 }

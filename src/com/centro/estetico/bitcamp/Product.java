@@ -35,11 +35,11 @@ public class Product {
 	public Product(String name, int amount, int minStock, BigDecimal price, VAT vat, ProductCat type) {
 		this(-1, name, amount, minStock, price, vat, type, true);
 	}
-	
+
 	public Product(int id, Product obj) {
 		this(id, obj.name, obj.amount, obj.minStock, obj.price, obj.vat, obj.type, obj.isEnabled);
 	}
-	
+
 	public Product(ResultSet rs) throws SQLException {
 		this(rs.getInt(1), rs.getString(2), rs.getInt(3),
 			rs.getInt(4), rs.getBigDecimal(5), VATDao.getVAT(rs.getInt(6)).get(),
@@ -106,7 +106,7 @@ public class Product {
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
 	}
-	
+
 	public static boolean isNameUnique(String productName) {
 		String query="SELECT * FROM beauty_centerdb.product WHERE name=? LIMIT 1";
 		String name="";
@@ -116,7 +116,7 @@ public class Product {
 			ResultSet rs=pstmt.executeQuery();
 			if(rs.next()) {
 				name=rs.getString("name");
-				
+
 			}
 			System.out.println("Nome cercato: "+productName);
 			System.out.println("Nome trovato: "+name);

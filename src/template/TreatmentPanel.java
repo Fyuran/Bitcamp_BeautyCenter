@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,11 +24,9 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import com.centro.estetico.bitcamp.Product;
-import com.centro.estetico.bitcamp.ProductCat;
 import com.centro.estetico.bitcamp.Treatment;
 import com.centro.estetico.bitcamp.VAT;
 
-import DAO.EmployeeDAO;
 import DAO.ProductDAO;
 import DAO.TreatmentDAO;
 import DAO.VATDao;
@@ -102,7 +99,7 @@ public class TreatmentPanel extends JPanel {
 
 						// { "ID", "Nome trattamento", "Prezzo", "IVA%", "Durata" };
 						// Il listener ascolta la riga selezionata e la usa per popolare i campi
-						
+
 						txtName.setText(name);
 						cBoxIVA.setSelectedItem(vat);
 						txtPrice.setText(price);
@@ -114,14 +111,14 @@ public class TreatmentPanel extends JPanel {
 				}
 			}
 		});
-		
+
 
 		//tabella prodotti per trattamento
 		 String[] columnProductNames = {"ID","Prodotto", "Categoria"};
 			productModel = new DefaultTableModel(columnProductNames, 0);
 			JTable productTable = new JTable(productModel);
 			productTable.setEnabled(false);
-			
+
 			JScrollPane productScrollPane = new JScrollPane(productTable);
 			productScrollPane.setBounds(577, 474, 437, 181);
 			add(productScrollPane);
@@ -237,7 +234,7 @@ public class TreatmentPanel extends JPanel {
 			ivasToString[i] = iva.toString();
 			i++;
 		}
-		cBoxIVA = new JComboBox<String>(ivasToString);
+		cBoxIVA = new JComboBox<>(ivasToString);
 		cBoxIVA.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 11));
 		cBoxIVA.setBounds(209, 511, 220, 22);
 		add(cBoxIVA);
@@ -264,8 +261,8 @@ public class TreatmentPanel extends JPanel {
 		msgLbl = new JLabel("");
 		msgLbl.setBounds(248, 413, 625, 16);
 		add(msgLbl);
-		
-		
+
+
 		populateTable();
 
 	}
@@ -319,14 +316,14 @@ public class TreatmentPanel extends JPanel {
 			VAT vat = VATDao.getVATByAmount(vatAmount).get();
 			int durationInt = Integer.parseInt(txtDuration.getText());
 			Duration duration = Duration.ofMinutes(durationInt);
-			
-			
-//			
+
+
+//
 			// prodottiSelezionati
 			// isEnabled
 
 			Treatment t = new Treatment(name, price, vat, duration, products, true);
-			
+
 			Treatment tUpdated=TreatmentDAO.insertTreatment(t).get();
 			//per aggiungere i prodotti nella tabella tratmentproduct
 			for(Product p:products) {

@@ -29,7 +29,7 @@ public class gestionePremi extends JPanel {
 
 	// Modello della tabella (scope a livello di classe per poter aggiornare la
 	// tabella)
-	DefaultTableModel tableModel;
+	private DefaultTableModel tableModel;
 
 	/**
 	 * Create the panel.
@@ -37,6 +37,7 @@ public class gestionePremi extends JPanel {
 	public gestionePremi() {
 		setLayout(null);
 		setSize(1024, 768);
+		setName("Premi");
 
 		JLabel lblGestionePremi = new JLabel("GESTIONE  PREMI");
 		lblGestionePremi.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
@@ -75,6 +76,7 @@ public class gestionePremi extends JPanel {
 
 		JButton btnSearch = new JButton("");
 		btnSearch.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
@@ -87,6 +89,7 @@ public class gestionePremi extends JPanel {
 
 		JButton btnFilter = new JButton("");
 		btnFilter.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
@@ -99,6 +102,7 @@ public class gestionePremi extends JPanel {
 
 		JButton btnInsert = new JButton("");
 		btnInsert.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
@@ -111,6 +115,7 @@ public class gestionePremi extends JPanel {
 
 		JButton btnUpdate = new JButton("");
 		btnUpdate.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
@@ -123,6 +128,7 @@ public class gestionePremi extends JPanel {
 
 		JButton btnDisable = new JButton("");
 		btnDisable.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
@@ -135,6 +141,7 @@ public class gestionePremi extends JPanel {
 
 		JButton btnHystorical = new JButton("");
 		btnHystorical.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 			}
 		});

@@ -9,7 +9,7 @@ public abstract class  User {
 	private UserDetails details;
 	private UserCredentials userCredentials;
 	private boolean isEnabled;
-	
+
 	protected User(int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled) {
 		this.id = id;
 		this.details = details;
@@ -32,7 +32,7 @@ public abstract class  User {
 	public boolean isEnabled() {
 		return isEnabled;
 	}
-	
+
 	public void setDetails(UserDetails details) {
 		this.details = details;
 	}
@@ -57,7 +57,7 @@ public abstract class  User {
 	    return details.getBirthplace();
 	}
 
-    public boolean isFemale() { 
+    public boolean isFemale() {
         return details.isFemale();
     }
 
@@ -72,7 +72,7 @@ public abstract class  User {
 	public CodiceFiscale getEU_TIN() {
 		return details.getEU_TIN();
 	}
-	
+
 	//Setter
 	public void setName(String name) {
 		details.setName(name);
@@ -86,7 +86,7 @@ public abstract class  User {
 	    details.setBirthplace(birthplace);
 	}
 
-	public void setIsFemale(boolean isFemale) { 
+	public void setIsFemale(boolean isFemale) {
         details.setIsFemale(isFemale);
     }
 
@@ -97,7 +97,7 @@ public abstract class  User {
 	public void setNotes(String notes) {
 	    details.setNotes(notes);
 	}
-	
+
 	public int getUserCredentialsId() {
 		return userCredentials.getId();
 	}
@@ -141,13 +141,13 @@ public abstract class  User {
 	public void setMail(String mail) {
 		userCredentials.setMail(mail);
 	}
-	
+
 	@Override
 	public String toString() {
 		return "User [id=" + id + ", details=" + details.toString() + ", userCredentials=" + userCredentials.toString() + ", isEnabled="
 				+ isEnabled + "]";
 	}
-	
+
 	public Object[] toTableRow() {
 		return new Object[] {
 				id, getName(), getSurname(), getBoD(), getBirthplace(), getNotes()

@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -18,12 +17,12 @@ public class Employee extends User {
     private List<Shift> turns;
     private LocalDate hiredDate;
     private LocalDate terminationDate;
-    
+
     //User(int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled)
     //UserDetails(String name, String surname, boolean isFemale, LocalDate BoD, String birthplace, String notes)
 	private Employee(
 			int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled,
-			
+
 			long employeeSerial, Roles role, List<Shift> turns, LocalDate hiredDate, LocalDate terminationDate) {
 		super(id, details, userCredentials, isEnabled);
 		this.employeeSerial = employeeSerial;
@@ -31,33 +30,33 @@ public class Employee extends User {
 		this.hiredDate = hiredDate;
 		this.role = role;
 		this.terminationDate = terminationDate;
-		
+
 	}
 	public Employee(
 			UserDetails details, UserCredentials userCredentials,
             long employeeSerial, Roles role, List<Shift> turns, LocalDate hiredDate, LocalDate terminationDate) {
 		this(-1, details, userCredentials, true, employeeSerial, role, turns, hiredDate, terminationDate);
     }
-	
+
 	public Employee(ResultSet rs) throws SQLException {
-		
+
 		this(
 				rs.getInt(1),
 				new UserDetails(
 					rs.getString(2), rs.getString(3),
-					rs.getBoolean(4), rs.getDate(5).toLocalDate(), 
+					rs.getBoolean(4), rs.getDate(5).toLocalDate(),
 					rs.getString(6), rs.getString(11)
 				),
 				UserCredentialsDAO.getUserCredentials(rs.getInt(10)).get(),
 				rs.getBoolean(12),
 				rs.getLong(13),
-				Roles.valueOf(rs.getString(7)),
-				DAOShift.loadShiftsForEmployeeWhitID(rs.getInt(1)),//I metodi di DAOShift non dovrebbero essere statici?
-				rs.getDate(8) != null ? rs.getDate(8).toLocalDate() : null,  
-				rs.getDate(9) != null ? rs.getDate(9).toLocalDate() : null 
+				Roles.toEnum(rs.getString(7)),
+				DAOShift.loadShiftsForEmployeeWithID(rs.getInt(1)),//I metodi di DAOShift non dovrebbero essere statici?
+				rs.getDate(8) != null ? rs.getDate(8).toLocalDate() : null,
+				rs.getDate(9) != null ? rs.getDate(9).toLocalDate() : null
 			);
 	}
-	
+
 	public Employee(int id, Employee obj) {
 		this(id, obj.getDetails(),  obj.getUserCredentials(), obj.isEnabled(), obj.employeeSerial, obj.role, obj.turns, obj.hiredDate, obj.terminationDate);
 	}
@@ -121,7 +120,7 @@ public class Employee extends User {
     	long serial=rand.nextInt(100000)+900000;
     	return isSerialUnique(serial)?serial:generateSerial();
     }
-    
+
     //funzione da correggere, ho fallito male
     private static boolean isSerialUnique(long serial) {
     		String query="SELECT * FROM beauty_centerdb.employee WHERE serial=? LIMIT 1";
@@ -129,21 +128,22 @@ public class Employee extends User {
     		try(PreparedStatement pstmt = conn.prepareStatement(query)){
     			pstmt.setLong(1, serial);
     			ResultSet rs=pstmt.executeQuery();
-    			
+
     			return !rs.next();
     			}catch(SQLException e) {
     			e.printStackTrace();
     			return false;
     		}
     	}
-   
-    
+
+
 
 	@Override
 	public String toString() {
 		return "Employee [employeeSerial=" + employeeSerial + ", role=" + role + ", turns=" + turns + ", hiredDate="
 				+ hiredDate + ", terminationDate=" + terminationDate + ", toString()=" + super.toString() + "]";
 	}
+	@Override
 	public Object[] toTableRow() {
 		return new Object[] {
 				getId(), getName(), getSurname(), getBoD(), getBirthplace(), employeeSerial, role, turns, hiredDate, terminationDate, getNotes()

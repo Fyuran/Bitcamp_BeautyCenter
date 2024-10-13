@@ -1,10 +1,8 @@
 package template;
 
 import java.awt.Color;
-import java.awt.Dialog;
 import java.awt.Font;
 import java.beans.PropertyVetoException;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import javax.swing.JButton;
@@ -44,7 +42,7 @@ public class UserAccessPanel extends JPanel {
 
 	/**
 	 * Create the panel.
-	 * 
+	 *
 	 * @throws PropertyVetoException
 	 */
 	public UserAccessPanel(Employee employee) {
@@ -117,7 +115,7 @@ public class UserAccessPanel extends JPanel {
 
 		// Creazione della tabella
 		JTable shiftTable = new JTable(tableModel);
-		
+
 		// Aggiungere la tabella all'interno di uno JScrollPane per lo scroll
 		JScrollPane shiftScrollsPane = new JScrollPane(shiftTable);
 		shiftScrollsPane.setBorder(new CompoundBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null),
@@ -146,7 +144,7 @@ public class UserAccessPanel extends JPanel {
 		int i=1;
 
 		for (Shift shift : activeUser.getShift()) {
-			
+
 			if (!shift.isShiftOver()) {
 				String day = shift.getStart().format(dayFormat);
 				String start = shift.getStart().format(timeFormat);
@@ -155,7 +153,7 @@ public class UserAccessPanel extends JPanel {
 				System.out.println("Turno "+i+":\n ID: "+shift.getId()+"\nGiorno: "+day+ "\nDa a: "+start+"-"+end+"\nTipo: "+type);
 				i++;
 				tableModel.addRow(new String[] { day, start, end, type });
-				
+
 
 			}
 		}
@@ -177,7 +175,7 @@ public class UserAccessPanel extends JPanel {
 		ChangePassDialog changePassDialog = new ChangePassDialog(activeUser);
 		changePassDialog.setAlwaysOnTop(true);
 		updateActiveUser();
-		
+
 
 	}
 
@@ -186,7 +184,7 @@ public class UserAccessPanel extends JPanel {
 		changeUserDialog.setAlwaysOnTop(true);
 		updateActiveUser();
 		updateData();
-		
+
 	}
 	public void updateActiveUser() {
 		this.activeUser=EmployeeDAO.getEmployee(activeUser.getId()).get();

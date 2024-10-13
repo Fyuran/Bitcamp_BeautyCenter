@@ -21,11 +21,11 @@ public class BeautyCenter {
 	private LocalTime openingHour;
 	private LocalTime closingHour;
 	private boolean isEnabled;
-	
+
 	private BeautyCenter(
-			int id, String name, String phone, String certifiedMail, 
+			int id, String name, String phone, String certifiedMail,
 			String mail, String registeredOffice,
-			String operatingOffice, String REA, String P_IVA, 
+			String operatingOffice, String REA, String P_IVA,
 			LocalTime openingHour, LocalTime closingHour, boolean isEnabled
 		) {
 		this.id = id;
@@ -42,19 +42,19 @@ public class BeautyCenter {
 		this.isEnabled = isEnabled;
 		infoVat = VATDao.getAllVAT();
 	}
-	
-	public BeautyCenter(String name, String phone, String certifiedMail, 
+
+	public BeautyCenter(String name, String phone, String certifiedMail,
 			String mail, String registeredOffice,
-			String operatingOffice, String REA, String P_IVA, 
+			String operatingOffice, String REA, String P_IVA,
 			LocalTime openingHour, LocalTime closingHour
 		) {
 		this(
-			-1, name, phone, certifiedMail, mail, 
+			-1, name, phone, certifiedMail, mail,
 			registeredOffice, operatingOffice, REA, P_IVA, openingHour,
 			closingHour, true
 		);
 	}
-	
+
 	public BeautyCenter(int id, BeautyCenter bc) {
 		this(
 			id, bc.name, bc.phone, bc.certifiedMail, bc.mail, bc.registeredOffice, bc.operatingOffice,
@@ -63,19 +63,19 @@ public class BeautyCenter {
 	}
 	public BeautyCenter(ResultSet rs) throws SQLException {
 		this(
-			rs.getInt(1), 
-			rs.getString(2), 
+			rs.getInt(1),
+			rs.getString(2),
 			rs.getString(3),
-			rs.getString(4), 
-			rs.getString(5), 
+			rs.getString(4),
+			rs.getString(5),
 			rs.getString(6),
-			rs.getString(7), 
-			rs.getString(8), 
+			rs.getString(7),
+			rs.getString(8),
 			rs.getString(9),
-			rs.getTime(10).toLocalTime(), 
+			rs.getTime(10).toLocalTime(),
 			rs.getTime(11).toLocalTime(),
 			rs.getBoolean(12)
-		);		
+		);
 	}
 	public boolean isEnabled() {
 		return isEnabled;
@@ -152,14 +152,14 @@ public class BeautyCenter {
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
 	}
-	
+
 	/*(String name, String phone, String certifiedMail, String mail, String registeredOffice,
-			String operatingOffice, String REA, String P_IVA, 
+			String operatingOffice, String REA, String P_IVA,
 			LocalTime openingHour, LocalTime closingHour)*/
 	public Object[] toTableRow() {
 		return new Object[] {
 				id, name, phone, certifiedMail, mail, registeredOffice, operatingOffice, REA, P_IVA, openingHour, closingHour
 		};
 	}
-	
+
 }

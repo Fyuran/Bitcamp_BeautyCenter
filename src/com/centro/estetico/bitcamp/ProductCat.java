@@ -8,7 +8,7 @@ public enum ProductCat {
 	COSMETICS("Cosmetici"),
 	PERFUMES("Profumi"),
 	OTHER("Altro");
-	
+
 	private final String description;
 
 	private ProductCat(String description ) {
@@ -25,9 +25,14 @@ public enum ProductCat {
         }
         throw new IllegalArgumentException("Nessun ProductCat trovato per la descrizione: " + description);
     }
-	
+
 	public int toSQLOrdinal() {
 		return this.ordinal() + 1;
+	}
+
+	@Override
+	public String toString() {
+		return description;
 	}
 }
 

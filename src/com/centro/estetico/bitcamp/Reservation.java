@@ -1,5 +1,5 @@
 package com.centro.estetico.bitcamp;
-import java.time.*;
+import java.time.LocalDateTime;
 
 
 public class Reservation {
@@ -11,13 +11,13 @@ public class Reservation {
 	private boolean isPaid;
 	private ReservationState state;
 	private boolean isEnabled;
-	
+
 	public Reservation() {
 		this.isPaid = false;
 		this.isEnabled = true;
 		this.state = ReservationState.CREATED;
 	}
-	
+
 	public Reservation(Customer customer, Treatment treatment, Employee employee, LocalDateTime datetime) {
 		this.customer = customer;
 		this.treatment = treatment;
@@ -27,7 +27,7 @@ public class Reservation {
 		this.isEnabled = true;
 		this.state = ReservationState.CREATED;
 	}
-	
+
 	public boolean isEnabled() {
 		return isEnabled;
 	}
@@ -103,9 +103,9 @@ public class Reservation {
 	}
 
 
-	public void setDateTime(LocalDateTime dateTime) {		
+	public void setDateTime(LocalDateTime dateTime) {
 		this.dateTime = dateTime;
 	}
-	
-		
+
+
 }

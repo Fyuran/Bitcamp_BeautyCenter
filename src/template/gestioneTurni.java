@@ -36,6 +36,7 @@ public class gestioneTurni extends JPanel {
 	 * Create the panel.
 	 */
 	public gestioneTurni() {
+		setName("Turni");
 		setLayout(null);
 		setSize(1024, 768);
 
@@ -69,6 +70,7 @@ public class gestioneTurni extends JPanel {
 
 		JButton btnSearch = new JButton("");
 		btnSearch.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
@@ -87,6 +89,7 @@ public class gestioneTurni extends JPanel {
 
 		JButton btnFilter = new JButton("");
 		btnFilter.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
@@ -99,6 +102,7 @@ public class gestioneTurni extends JPanel {
 
 		JButton btnInsert = new JButton("");
 		btnInsert.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
@@ -111,6 +115,7 @@ public class gestioneTurni extends JPanel {
 
 		JButton btnUpdate = new JButton("");
 		btnUpdate.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
@@ -123,6 +128,7 @@ public class gestioneTurni extends JPanel {
 
 		JButton btnDisable = new JButton("");
 		btnDisable.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
@@ -135,6 +141,7 @@ public class gestioneTurni extends JPanel {
 
 		JButton btnHystorical = new JButton("");
 		btnHystorical.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
