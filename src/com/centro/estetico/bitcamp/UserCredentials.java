@@ -5,6 +5,8 @@ import java.sql.SQLException;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
+
+
 public class UserCredentials {
 	private final int id;
     private String username;//Non criptata
@@ -17,7 +19,7 @@ public class UserCredentials {
     private String mail;
     private boolean isEnabled;
 
-    private UserCredentials(int id, String username, String password, String address, String iban, String phone, String mail) {
+    private UserCredentials(int id, String username, String password, String address, String iban, String phone, String mail, boolean isEnabled) {
     	this.id = id;
         this.username = username;
         this.password = encryptPassword(password);
@@ -25,16 +27,21 @@ public class UserCredentials {
         this.iban = iban;
         this.phone = phone;
         this.mail = mail;
+        this.isEnabled = isEnabled;
     }
-    
+
     public UserCredentials(String username, String password, String address, String iban, String phone, String mail) {
-    	this(-1, username, password, address, iban, phone, mail);
+    	this(-1, username, password, address, iban, phone, mail, true);
     }
-    
+
+    public UserCredentials(String username, String password) {
+    	this(-1, username, password, null, null, null, null, true);
+    }
+
     public UserCredentials(int id, UserCredentials obj) {
-    	this(id, obj.username, obj.password, obj.address, obj.iban, obj.phone, obj.mail);
+    	this(id, obj.username, obj.password, obj.address, obj.iban, obj.phone, obj.mail, obj.isEnabled);
     }
-    
+
     //id, username, password, mail, iban, phone, is_enabled
     public UserCredentials(ResultSet rs) throws SQLException {
 		this(
@@ -44,18 +51,20 @@ public class UserCredentials {
 			rs.getString(4),
 			rs.getString(5),
 			rs.getString(6),
-			rs.getString(7)
+			rs.getString(7),
+			rs.getBoolean(8)
 		);
 	}
 
 	// Metodi per gestire la criptazione e la decriptazione della password tramite la libreria Bcrypt
- 	private String encryptPassword(String password) {
+ 	public static String encryptPassword(String password) {
  		//Utilizzeremo le impostazioni di default fornite dalla libreria
  		//Creiamo un array di caratteri per la password dopodiché verrà eseguito un numero di 5 iterazioni per criptare la password
  		char[] cryptStringChars = password.toCharArray();
  		String bcryptPassword = BCrypt.withDefaults().hashToString(5, cryptStringChars);
  		return bcryptPassword;
  	}
+ 	
  	public void changePassword(String oldPassword, String newPassword) {
 		if (isValidPassword(oldPassword)) {
 			this.password = encryptPassword(newPassword);
@@ -112,7 +121,7 @@ public class UserCredentials {
 		this.mail = mail;
 	}
 
-	
+
 	public String getPassword() {
 		return password;
 	}
@@ -130,7 +139,7 @@ public class UserCredentials {
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
 	}
-	
+
 	public boolean isEnabled() {
 		return isEnabled;
 	}

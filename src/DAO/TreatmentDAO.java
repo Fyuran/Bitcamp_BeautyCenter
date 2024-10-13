@@ -17,11 +17,11 @@ import com.centro.estetico.bitcamp.Treatment;
 public abstract class TreatmentDAO {
 	private static Connection conn = Main.getConnection();
 
-	public static Optional<Treatment> insertTreatment(Treatment obj) {
+	public final static Optional<Treatment> insertTreatment(Treatment obj) {
 		String query = "INSERT INTO beauty_centerdb.treatment(type, price, vat_id, duration, is_enabled) "
 				+ "VALUES (?, ?, ?, ?, ?)";
 
-		try (PreparedStatement stat = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
+		try (PreparedStatement stat = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
 			stat.setString(1, obj.getType());
 			stat.setBigDecimal(2, obj.getPrice());
@@ -37,7 +37,7 @@ public abstract class TreatmentDAO {
 //			java.sql.Time sqlTime = ..;
 //			LocalTime localTime = sqlTime.toLocalTime();
 //			Duration duration = Duration.between(LocalTime.MIDNIGHT, localTime);
-			
+
 			stat.executeUpdate();
 			conn.commit();
 
@@ -45,9 +45,8 @@ public abstract class TreatmentDAO {
 			if (generatedKeys.next()) {
 				int id = generatedKeys.getInt(1);
 				return Optional.ofNullable(new Treatment(id, obj));
-			} else {
-				throw new SQLException("Could not retrieve id");
 			}
+			throw new SQLException("Could not retrieve id");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			if (conn != null) {
@@ -57,15 +56,16 @@ public abstract class TreatmentDAO {
 					e1.printStackTrace();
 				}
 			}
-			;
 		}
 		return Optional.empty();
 	}
 
-	public static Optional<Treatment> getTreatment(int id) {
+	public final static Optional<Treatment> getTreatment(int id) {
 		String query = "SELECT * FROM beauty_centerdb.treatment WHERE id = ?";
 
 		Optional<Treatment> opt = Optional.empty();
+		if(isEmpty()) return opt;
+		
 		try (PreparedStatement stat = conn.prepareStatement(query)) {
 			stat.setInt(1, id); // WHERE id = ?
 
@@ -87,7 +87,7 @@ public abstract class TreatmentDAO {
 		return opt;
 	}
 
-	public static List<Treatment> getAllTreatments() {
+	public final static List<Treatment> getAllTreatments() {
 		List<Treatment> list = new ArrayList<>();
 
 		String query = "SELECT * FROM beauty_centerdb.treatment";
@@ -111,10 +111,33 @@ public abstract class TreatmentDAO {
 		return list;
 	}
 
-	public static int addProductToTreatment(Treatment treatment, Product product) {
-		String query = "INSERT INTO beauty_centerdb.producttreatment(product_id, treatment_id) " + "VALUES (?, ?)";
+	public final static boolean isEmpty() {
+		String query = "SELECT * FROM beauty_centerdb.treatment LIMIT 1";
 
-		try (PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			ResultSet rs = stat.executeQuery();
+			conn.commit();
+			if(rs.next()) {
+				return false;
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return true;
+	}
+
+	public final static int addProductToTreatment(Treatment treatment, Product product) {
+		String query = "INSERT INTO beauty_centerdb.producttreatment(product_id, treatment_id) "
+				+ "VALUES (?, ?)";
+
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
 			stat.setInt(1, product.getId());
 			stat.setInt(2, treatment.getId());
 
@@ -137,7 +160,7 @@ public abstract class TreatmentDAO {
 		return -1;
 	}
 
-	public static int removeProductFromTreatment(Treatment treatment, Product product) {
+	public final static int removeProductFromTreatment(Treatment treatment, Product product) {
 		String query = "DELETE FROM beauty_centerdb.customerprize WHERE product_id = ? AND treatment_id = ?";
 
 		try (PreparedStatement stat = conn.prepareStatement(query)) {
@@ -163,9 +186,8 @@ public abstract class TreatmentDAO {
 		return -1;
 	}
 
-	// get all rows where treatment_id == id then retrieve products' id from row for
-	// object retrieval function
-	public static List<Product> getProductsOfTreatment(int id) {
+	//get all rows where treatment_id == id then retrieve products' id from row for object retrieval function
+	public final static List<Product> getProductsOfTreatment(int id) {
 		String query = "SELECT * FROM beauty_centerdb.producttreatment WHERE treatment_id = ?";
 
 		List<Product> list = new ArrayList<>();
@@ -191,14 +213,12 @@ public abstract class TreatmentDAO {
 		}
 		return list;
 	}
-
-	public static List<Product> getProductsOfTreatment(Treatment treatment) {
+	public final static List<Product> getProductsOfTreatment(Treatment treatment) {
 		return getProductsOfTreatment(treatment.getId());
 	}
 
-	// get all rows where product_id == id then retrieve treatments' id from row for
-	// object retrieval function
-	public static List<Treatment> getTreatmentsOfProduct(int id) {
+	//get all rows where product_id == id then retrieve treatments' id from row for object retrieval function
+	public final static List<Treatment> getTreatmentsOfProduct(int id) {
 		String query = "SELECT * FROM beauty_centerdb.producttreatment WHERE product_id = ?";
 
 		List<Treatment> list = new ArrayList<>();
@@ -224,12 +244,10 @@ public abstract class TreatmentDAO {
 		}
 		return list;
 	}
-
-	public static List<Treatment> getTreatmentsOfProduct(Product product) {
+	public final static List<Treatment> getTreatmentsOfProduct(Product product) {
 		return getTreatmentsOfProduct(product.getId());
 	}
-
-	public static int updateTreatment(int id, Treatment obj) {
+	public final static int updateTreatment(int id, Treatment obj) {
 		String query = "UPDATE beauty_centerdb.treatment "
 				+ "SET type = ?, price = ?, vat_id = ?, duration = ?, is_enabled = ? " + "WHERE id = ?";
 
@@ -260,11 +278,13 @@ public abstract class TreatmentDAO {
 		return -1;
 	}
 
-	public static int toggleEnabledTreatment(Treatment obj) {
-		String query = "UPDATE beauty_centerdb.treatment " + "SET is_enabled = ? " + "WHERE id = ?";
+	public final static int toggleEnabledTreatment(Treatment obj) {
+		String query = "UPDATE beauty_centerdb.treatment "
+				+ "SET is_enabled = ? "
+				+ "WHERE id = ?";
 
-		try (PreparedStatement stat = conn.prepareStatement(query)) {
-			boolean toggle = !obj.isEnabled(); // toggle enable or disable state
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			boolean toggle = !obj.isEnabled(); //toggle enable or disable state
 			obj.setEnabled(toggle);
 			stat.setBoolean(1, toggle);
 			stat.setInt(2, obj.getId()); // WHERE id = ?
@@ -285,12 +305,11 @@ public abstract class TreatmentDAO {
 		}
 		return -1;
 	}
-
-	public static int toggleEnabledTreatment(int id) {
+	public final static int toggleEnabledTreatment(int id) {
 		return toggleEnabledTreatment(getTreatment(id).get());
 	}
 
-	public static int deleteTreatment(int id) {
+	public final static int deleteTreatment(int id) {
 		String query = "DELETE FROM beauty_centerdb.treatment WHERE id = ?";
 
 		try (PreparedStatement stat = conn.prepareStatement(query)) {
@@ -313,7 +332,7 @@ public abstract class TreatmentDAO {
 		return -1;
 	}
 
-	public static List<Object[]> toTableRowAll() {
+	public final static List<Object[]> toTableRowAll() {
 		List<Treatment> list = getAllTreatments();
 		List<Object[]> data = new ArrayList<>(list.size());
 		for (int i = 0; i < list.size(); i++) {
@@ -325,12 +344,11 @@ public abstract class TreatmentDAO {
 
 	// SELECT * FROM Table ORDER BY ID DESC LIMIT 1
 	public static Treatment getLastTreatment() {
-		try {
-			String query = "SELECT * FROM treatment ORDER BY ID DESC LIMIT 1";
-			Statement stmt = conn.createStatement();
-			ResultSet rs=stmt.executeQuery(query);
+		String query = "SELECT * FROM treatment ORDER BY ID DESC LIMIT 1";
+		try (PreparedStatement stmt = conn.prepareStatement(query)) {
+			ResultSet rs = stmt.executeQuery(query);
 			conn.commit();
-			if(rs.next()) {
+			if (rs.next()) {
 				return getTreatment(rs.getInt("id")).get();
 			}
 			return null;

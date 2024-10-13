@@ -7,6 +7,7 @@ import it.kamaladafrica.codicefiscale.Person;
 import it.kamaladafrica.codicefiscale.city.CityByName;
 import it.kamaladafrica.codicefiscale.city.CityProvider;
 
+
 public class UserDetails {
 	private String name;
 	private String surname;
@@ -27,6 +28,16 @@ public class UserDetails {
 		this.EU_TIN = calculateEU_TIN(name, surname, birthplace, isFemale, BoD); // Il codice fiscale lo calcola in automatico
 	}
 
+	public UserDetails() {
+		this.name = "";
+		this.surname = "";
+		this.birthplace = "";
+		this.isFemale = false;
+		this.BoD = LocalDate.EPOCH;
+		this.notes = "";
+		this.EU_TIN = null;
+	}
+
 	//Getter
 	protected String getName() {
 	    return name;
@@ -40,7 +51,7 @@ public class UserDetails {
 	    return birthplace;
 	}
 
-	protected boolean isFemale() { 
+	protected boolean isFemale() {
         return isFemale;
     }
 
@@ -55,7 +66,7 @@ public class UserDetails {
 	protected CodiceFiscale getEU_TIN() {
 		return EU_TIN;
 	}
-	
+
 	//Setter
 	protected void setName(String name) {
 	    this.name = name;
@@ -69,7 +80,7 @@ public class UserDetails {
 	    this.birthplace = birthplace;
 	}
 
-	protected void setIsFemale(boolean isFemale) { 
+	protected void setIsFemale(boolean isFemale) {
         this.isFemale = isFemale;
     }
 
@@ -93,7 +104,7 @@ public class UserDetails {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 		Person person =	Person.builder()
 				.firstname(name)
 				.lastname(surname)
@@ -110,5 +121,5 @@ public class UserDetails {
 		return "UserDetails [name=" + name + ", surname=" + surname + ", birthplace=" + birthplace + ", isFemale="
 				+ isFemale + ", BoD=" + BoD + ", notes=" + notes + ", EU_TIN=" + EU_TIN + "]";
 	}
-	
+
 }
