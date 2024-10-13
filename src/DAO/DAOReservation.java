@@ -232,7 +232,7 @@ public class DAOReservation {
 				+ "e.surname AS employee_surname, t.id AS treatment_id, t.type, t.duration " + "FROM reservation r "
 				+ "JOIN customer c ON r.customer_id = c.id " + "JOIN employee e ON r.employee_id = e.id "
 				+ "JOIN treatment t ON r.treatment_id = t.id "
-				+ "WHERE r.is_enabled = 1 AND (c.name LIKE ? OR c.surname LIKE ? OR t.type LIKE ?);";
+				+ "WHERE r.is_enabled = 1 AND (c.name LIKE ? OR c.surname LIKE ? OR t.type LIKE ? OR e.name LIKE ? OR e.surname LIKE ?);";
 
 		Map<Integer, Reservation> reservations = new HashMap<>();
 
@@ -241,6 +241,8 @@ public class DAOReservation {
 			pstmt.setString(1, searchPattern);
 			pstmt.setString(2, searchPattern);
 			pstmt.setString(3, searchPattern);
+			pstmt.setString(4, searchPattern);
+			pstmt.setString(5, searchPattern);
 
 			try (ResultSet rs = pstmt.executeQuery()) {
 				while (rs.next()) {

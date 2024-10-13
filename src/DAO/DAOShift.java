@@ -4,21 +4,98 @@ import java.sql.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import javax.swing.JOptionPane;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.centro.estetico.bitcamp.Employee;
 import com.centro.estetico.bitcamp.Main;
+import com.centro.estetico.bitcamp.Roles;
 import com.centro.estetico.bitcamp.Shift;
+import com.centro.estetico.bitcamp.ShiftEmployee;
 import com.centro.estetico.bitcamp.ShiftType;
 
 import java.time.*;
 
 public class DAOShift {
-
 	private static Connection connection = Main.getConnection();
 
-	public Map<Integer, Shift> getEmployeesShifts() {
+	public Map<Integer, ShiftEmployee> getShifts() throws Exception {
+		String query = "SELECT se.id as shiftEmployee_id, s.start, s.end, s.type, s.id as shift_id, e.name, e.surname, e.role, e.id as "
+				+ "employee_id FROM shift s " + "JOIN shiftemployee se ON se.shift_id = s.id "
+				+ "JOIN employee e ON se.employee_id = e.id WHERE role = ?;";
+
+		Map<Integer, ShiftEmployee> shifts = new HashMap<Integer, ShiftEmployee>();
+
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setString(1, Roles.PERSONNEL.name());
+
+			try (ResultSet rs = pstmt.executeQuery()) {
+
+				while (rs.next()) {
+
+					ShiftEmployee shiftEmployee = new ShiftEmployee();
+
+					Shift shift = new Shift();
+					shift.setId(rs.getInt("shift_id"));
+					shift.setStart(rs.getTimestamp("start").toLocalDateTime());
+					shift.setEnd(rs.getTimestamp("end").toLocalDateTime());
+					shift.setType(ShiftType.valueOf(rs.getString("type")));
+					shiftEmployee.setShift(shift);
+
+					int idEmployee = rs.getInt("employee_id");
+					Optional<Employee> optionalEmployee;
+					optionalEmployee = EmployeeDAO.getEmployee(idEmployee);
+
+					if (optionalEmployee.isPresent()) {
+						shiftEmployee.setEmployee(optionalEmployee.get());
+					}
+					int shiftEmployee_id = rs.getInt("shiftEmployee_id");
+					shifts.put(shiftEmployee_id, shiftEmployee);
+				}
+			}
+
+			catch (Exception e) {
+				e.printStackTrace();
+				throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);
+			}
+		}
+
+		catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception("Errore nella preparazione della query: " + e.getMessage(), e);
+		}
+		return shifts;
+	}
+
+	public ShiftEmployee getShift(int id) throws Exception {
+		String query = "SELECT se.id AS shift_employee_id, s.id AS shift_id, s.start, s.end, s.type, e.id AS employee_id, e.name, "
+				+ "e.surname, e.is_female, e.birthday, e.role, e.hired, e.termination, e.credentials_id, e.notes, e.treatment_id, "
+				+ "e.serial FROM shift s JOIN shiftemployee se ON s.id = se.shift_id JOIN employee e ON e.id = se.employee_id "
+				+ "WHERE se.id = ?;";
+
+		ShiftEmployee se = new ShiftEmployee();
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setInt(1, id);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					Shift shift = new Shift(rs.getInt("shift_id"), rs.getTimestamp("start").toLocalDateTime(),
+							rs.getTimestamp("end").toLocalDateTime(), ShiftType.valueOf(rs.getString("type")),
+							rs.getString("notes"));
+					Optional<Employee> employee = EmployeeDAO.getEmployee(rs.getInt("employee_id"));
+					se = new ShiftEmployee(rs.getInt("shift_employee_id"), shift, employee.get());
+				}
+			}
+		} catch (Exception ex) {
+			JOptionPane.showMessageDialog(null, "qualcosa è andato storto");
+			// throw new Exception("");
+		}
+		return se;
+	}
+
+	public Map<Integer, Shift> getEmployeesShifts() throws Exception {
 		String query = "SELECT s.id as shift_id, s.start AS start_shift, s.end AS end_shift, s.type AS typeOfShift, "
 				+ "e.id as employee_id, e.name, e.surname FROM shift s JOIN shiftemployee se ON s.id = se.shift_id "
 				+ "JOIN employee e ON e.id = se.employee_id;";
@@ -38,16 +115,15 @@ public class DAOShift {
 
 			if (optionalEmployee.isPresent()) {
 				Employee employee = optionalEmployee.get();
-
 			}
-
-		} catch (Exception ex) {
-			ex.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);
 		}
 		return shifts;
 	}
 
-	public List<Employee> loadEmployeesWithShifts(int treatmentId) {
+	public List<Employee> loadEmployeesWithShifts(int treatmentId) throws Exception {
 		// Mappa per evitare duplicati di Employee
 		Map<Integer, Employee> employeeMap = new HashMap<>();
 
@@ -55,70 +131,71 @@ public class DAOShift {
 		String query = "SELECT e.id AS employee_id, e.name AS employee_name, e.surname AS employee_surname "
 				+ "FROM employee e " + "JOIN treatment t ON t.id = e.treatment_id " + "WHERE t.id = ?";
 
-		try {
-			PreparedStatement pstmt = connection.prepareStatement(query);
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			// PreparedStatement pstmt = connection.prepareStatement(query);
 			pstmt.setInt(1, treatmentId);
-			ResultSet rs = pstmt.executeQuery();
 
-			// Itera sui risultati della query
-			while (rs.next()) {
-				int employeeId = rs.getInt("employee_id");
+			try (ResultSet rs = pstmt.executeQuery()) {
 
-				Employee employee = employeeMap.get(employeeId);
-				if (employee == null) {
+				// Itera sui risultati della query
+				while (rs.next()) {
+
+					int employeeId = rs.getInt("employee_id");
+
 					Optional<Employee> optionalEmployee = EmployeeDAO.getEmployee(employeeId);
-
 					if (optionalEmployee.isPresent()) {
 						Employee employeee = optionalEmployee.get();
 						employeeMap.put(employeeId, employeee);
-						// reservation.setEmployee(employeee);
 					}
 				}
+
+				for (Employee employee : employeeMap.values()) {
+					List<Shift> shifts = loadShiftsForEmployee(employee.getId());
+					employee.setShift(shifts);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new Exception("Errore nella preparazione della query: " + e.getMessage(), e);
 			}
 
-			// Chiama il DAOShift per caricare i turni degli estetisti
-			// DAOShift daoShift = new DAOShift();
-			for (Employee employee : employeeMap.values()) {
-				List<Shift> shifts = loadShiftsForEmployee(employee.getId());
-				employee.setShift(shifts);
-			}
-			// rs.close();
-			// stmt.close();
-			// conn.close();
-		} catch (Exception ex) {
-			ex.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);
 		}
 
-		// Ritorna la lista di employee con i turni
 		return new ArrayList<>(employeeMap.values());
 	}
 
-	public List<Shift> loadShiftsForEmployee(int employeeId){
+	public List<Shift> loadShiftsForEmployee(int employeeId) throws Exception {
 		List<Shift> shifts = new ArrayList<>();
 
 		String query = "SELECT s.start AS shift_start_time, s.end AS shift_end_time " + "FROM shiftemployee se "
 				+ "JOIN shift s ON se.shift_id = s.id " + "WHERE se.employee_id = ?";
-		
-		try(PreparedStatement pstmt = connection.prepareStatement(query)) {
-					
+
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+
 			pstmt.setInt(1, employeeId);
 
-			ResultSet rs = pstmt.executeQuery();
+			try (ResultSet rs = pstmt.executeQuery()) {
 
-			while (rs.next()) {
-				LocalDateTime shiftStart = rs.getTimestamp("shift_start_time").toLocalDateTime();
-				LocalDateTime shiftEnd = rs.getTimestamp("shift_end_time").toLocalDateTime();
-				Shift shift = new Shift();
-				shift.setStart(shiftStart);
-				shift.setEnd(shiftEnd);
-	
-				shifts.add(shift);
+				while (rs.next()) {
+					LocalDateTime shiftStart = rs.getTimestamp("shift_start_time").toLocalDateTime();
+					LocalDateTime shiftEnd = rs.getTimestamp("shift_end_time").toLocalDateTime();
+					Shift shift = new Shift();
+					shift.setStart(shiftStart);
+					shift.setEnd(shiftEnd);
+
+					shifts.add(shift);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new Exception("Errore nella preparazione della query: " + e.getMessage(), e);
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);
 		}
-		catch(Exception ex) {
-			
-		}
-		
+
 		return shifts;
 	}
 	//Con questo metodo sto compiendo crimini che non voglio ripetere e di cui non voglio parlare - Daniele
@@ -147,48 +224,69 @@ public class DAOShift {
 		return shifts;
 	}
 
-	
-	public  void insert(Shift shift, Employee employee) {
+	public void insert(ShiftEmployee shiftEmployee) throws Exception {
 		int id = -1;
 		String query = "INSERT INTO shift(start, end, type) values(?, ?, ?)";
-		
-		try(PreparedStatement pstmt = connection.prepareStatement(query)){
-			pstmt.setTimestamp(1, java.sql.Timestamp.valueOf(shift.getStart()));
-			pstmt.setTimestamp(2, java.sql.Timestamp.valueOf(shift.getEnd()));
-			pstmt.setString(3, shift.getType().name());
-			
+
+		try (PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+			pstmt.setTimestamp(1, java.sql.Timestamp.valueOf(shiftEmployee.getShift().getStart()));
+			pstmt.setTimestamp(2, java.sql.Timestamp.valueOf(shiftEmployee.getShift().getEnd()));
+			pstmt.setString(3, shiftEmployee.getShift().getType().name());
+
 			pstmt.executeUpdate();
-			
+
 			ResultSet generatedKeys = pstmt.getGeneratedKeys();
-			if (generatedKeys.next()) {                
-                id = generatedKeys.getInt(1);
-            } 
-			else {
-				throw new Exception("Qualcosa è andato storto");
+			if (generatedKeys.next()) {
+				id = generatedKeys.getInt(1);
 			}
-			insertShiftEmployee(id, employee);
+
+			insertShiftEmployee(id, shiftEmployee.getEmployee());
 		}
-		
-		catch(Exception ex) {
-			ex.printStackTrace();
+
+		catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);
 		}
 	}
-	
-	
-	private void insertShiftEmployee(int id, Employee employee) {
+
+	private void insertShiftEmployee(int id, Employee employee) throws Exception {
 		String query = "INSERT INTO shiftemployee(shift_id, employee_id) VALUES(?,?)";
-		
-		try(PreparedStatement pstmt = connection.prepareStatement(query)){
+
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setInt(1, id);
 			pstmt.setInt(2, employee.getId());
-			
+
 			pstmt.executeUpdate();
 		}
-		
-		catch(Exception ex) {
-			
+
+		catch (Exception ex) {
+
 		}
 	}
+
+	public void updateShiftEmployee(ShiftEmployee shiftEmployee) throws Exception {
+		String query = "UPDATE shiftemployee SET shift_id = ?, employee_id = ? WHERE id = ?";
+
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setInt(1, shiftEmployee.getShift().getId());
+			pstmt.setInt(2, shiftEmployee.getEmployee().getId());
+			pstmt.setInt(3, shiftEmployee.getId());
+			pstmt.executeUpdate();
+		}
+
+		catch (Exception ex) {
+			throw new Exception(ex.getMessage());
+		}
+	}
+	
+	public void updateShift(Shift shift) throws Exception {
+		String query = "UPDATE shift SET start = ?, end = ?, type = ? WHERE id = ?";
+
+
+	public Map<Integer, Shift> getSearchedShifts(String text) {
+		return new HashMap<Integer, Shift>();
+	}
+
 	public static Shift getShift(int id) {
 		String query="SELECT * FROM shift WHERE id=? LIMIT 1";
 		try(PreparedStatement pstmt = connection.prepareStatement(query)){
@@ -206,9 +304,5 @@ public class DAOShift {
 			return null;
 		}
 	}
-
-	public void update(Shift shift, Employee employee) {
-
-	}
-
+	
 }

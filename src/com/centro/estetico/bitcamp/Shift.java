@@ -5,36 +5,31 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 public class Shift {
-	private int id;
-	private LocalDateTime start;
-	private LocalDateTime end;
-	private ShiftType type;
-	private String notes;
-
-	public Shift(LocalDateTime start, LocalDateTime end, ShiftType type, String notes) {
-		this.start = start;
-		this.end = end;
-		this.type = type;
-		this.notes = notes;
-	}
-
-
-	public Shift(ResultSet rs) throws SQLException {
-		this.id=rs.getInt("id");
-		this.start=rs.getTimestamp("start").toLocalDateTime();
-		this.end= rs.getTimestamp("end").toLocalDateTime();
-		this.type=ShiftType.toEnum(rs.getString("type"));
-		this.notes=null;//non abbiamo notes nel database, checcepossofa'? - Daniele
-	}
-
-	public boolean isShiftOver() {
-		return LocalDateTime.now().isAfter(end);
-	}
-
-	public Shift() {
-
-	}
-
+    private int id;
+    private LocalDateTime start;
+    private LocalDateTime end;
+    private ShiftType type;
+    private String notes;
+        
+    public Shift(LocalDateTime start, LocalDateTime end, ShiftType type, String notes) {        
+        this.start = start;
+        this.end = end;
+        this.type = type;
+        this.notes = notes;
+    }
+    
+    public Shift(int id, LocalDateTime start, LocalDateTime end, ShiftType type, String notes) {
+    	this.id = id;
+        this.start = start;
+        this.end = end;
+        this.type = type;
+        this.notes = notes;
+    }
+    
+    public Shift() {
+    	
+    }
+    
 	public int getId() {
 		return id;
 	}

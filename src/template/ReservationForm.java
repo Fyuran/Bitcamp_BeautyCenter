@@ -250,7 +250,7 @@ public class ReservationForm extends JPanel {
 		cancelReservationButton = new JButton();
 		cancelReservationButton.setBounds(225, 18, 36, 24);
 		cancelReservationButton
-				.setIcon(new ImageIcon(ReservationForm.class.getResource("/iconeGestionale/potrebbeServire.png")));
+				.setIcon(new ImageIcon(ReservationForm.class.getResource("/iconeGestionale/delete.png")));
 		add(cancelReservationButton);
 
 	}
@@ -313,8 +313,7 @@ public class ReservationForm extends JPanel {
 				enablePanel(calendar);
 				getVisibleInvisibleCalendar(calendar);
 
-				disableUpperPanel(addReservation, editReservation, deleteReservation, searchReservation,
-						searchReservationButton, cancelReservationButton);
+				disableUpperPanel(false);
 				// disablePreviousDays(calendar);
 			}
 		});
@@ -327,13 +326,12 @@ public class ReservationForm extends JPanel {
 					enablePanel(anagraphicPanel);
 					enablePanel(calendar);
 					getVisibleInvisibleCalendar(calendar);
-					disableUpperPanel(addReservation, editReservation, deleteReservation, searchReservation,
-							searchReservationButton, cancelReservationButton);
+					disableUpperPanel(false);
 					fillControlsFromMap(customersComboBox, treatmentsComboBox, calendar);
-				} else {
+				} 
+				else {
 					JOptionPane.showMessageDialog(ReservationForm.this, "Seleziona un appuntamento");
 				}
-
 			}
 		});
 
@@ -365,25 +363,23 @@ public class ReservationForm extends JPanel {
 		// pulsante conferma
 		confirmBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
 				try {
-
-					sendObjectToController();
-					// pulire i dati delle textbox,combobox
-					cleanPanelData(anagraphicPanel);
-					// disabilitare componenti
-					disableComponents(anagraphicPanel);
-					// disabilita calenario
-					disableComponents(calendar);
-					// rendi invisbile il calendario
-					getVisibleInvisibleCalendar(calendar);
-
-					enableUpperPanel(addReservation, editReservation, deleteReservation, searchReservation,
-							searchReservationButton, cancelReservationButton);
-					// ripopolo il dizionario
-					reservations = getReservations();
-					// ripopolo la tabella dai valori che ho nel dizionario
-					populateReservationsTable(reservations);
+					if(sendObjectToController()) {					
+						// pulire i dati delle textbox,combobox
+						cleanPanelData(anagraphicPanel);
+						// disabilitare componenti
+						disableComponents(anagraphicPanel);
+						// disabilita calenario
+						disableComponents(calendar);
+						// rendi invisbile il calendario
+						getVisibleInvisibleCalendar(calendar);
+	
+						enableUpperPanel(true);
+						// ripopolo il dizionario
+						reservations = getReservations();
+						// ripopolo la tabella dai valori che ho nel dizionario
+						populateReservationsTable(reservations);
+					}
 				}
 
 				catch (Exception ex) {
@@ -392,10 +388,6 @@ public class ReservationForm extends JPanel {
 			}
 		});
 
-		/*
-		 * LocalDate localDate = date.toInstant() .atZone(ZoneId.systemDefault())
-		 * .toLocalDate();
-		 */
 
 		// pulsante annulla
 		btnCancel.addActionListener(new ActionListener() {
@@ -403,8 +395,7 @@ public class ReservationForm extends JPanel {
 				cleanPanelData(anagraphicPanel);
 				disableComponents(anagraphicPanel);
 				disableComponents(calendar);
-				enableUpperPanel(addReservation, editReservation, deleteReservation, searchReservation,
-						searchReservationButton, cancelReservationButton);
+				enableUpperPanel(true);
 				getVisibleInvisibleCalendar(calendar);
 			}
 		});
@@ -469,6 +460,7 @@ public class ReservationForm extends JPanel {
 			Reservation reservation = entry.getValue();
 
 			Duration duration = reservation.getTreatment().getDuration();
+			
 			long hours = duration.toHours();
 			long minutes = duration.toMinutes() % 60;
 			String formattedDuration = String.format("%dh %02dm", hours, minutes);
@@ -646,8 +638,8 @@ public class ReservationForm extends JPanel {
 
 		DefaultListModel<Employee> listModel = new DefaultListModel<>();
 		LocalTime time = (LocalTime) timeList.getSelectedValue();
-
-		if (freeEmployees != null) {
+		
+		if (freeEmployees != null && freeEmployees.get(time) != null) {			
 			for (Employee e : freeEmployees.get(time)) {
 				// Employee ew = new Employee(e);
 				listModel.addElement(e);
@@ -693,24 +685,22 @@ public class ReservationForm extends JPanel {
 		calendar.setDate(date);
 	}
 
-	private void disableUpperPanel(JButton addReservation, JButton editReservation, JButton deleteReservation,
-			JTextField searchTextBox, JButton searchReservationButton, JButton cancelReservationButton) {
-		addReservation.setEnabled(false);
-		editReservation.setEnabled(false);
-		deleteReservation.setEnabled(false);
-		searchTextBox.setEnabled(false);
-		searchReservationButton.setEnabled(false);
-		cancelReservationButton.setEnabled(false);
+	private void disableUpperPanel(boolean flag) {
+		addReservation.setEnabled(flag);
+		editReservation.setEnabled(flag);
+		deleteReservation.setEnabled(flag);
+		searchReservation.setEnabled(flag);
+		searchReservationButton.setEnabled(flag);
+		cancelReservationButton.setEnabled(flag);
 	}
 
-	private void enableUpperPanel(JButton addReservation, JButton editReservation, JButton deleteReservation,
-			JTextField searchTextBox, JButton searchReservationButton, JButton cancelReservationButton) {
-		addReservation.setEnabled(true);
-		editReservation.setEnabled(true);
-		deleteReservation.setEnabled(true);
-		searchTextBox.setEnabled(true);
-		searchReservationButton.setEnabled(true);
-		cancelReservationButton.setEnabled(true);
+	private void enableUpperPanel(boolean flag) {
+		addReservation.setEnabled(flag);
+		editReservation.setEnabled(flag);
+		deleteReservation.setEnabled(flag);
+		searchReservation.setEnabled(flag);
+		searchReservationButton.setEnabled(flag);
+		cancelReservationButton.setEnabled(flag);
 
 	}
 
@@ -743,7 +733,7 @@ public class ReservationForm extends JPanel {
 		}
 	}
 
-	private void sendObjectToController() {
+	private boolean sendObjectToController()throws Exception {
 		DAOReservation daoReservation = new DAOReservation();
 		CreateReservationUseCase createReservationUseCase = new CreateReservationUseCase(daoReservation);
 		UpdateReservationUseCase updateReservationUseCase = new UpdateReservationUseCase(daoReservation); 
@@ -755,12 +745,21 @@ public class ReservationForm extends JPanel {
 		LocalDate localDate = calendar.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
 		Employee employee = (Employee) beauticiansList.getSelectedValue();
-		LocalTime localTime = (LocalTime) timeList.getSelectedValue();
-		LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
 		
+		LocalTime localTime;
+		LocalDateTime localDateTime;
+		
+		if(timeList.getSelectedValue() != null)	{		
+			localTime = (LocalTime) timeList.getSelectedValue();
+			localDateTime = LocalDateTime.of(localDate, localTime);
+		}
+		
+		else {
+			throw new Exception("controlla correttamente data e ora");
+		}
 		
 		try {
-			if (icou == IsCreatingOrUpdating.CREATE) {
+			if (icou == IsCreatingOrUpdating.CREATE) {				
 				reservationCreateController.add(new Reservation(customer, treatment, employee, localDateTime));
 			} 
 			else {
@@ -779,6 +778,8 @@ public class ReservationForm extends JPanel {
 		}
 		catch(Exception ex) {
 			JOptionPane.showMessageDialog(null, ex.getMessage());
+			return false;
 		}
+		return true;
 	}
 }
