@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import com.centro.estetico.bitcamp.BeautyCenter;
 import com.centro.estetico.bitcamp.Employee;
 import com.centro.estetico.bitcamp.Roles;
-import com.centro.estetico.bitcamp.Shift;
 import com.centro.estetico.bitcamp.UserCredentials;
 import com.centro.estetico.bitcamp.UserDetails;
 
@@ -21,20 +20,20 @@ public class MainFrameTest {
 
 	public MainFrameTest() {
 		employee = new Employee(
-				
+
 				new UserDetails("Mario", "Rossi", false, LocalDate.of(1990, 5, 15), "Milano",
 				"Note sul dipendente"),
 				new UserCredentials("mario.rossi", "password123!", "Via Roma 1", "IT60X0542811101000000123456",
 				"1234567890", "mario.rossi@example.com"),
-				121321451251L, Roles.PERSONNEL, new ArrayList<Shift>(), LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 1)
+				121321451251L, Roles.PERSONNEL, new ArrayList<>(), LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 1)
 				);
 		admin = new Employee(
-				
+
 				new UserDetails("Marta", "Paolucci", true, LocalDate.of(1985, 5, 15), "Roma",
 				"Note"),
 				new UserCredentials("adminuser", "AdminPass123!", "Via Roma 123", "IT60X0542811101000000123456",
 				"3331234567", "marta.paolucci@mail.com"),
-				123456789L, Roles.ADMIN, new ArrayList<Shift>(), LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 1)
+				123456789L, Roles.ADMIN, new ArrayList<>(), LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 1)
 				);
 
 		bc = new BeautyCenter("Centro Estetico Bitcamp", "123456789", "info@bitcamp.com", "bitcamp@gmail.com",

@@ -16,7 +16,7 @@ import DAO.EmployeeDAO;
 public class EmployeeTest {
 
 	public static void main(String[] args) {
-		Main main=new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
+		new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
 		 // Supponiamo di avere un EmployeeDAO con il metodo insertEmployee.
 
 

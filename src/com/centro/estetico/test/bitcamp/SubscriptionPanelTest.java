@@ -6,17 +6,18 @@ import javax.swing.WindowConstants;
 
 import com.centro.estetico.bitcamp.Main;
 
-import template.TransactionPanel;
+import template.SubscriptionPanel;
 
-public class TransactionPanelTest {
+public class SubscriptionPanelTest {
 
 	public static void main(String[] args) {
+
 	    SwingUtilities.invokeLater(new Runnable() {
 	        @Override
 			public void run() {
-	        	new Main("jdbc:mysql://localhost:1806", "root", "bitcampPassword");
+	        	Main main = new Main("jdbc:mysql://localhost:1806", "root", "bitcampPassword");
 	            JFrame frame = new JFrame();
-	            TransactionPanel panel = new TransactionPanel();
+	            SubscriptionPanel panel = new SubscriptionPanel();
 	            frame.setSize(1040, 900);
 	            frame.getContentPane().add(panel);
 	            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

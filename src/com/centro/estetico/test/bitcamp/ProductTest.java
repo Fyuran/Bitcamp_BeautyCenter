@@ -11,7 +11,7 @@ import DAO.VATDao;
 
 public class ProductTest {
     public static void main(String[] args) {
-		Main main = new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
+		new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
 
     	//generazione test di prodotti, grazie chatgpt
         // Create an array of products
@@ -32,7 +32,7 @@ public class ProductTest {
          //Insert each product into the database
         for (Product product : products) {
             ProductDAO.insertProduct(product);
-           
+
         	System.out.println(product);
         }
 
