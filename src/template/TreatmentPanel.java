@@ -4,6 +4,11 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -15,16 +20,33 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+
+import com.centro.estetico.bitcamp.Product;
+import com.centro.estetico.bitcamp.ProductCat;
+import com.centro.estetico.bitcamp.Treatment;
+import com.centro.estetico.bitcamp.VAT;
+
+import DAO.EmployeeDAO;
+import DAO.ProductDAO;
+import DAO.TreatmentDAO;
+import DAO.VATDao;
+import utils.inputValidator;
 
 public class TreatmentPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField txtPrice;
-	private JTextField txfSearchBar;
-	private JTextField txfName;
+	private JTextField txtSearchBar;
+	private JTextField txtName;
 	private JComboBox<String> cBoxIVA;
 	private JTextField txtDuration;
+	private List<Product> products;
+	private JLabel msgLbl;
+	private int selectedId;
+	private DefaultTableModel productModel;
 
 	// Modello della tabella (scope a livello di classe per poter aggiornare la
 	// tabella)
@@ -37,6 +59,8 @@ public class TreatmentPanel extends JPanel {
 		setLayout(null);
 		setSize(1024, 768);
 		setName("Trattamenti");
+		products = new ArrayList<>();
+
 		JLabel titleTab = new JLabel("GESTIONE TRATTAMENTI");
 		titleTab.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
 		titleTab.setBounds(415, 11, 220, 32);
@@ -50,11 +74,58 @@ public class TreatmentPanel extends JPanel {
 		add(containerPanel);
 
 		// Modello della tabella con colonne
-		String[] columnNames = { "Nome trattamento", "Prezzo", "IVA%", "Durata" };
+		String[] columnNames = { "ID", "Nome trattamento", "Prezzo", "IVA%", "Durata" };
 		tableModel = new DefaultTableModel(columnNames, 0);
 
 		// Creazione della tabella
 		JTable table = new JTable(tableModel);
+
+		// Listener della tabella per pescare i nomi che servono
+		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent event) {
+				if (!event.getValueIsAdjusting()) {
+					int selectedRow = table.getSelectedRow();
+					if (selectedRow != -1) {
+						clearProdutTable();
+						selectedId = Integer.parseInt(String.valueOf(table.getValueAt(selectedRow, 0)));
+						String name = String.valueOf(table.getValueAt(selectedRow, 1));
+						String price = String.valueOf(String.valueOf(table.getValueAt(selectedRow, 2)));
+						String vat = String.valueOf(table.getValueAt(selectedRow, 3) + "%");
+						String duration = String.valueOf(table.getValueAt(selectedRow, 4));
+						products=TreatmentDAO.getProductsOfTreatment(selectedId);
+						System.out.println(products.size());
+						populateProductsTable(products);
+
+						System.out.println(vat);
+						// double vat=Double.parseDouble(vatString.substring(0,vatString.length()-1));
+
+						// { "ID", "Nome trattamento", "Prezzo", "IVA%", "Durata" };
+						// Il listener ascolta la riga selezionata e la usa per popolare i campi
+						
+						txtName.setText(name);
+						cBoxIVA.setSelectedItem(vat);
+						txtPrice.setText(price);
+						txtPrice.setText(price);
+						txtDuration.setText(duration);
+						table.clearSelection();
+
+					}
+				}
+			}
+		});
+		
+
+		//tabella prodotti per trattamento
+		 String[] columnProductNames = {"ID","Prodotto", "Categoria"};
+			productModel = new DefaultTableModel(columnProductNames, 0);
+			JTable productTable = new JTable(productModel);
+			productTable.setEnabled(false);
+			
+			JScrollPane productScrollPane = new JScrollPane(productTable);
+			productScrollPane.setBounds(577, 474, 437, 181);
+			add(productScrollPane);
+
 
 		// Aggiungere la tabella all'interno di uno JScrollPane per lo scroll
 		JScrollPane scrollPane = new JScrollPane(table);
@@ -69,11 +140,11 @@ public class TreatmentPanel extends JPanel {
 		btnSearch.setBounds(206, 8, 40, 30);
 		containerPanel.add(btnSearch);
 
-		txfSearchBar = new JTextField();
-		txfSearchBar.setColumns(10);
-		txfSearchBar.setBackground(UIManager.getColor("CheckBox.background"));
-		txfSearchBar.setBounds(23, 14, 168, 24);
-		containerPanel.add(txfSearchBar);
+		txtSearchBar = new JTextField();
+		txtSearchBar.setColumns(10);
+		txtSearchBar.setBackground(UIManager.getColor("CheckBox.background"));
+		txtSearchBar.setBounds(23, 14, 168, 24);
+		containerPanel.add(txtSearchBar);
 
 		JButton btnFilter = new JButton("");
 		btnFilter.setOpaque(false);
@@ -81,6 +152,7 @@ public class TreatmentPanel extends JPanel {
 		btnFilter.setBorderPainted(false);
 		btnFilter.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/filterIcon.png")));
 		btnFilter.setBounds(256, 8, 40, 30);
+		btnFilter.addActionListener(e -> populateTableByFilter());
 		containerPanel.add(btnFilter);
 
 		JButton btnInsert = new JButton("");
@@ -89,29 +161,8 @@ public class TreatmentPanel extends JPanel {
 		btnInsert.setBorderPainted(false);
 		btnInsert.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/Insert.png")));
 		btnInsert.setBounds(720, 8, 40, 30);
+		btnInsert.addActionListener(e -> createTreatment());
 		containerPanel.add(btnInsert);
-
-		btnInsert.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-//				// Raccogliere i dati dai campi di testo
-//				String nome = txfName.getText();
-//				String prezzo = txtPrice.getText();
-//				String iva = (String) cBoxIVA.getSelectedItem();
-//				String durata = txtDuration.getText();
-//
-//				//aggiungere il check dei campi in modo da non aggiungere una nuova riga
-//				// Aggiungere una nuova riga alla tabella
-//				Object[] rowData = { nome, prezzo,  iva, durata};
-//				tableModel.addRow(rowData); // Aggiunge la riga alla tabella
-
-				// Pulisci i campi dopo l'inserimento
-				txfName.setText("");
-				txtPrice.setText("");
-				txtDuration.setText("");
-				cBoxIVA.setSelectedIndex(0);
-			}
-
-		});
 
 		JButton btnUpdate = new JButton("");
 		btnUpdate.setOpaque(false);
@@ -119,21 +170,8 @@ public class TreatmentPanel extends JPanel {
 		btnUpdate.setBorderPainted(false);
 		btnUpdate.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/Update.png")));
 		btnUpdate.setBounds(770, 8, 40, 30);
+		btnUpdate.addActionListener(e -> updateTreatment());
 		containerPanel.add(btnUpdate);
-
-		btnUpdate.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// Ottieni l'indice della riga selezionata
-				int selectedRow = table.getSelectedRow();
-				if (selectedRow != -1) { // Verifica che una riga sia stata selezionata
-					// Riempie i campi con i valori della riga selezionata
-					txfName.setText((String) tableModel.getValueAt(selectedRow, 0));
-					txtPrice.setText((String) tableModel.getValueAt(selectedRow, 1));
-					txtDuration.setText((String) tableModel.getValueAt(selectedRow, 5));
-					cBoxIVA.setSelectedItem(tableModel.getValueAt(selectedRow, 6));
-				}
-			}
-		});
 
 		JButton btnDelete = new JButton("");
 		btnDelete.setOpaque(false);
@@ -141,6 +179,7 @@ public class TreatmentPanel extends JPanel {
 		btnDelete.setBorderPainted(false);
 		btnDelete.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/delete.png")));
 		btnDelete.setBounds(820, 8, 40, 30);
+		btnDelete.addActionListener(e -> deleteTreatment());
 		containerPanel.add(btnDelete);
 
 		JButton btnDisable = new JButton("");
@@ -162,6 +201,7 @@ public class TreatmentPanel extends JPanel {
 		btnHystorical.setBorderPainted(false);
 		btnHystorical.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/cartellina.png")));
 		btnHystorical.setBounds(870, 8, 40, 30);
+		btnHystorical.addActionListener(e -> populateTable());
 		containerPanel.add(btnHystorical);
 
 		// label e textfield degli input
@@ -170,10 +210,10 @@ public class TreatmentPanel extends JPanel {
 		lblName.setBounds(43, 437, 170, 14);
 		add(lblName);
 
-		txfName = new JTextField();
-		txfName.setColumns(10);
-		txfName.setBounds(209, 436, 220, 20);
-		add(txfName);
+		txtName = new JTextField();
+		txtName.setColumns(10);
+		txtName.setBounds(209, 436, 220, 20);
+		add(txtName);
 
 		JLabel lblPrice = new JLabel("Prezzo:");
 		lblPrice.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
@@ -190,8 +230,14 @@ public class TreatmentPanel extends JPanel {
 		lblIVa.setBounds(43, 513, 170, 14);
 		add(lblIVa);
 
-		String[] IVAs = { "Seleziona IVA" };
-		cBoxIVA = new JComboBox<String>(IVAs);
+		List<VAT> ivas = VATDao.getAllVAT();
+		int i = 0;
+		String[] ivasToString = new String[ivas.size()];
+		for (VAT iva : ivas) {
+			ivasToString[i] = iva.toString();
+			i++;
+		}
+		cBoxIVA = new JComboBox<String>(ivasToString);
 		cBoxIVA.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 11));
 		cBoxIVA.setBounds(209, 511, 220, 22);
 		add(cBoxIVA);
@@ -211,11 +257,177 @@ public class TreatmentPanel extends JPanel {
 		productButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				new ProductSelector();
+				new ProductSelector(TreatmentPanel.this);
 			}
 		});
 		add(productButton);
+		msgLbl = new JLabel("");
+		msgLbl.setBounds(248, 413, 625, 16);
+		add(msgLbl);
+		
+		
+		populateTable();
 
+	}
+
+	public void getProducts(List<Integer> productIds) {
+		products.clear();
+		for (int id : productIds) {
+			Product p = ProductDAO.getProduct(id).get();
+			products.add(p);
+			System.out.println(id);
+		}
+		for (Product p : products) {
+			System.out.println(p);
+		}
+		populateProductsTable(products);
+		msgLbl.setText("Prodotti selezionati correttamente");
+	}
+
+	private void populateTable() {
+		clearTable();
+		List<Treatment> treatments = TreatmentDAO.getAllTreatments();
+		if (treatments.isEmpty()) {
+			tableModel.addRow(new String[] { "Sembra non ci siano trattamenti presenti", "" });
+			return;
+		}
+		for (Treatment t : treatments) {
+			if (t.isEnabled()) {
+				tableModel.addRow(new String[] { String.valueOf(t.getId()), t.getType(), String.valueOf(t.getPrice()),
+						t.getVat().toString(), String.valueOf(t.getDuration().toMinutes()) });
+			}
+			// { "ID","Nome trattamento", "Prezzo", "IVA%", "Durata" };
+		}
+	}
+
+	private void clearTable() {
+		tableModel.getDataVector().removeAllElements();
+		revalidate();
+	}
+	private void clearProdutTable(){
+		productModel.getDataVector().removeAllElements();
+		revalidate();
+	}
+
+	private void createTreatment() {
+		System.out.println(isDataValid(true));
+		if (isDataValid(true)) {
+			String name = txtName.getText();
+			BigDecimal price = new BigDecimal(txtPrice.getText());
+			String vatString=String.valueOf(cBoxIVA.getSelectedItem().toString());
+			double vatAmount = Double.parseDouble(vatString.substring(0, vatString.length() - 1));
+			VAT vat = VATDao.getVATByAmount(vatAmount).get();
+			int durationInt = Integer.parseInt(txtDuration.getText());
+			Duration duration = Duration.ofMinutes(durationInt);
+			
+			
+//			
+			// prodottiSelezionati
+			// isEnabled
+
+			Treatment t = new Treatment(name, price, vat, duration, products, true);
+			
+			Treatment tUpdated=TreatmentDAO.insertTreatment(t).get();
+			//per aggiungere i prodotti nella tabella tratmentproduct
+			for(Product p:products) {
+				TreatmentDAO.addProductToTreatment(tUpdated, p);
+			}
+			msgLbl.setText(name + " inserito correttamente");
+			populateTable();
+		}
+
+	}
+
+	private boolean isDataValid(boolean mustNameBeUnique) {
+		msgLbl.setText("");
+		if (mustNameBeUnique) {
+			if (!inputValidator.isTreatmentNameUnique(txtName.getText())) {
+				msgLbl.setText("Nome del trattamento già presente");
+				return false;
+			}
+		}
+		if (!inputValidator.validateName(txtName.getText())) {
+			msgLbl.setText(inputValidator.getErrorMessage());
+			return false;
+		}
+		if(Integer.parseInt(txtDuration.getText())>1200) {
+			msgLbl.setText("Inserire una durata in minuti valida");
+			return false;
+		}
+		return true;
+	}
+
+	private void populateTableByFilter() {
+		msgLbl.setText("");
+		if (txtSearchBar.getText().isBlank() || txtSearchBar.getText().isEmpty()) {
+			msgLbl.setText("Inserire un filtro!");
+			return;
+		}
+		clearTable();
+		List<Treatment> treatments = TreatmentDAO.getAllTreatments();
+		if (products.isEmpty()) {
+			tableModel.addRow(new String[] { "Sembra non ci siano trattamenti presenti", "" });
+			return;
+		}
+		for (Treatment t : treatments) {
+			if (t.isEnabled() && t.getType().toLowerCase().contains(txtSearchBar.getText().toLowerCase())) {
+				tableModel.addRow(new String[] { String.valueOf(t.getId()), t.getType(), String.valueOf(t.getPrice()),
+						t.getVat().toString(), String.valueOf(t.getDuration()) });
+			}
+		}
+		txtSearchBar.setText("");
+	}
+
+	private void updateTreatment() {
+		if (isDataValid(false)) {
+			String name = txtName.getText();
+			BigDecimal price = new BigDecimal(txtPrice.getText());
+			String vatString=String.valueOf(cBoxIVA.getSelectedItem().toString());
+			double vatAmount = Double.parseDouble(vatString.substring(0, vatString.length() - 1));
+			VAT vat = VATDao.getVATByAmount(vatAmount).get();
+			int durationInt = Integer.parseInt(txtDuration.getText());
+			Duration duration = Duration.ofMinutes(durationInt);
+			// prodottiSelezionati
+			// isEnabled
+			Treatment oldTreatment=TreatmentDAO.getTreatment(selectedId).get();
+			for(Product p:oldTreatment.getProducts()) {
+				TreatmentDAO.removeProductFromTreatment(oldTreatment, p);
+			}
+			Treatment t = new Treatment(name, price, vat, duration, products, true);
+
+			TreatmentDAO.updateTreatment(selectedId, t);
+			//per aggiungere i prodotti nella tabella tratmentproduct
+			for(Product p:products) {
+				TreatmentDAO.addProductToTreatment(oldTreatment, p);
+			}
+			clearFields();
+			populateTable();
+
+		}
+
+	}
+	private void populateProductsTable(List<Product> products) {
+		if (products.isEmpty()) {
+			productModel.addRow(new String[] { "Sembra non ci siano prodotti presenti", "" });
+			return;
+		}
+		for (Product p : products) {
+			productModel.addRow(new String[] {String.valueOf(p.getId()),p.getName(),p.getType().getDescription()});
+		}
+	}
+
+	private void deleteTreatment() {
+		msgLbl.setText("");
+		TreatmentDAO.toggleEnabledTreatment(selectedId);
+		msgLbl.setText("Trattamento rimosso correttamente");
+		populateTable();
+	}
+
+	private void clearFields() {
+		txtName.setText("");
+		txtPrice.setText("");
+		txtDuration.setText("");
+		products.clear();
 	}
 
 	public JTextField getTxtPrice() {
@@ -227,19 +439,19 @@ public class TreatmentPanel extends JPanel {
 	}
 
 	public JTextField getTxfSearchBar() {
-		return txfSearchBar;
+		return txtSearchBar;
 	}
 
 	public void setTxfSearchBar(JTextField txfSearchBar) {
-		this.txfSearchBar = txfSearchBar;
+		this.txtSearchBar = txfSearchBar;
 	}
 
 	public JTextField getTxfName() {
-		return txfName;
+		return txtName;
 	}
 
 	public void setTxfName(JTextField txfName) {
-		this.txfName = txfName;
+		this.txtName = txfName;
 	}
 
 	public JComboBox<String> getcBoxIVA() {
@@ -265,5 +477,4 @@ public class TreatmentPanel extends JPanel {
 	public void setTableModel(DefaultTableModel tableModel) {
 		this.tableModel = tableModel;
 	}
-	
 }

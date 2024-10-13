@@ -4,7 +4,7 @@ package com.centro.estetico.useCases;
 import java.util.LinkedHashMap;
 import com.centro.estetico.bitcamp.Employee;
 import com.centro.estetico.bitcamp.Treatment;
-import com.centro.estetico.bitcamp.repository.*;
+import DAO.*;
 import com.centro.estetico.bitcamp.Shift;
 import com.centro.estetico.bitcamp.Reservation;
 import java.util.List;
@@ -20,40 +20,55 @@ import java.util.ArrayList;
 
 public class GetReservationUseCase {
 	private final DAOReservation daoReservation; // IDAO?
-	private final DAOEmployee daoEmployee;
-	private Treatment treatment;
+	private DAOShift daoShift;
+	/*private Treatment treatment;
 	private LocalDate date;
-	private List<LocalTime> hours;
+	private List<LocalTime> hours;*/
 
 	List<Employee> busiedEmployees;
 
-	public GetReservationUseCase(DAOReservation daoReservation, DAOEmployee daoEmployee, LocalDate date,
-			List<LocalTime> hours, Treatment treatment) {
+	public GetReservationUseCase(DAOReservation daoReservation, DAOShift daoShift) {
 		this.daoReservation = daoReservation;
-		this.daoEmployee = daoEmployee;
-		this.date = date;
+		this.daoShift = daoShift;
+		/*this.date = date;
 		this.hours = hours;
-		this.treatment = treatment;
+		this.treatment = treatment;*/
+	}
+	
+	public GetReservationUseCase(DAOReservation daoReservation) {
+		this.daoReservation = daoReservation;
+	}
+	
+	public Map<Integer, Reservation> getReservations()throws Exception{		
+		return daoReservation.getAll();
+	}
+	
+	public Reservation getReservation(int id) throws Exception{
+		return daoReservation.getReservation(id);
+	}
+	
+	public Map<Integer, Reservation> getSearchedReservations(String text)throws Exception{
+		return daoReservation.getSearchedReservation(text);
 	}
 
-	public Map<LocalTime, List<Employee>> Execute() {
+	public Map<LocalTime, List<Employee>> getEmployees(LocalDate date, List<LocalTime> hours, Treatment treatment) throws Exception{
 		// tutti gli estetisti che eseguono quel tipo di trattamento e i loro turni
-		List<Employee> employees = daoEmployee.loadEmployeesWithShifts(treatment.getId());
+		List<Employee> employees = daoShift.loadEmployeesWithShifts(treatment.getId());
 		// metodo per ottenere una lista di tutti gli orari(9,10,11,12 in base alla
 		// durata del trattamento)
 		// e gli operatori che sono di turno in ciascun orario
-		Map<LocalTime, List<Employee>> shiftsForBeautician = getShiftsForBeautician(employees);
-		return getFreeBeauticiansForEachTime(shiftsForBeautician);
+		Map<LocalTime, List<Employee>> shiftsForBeautician = getShiftsForBeautician(employees, hours, date);
+		return getFreeBeauticiansForEachTime(shiftsForBeautician, date, treatment);
 	}
 
-	private Map<LocalTime, List<Employee>> getShiftsForBeautician(List<Employee> employees) {
+	private Map<LocalTime, List<Employee>> getShiftsForBeautician(List<Employee> employees, List<LocalTime> hours, LocalDate date) {
 		Map<LocalTime, List<Employee>> operatorShifts = new LinkedHashMap<>();
 
 		for (LocalTime time : hours) {
 			List<Employee> employeesForShift = new ArrayList<>();
 
 			for (Employee e : employees) {
-				if (isEmployeeOnDuty(time, e)) {
+				if (isEmployeeOnDuty(time, e, date)) {
 					employeesForShift.add(e);
 				}
 				operatorShifts.put(time, employeesForShift);
@@ -62,13 +77,13 @@ public class GetReservationUseCase {
 		return operatorShifts;
 	}
 
-	private boolean isEmployeeOnDuty(LocalTime time, Employee employee) {
+	private boolean isEmployeeOnDuty(LocalTime time, Employee employee, LocalDate date) {
 		for (Shift shift : employee.getShifts()) {
-			LocalDate startShiftDate = shift.getStartDate().toLocalDate();
-			LocalDate endShiftDate = shift.getEndDate().toLocalDate();
+			LocalDate startShiftDate = shift.getStart().toLocalDate();
+			LocalDate endShiftDate = shift.getEnd().toLocalDate();
 
-			LocalTime startShiftTime = shift.getStartDate().toLocalTime();
-			LocalTime endShiftTime = shift.getEndDate().toLocalTime();
+			LocalTime startShiftTime = shift.getStart().toLocalTime();
+			LocalTime endShiftTime = shift.getEnd().toLocalTime();
 
 			if ((date.equals(startShiftDate) || date.isAfter(startShiftDate))
 					&& (date.equals(endShiftDate) || date.isBefore(endShiftDate))) {
@@ -82,7 +97,8 @@ public class GetReservationUseCase {
 	}
 
 	private Map<LocalTime, List<Employee>> getFreeBeauticiansForEachTime(
-			Map<LocalTime, List<Employee>> shiftsForBeautician) {
+			Map<LocalTime, List<Employee>> shiftsForBeautician, LocalDate date, Treatment treatment)throws Exception 
+	{
 		List<Reservation> reservations = daoReservation.getAllBusyReservations(date, treatment);
 
 		for (LocalTime key : shiftsForBeautician.keySet()) {

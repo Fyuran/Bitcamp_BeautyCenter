@@ -20,16 +20,16 @@ public abstract class UserCredentialsDAO {
 
 	public static Optional<UserCredentials> insertUserCredentials(UserCredentials obj) {
 		String query = "INSERT INTO `beauty_centerdb`.`user_credentials`(`username`, `password`, `mail`, `iban`, `phone`, `is_enabled`)"
-				+ "VALUES(?, ?, ?, ?, ?, ?, ?);";
+				+ "VALUES(?, ?, ?, ?, ?, ?);";
 		
 		try(PreparedStatement stat = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
 			//(String username, String password, String address, String iban, String phone, String mail)
 			stat.setString(1, obj.getUsername());
 			stat.setString(2, obj.getPassword());
-			stat.setString(3, obj.getAddress());
+			stat.setString(3, obj.getMail());
 			stat.setString(4, obj.getIban());
 			stat.setString(5, obj.getPhone());
-			stat.setString(6, obj.getMail());
+			stat.setBoolean(6, obj.isEnabled());
 			
 			stat.executeUpdate();
 			conn.commit();
@@ -60,6 +60,30 @@ public abstract class UserCredentialsDAO {
 		Optional<UserCredentials> opt = Optional.empty();
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
 			stat.setInt(1, id);  //WHERE id = ?
+			
+			ResultSet rs = stat.executeQuery();
+			conn.commit();
+			if(rs.next()) {
+				opt = Optional.ofNullable(new UserCredentials(rs));				
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}	
+		}
+		return opt;
+	}
+	public static Optional<UserCredentials> getUserCredentials(String username) {
+		String query = "SELECT * FROM beauty_centerdb.user_credentials WHERE username = ? LIMIT 1";
+		
+		Optional<UserCredentials> opt = Optional.empty();
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			stat.setString(1, username);  
 			
 			ResultSet rs = stat.executeQuery();
 			conn.commit();
@@ -385,5 +409,25 @@ public abstract class UserCredentialsDAO {
         }
         return false; // Restituisce false se l'utente non viene trovato o se la verifica fallisce
     }
+
+//stesso metodo overloadato con char[]
+public static boolean verifyPassword(String username, char[] password) throws SQLException {
+    String query = "SELECT password FROM user_credentials WHERE username = ? AND is_enabled = 1";
+    
+    try (PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+        preparedStatement.setString(1, username);
+        
+        try (ResultSet resultSet = preparedStatement.executeQuery()) {
+            if (resultSet.next()) {
+                String storedPassword = resultSet.getString("password");
+                
+                // Verifica della password con BCrypt
+                BCrypt.Result result = BCrypt.verifyer().verify(password, storedPassword);
+                return result.verified;
+            }
+        }
+    }
+    return false; // Restituisce false se l'utente non viene trovato o se la verifica fallisce
+}
 }
 

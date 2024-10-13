@@ -14,6 +14,16 @@ public enum SubPeriod {
 		this.name = name;
 	}
 	
+	public static SubPeriod toEnum(String s) {
+		switch(s) {
+			case "MONTHLY": return SubPeriod.MONTHLY;
+			case "QUARTERLY": return SubPeriod.QUARTERLY;
+			case "HALF_YEAR": return SubPeriod.HALF_YEAR;
+			case "YEARLY": return SubPeriod.YEARLY;
+			default: return null;
+		}		
+	}
+	
 	public int getMonths() {
 		return months;
 	}

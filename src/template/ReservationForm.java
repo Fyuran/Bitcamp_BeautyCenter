@@ -1,8 +1,9 @@
 package template;
 
 import com.centro.estetico.bitcamp.*;
-import com.centro.estetico.enums.IsCreatingOrUpdating;
-import com.centro.estetico.bitcamp.repository.*;
+
+import DAO.*;
+import com.centro.estetico.controller.ReservationController;
 import com.centro.estetico.useCases.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -25,67 +26,114 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 
 import java.util.HashMap;
-import com.centro.estetico.bitcamp.controller.*;
 import java.util.Calendar;
+
+//import wrappersForDisplayMember.*;
+
 public class ReservationForm extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JTextField searchReservation;
 	private JTable table;
 	private JList<LocalTime> timeList;
-	private HashMap<Integer, Customer> customers;
+	// private JList<EmployeeWrapper> beauticiansList;
+	private JList<Employee> beauticiansList;
 	private JScrollPane scrollPane;
+	private JScrollPane tablePane;
+	private JPanel containerPanel;
+	private JPanel outputPanel;
+	private JPanel anagraphicPanel;
+	private JButton addReservation;
+	private JButton editReservation;
+	private JButton deleteReservation;
+	private JButton btnHystorical;
+	private JButton searchCustomers;
+	private JButton dateButtonVisible;
+	private JButton confirmBtn;
+	private JButton getVisibleInvisibleCalendarButton;
+	private JButton btnCancel;
+	private JButton searchReservationButton;
+	private JButton cancelReservationButton;
+	private JLabel lblManageShifts;
+	private JLabel lblStartShift;
+	private JLabel lblAvailableBeauticians;
+	private JLabel lblDate;
+	private JLabel lblTime;
+	private JLabel lblCustomers;
+	private JComboBox customersComboBox;
+	private JComboBox treatmentsComboBox;
+	private JCalendar calendar;
+
+	/*-----------------------------------------------------------------------*/
+
+	private List<Customer> customers;
 	private List<LocalTime> times;
 	private Map<LocalTime, List<Employee>> freeEmployees;
 	private Map<Integer, Reservation> reservations;
 	private IsCreatingOrUpdating icou;
-
+	// private Map<Integer, CustomerWrapper> customerMap;
+	private Map<Integer, Customer> customerMap;
+	// private Map<Integer, TreatmentWrapper> treatmentMap;
+	private Map<Integer, Treatment> treatmentMap;
+	
+	private ActionListener treatmentComboBoxListener;
 	/**
 	 * Create the panel.
 	 */
 
 	public ReservationForm() {
-		customers = new HashMap<Integer, Customer>();
-		intialize();		
-		reservations = getReservations(); //metodo per popolare la mappa
-		populateReservationsTable(reservations); //metodo per popolare la tabella dalla mappa
-		times = new ArrayList<LocalTime>();
-		freeEmployees = new HashMap<LocalTime, List<Employee>>();		
+		intialize();
+		events();
+		loadReservations();
+		populateCustomersComboBox(customersComboBox);		
+		populateTreatmentsComboBox(treatmentsComboBox);		
 	}
 
 	public void intialize() {
+		customerMap = new HashMap<>();
+		treatmentMap = new HashMap<>();
+		customers = new ArrayList<Customer>();
+		times = new ArrayList<LocalTime>();
+		freeEmployees = new HashMap<LocalTime, List<Employee>>();
+		reservations = new HashMap<Integer, Reservation>();
+
 		setLayout(null);
 		setSize(1257, 768);
-		
-		JPanel containerPanel = new JPanel();
+
+		containerPanel = new JPanel();
 		containerPanel.setLayout(null);
 		containerPanel.setBorder(new LineBorder(new Color(0, 0, 0), 3));
 		containerPanel.setBackground(Color.WHITE);
 		containerPanel.setBounds(10, 52, 1237, 347);
 		add(containerPanel);
 
-		JPanel outputPanel = new JPanel();
+		outputPanel = new JPanel();
 		outputPanel.setLayout(null);
 		outputPanel.setBounds(10, 8, 1217, 329);
 		containerPanel.add(outputPanel);
 
 		table = new JTable();
-		JScrollPane tablePane = new JScrollPane(table);
+		tablePane = new JScrollPane(table);
 		tablePane.setBounds(0, 38, 1217, 291);
 		outputPanel.add(tablePane);
 
-		JButton addReservation = new JButton();
+		addReservation = new JButton();
 		addReservation.setIcon(new ImageIcon(ReservationForm.class.getResource("/iconeGestionale/Insert.png")));
 		addReservation.setBounds(943, 7, 24, 21);
 		outputPanel.add(addReservation);
 
-		JButton editReservation = new JButton();
+		editReservation = new JButton();
 
 		editReservation.setIcon(new ImageIcon(ReservationForm.class.getResource("/iconeGestionale/disable.png")));
 		editReservation.setBounds(977, 7, 24, 21);
 		outputPanel.add(editReservation);
 
-		JButton btnHystorical = new JButton("");
+		deleteReservation = new JButton("");
+		deleteReservation.setBounds(1011, 7, 24, 21);
+		deleteReservation.setIcon(new ImageIcon(ReservationForm.class.getResource("/iconeGestionale/delete.png")));
+		outputPanel.add(deleteReservation);
+
+		btnHystorical = new JButton("");
 		btnHystorical.setIcon(new ImageIcon(""));
 		btnHystorical.setOpaque(false);
 		btnHystorical.setContentAreaFilled(false);
@@ -93,14 +141,14 @@ public class ReservationForm extends JPanel {
 		btnHystorical.setBounds(870, 8, 40, 30);
 		containerPanel.add(btnHystorical);
 
-		JLabel lblGestioneTurni = new JLabel("GESTIONE APPUNTAMENTI");
-		lblGestioneTurni.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
-		lblGestioneTurni.setBounds(413, 11, 243, 32);
-		add(lblGestioneTurni);
+		lblManageShifts = new JLabel("GESTIONE APPUNTAMENTI");
+		lblManageShifts.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
+		lblManageShifts.setBounds(413, 11, 243, 32);
+		add(lblManageShifts);
 
-		JButton dateButtonVisible = new JButton("V");
+		dateButtonVisible = new JButton("V");
 
-		JCalendar calendar = new JCalendar();
+		calendar = new JCalendar();
 		calendar.setBounds(45, 548, 257, 183);
 		calendar.setVisible(false);
 		add(calendar);
@@ -111,48 +159,46 @@ public class ReservationForm extends JPanel {
 		searchReservation.setColumns(10);
 		searchReservation.setBackground(UIManager.getColor("CheckBox.background"));
 
-
-		JPanel anagraphicPanel = new JPanel();
+		anagraphicPanel = new JPanel();
 		anagraphicPanel.setLayout(null);
 		anagraphicPanel.setBounds(20, 409, 817, 349);
 		add(anagraphicPanel);
 
-		JButton searchCustomers = new JButton("...");
+		searchCustomers = new JButton("...");
 		searchCustomers.setBounds(208, 22, 53, 21);
 		anagraphicPanel.add(searchCustomers);
 		searchCustomers.setEnabled(false);
 
-		JLabel lblInizioTurno = new JLabel("Trattamento");
-		lblInizioTurno.setEnabled(false);
-		lblInizioTurno.setBounds(22, 61, 85, 17);
-		anagraphicPanel.add(lblInizioTurno);
-		lblInizioTurno.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
+		lblStartShift = new JLabel("Trattamento");
+		lblStartShift.setEnabled(false);
+		lblStartShift.setBounds(22, 61, 85, 17);
+		lblStartShift.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
+		anagraphicPanel.add(lblStartShift);
 
-		JComboBox treatmentsComboBox = new JComboBox();
+		treatmentsComboBox = new JComboBox();
 		treatmentsComboBox.setBounds(111, 61, 87, 21);
 		anagraphicPanel.add(treatmentsComboBox);
 		treatmentsComboBox.setEnabled(false);
-		populateTreatmentsList(treatmentsComboBox);
 		// non selezionare nessun item dalla combobox
-		treatmentsComboBox.setSelectedItem(null);
+		//treatmentsComboBox.setSelectedItem(null);
 
-		JLabel lblData = new JLabel("Data");
-		lblData.setEnabled(false);
-		lblData.setBounds(22, 105, 95, 14);
-		anagraphicPanel.add(lblData);
-		lblData.setFont(new Font("Dialog", Font.PLAIN, 14));
+		lblDate = new JLabel("Data");
+		lblDate.setEnabled(false);
+		lblDate.setBounds(22, 105, 95, 14);
+		anagraphicPanel.add(lblDate);
+		lblDate.setFont(new Font("Dialog", Font.PLAIN, 14));
 
-		JButton getVisibleInvisibleCalendarButton = new JButton("V");
+		getVisibleInvisibleCalendarButton = new JButton("V");
 		getVisibleInvisibleCalendarButton.setBounds(111, 98, 87, 21);
 		anagraphicPanel.add(getVisibleInvisibleCalendarButton);
 		getVisibleInvisibleCalendarButton.setEnabled(false);
 
-		JLabel lblTime = new JLabel("Orari");
+		lblTime = new JLabel("Orari");
+		lblTime.setFont(new Font("Dialog", Font.PLAIN, 14));
 		lblTime.setEnabled(false);
 		lblTime.setBounds(304, 23, 85, 14);
 		anagraphicPanel.add(lblTime);
-		lblTime.setFont(new Font("Dialog", Font.PLAIN, 14));
-		// timeList.setBounds(319, 455, 95, 278);
+
 		scrollPane = new JScrollPane();
 		scrollPane.setEnabled(false);
 		scrollPane.setBounds(305, 45, 95, 278);
@@ -162,52 +208,60 @@ public class ReservationForm extends JPanel {
 		scrollPane.setViewportView(timeList);
 		timeList.setEnabled(false);
 
-		JLabel lblAvailableBeauticians = new JLabel("Estetisti disponibili:");
+		lblAvailableBeauticians = new JLabel("Estetisti disponibili:");
 		lblAvailableBeauticians.setEnabled(false);
 		lblAvailableBeauticians.setBounds(437, 23, 145, 14);
 		anagraphicPanel.add(lblAvailableBeauticians);
 		lblAvailableBeauticians.setFont(new Font("Dialog", Font.PLAIN, 14));
 
-		JButton confirmBtn = new JButton("Conferma");
+		confirmBtn = new JButton("Conferma");
 		confirmBtn.setEnabled(false);
 		confirmBtn.setBounds(613, 302, 95, 21);
 		anagraphicPanel.add(confirmBtn);
 
-		JButton btnCancel = new JButton("Annulla");
+		btnCancel = new JButton("Annulla");
 		btnCancel.setEnabled(false);
 		btnCancel.setBounds(708, 302, 85, 21);
 		anagraphicPanel.add(btnCancel);
 
-		JLabel lblCustomers = new JLabel("Cliente");
+		lblCustomers = new JLabel("Cliente");
 		lblCustomers.setEnabled(false);
 		lblCustomers.setFont(new Font("Dialog", Font.PLAIN, 14));
 		lblCustomers.setBounds(22, 23, 85, 14);
 		anagraphicPanel.add(lblCustomers);
 
-		JList<Employee> beauticiansList = new JList<>();
+		beauticiansList = new JList<>();
+		beauticiansList = new JList<>();
 		beauticiansList.setBounds(437, 46, 122, 277);
-		anagraphicPanel.add(beauticiansList);
 		beauticiansList.setEnabled(false);
+		anagraphicPanel.add(beauticiansList);
 
-		JComboBox customersComboBox = new JComboBox();
+		customersComboBox = new JComboBox();
 		customersComboBox.setEnabled(false);
 		customersComboBox.setBounds(113, 22, 85, 21);
 		anagraphicPanel.add(customersComboBox);
 
-		populateCustomersComboBox(customersComboBox);
-		// non selezionare alcun cliente;
-		customersComboBox.setSelectedItem(null);
-		
-		JButton searchReservationButton = new JButton("Cerca");
+		searchReservationButton = new JButton();
+		searchReservationButton.setBounds(188, 18, 27, 24);
+		searchReservationButton
+				.setIcon(new ImageIcon(ReservationForm.class.getResource("/iconeGestionale/searchIcon.png")));
+		add(searchReservationButton);
+
+		cancelReservationButton = new JButton();
+		cancelReservationButton.setBounds(225, 18, 36, 24);
+		cancelReservationButton
+				.setIcon(new ImageIcon(ReservationForm.class.getResource("/iconeGestionale/potrebbeServire.png")));
+		add(cancelReservationButton);
+
+	}
+
+	private void events() {
 		searchReservationButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				searchReservation();
 			}
 		});
-		searchReservationButton.setBounds(188, 20, 70, 22);
-		add(searchReservationButton);
-		
-		JButton cancelReservationButton = new JButton("Annulla");
+
 		cancelReservationButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				searchReservation.setText("");
@@ -215,18 +269,12 @@ public class ReservationForm extends JPanel {
 				populateReservationsTable(reservations);
 			}
 		});
-		cancelReservationButton.setBounds(268, 20, 70, 22);
-		add(cancelReservationButton);
 
 		// evento quando l'utente cambia la data dal calendario
 		calendar.addPropertyChangeListener("calendar", new PropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent e) {
 				if (treatmentsComboBox.getSelectedItem() != null) {
-					/*
-					 * Treatment treatment = (Treatment)treatmentsComboBox.getSelectedItem();
-					 * getReservationTimeInterval(treatment);
-					 */
 					getFreeBeauticians(calendar, treatmentsComboBox, beauticiansList);
 					LocalTime selectedTime = timeList.getSelectedValue();
 					if (selectedTime != null) {
@@ -245,17 +293,17 @@ public class ReservationForm extends JPanel {
 			}
 		});
 
-		// selezione item dai trattamenti
-		treatmentsComboBox.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Treatment treatment = (Treatment) treatmentsComboBox.getSelectedItem();
-				// lista intera degli orari
-				getReservationTimeInterval(treatment);
-				getFreeBeauticians(calendar, treatmentsComboBox, beauticiansList);
-
-			}
-		});
+		treatmentComboBoxListener = new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	            if (treatmentsComboBox.getSelectedItem() != null) {
+	                Treatment treatment = (Treatment) treatmentsComboBox.getSelectedItem();
+	                cleanBeauticiansList();
+	                getReservationTimeInterval(treatment);	                
+	                getFreeBeauticians(calendar, treatmentsComboBox, beauticiansList);
+	            }
+	        }
+	    };
 
 		// crea appuntamento
 		addReservation.addActionListener(new ActionListener() {
@@ -264,8 +312,9 @@ public class ReservationForm extends JPanel {
 				enablePanel(anagraphicPanel);
 				enablePanel(calendar);
 				getVisibleInvisibleCalendar(calendar);
-				
-				disableUpperPanel(addReservation, editReservation, searchReservation);
+
+				disableUpperPanel(addReservation, editReservation, deleteReservation, searchReservation,
+						searchReservationButton, cancelReservationButton);
 				// disablePreviousDays(calendar);
 			}
 		});
@@ -273,18 +322,38 @@ public class ReservationForm extends JPanel {
 		// modifica appuntamento
 		editReservation.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(table.getSelectedRow() != -1) {
+				if (table.getSelectedRow() != -1) {
 					icou = IsCreatingOrUpdating.UPDATE;
 					enablePanel(anagraphicPanel);
 					enablePanel(calendar);
 					getVisibleInvisibleCalendar(calendar);
-					disableUpperPanel(addReservation, editReservation, searchReservation);
+					disableUpperPanel(addReservation, editReservation, deleteReservation, searchReservation,
+							searchReservationButton, cancelReservationButton);
 					fillControlsFromMap(customersComboBox, treatmentsComboBox, calendar);
-				}
-				else {
+				} else {
 					JOptionPane.showMessageDialog(ReservationForm.this, "Seleziona un appuntamento");
 				}
-				
+
+			}
+		});
+
+		// cancella appuntamento
+		deleteReservation.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (table.getSelectedRow() != -1) {
+					int answer = JOptionPane.showConfirmDialog(null, "Sei sicuro di voler cancellare l'appuntamento?",
+							"Conferma", JOptionPane.YES_NO_OPTION);
+
+					if (answer == JOptionPane.YES_OPTION) {
+						Reservation reservation = getSelectedReservationFromTable();
+						deleteReservation(reservation);
+						reservations = getReservations();
+						// ripopolo la tabella dai valori che ho nel dizionario
+						populateReservationsTable(reservations);
+					}
+				} else {
+					JOptionPane.showMessageDialog(ReservationForm.this, "Seleziona un appuntamento");
+				}
 			}
 		});
 
@@ -296,21 +365,10 @@ public class ReservationForm extends JPanel {
 		// pulsante conferma
 		confirmBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				DAOReservation daoReservation = new DAOReservation();				
-				ReservationController reservationController = new ReservationController(daoReservation);
-				
+
 				try {
-					
-					if(icou == IsCreatingOrUpdating.CREATE) {
-						reservationController.sendDataToDB(customersComboBox, treatmentsComboBox,
-							    calendar, beauticiansList, timeList, new Reservation(),icou);
-					}
-					else {
-						Reservation reservation = getSelectedReservationFromTable();
-						reservationController.sendDataToDB(customersComboBox, treatmentsComboBox,
-							    calendar, beauticiansList, timeList, reservation, icou);
-					}
-					
+
+					sendObjectToController();
 					// pulire i dati delle textbox,combobox
 					cleanPanelData(anagraphicPanel);
 					// disabilitare componenti
@@ -319,10 +377,12 @@ public class ReservationForm extends JPanel {
 					disableComponents(calendar);
 					// rendi invisbile il calendario
 					getVisibleInvisibleCalendar(calendar);
-					enableUpperPanel(addReservation, editReservation, searchReservation);
-					//ripopolo il dizionario
+
+					enableUpperPanel(addReservation, editReservation, deleteReservation, searchReservation,
+							searchReservationButton, cancelReservationButton);
+					// ripopolo il dizionario
 					reservations = getReservations();
-					//ripopolo la tabella dai valori che ho nel dizionario					
+					// ripopolo la tabella dai valori che ho nel dizionario
 					populateReservationsTable(reservations);
 				}
 
@@ -332,13 +392,19 @@ public class ReservationForm extends JPanel {
 			}
 		});
 
+		/*
+		 * LocalDate localDate = date.toInstant() .atZone(ZoneId.systemDefault())
+		 * .toLocalDate();
+		 */
+
 		// pulsante annulla
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				cleanPanelData(anagraphicPanel);
 				disableComponents(anagraphicPanel);
 				disableComponents(calendar);
-				enableUpperPanel(addReservation, editReservation, searchReservation);
+				enableUpperPanel(addReservation, editReservation, deleteReservation, searchReservation,
+						searchReservationButton, cancelReservationButton);
 				getVisibleInvisibleCalendar(calendar);
 			}
 		});
@@ -346,7 +412,7 @@ public class ReservationForm extends JPanel {
 		// searchCustomer
 		searchCustomers.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(ReservationForm.this);				
+				Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(ReservationForm.this);
 				SearchCustomerForm scf = new SearchCustomerForm(parentFrame, customers);
 				scf.setVisible(true);
 				/*----------------------------------------------------------------------*/
@@ -368,14 +434,26 @@ public class ReservationForm extends JPanel {
 			}
 		});
 	}
-	
-	private Map<Integer,Reservation> getReservations(){
+
+	private void loadReservations() {
+		reservations = getReservations(); // metodo per popolare la mappa
+		populateReservationsTable(reservations); // metodo per popolare la tabella dalla mappa
+	}
+
+	private Map<Integer, Reservation> getReservations() {
 		DAOReservation daoReservation = new DAOReservation();
-		reservations = daoReservation.getAll();
+		GetReservationUseCase gruc = new GetReservationUseCase(daoReservation);
+		ReservationController rc = new ReservationController(gruc);
+		try {
+			reservations = rc.getReservations();
+		}
+		catch(Exception ex) {
+			JOptionPane.showMessageDialog(null, ex.getMessage());
+		}		
 		return reservations;
 	}
 
-	private void populateReservationsTable(Map<Integer, Reservation>reservations) {		
+	private void populateReservationsTable(Map<Integer, Reservation> reservations) {
 
 		String[] columnNames = { "ID", "Cliente", "Data e Ora", "Operatore", "Servizio", "Durata" };
 
@@ -394,6 +472,8 @@ public class ReservationForm extends JPanel {
 			long hours = duration.toHours();
 			long minutes = duration.toMinutes() % 60;
 			String formattedDuration = String.format("%dh %02dm", hours, minutes);
+
+			// CustomerWrapper cw = new CustomerWrapper(reservation.getCustomer());
 
 			Object[] rowData = { reservation.getId(), reservation.getCustomer(),
 					reservation.getDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
@@ -415,17 +495,6 @@ public class ReservationForm extends JPanel {
 	private void disablePreviousDays(JCalendar calendar) {
 		Date today = new Date();
 		calendar.setSelectableDateRange(today, null);
-	}
-
-	// prova
-	private void populateTreatmentsList(JComboBox treatmentsComboBox) {
-		DAOTreatment daoTreatment = new DAOTreatment();
-		Map<Integer, Treatment> treatments = daoTreatment.getAll();
-
-		for (Map.Entry<Integer, Treatment> entry : treatments.entrySet()) {
-			treatmentsComboBox.addItem(entry.getValue());
-		}
-
 	}
 
 	private void enablePanel(Component component) {
@@ -478,21 +547,17 @@ public class ReservationForm extends JPanel {
 				for (Component comp : ((JPanel) component).getComponents()) {
 					cleanPanelData(comp);
 				}
-			}
-			else if (component instanceof JTextField) {
+			} else if (component instanceof JTextField) {
 				((JTextField) component).setText("");
-			} 
-			else if (component instanceof JComboBox) {
+			} else if (component instanceof JComboBox) {
 				((JComboBox<?>) component).setSelectedIndex(-1);
-			} 
-			else if (component instanceof JList) {
+			} else if (component instanceof JList) {
 				JList<?> list = (JList<?>) component;
 				ListModel<?> model = list.getModel();
 				if (model instanceof DefaultListModel<?>) {
 					((DefaultListModel<?>) model).clear();
 				}
-			}
-			else if (component instanceof JScrollPane) {
+			} else if (component instanceof JScrollPane) {
 				JScrollPane scrollPane = (JScrollPane) component;
 				Component view = scrollPane.getViewport().getView();
 				cleanPanelData(view);
@@ -503,8 +568,13 @@ public class ReservationForm extends JPanel {
 			return;
 		}
 	}
+	
+	private void cleanBeauticiansList() {		
+		beauticiansList.setModel(new DefaultListModel<Employee>());
+	}
 
 	private void getReservationTimeInterval(Treatment treatment) {
+		// USE CASE
 		try {
 			times = treatment.getTreatmentTime();
 
@@ -520,13 +590,34 @@ public class ReservationForm extends JPanel {
 	}
 
 	// metodo per popolare la combobox dei clienti
-	private void populateCustomersComboBox(JComboBox customersComboBox) {		
-		DAOCustomer daoCustomer = new DAOCustomer();
-		customers = daoCustomer.getAll();		
+	private void populateCustomersComboBox(JComboBox customersComboBox) {
+		// USE CASE
+		customers = CustomerDAO.getAllCustomers();
 
-		for (Map.Entry<Integer, Customer> entry : customers.entrySet()) {
-			customersComboBox.addItem(entry.getValue());
+		for (Customer customer : customers) {
+			// CustomerWrapper cw = new CustomerWrapper(customer);
+			customersComboBox.addItem(customer);
+			customerMap.put(customer.getId(), customer);
 		}
+		customersComboBox.setSelectedItem(null);
+	}
+
+	// prova
+	private void populateTreatmentsComboBox(JComboBox treatmentsComboBox) {
+		// USE CASE
+		treatmentsComboBox.removeActionListener(treatmentComboBoxListener);
+
+	    List<Treatment> treatments = TreatmentDAO.getAllTreatments();
+	    for (Treatment t : treatments) {
+	        treatmentsComboBox.addItem(t);
+	        treatmentMap.put(t.getId(), t);
+	    }
+
+	    // Imposta l'elemento selezionato a null
+	    treatmentsComboBox.setSelectedItem(null);
+
+	    // Riaggiungi l'ActionListener solo dopo il popolamento
+	    treatmentsComboBox.addActionListener(treatmentComboBoxListener);
 	}
 
 	private void getFreeBeauticians(JCalendar calendar, JComboBox treatmentsComboBox, JList<Employee> beauticiansList) {
@@ -535,69 +626,159 @@ public class ReservationForm extends JPanel {
 
 		if (treatmentsComboBox.getSelectedItem() != null && calendar.getDate() != null && times != null) {
 			DAOReservation daoReservation = new DAOReservation();
-			DAOEmployee daoEmployee = new DAOEmployee();
-			GetReservationUseCase gruc = new GetReservationUseCase(daoReservation, daoEmployee, selectedDate, times,
-					(Treatment) treatmentsComboBox.getSelectedItem());
-			freeEmployees = gruc.Execute();
+			DAOShift daoShift = new DAOShift();
 			
-		
-
+			Treatment treatment = (Treatment) treatmentsComboBox.getSelectedItem();			
+			GetReservationUseCase gruc = new GetReservationUseCase(daoReservation, daoShift);
+			ReservationController reservationController = new ReservationController(gruc);
+			try {
+				freeEmployees = reservationController.getEmployees(selectedDate, times, treatment);
+			}
+			catch(Exception ex){
+				JOptionPane.showMessageDialog(null, ex.getMessage());
+			}
+			//freeEmployees = gruc.execute();
 		}
 	}
 
 	private void populateFreeEmployeesList(Map<LocalTime, List<Employee>> freeEmployees,
-		JList<Employee> beauticiansList) {
+			JList<Employee> beauticiansList) {
+
 		DefaultListModel<Employee> listModel = new DefaultListModel<>();
 		LocalTime time = (LocalTime) timeList.getSelectedValue();
 
 		if (freeEmployees != null) {
 			for (Employee e : freeEmployees.get(time)) {
+				// Employee ew = new Employee(e);
 				listModel.addElement(e);
 			}
 		}
 
 		beauticiansList.setModel(listModel);
 	}
-	
+
 	private Reservation getSelectedReservationFromTable() {
-		//Reservation reservation = reservations.get(table.getValueAt(table.getSelectedRow(), 0));
-		DAOReservation daoReservation = new DAOReservation(); 
-		Reservation reservation = daoReservation.getReservation((int)table.getValueAt(table.getSelectedRow(), 0));
+		DAOReservation daoReservation = new DAOReservation();
+		DAOShift daoShift = new DAOShift();
+		GetReservationUseCase getReservationUseCase = new GetReservationUseCase(daoReservation, daoShift);
+		ReservationController reservationController = new ReservationController(getReservationUseCase);
+		Reservation reservation = new Reservation();
+		try {
+			reservation = reservationController.getReservation((int) table.getValueAt(table.getSelectedRow(), 0));
+			return reservation;
+		}
+		
+		catch(Exception ex) {
+			JOptionPane.showMessageDialog(null, ex.getMessage());
+		}
 		return reservation;
 	}
-	
+
 	private void fillControlsFromMap(JComboBox customersComboBox, JComboBox treatmentsComboBox, JCalendar calendar) {
 		Reservation reservation = getSelectedReservationFromTable();
-		
-		customersComboBox.setSelectedItem(reservation.getCustomer());
-		treatmentsComboBox.setSelectedItem(reservation.getTreatment());
-		
+
+		Customer customer = customerMap.get(reservation.getCustomer().getId());
+		customersComboBox.setSelectedItem(customer);
+
+		Treatment treatment = treatmentMap.get(reservation.getTreatment().getId());
+		treatmentsComboBox.setSelectedItem(treatment);
+
 		int year = reservation.getDateTime().getYear();
-		int month = reservation.getDateTime().getMonthValue()-1;
+		int month = reservation.getDateTime().getMonthValue() - 1;
 		int day = reservation.getDateTime().getDayOfMonth();
-		
+
 		Calendar calendarObj = Calendar.getInstance();
 		calendarObj.set(year, month, day, 0, 0, 0);
 		Date date = calendarObj.getTime();
 		calendar.setDate(date);
 	}
-	
-	private void disableUpperPanel(JButton addReservation, JButton editReservation, JTextField searchTextBox) {
+
+	private void disableUpperPanel(JButton addReservation, JButton editReservation, JButton deleteReservation,
+			JTextField searchTextBox, JButton searchReservationButton, JButton cancelReservationButton) {
 		addReservation.setEnabled(false);
 		editReservation.setEnabled(false);
+		deleteReservation.setEnabled(false);
 		searchTextBox.setEnabled(false);
+		searchReservationButton.setEnabled(false);
+		cancelReservationButton.setEnabled(false);
 	}
-	
-	private void enableUpperPanel(JButton addReservation, JButton editReservation, JTextField searchTextBox) {
+
+	private void enableUpperPanel(JButton addReservation, JButton editReservation, JButton deleteReservation,
+			JTextField searchTextBox, JButton searchReservationButton, JButton cancelReservationButton) {
 		addReservation.setEnabled(true);
 		editReservation.setEnabled(true);
+		deleteReservation.setEnabled(true);
 		searchTextBox.setEnabled(true);
+		searchReservationButton.setEnabled(true);
+		cancelReservationButton.setEnabled(true);
+
 	}
-	
-	private void searchReservation() {
+
+	private void searchReservation() {	
 		DAOReservation daoReservation = new DAOReservation();
-		Map<Integer,Reservation>reservations = new HashMap<Integer,Reservation>();
-		reservations = daoReservation.getSearchedReservation(searchReservation.getText());
-		populateReservationsTable(reservations);
+		GetReservationUseCase getReservationUseCase = new GetReservationUseCase(daoReservation);
+		ReservationController reservationController = new ReservationController(getReservationUseCase);
+		
+		Map<Integer, Reservation> reservations = new HashMap<Integer, Reservation>();
+		try {
+			reservations = reservationController.getSearchedReservations(searchReservation.getText());
+			populateReservationsTable(reservations);
+		}
+		 
+		catch(Exception e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+		}
+	}
+
+	private void deleteReservation(Reservation reservation) {
+		// USE CASE
+		DAOReservation daoReservation = new DAOReservation();
+		DeleteReservationUseCase deleteReservationUseCase = new DeleteReservationUseCase(daoReservation);
+		ReservationController reservationDeleteController = new ReservationController(deleteReservationUseCase);
+		try {
+			reservationDeleteController.delete(reservation);
+		}
+		catch(Exception ex) {
+			JOptionPane.showMessageDialog(null, ex.getMessage());
+		}
+	}
+
+	private void sendObjectToController() {
+		DAOReservation daoReservation = new DAOReservation();
+		CreateReservationUseCase createReservationUseCase = new CreateReservationUseCase(daoReservation);
+		UpdateReservationUseCase updateReservationUseCase = new UpdateReservationUseCase(daoReservation); 
+		ReservationController reservationCreateController = new ReservationController(createReservationUseCase);
+		ReservationController updateCreateController = new ReservationController(updateReservationUseCase);
+
+		Customer customer = (Customer) customersComboBox.getSelectedItem();
+		Treatment treatment = (Treatment) treatmentsComboBox.getSelectedItem();
+		LocalDate localDate = calendar.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+		Employee employee = (Employee) beauticiansList.getSelectedValue();
+		LocalTime localTime = (LocalTime) timeList.getSelectedValue();
+		LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
+		
+		
+		try {
+			if (icou == IsCreatingOrUpdating.CREATE) {
+				reservationCreateController.add(new Reservation(customer, treatment, employee, localDateTime));
+			} 
+			else {
+				Reservation reservation = getSelectedReservationFromTable();
+				int id = reservation.getId();
+				reservation = new  Reservation(customer, treatment, employee, localDateTime);
+				reservation.setId(id);
+				if(employee == null && treatment.getId() == reservation.getTreatment().getId()) {
+					employee = reservation.getEmployee();
+					localTime = reservation.getDateTime().toLocalTime();
+				}
+				
+				updateCreateController.update(reservation);
+			}
+
+		}
+		catch(Exception ex) {
+			JOptionPane.showMessageDialog(null, ex.getMessage());
+		}
 	}
 }

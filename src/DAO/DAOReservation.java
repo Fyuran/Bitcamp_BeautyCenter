@@ -1,4 +1,4 @@
-package com.centro.estetico.bitcamp.repository;
+package DAO;
 
 import java.util.Map;
 
@@ -13,184 +13,181 @@ import java.sql.*;
 import com.centro.estetico.bitcamp.*;
 import java.time.LocalDate;
 import java.time.Duration;
+import java.util.Optional;
 
 public class DAOReservation {
-	private final String url = "jdbc:mysql://localhost:3306/beauty_centerdb";
-	private final String username = "root";
-	private final String password = "Bitcamp_0";
+	private static Connection connection = Main.getConnection();
 
-	public Map<Integer, Reservation> getAll() {// throws Exception{
-		String query = "SELECT c.id as customer_id, c.name AS customer_name, c.surname AS customer_surname, r.id as reservation_id, r.date, "
-				+ "e.id AS employee_id, e.name AS employee_name, e.surname AS employee_surname, t.id as treatment_id,"
-				+ "t.type, t.duration " + "FROM reservation r JOIN customer c "
-				+ "ON r.customer_id = c.id JOIN employee e "
-				+ "ON r.employee_id = e.id JOIN treatment t ON r.treatment_id = t.id WHERE r.is_enabled = ?;";
-		;
+	public Map<Integer, Reservation> getAll() throws Exception {
+		String query = "SELECT c.id as customer_id, c.name AS customer_name, c.surname AS customer_surname, "
+				+ "r.id as reservation_id, r.date, e.id AS employee_id, e.name AS employee_name, "
+				+ "e.surname AS employee_surname, t.id as treatment_id, t.type, t.duration " + "FROM reservation r "
+				+ "JOIN customer c ON r.customer_id = c.id " + "JOIN employee e ON r.employee_id = e.id "
+				+ "JOIN treatment t ON r.treatment_id = t.id " + "WHERE r.is_enabled = ? " + "ORDER BY r.date ASC;";
 
-		Map<Integer, Reservation> reservations = new HashMap<Integer, Reservation>();
+		Map<Integer, Reservation> reservations = new HashMap<>();
 
-		try {
-			Connection connection = DriverManager.getConnection(url, username, password);
-			PreparedStatement pstmt = connection.prepareStatement(query);
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setInt(1, 1);
-			ResultSet rs = pstmt.executeQuery();
 
-			while (rs.next()) {
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					int id = rs.getInt("reservation_id");
 
-				int id = rs.getInt("reservation_id");
+					Reservation reservation = new Reservation();
+					reservation.setId(id);
+					reservation.setDateTime(rs.getTimestamp("date").toLocalDateTime());
 
-				Reservation reservation = new Reservation();
-				reservation.setId(rs.getInt("reservation_id"));
-				reservation.setDateTime(rs.getTimestamp("date").toLocalDateTime());
+					int idTreatment = rs.getInt("treatment_id");
+					Optional<Treatment> optionalTreatment;
 
-				Treatment treatment = new Treatment();
-				treatment.setId(rs.getInt("treatment_id"));
-				treatment.setType(rs.getString("type"));
+					optionalTreatment = TreatmentDAO.getTreatment(idTreatment);
 
-				// durata trattamento
-				Time durationTime = rs.getTime("duration");
-				Duration duration = Duration.ofHours(durationTime.toLocalTime().getHour())
-						.plusMinutes(durationTime.toLocalTime().getMinute())
-						.plusSeconds(durationTime.toLocalTime().getSecond());
+					reservation.setTreatment(optionalTreatment.get());
 
-				treatment.setDuration(duration);
+					int idCustomer = rs.getInt("customer_id");
+					Optional<Customer> optionalCustomer;
+					optionalCustomer = CustomerDAO.getCustomer(idCustomer);
 
-				Customer customer = new Customer();
-				customer.setId(rs.getInt("customer_id"));
-				customer.setName(rs.getString("customer_name"));
-				customer.setSurname(rs.getString("customer_surname"));
+					if (optionalCustomer.isPresent()) {
+						reservation.setCustomer(optionalCustomer.get());
+					}
 
-				Employee employee = new Employee();
-				employee.setId(rs.getInt("employee_id"));
-				employee.setName(rs.getString("employee_name"));
-				employee.setSurname(rs.getString("employee_surname"));
+					int idEmployee = rs.getInt("employee_id");
+					Optional<Employee> optionalEmployee;
+					optionalEmployee = EmployeeDAO.getEmployee(idEmployee);
 
-				reservation.setCustomer(customer);
-				reservation.setTreatment(treatment);
-				reservation.setEmployee(employee);
+					if (optionalEmployee.isPresent()) {
+						reservation.setEmployee(optionalEmployee.get());
+					}
 
-				reservations.put(id, reservation);
+					reservations.put(id, reservation);
+				}
+			} 
+			catch (SQLException e) {
+				e.printStackTrace();
+				throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);
 			}
-
-			pstmt.close();
-			connection.close();
-		} catch (Exception ex) {
-			ex.printStackTrace();
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+			throw new Exception("Errore nella preparazione della query: " + e.getMessage(), e);
 		}
 		return reservations;
 	}
 
 	// metodo per ottenere tutti gli appuntamenti già presi in quella specifica
 	// data, per quel trattamento
-	public List<Reservation> getAllBusyReservations(LocalDate date, Treatment treatment) {// throws Exception{
-
-		String query = "SELECT c.name AS customer_name, c.surname AS customer_surname, r.id as reservation_id, "
-				+ "r.date, r.treatment_id, "
-				+ "e.id AS beautician_id, e.name AS beautician_name, e.surname AS beautician_surname, "
-				+ "t.type, t.duration FROM reservation r " + "JOIN customer c ON r.customer_id = c.id "
-				+ "JOIN employee e ON r.employee_id = e.id " + "JOIN treatment t ON r.treatment_id = t.id "
+	// Metodo per ottenere tutti gli appuntamenti già presi in quella specifica
+	// data, per quel trattamento
+	public List<Reservation> getAllBusyReservations(LocalDate date, Treatment treatment) throws Exception {
+		String query = "SELECT r.id as reservation_id, r.date, r.treatment_id, " + "e.id AS beautician_id "
+				+ "FROM reservation r " + "JOIN employee e ON r.employee_id = e.id "
 				+ "WHERE r.treatment_id = ? AND DATE(r.date) = ?;";
-		List<Reservation> reservations = new ArrayList<Reservation>();
 
-		try {
-			Connection connection = DriverManager.getConnection(url, username, password);
-			PreparedStatement pstmt = connection.prepareStatement(query);
+		List<Reservation> reservations = new ArrayList<>();
 
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setInt(1, treatment.getId());
 			pstmt.setDate(2, Date.valueOf(date));
-			ResultSet rs = pstmt.executeQuery();
 
-			while (rs.next()) {
-				Reservation reservation = new Reservation();
-				reservation.setId(rs.getInt("reservation_id"));
-				reservation.setDateTime(rs.getTimestamp("date").toLocalDateTime());
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					Reservation reservation = new Reservation();
+					reservation.setId(rs.getInt("reservation_id"));
+					reservation.setDateTime(rs.getTimestamp("date").toLocalDateTime());
 
-				Employee employee = new Employee();
-				employee.setId(rs.getInt("beautician_id"));
-				employee.setName(rs.getString("beautician_name"));
-				employee.setSurname(rs.getString("beautician_surname"));
+					int idEmployee = rs.getInt("beautician_id");
+					Optional<Employee> optionalEmployee = EmployeeDAO.getEmployee(idEmployee);
 
-				reservation.setEmployee(employee);
-				reservation.setTreatment(treatment);
+					if (optionalEmployee.isPresent()) {
+						Employee employee = optionalEmployee.get();
+						reservation.setEmployee(employee);
+					} else {
+						// Gestisci il caso in cui l'Employee non sia presente, se necessario
+					}
 
-				reservations.add(reservation);
+					reservation.setTreatment(treatment);
+
+					reservations.add(reservation);
+				}
+			} 
+			catch (SQLException e) {
+				e.printStackTrace();
+				throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);
 			}
-			pstmt.close();
-			connection.close();
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+			throw new Exception("Errore nella preparazione della query: " + e.getMessage(), e);
 		}
-
-		catch (Exception ex) {
-			ex.printStackTrace();
-			// throw new Exception(ex.getMessage());
-		}
-
 		return reservations;
 	}
 
-	public Reservation getReservation(int reservationId) {
-		String query = "SELECT c.id as customer_id, c.name AS customer_name, c.surname AS customer_surname, r.id as reservation_id, r.date, "
-				+ "e.id AS employee_id, e.name AS employee_name, e.surname AS employee_surname, t.id as treatment_id,"
-				+ "t.type, t.duration " + "FROM reservation r JOIN customer c "
-				+ "ON r.customer_id = c.id JOIN employee e "
-				+ "ON r.employee_id = e.id JOIN treatment t ON r.treatment_id = t.id WHERE r.is_enabled = ? AND r.id = ?;";
+	public Reservation getReservation(int reservationId)throws Exception  {
+		String query = "SELECT c.id as customer_id, c.name AS customer_name, c.surname AS customer_surname, "
+				+ "r.id as reservation_id, r.date, "
+				+ "e.id AS employee_id, e.name AS employee_name, e.surname AS employee_surname, "
+				+ "t.id as treatment_id, t.type, t.duration " + "FROM reservation r "
+				+ "JOIN customer c ON r.customer_id = c.id " + "JOIN employee e ON r.employee_id = e.id "
+				+ "JOIN treatment t ON r.treatment_id = t.id " + "WHERE r.is_enabled = ? AND r.id = ?;";
+
 		Reservation reservation = new Reservation();
 
-		try {
-			Connection connection = DriverManager.getConnection(url, username, password);
-			PreparedStatement pstmt = connection.prepareStatement(query);
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setInt(1, 1);
 			pstmt.setInt(2, reservationId);
-			ResultSet rs = pstmt.executeQuery();
 
-			while (rs.next()) {
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
 
-				// int id = rs.getInt("id");
+					reservation.setId(rs.getInt("reservation_id"));
+					reservation.setDateTime(rs.getTimestamp("date").toLocalDateTime());
 
-				reservation.setId(rs.getInt("reservation_id"));
-				reservation.setDateTime(rs.getTimestamp("date").toLocalDateTime());
+					int idTreatment = rs.getInt("treatment_id");
+					Optional<Treatment> optionalTreatment = TreatmentDAO.getTreatment(idTreatment);
 
-				Treatment treatment = new Treatment();
-				treatment.setId(rs.getInt("treatment_id"));
-				treatment.setType(rs.getString("type"));
+					if (optionalTreatment.isPresent()) {
+						Treatment treatment = optionalTreatment.get();
+						reservation.setTreatment(treatment);
+					}
 
-				// durata trattamento
-				Time durationTime = rs.getTime("duration");
-				Duration duration = Duration.ofHours(durationTime.toLocalTime().getHour())
-						.plusMinutes(durationTime.toLocalTime().getMinute())
-						.plusSeconds(durationTime.toLocalTime().getSecond());
+					int idCustomer = rs.getInt("customer_id");
+					Optional<Customer> optionalCustomer = CustomerDAO.getCustomer(idCustomer);
 
-				treatment.setDuration(duration);
+					// Correzione: Controllo di optionalCustomer invece di optionalTreatment
+					if (optionalCustomer.isPresent()) {
+						Customer customer = optionalCustomer.get();
+						reservation.setCustomer(customer);
+					}
 
-				Customer customer = new Customer();
-				customer.setId(rs.getInt("customer_id"));
-				customer.setName(rs.getString("customer_name"));
-				customer.setSurname(rs.getString("customer_surname"));
+					int idEmployee = rs.getInt("employee_id");
+					Optional<Employee> optionalEmployee = EmployeeDAO.getEmployee(idEmployee);
 
-				Employee employee = new Employee();
-				employee.setId(rs.getInt("employee_id"));
-				employee.setName(rs.getString("employee_name"));
-				employee.setSurname(rs.getString("employee_surname"));
-
-				reservation.setCustomer(customer);
-				reservation.setTreatment(treatment);
-				reservation.setEmployee(employee);
+					if (optionalEmployee.isPresent()) {
+						Employee employee = optionalEmployee.get();
+						reservation.setEmployee(employee);
+					}
+				}			
 			}
-
-			pstmt.close();
-			connection.close();
-		} catch (Exception ex) {
-			ex.printStackTrace();
+			catch (Exception e) {
+				e.printStackTrace();
+				throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+			throw new Exception("Errore nella preparazione della query: " + e.getMessage(), e);
 		}
 		return reservation;
 	}
 
-	public void insert(Reservation reservation) {
+	public void insert(Reservation reservation) throws Exception{
 		String query = "INSERT INTO reservation(date, is_paid, treatment_id, customer_id, employee_id, state)"
 				+ "VALUES(?,?,?,?,?,?)";
 
-		try {
-			Connection connection = DriverManager.getConnection(url, username, password);
-			PreparedStatement pstmt = connection.prepareStatement(query);
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+
 			pstmt.setTimestamp(1, java.sql.Timestamp.valueOf(reservation.getDateTime()));
 			pstmt.setBoolean(2, reservation.isPaid());
 			pstmt.setInt(3, reservation.getTreatment().getId());
@@ -200,22 +197,17 @@ public class DAOReservation {
 
 			pstmt.execute();
 
-			pstmt.close();
-			connection.close();
-		}
-
-		catch (Exception ex) {
-			ex.printStackTrace();
+		} 
+		catch (SQLException e) {			
+			e.printStackTrace();
+			throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);
 		}
 	}
 
-	public void update(Reservation reservation) {
-		String query = "UPDATE reservation set date = ?, is_paid = ?, treatment_id = ?, customer_id = ?,"
-				+ "employee_id = ?, state = ? WHERE id = ?";
-
-		try {
-			Connection connection = DriverManager.getConnection(url, username, password);
-			PreparedStatement pstmt = connection.prepareStatement(query);
+	public void update(Reservation reservation)throws Exception {
+		String query = "UPDATE reservation SET date = ?, is_paid = ?, treatment_id = ?, customer_id = ?, "
+				+ "employee_id = ?, state = ? WHERE id = ?";		
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setTimestamp(1, Timestamp.valueOf(reservation.getDateTime()));
 			pstmt.setBoolean(2, reservation.isPaid());
 			pstmt.setInt(3, reservation.getTreatment().getId());
@@ -223,74 +215,97 @@ public class DAOReservation {
 			pstmt.setInt(5, reservation.getEmployee().getId());
 			pstmt.setString(6, reservation.getState().name());
 			pstmt.setInt(7, reservation.getId());
-			pstmt.execute();
 
-			pstmt.close();
-			connection.close();
-		}
+			pstmt.executeUpdate(); // Consigliato utilizzare executeUpdate per operazioni di UPDATE
 
-		catch (Exception ex) {
-			ex.printStackTrace();
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+			throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);
+			// Puoi gestire l'eccezione in modo più specifico se necessario
 		}
 	}
 
-	public Map<Integer, Reservation> getSearchedReservation(String textToSearch) {
+	public Map<Integer, Reservation> getSearchedReservation(String textToSearch)throws Exception {
 		String query = "SELECT c.id AS customer_id, c.name AS customer_name, c.surname AS customer_surname, "
 				+ "r.id AS reservation_id, r.date, e.id AS employee_id, e.name AS employee_name, "
 				+ "e.surname AS employee_surname, t.id AS treatment_id, t.type, t.duration " + "FROM reservation r "
-				+ "JOIN customer c ON r.customer_id = c.id JOIN employee e ON r.employee_id = e.id "
-				+ "JOIN treatment t ON r.treatment_id = t.id WHERE r.is_enabled = 1 AND c.name LIKE ? OR "
-				+ "c.surname LIKE ? OR t.type LIKE ?;";
-		
-		Map<Integer, Reservation> reservations = new HashMap<Integer, Reservation>();
+				+ "JOIN customer c ON r.customer_id = c.id " + "JOIN employee e ON r.employee_id = e.id "
+				+ "JOIN treatment t ON r.treatment_id = t.id "
+				+ "WHERE r.is_enabled = 1 AND (c.name LIKE ? OR c.surname LIKE ? OR t.type LIKE ?);";
 
-		try {
-			Connection connection = DriverManager.getConnection(url, username, password);
-			PreparedStatement pstmt = connection.prepareStatement(query);
+		Map<Integer, Reservation> reservations = new HashMap<>();
 
-			pstmt.setString(1, "%" + textToSearch + "%");
-			pstmt.setString(2, "%" + textToSearch + "%");
-			pstmt.setString(3, "%" + textToSearch + "%");
-			
-			ResultSet rs = pstmt.executeQuery();
-			while (rs.next()) {
-				Reservation reservation = new Reservation();
-				reservation.setId(rs.getInt("reservation_id"));
-				reservation.setDateTime(rs.getTimestamp("date").toLocalDateTime());
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			String searchPattern = "%" + textToSearch + "%";
+			pstmt.setString(1, searchPattern);
+			pstmt.setString(2, searchPattern);
+			pstmt.setString(3, searchPattern);
 
-				Treatment treatment = new Treatment();
-				treatment.setId(rs.getInt("treatment_id"));
-				treatment.setType(rs.getString("type"));
+			try (ResultSet rs = pstmt.executeQuery()) {
+				while (rs.next()) {
+					Reservation reservation = new Reservation();
+					reservation.setId(rs.getInt("reservation_id"));
+					reservation.setDateTime(rs.getTimestamp("date").toLocalDateTime());
 
-				// durata trattamento
-				Time durationTime = rs.getTime("duration");
-				Duration duration = Duration.ofHours(durationTime.toLocalTime().getHour())
-						.plusMinutes(durationTime.toLocalTime().getMinute())
-						.plusSeconds(durationTime.toLocalTime().getSecond());
+					// Recupero e impostazione del Treatment
+					int idTreatment = rs.getInt("treatment_id");
+					Optional<Treatment> optionalTreatment = TreatmentDAO.getTreatment(idTreatment);
+					if (optionalTreatment.isPresent()) {
+						Treatment treatment = optionalTreatment.get();
+						reservation.setTreatment(treatment);
+					}
 
-				treatment.setDuration(duration);
+					// Recupero e impostazione del Customer
+					int idCustomer = rs.getInt("customer_id");
+					Optional<Customer> optionalCustomer = CustomerDAO.getCustomer(idCustomer);
+					// Correzione: Controllo di optionalCustomer invece di optionalTreatment
+					if (optionalCustomer.isPresent()) {
+						Customer customer = optionalCustomer.get();
+						reservation.setCustomer(customer);
+					}
 
-				Customer customer = new Customer();
-				customer.setId(rs.getInt("customer_id"));
-				customer.setName(rs.getString("customer_name"));
-				customer.setSurname(rs.getString("customer_surname"));
+					// Recupero e impostazione dell'Employee
+					int idEmployee = rs.getInt("employee_id");
+					Optional<Employee> optionalEmployee = EmployeeDAO.getEmployee(idEmployee);
+					if (optionalEmployee.isPresent()) {
+						Employee employee = optionalEmployee.get();
+						reservation.setEmployee(employee);
+					}
 
-				Employee employee = new Employee();
-				employee.setId(rs.getInt("employee_id"));
-				employee.setName(rs.getString("employee_name"));
-				employee.setSurname(rs.getString("employee_surname"));
-
-				reservation.setCustomer(customer);
-				reservation.setTreatment(treatment);
-				reservation.setEmployee(employee);
-				
-				reservations.put(reservation.getId(), reservation);
+					reservations.put(reservation.getId(), reservation);
+				}				
 			}
+			catch (SQLException e) {
+				e.printStackTrace();
+				throw new Exception("Errore nella preparazione della query: " + e.getMessage(), e);
+			}
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+			throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);
 		}
 
-		catch (Exception ex) {
-			ex.printStackTrace();
-		}
 		return reservations;
 	}
+
+	public void disable(Reservation reservation)throws Exception {
+		String query = "UPDATE reservation SET is_enabled = ? WHERE id = ?";
+
+		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+			pstmt.setInt(1, 0);
+			pstmt.setInt(2, reservation.getId());
+
+			pstmt.executeUpdate();
+
+		} 
+		catch (SQLException e) {
+			e.printStackTrace();
+			throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);
+			
+			// Puoi gestire l'eccezione in modo più specifico o loggarla utilizzando un
+			// framework di logging
+		}
+	}
+
 }

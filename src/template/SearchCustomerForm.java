@@ -21,11 +21,11 @@ public class SearchCustomerForm extends JDialog{
 
 	
 	private Customer selectedCustomer;
-    private Map<Integer, Customer> customers;
+    private List<Customer> customers;
     private JTextField textField;
     private JList<Customer> customerList;
     
-	public SearchCustomerForm(Frame owner, HashMap<Integer, Customer> customers) {
+	public SearchCustomerForm(Frame owner, List<Customer> customers) {
 		super(owner, "Seleziona Cliente", true);
 		this.customers = customers;
 		initialize();
@@ -99,7 +99,7 @@ public class SearchCustomerForm extends JDialog{
 	private void populateCustomersList() {
 		DefaultListModel<Customer> listModel = new DefaultListModel<>();
 		
-		for (Customer customer : customers.values()) {			
+		for (Customer customer : customers) {			
 		    listModel.addElement(customer);
 		}
 		customerList.setModel(listModel);

@@ -181,8 +181,8 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservation` (
     
     CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`shift` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `start` DATE NOT NULL,
-  `end` DATE NOT NULL,
+  `start` DATETIME NOT NULL,
+  `end` DATETIME NOT NULL,
   `type` ENUM('WORK', 'HOLYDAYS') NULL,
   `is_enabled` TINYINT NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`));

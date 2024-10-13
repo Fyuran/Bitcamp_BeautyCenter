@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Font;
 import java.beans.PropertyVetoException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -18,10 +20,27 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 
 import com.centro.estetico.bitcamp.Employee;
+import com.centro.estetico.bitcamp.Shift;
+
+import DAO.EmployeeDAO;
 
 public class UserAccessPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
+	private DateTimeFormatter dayFormat;
+	private DateTimeFormatter timeFormat;
+	private DefaultTableModel tableModel;
+	private Employee activeUser;
+	private JLabel lblName;
+	private JLabel lblUsername;
+	private JLabel lblSurname;
+	private JLabel lblRole;
+	private JLabel lblMail;
+	private JLabel lblAddress;
+	private JLabel lblPhone;
+	private JLabel lblIBAN;
+	private JLabel lblBirthday;
+	private JLabel lblHireDate;
 
 	/**
 	 * Create the panel.
@@ -33,10 +52,13 @@ public class UserAccessPanel extends JPanel {
 			JOptionPane.showMessageDialog(this, "Errore di connessione");
 			System.exit(1);
 		}
+		this.activeUser = employee;
+		dayFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		timeFormat = DateTimeFormatter.ofPattern("hh:mm");
 		setLayout(null);
 		setSize(1024, 768);
 		setName("Area personale");
-		JLabel titleTab = new JLabel("Benvenuto " + employee.getName());
+		JLabel titleTab = new JLabel("Benvenuto " + activeUser.getName());
 		titleTab.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
 		titleTab.setBounds(415, 11, 206, 32);
 		add(titleTab);
@@ -49,53 +71,53 @@ public class UserAccessPanel extends JPanel {
 		add(dataPanel);
 		dataPanel.setLayout(null);
 
-		JLabel lblName = new JLabel("Nome: " + employee.getName());
+		lblName = new JLabel();
 		lblName.setBounds(25, 47, 185, 16);
 
 		dataPanel.add(lblName);
 
-		JLabel lblSurname = new JLabel("Cognome: " + employee.getSurname());
+		lblSurname = new JLabel();
 		lblSurname.setBounds(25, 87, 185, 16);
 		dataPanel.add(lblSurname);
 
-		JLabel lblRole = new JLabel("Ruolo: " + employee.getRole().toString());
+		lblRole = new JLabel();
 		lblRole.setBounds(222, 87, 231, 16);
 		dataPanel.add(lblRole);
 
-		JLabel lblAddress = new JLabel("Indirizzo: " + employee.getAddress() + ", " + employee.getBirthplace());
+		lblAddress = new JLabel();
 		lblAddress.setBounds(25, 172, 415, 16);
 		dataPanel.add(lblAddress);
 
-		JLabel lblIBAN = new JLabel("IBAN: " + employee.getIban());
+		lblIBAN = new JLabel();
 		lblIBAN.setBounds(25, 253, 353, 16);
 		dataPanel.add(lblIBAN);
 
-		JLabel lblBirthday = new JLabel("Data di nascita: " + employee.getBoD());
+		lblBirthday = new JLabel();
 		lblBirthday.setBounds(25, 281, 324, 16);
 		dataPanel.add(lblBirthday);
 
-		JLabel lblHireDate = new JLabel("Data di assunzione: " + employee.getHiredDate());
+		lblHireDate = new JLabel();
 		lblHireDate.setBounds(25, 313, 335, 16);
 		dataPanel.add(lblHireDate);
 
-		JLabel lblUsername = new JLabel("Username: " + employee.getUsername());
+		lblUsername = new JLabel();
 		lblUsername.setBounds(222, 47, 185, 16);
 		dataPanel.add(lblUsername);
 
-		JLabel lblMail = new JLabel("Mail: " + employee.getMail());
+		lblMail = new JLabel();
 		lblMail.setBounds(25, 128, 250, 16);
 		dataPanel.add(lblMail);
 
-		JLabel lblPhone = new JLabel("Telefono: " + employee.getPhone());
+		lblPhone = new JLabel();
 		lblPhone.setBounds(25, 212, 324, 16);
 		dataPanel.add(lblPhone);
 
 		String[] columnNames = { "Giorno", "Inizio turno", "Fine turno", "Tipologia" };
-		DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
+		tableModel = new DefaultTableModel(columnNames, 0);
 
 		// Creazione della tabella
 		JTable shiftTable = new JTable(tableModel);
-
+		
 		// Aggiungere la tabella all'interno di uno JScrollPane per lo scroll
 		JScrollPane shiftScrollsPane = new JScrollPane(shiftTable);
 		shiftScrollsPane.setBorder(new CompoundBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null),
@@ -113,20 +135,61 @@ public class UserAccessPanel extends JPanel {
 		changeUserBtn.setBounds(200, 529, 145, 29);
 		changeUserBtn.addActionListener(e -> changeUsername());
 		add(changeUserBtn);
+		updateData();
+		populateShiftTable();
 
 	}
 
+	private void populateShiftTable() {
+		System.out.println("ID impiegato: " + activeUser.getId());
+		// popolamento tabella
+		int i=1;
+
+		for (Shift shift : activeUser.getShift()) {
+			
+			if (!shift.isShiftOver()) {
+				String day = shift.getStart().format(dayFormat);
+				String start = shift.getStart().format(timeFormat);
+				String end = shift.getEnd().format(timeFormat);
+				String type=shift.getType().toString();
+				System.out.println("Turno "+i+":\n ID: "+shift.getId()+"\nGiorno: "+day+ "\nDa a: "+start+"-"+end+"\nTipo: "+type);
+				i++;
+				tableModel.addRow(new String[] { day, start, end, type });
+				
+
+			}
+		}
+	}
+
+	public void updateData() {
+		lblName.setText("Nome: " + activeUser.getName());
+		lblSurname.setText("Cognome: " + activeUser.getSurname());
+		lblRole.setText("Ruolo: " + activeUser.getRole().toString());
+		lblAddress.setText("Indirizzo: " + activeUser.getAddress() + ", " + activeUser.getBirthplace());
+		lblIBAN.setText("IBAN: " + activeUser.getIban());
+		lblHireDate.setText("Data di assunzione: " + activeUser.getHiredDate());
+		lblUsername.setText("Username: " + activeUser.getUsername());
+		lblMail.setText("Mail: " + activeUser.getMail());
+		lblPhone.setText("Telefono: " + activeUser.getPhone());
+	}
+
 	public void changePassword() {
-		ChangePassDialog changePassDialog = new ChangePassDialog();
+		ChangePassDialog changePassDialog = new ChangePassDialog(activeUser);
 		changePassDialog.setAlwaysOnTop(true);
-		changePassDialog.setModalityType(Dialog.DEFAULT_MODALITY_TYPE);
+		updateActiveUser();
+		
 
 	}
 
 	public void changeUsername() {
-		ChangeUserDialog changeUserDialog = new ChangeUserDialog();
+		ChangeUserDialog changeUserDialog = new ChangeUserDialog(this,activeUser);
 		changeUserDialog.setAlwaysOnTop(true);
-		changeUserDialog.setModalityType(Dialog.DEFAULT_MODALITY_TYPE);
+		updateActiveUser();
+		updateData();
+		
+	}
+	public void updateActiveUser() {
+		this.activeUser=EmployeeDAO.getEmployee(activeUser.getId()).get();
 	}
 
 }

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import DAO.DAOShift;
 import DAO.UserCredentialsDAO;
 
 public class Employee extends User {
@@ -39,6 +40,7 @@ public class Employee extends User {
     }
 	
 	public Employee(ResultSet rs) throws SQLException {
+		
 		this(
 				rs.getInt(1),
 				new UserDetails(
@@ -50,7 +52,7 @@ public class Employee extends User {
 				rs.getBoolean(12),
 				rs.getLong(13),
 				Roles.valueOf(rs.getString(7)),
-				new ArrayList<Shift>(), //TODO: Add DAO for Shift
+				DAOShift.loadShiftsForEmployeeWhitID(rs.getInt(1)),//I metodi di DAOShift non dovrebbero essere statici?
 				rs.getDate(8) != null ? rs.getDate(8).toLocalDate() : null,  
 				rs.getDate(9) != null ? rs.getDate(9).toLocalDate() : null 
 			);
@@ -117,24 +119,24 @@ public class Employee extends User {
     public static long generateSerial() {
     	Random rand=new Random();
     	long serial=rand.nextInt(100000)+900000;
-    	return serial;
+    	return isSerialUnique(serial)?serial:generateSerial();
     }
     
     //funzione da correggere, ho fallito male
-//    private static boolean isSerialUnique(long serial) {
-//    		String query="SELECT * FROM beauty_centerdb.employee WHERE serial=? LIMIT 1";
-//    		Connection conn=Main.getConnection();
-//    		try(PreparedStatement pstmt = conn.prepareStatement(query)){
-//    			pstmt.setLong(1, serial);
-//    			ResultSet rs=pstmt.executeQuery();
-//    			
-//    			
-//    			return !rs.next();
-//    			}catch(SQLException e) {
-//    			e.printStackTrace();
-//    			return false;
-//    		}
-//    	}
+    private static boolean isSerialUnique(long serial) {
+    		String query="SELECT * FROM beauty_centerdb.employee WHERE serial=? LIMIT 1";
+    		Connection conn=Main.getConnection();
+    		try(PreparedStatement pstmt = conn.prepareStatement(query)){
+    			pstmt.setLong(1, serial);
+    			ResultSet rs=pstmt.executeQuery();
+    			
+    			return !rs.next();
+    			}catch(SQLException e) {
+    			e.printStackTrace();
+    			return false;
+    		}
+    	}
+   
     
 
 	@Override

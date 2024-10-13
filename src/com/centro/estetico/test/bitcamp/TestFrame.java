@@ -13,10 +13,12 @@ import com.centro.estetico.bitcamp.Shift;
 import com.centro.estetico.bitcamp.UserCredentials;
 import com.centro.estetico.bitcamp.UserDetails;
 
+import DAO.EmployeeDAO;
 import template.EmployeePanel;
 import template.ProductPanel;
 import template.TreatmentPanel;
 import template.UserAccessPanel;
+import template.gestioneClienti;
 import template.gestioneTurni;
 
 public class TestFrame extends JFrame {
@@ -26,6 +28,7 @@ public class TestFrame extends JFrame {
 	ProductPanel panelP;
 	UserAccessPanel panelU;
 	gestioneTurni panelG;
+	gestioneClienti panelC;
 
 	/*
 	 * Employee( 
@@ -39,16 +42,11 @@ public class TestFrame extends JFrame {
 	 * 
 	 */
 	public TestFrame() {
-		Employee employee = new Employee(
-				
-				new UserDetails("Mario", "Rossi", false, LocalDate.of(1990, 5, 15), "Milano",
-				"Note sul dipendente"),
-				new UserCredentials("mario.rossi", "password123!", "Via Roma 1", "IT60X0542811101000000123456",
-				"1234567890", "mario.rossi@example.com"),
-				121321451251L, Roles.PERSONNEL, new ArrayList<Shift>(), LocalDate.of(2019, 1, 1), LocalDate.of(2019, 1, 1)
-				);
 
 		new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
+		Employee employee = EmployeeDAO.getEmployee(26).get();
+
+		panelC=new gestioneClienti();
 		panelU = new UserAccessPanel(employee);
 		panelT = new TreatmentPanel();
 		panelE = new EmployeePanel();
@@ -57,6 +55,7 @@ public class TestFrame extends JFrame {
 
 		setSize(1075, 768);
 		JTabbedPane mainPane = new JTabbedPane();
+		mainPane.add(panelC);
 		mainPane.add(panelP);
 		mainPane.add(panelU);
 		mainPane.add(panelT);
