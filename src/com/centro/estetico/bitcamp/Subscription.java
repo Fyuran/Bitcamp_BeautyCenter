@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Optional;
 
+import DAO.SubscriptionDAO;
 import DAO.VATDao;
 
 
@@ -17,57 +19,46 @@ public class Subscription {
     private VAT vat;
     private double discount;
     private boolean isEnabled;
-   
+
     private Subscription(int id, SubPeriod subperiod, LocalDate start, BigDecimal price, VAT vat, double discount, boolean isEnabled) {
         this.id = id;
         this.subperiod = subperiod;
         this.start=start;
-        this.end = start==null?null:plusSubPeriod(start, subperiod);
+        this.end = start == null ? null : plusSubPeriod(start, subperiod);
         this.price = price;
-        this.vat = vat;    
+        this.vat = vat;
         this.discount = discount;
         this.isEnabled = isEnabled;
     }
-    
+
     public Subscription(SubPeriod subperiod, LocalDate start, BigDecimal price, VAT vat, double discount, boolean isEnabled) {
-        this.id = -1;
-        this.subperiod = subperiod;
-        this.start=start;
-        this.end = start==null?null:plusSubPeriod(start, subperiod);
-        this.price = price;
-        this.vat = vat;    
-        this.discount = discount;
-        this.isEnabled = isEnabled;
+        this(-1, subperiod, start, price, vat, discount, isEnabled);
     }
-    
-    public Subscription(ResultSet rs) throws SQLException {
-    	this(
-			rs.getInt(1), 
-			SubPeriod.valueOf(rs.getString(2)), 
-			null,
-			rs.getBigDecimal(3), 
-			VATDao.getVAT(rs.getInt(4)).get(), 
-			rs.getDouble(5),
-			rs.getBoolean(6)
-			//nel database manca un campo per lo startdate!
-//			 `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-//			  `subperiod` ENUM('MONTHLY', 'QUARTERLY', 'HALF_YEAR', 'YEARLY') NOT NULL,
-//			  `price` FLOAT NOT NULL,
-//			  `vat_id` INT UNSIGNED NULL,
-//			  `discount` FLOAT NOT NULL,
-//			  `is_enabled` TINYINT NOT NULL DEFAULT 1,
-		);
-    }
-    
+
     public Subscription(int id, Subscription obj) {
 		this(id, obj.subperiod, obj.start, obj.price, obj.vat, obj.discount, obj.isEnabled);
 	}
 
+	public Subscription(ResultSet rs, Optional<LocalDate> start) throws SQLException {
+    	this(
+			rs.getInt(1),
+			SubPeriod.valueOf(rs.getString(2)),
+			start.orElse(null),
+			rs.getBigDecimal(3),
+			VATDao.getVAT(rs.getInt(4)).get(),
+			rs.getDouble(5),
+			rs.getBoolean(6)
+		);
+	}
+
 	//Calcoliamo la durata
     private static LocalDate plusSubPeriod(LocalDate start, SubPeriod subperiod) {
+    	if(start == null) {
+			return null;
+		}
     	return start.plusMonths(subperiod.getMonths());
     }
-    
+
     // Getter e Setter
 
     public void setStart(LocalDate start) {
@@ -142,11 +133,11 @@ public class Subscription {
 		return "Subscription [id=" + id + ", subperiod=" + subperiod + ", start=" + start + ", end=" + end + ", price="
 				+ price + ", vat=" + vat + ", discount=" + discount + ", isEnabled=" + isEnabled + "]";
 	}
-   
+   //"ID", "Prezzo","IVA","Periodo", "Inizio", "Fine", "Sconto applicato", "Cliente", "Abilitata"
 	public Object[] toTableRow() {
 		return new Object[] {
-				id, subperiod, start, end, price, vat, discount, isEnabled
+				id, price, vat, subperiod, start, end, discount, SubscriptionDAO.getCustomerOfSubscription(id).orElse(null), isEnabled
 		};
-	}  
-    
+	}
+
 }
