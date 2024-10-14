@@ -4,9 +4,8 @@ import com.github.lgooddatepicker.components.DateTimePicker;
 import java.time.*;
 import java.awt.Font;
 import java.util.List;
-import javax.swing.JTextField;
-import javax.swing.ListModel;
-import java.util.Vector;
+import java.util.Map;
+import java.util.HashMap;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -16,26 +15,30 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.border.LineBorder;
 
-
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import javax.swing.UIManager;
 
+import com.centro.estetico.bitcamp.IsCreatingOrUpdating;
 import com.centro.estetico.bitcamp.Employee;
+import com.centro.estetico.bitcamp.Shift;
+import com.centro.estetico.bitcamp.ShiftEmployee;
 import com.centro.estetico.bitcamp.Roles;
 import com.centro.estetico.controller.ShiftController;
+
 import DAO.DAOShift;
 import DAO.EmployeeDAO;
 import com.centro.estetico.bitcamp.ShiftType;
-//import wrappersForDisplayMember.EmployeeWrapper;
-
+import com.centro.estetico.useCases.GetShiftUseCase;
+import com.centro.estetico.useCases.CreateShiftUseCase;
+import com.centro.estetico.useCases.UpdateShiftUseCase;
+import com.centro.estetico.useCases.DeleteShiftUseCase;
 
 public class ShiftForm extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private JLabel lblEndShift;
-	private JTextField txfSearchBar;
-	private JTextField txfNotes;	
+	private JTextField searchShift;
+	private JTextField txtNotes;
 	private int selectedRow = -1;
 	private ButtonGroup group;
 	private DateTimePicker startShift;
@@ -44,11 +47,11 @@ public class ShiftForm extends JPanel {
 	private JPanel containerPanel;
 	private JScrollPane scrollPane;
 	private JPanel outputPanel;
-	private JButton btnSearch;
-	private JButton btnFilter;
-	private JButton btnInsert;
-	private JButton btnUpdate;
-	private JButton btnDisable;
+	private JButton searchShiftButton;
+	private JButton cancelShiftButton;
+	private JButton addShift;
+	private JButton editShift;
+	private JButton deleteShift;
 	private JButton btnHystorical;
 	private JLabel lblOperator;
 	private JComboBox cBoxEmployee;
@@ -58,12 +61,30 @@ public class ShiftForm extends JPanel {
 	private JRadioButton rdbtnHolidays;
 	private JLabel lblNotes;
 	private JTable table;
-	private JPanel controlsPanel;
+	private JPanel anagraphicPanel;
 	private DefaultTableModel tableModel;
 	private JButton confirmBtn;
 	private JButton cancelBtn;
-	
+
 	private ShiftType shiftType;
+	private IsCreatingOrUpdating icou;
+
+	private Map<Integer, ShiftEmployee> shifts;
+	private Map<Integer, Employee> employees;
+
+	private DAOShift daoShift;
+
+	private ShiftController shiftGetController;
+	private ShiftController shiftCreateController;
+	private ShiftController shiftUpdateController;
+	private ShiftController shiftDeleteController;
+
+	private GetShiftUseCase getShiftUseCase;
+	private CreateShiftUseCase createShiftUseCase;
+	private UpdateShiftUseCase updateShiftUseCase;
+	private DeleteShiftUseCase deleteShiftUseCase;
+
+	private ShiftEmployee shiftEmployee;
 
 	/**
 	 * Create the panel.
@@ -71,16 +92,30 @@ public class ShiftForm extends JPanel {
 	public ShiftForm() {
 		initialize();
 		events();
-		loadShifts();
+		shifts = getAllShifts();
+		populateShiftsTable(shifts);
 		loadEmployees();
 	}
 
-	private void initialize() {		
+	private void initialize() {
 		shiftType = ShiftType.WORK;
-		
+		shifts = new HashMap<Integer, ShiftEmployee>();
+		employees = new HashMap<Integer, Employee>();
+		daoShift = new DAOShift();
+
+		getShiftUseCase = new GetShiftUseCase(daoShift);
+		createShiftUseCase = new CreateShiftUseCase(daoShift);
+		updateShiftUseCase = new UpdateShiftUseCase(daoShift);
+		deleteShiftUseCase = new DeleteShiftUseCase(daoShift);
+
+		shiftGetController = new ShiftController(getShiftUseCase);
+		shiftCreateController = new ShiftController(createShiftUseCase);
+		shiftUpdateController = new ShiftController(updateShiftUseCase);
+		shiftDeleteController = new ShiftController(deleteShiftUseCase);
+
 		setLayout(null);
-		setSize(1024, 768);				
-		
+		setSize(1024, 768);
+
 		containerPanel = new JPanel();
 		containerPanel.setLayout(null);
 		containerPanel.setBorder(new LineBorder(new Color(0, 0, 0), 3));
@@ -109,52 +144,52 @@ public class ShiftForm extends JPanel {
 		lblManageShifts.setBounds(413, 11, 179, 32);
 		add(lblManageShifts);
 
-		btnSearch = new JButton("");
+		searchShiftButton = new JButton("");
 
-		btnSearch.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/searchIcon.png")));
-		btnSearch.setOpaque(false);
-		btnSearch.setContentAreaFilled(false);
-		btnSearch.setBorderPainted(false);
-		btnSearch.setBounds(206, 8, 40, 30);
-		containerPanel.add(btnSearch);
+		searchShiftButton.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/searchIcon.png")));
+		searchShiftButton.setOpaque(false);
+		searchShiftButton.setContentAreaFilled(false);
+		searchShiftButton.setBorderPainted(false);
+		searchShiftButton.setBounds(206, 8, 40, 30);
+		containerPanel.add(searchShiftButton);
 
-		txfSearchBar = new JTextField();
-		txfSearchBar.setColumns(10);
-		txfSearchBar.setBackground(UIManager.getColor("CheckBox.background"));
-		txfSearchBar.setBounds(23, 14, 168, 24);
-		containerPanel.add(txfSearchBar);
+		searchShift = new JTextField();
+		searchShift.setColumns(10);
+		searchShift.setBackground(UIManager.getColor("CheckBox.background"));
+		searchShift.setBounds(23, 14, 168, 24);
+		containerPanel.add(searchShift);
 
-		btnFilter = new JButton("");
-		btnFilter.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/filterIcon.png")));
-		btnFilter.setOpaque(false);
-		btnFilter.setContentAreaFilled(false);
-		btnFilter.setBorderPainted(false);
-		btnFilter.setBounds(256, 8, 40, 30);
-		containerPanel.add(btnFilter);
+		cancelShiftButton = new JButton("");
+		cancelShiftButton.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/delete.png")));
+		cancelShiftButton.setOpaque(false);
+		cancelShiftButton.setContentAreaFilled(false);
+		cancelShiftButton.setBorderPainted(false);
+		cancelShiftButton.setBounds(256, 8, 40, 30);
+		containerPanel.add(cancelShiftButton);
 
-		btnInsert = new JButton("");
-		btnInsert.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/Insert.png")));
-		btnInsert.setOpaque(false);
-		btnInsert.setContentAreaFilled(false);
-		btnInsert.setBorderPainted(false);
-		btnInsert.setBounds(793, 8, 40, 30);
-		containerPanel.add(btnInsert);
+		addShift = new JButton("");
+		addShift.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/Insert.png")));
+		addShift.setOpaque(false);
+		addShift.setContentAreaFilled(false);
+		addShift.setBorderPainted(false);
+		addShift.setBounds(793, 8, 40, 30);
+		containerPanel.add(addShift);
 
-		btnUpdate = new JButton("");
-		btnUpdate.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/Update.png")));
-		btnUpdate.setOpaque(false);
-		btnUpdate.setContentAreaFilled(false);
-		btnUpdate.setBorderPainted(false);
-		btnUpdate.setBounds(843, 8, 40, 30);
-		containerPanel.add(btnUpdate);
+		editShift = new JButton("");
+		editShift.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/Update.png")));
+		editShift.setOpaque(false);
+		editShift.setContentAreaFilled(false);
+		editShift.setBorderPainted(false);
+		editShift.setBounds(843, 8, 40, 30);
+		containerPanel.add(editShift);
 
-		btnDisable = new JButton("");
-		btnDisable.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/disable.png")));
-		btnDisable.setOpaque(false);
-		btnDisable.setContentAreaFilled(false);
-		btnDisable.setBorderPainted(false);
-		btnDisable.setBounds(893, 8, 40, 30);
-		containerPanel.add(btnDisable);
+		deleteShift = new JButton("");
+		deleteShift.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/disable.png")));
+		deleteShift.setOpaque(false);
+		deleteShift.setContentAreaFilled(false);
+		deleteShift.setBorderPainted(false);
+		deleteShift.setBounds(893, 8, 40, 30);
+		containerPanel.add(deleteShift);
 
 		btnHystorical = new JButton("");
 		btnHystorical.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/cartellina.png")));
@@ -166,126 +201,162 @@ public class ShiftForm extends JPanel {
 
 		// parte inferiore
 
-		controlsPanel = new JPanel();
-		controlsPanel.setBounds(370, 424, 432, 334);
-		controlsPanel.setLayout(null);
-		controlsPanel.setEnabled(false);
-		add(controlsPanel);
+		anagraphicPanel = new JPanel();
+		anagraphicPanel.setBounds(370, 424, 432, 334);
+		anagraphicPanel.setLayout(null);
+		anagraphicPanel.setEnabled(false);
+		add(anagraphicPanel);
 
 		rdbtnWork = new JRadioButton("Lavoro");
 		rdbtnWork.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 11));
-		rdbtnWork.setBounds(145, 148, 109, 23);
+		rdbtnWork.setBounds(145, 148, 74, 23);
 		rdbtnWork.setEnabled(false);
-		rdbtnWork.setSelected(true);		
-		controlsPanel.add(rdbtnWork);
+		rdbtnWork.setSelected(true);
+		anagraphicPanel.add(rdbtnWork);
 
 		rdbtnHolidays = new JRadioButton("Ferie");
 		rdbtnHolidays.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 11));
 		rdbtnHolidays.setBounds(256, 148, 109, 23);
 		rdbtnHolidays.setEnabled(false);
-		controlsPanel.add(rdbtnHolidays);
+		anagraphicPanel.add(rdbtnHolidays);
 
-		txfNotes = new JTextField();
-		txfNotes.setColumns(10);
-		txfNotes.setBounds(145, 194, 220, 59);
-		txfNotes.setEnabled(false);
-		controlsPanel.add(txfNotes);
+		txtNotes = new JTextField();
+		txtNotes.setColumns(10);
+		txtNotes.setBounds(145, 194, 220, 59);
+		txtNotes.setEnabled(false);
+		anagraphicPanel.add(txtNotes);
 
 		lblOperator = new JLabel("Operatore:");
 		lblOperator.setBounds(10, 10, 170, 14);
 		lblOperator.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblOperator.setEnabled(false);
-		controlsPanel.add(lblOperator);
+		anagraphicPanel.add(lblOperator);
 
 		lblStartShift = new JLabel("Inizio Turno*:");
 		lblStartShift.setBounds(10, 51, 84, 17);
 		lblStartShift.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblStartShift.setEnabled(false);
-		controlsPanel.add(lblStartShift);
+		anagraphicPanel.add(lblStartShift);
 
 		lblEndShift = new JLabel("Fine Turno*:");
 		lblEndShift.setBounds(10, 97, 84, 17);
 		lblEndShift.setFont(new Font("Dialog", Font.PLAIN, 14));
 		lblEndShift.setEnabled(false);
-		controlsPanel.add(lblEndShift);
+		anagraphicPanel.add(lblEndShift);
 
 		lblShiftType = new JLabel("Tipo Turno:");
-		lblShiftType.setBounds(10, 151, 170, 14);
+		lblShiftType.setBounds(10, 151, 121, 14);
 		lblShiftType.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblShiftType.setEnabled(false);
-		controlsPanel.add(lblShiftType);
+		anagraphicPanel.add(lblShiftType);
 
 		lblNotes = new JLabel("Note Aggiuntive:");
 		lblNotes.setBounds(10, 192, 170, 19);
 		lblNotes.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblNotes.setEnabled(false);
-		controlsPanel.add(lblNotes);
+		anagraphicPanel.add(lblNotes);
 
 		cBoxEmployee = new JComboBox();
 		cBoxEmployee.setBounds(145, 7, 220, 22);
 		cBoxEmployee.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 11));
 		cBoxEmployee.setModel(new DefaultComboBoxModel());
 		cBoxEmployee.setEnabled(false);
-		controlsPanel.add(cBoxEmployee);
+		anagraphicPanel.add(cBoxEmployee);
 
 		startShift = new DateTimePicker();
 		startShift.setBounds(145, 50, 220, 20);
 		startShift.setEnabled(false);
-		controlsPanel.add(startShift);
+		anagraphicPanel.add(startShift);
 
 		endShift = new DateTimePicker();
 		endShift.setBounds(145, 98, 220, 20);
 		endShift.setEnabled(false);
-		controlsPanel.add(endShift);
+		anagraphicPanel.add(endShift);
 
 		confirmBtn = new JButton("Conferma");
 		confirmBtn.setBounds(145, 303, 109, 21);
 		confirmBtn.setEnabled(false);
-		controlsPanel.add(confirmBtn);
+		anagraphicPanel.add(confirmBtn);
 
 		cancelBtn = new JButton("Annulla");
 		cancelBtn.setBounds(254, 303, 111, 21);
 		cancelBtn.setEnabled(false);
-		controlsPanel.add(cancelBtn);
-		
+		anagraphicPanel.add(cancelBtn);
+
 		group = new ButtonGroup();
-		//group.setBounds(254, 303, 111, 21);
-		//group.setEnabled(false);
 		group.add(rdbtnWork);
 		group.add(rdbtnHolidays);
-		//controlsPanel.add(group);
 	}
 
 	private void events() {
-		// crea
-		btnInsert.addActionListener(new ActionListener() {
+
+		addShift.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// sblocca il pannello inferiore e tutti i suoi componenti
-				enablePanel(controlsPanel);
+				icou = IsCreatingOrUpdating.CREATE;
+				enablePanel(anagraphicPanel);
 				disableEnableUpperCommands(false);
 			}
 		});
 
 		// cancella
-		btnDisable.addActionListener(new ActionListener() {
+		deleteShift.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				disableEnableUpperCommands(false);
+				if (table.getSelectedRow() != -1) {
+					int answer = JOptionPane.showConfirmDialog(null, "Sei sicuro di voler cancellare questo turno?",
+							"Conferma", JOptionPane.YES_NO_OPTION);
+					
+					if (answer == JOptionPane.YES_OPTION) {
+						try {
+							shiftEmployee = getSelectedShiftFromTable();
+							shiftDeleteController.delete(shiftEmployee);
+							shifts = getAllShifts();
+							populateShiftsTable(shifts);
+						} 
+						catch (Exception ex) {
+							JOptionPane.showMessageDialog(null, ex.getMessage());
+						}
+					}
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "Seleziona un turno da cancellare");
+				}
 			}
 		});
 		// modifica
-		btnUpdate.addActionListener(new ActionListener() {
+		editShift.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				if (table.getSelectedRow() != -1) {
+					icou = IsCreatingOrUpdating.UPDATE;
+					enablePanel(anagraphicPanel);
+					disableEnableUpperCommands(false);
+					shiftEmployee = getSelectedShiftFromTable();
+					fillControls(shiftEmployee);
+				} 
+				else {
+					JOptionPane.showMessageDialog(ShiftForm.this, "Seleziona un turno");
+				}
 			}
 		});
 
 		// cerca
-		btnSearch.addActionListener(new ActionListener() {
+		searchShiftButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
+					shifts = shiftGetController.getSearchedShifts(searchShift.getText());					
+					populateShiftsTable(shifts);
+				}
+				catch(Exception ex) {
+					JOptionPane.showMessageDialog(null, ex.getMessage());
+				}
 			}
 		});
 
-		btnFilter.addActionListener(new ActionListener() {
+		cancelShiftButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				searchShift.setText("");
+				shifts = getAllShifts();
+				populateShiftsTable(shifts);
 			}
 		});
 
@@ -294,54 +365,88 @@ public class ShiftForm extends JPanel {
 			}
 		});
 
-		// conferma  
+		// conferma
 		confirmBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-				if(sendShiftToController()) {
-					disablePanel(controlsPanel);														
-					cleanPanelData(controlsPanel);
-					disableEnableUpperCommands(true);
+				try {
+					if (sendObjectToController(shiftEmployee)) {
+						disablePanel(anagraphicPanel);
+						cleanPanelData(anagraphicPanel);
+						disableEnableUpperCommands(true);
+						shifts = getAllShifts();
+						populateShiftsTable(shifts);
+					}
+				} catch (Exception ex) {
+					JOptionPane.showMessageDialog(null, ex.getMessage());
 				}
-				
 			}
 		});
 
 		// annulla
 		cancelBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				disablePanel(controlsPanel);
-				// crea oggetto e mandalo al controller
-
-				// pulisci il pannello
-				cleanPanelData(controlsPanel);
+				disablePanel(anagraphicPanel);
+				cleanPanelData(anagraphicPanel);
+				disableEnableUpperCommands(true);
 			}
 		});
 
-		rdbtnWork.addActionListener(new ActionListener() {			
-			public void actionPerformed(ActionEvent e) {								
-				shiftType = ShiftType.WORK;				
+		rdbtnWork.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				shiftType = ShiftType.WORK;
 			}
 		});
-		
-		rdbtnHolidays.addActionListener(new ActionListener() {			
-			public void actionPerformed(ActionEvent e) {									
-				shiftType = ShiftType.HOLIDAYS;								
+
+		rdbtnHolidays.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				shiftType = ShiftType.HOLIDAYS;
 			}
 		});
 	}
-	
-	private void loadShifts() {
-		//controller a cui passo il dao e a sua volta richiama lo usecase
-		//
-		String[] columnNames = { "ID", "Cliente", "Data e Ora", "Operatore", "Servizio", "Durata" };
+
+	/*private void loadShifts(Map<Integer, ShiftEmployee> shifts) {
+		//shifts = getAllShifts(); // metodo per popolare la mappa
+		populateShiftsTable(shifts); // metodo per popolare la tabella dalla mappa
+	}*/
+
+	private void populateShiftsTable(Map<Integer, ShiftEmployee> shifts) {
+		String[] columnNames = { "ID", "Inizio", "Fine", "Tipo", "Operatore" };
+
+		DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false; // Impedisce la modifica di qualsiasi cella
+			}
+		};
+
+		for (Map.Entry<Integer, ShiftEmployee> entry : shifts.entrySet()) {
+			ShiftEmployee shiftEmployee = entry.getValue();
+
+			Object[] rowData = { entry.getKey(), shiftEmployee.getShift().getStart(), shiftEmployee.getShift().getEnd(),
+					shiftEmployee.getShift().getType(), shiftEmployee.getEmployee().toString() };
+			tableModel.addRow(rowData);
+		}
+		table.setModel(tableModel);
 	}
-	
+
+	private Map<Integer, ShiftEmployee> getAllShifts() {
+		try {
+			shifts = shiftGetController.getShifts();
+		} catch (Exception ex) {
+			JOptionPane.showMessageDialog(null, ex.getMessage());
+		}
+		return shifts;
+	}
+
 	private void loadEmployees() {
-		List<Employee> employeesList = EmployeeDAO.getEmployeesByRole(Roles.PERSONNEL); //----> da sostituire con getAllBeauticians		
-		Vector<Employee> employeesVector = new Vector<>(employeesList);
-		DefaultComboBoxModel<Employee> employeesModel = new DefaultComboBoxModel<>(employeesVector);
-		cBoxEmployee.setModel(employeesModel);		
+		List<Employee> employeesList = EmployeeDAO.getEmployeesByRole(Roles.PERSONNEL); // ----> da sostituire con
+
+		for (Employee employee : employeesList) {
+			// CustomerWrapper cw = new CustomerWrapper(customer);
+			cBoxEmployee.addItem(employee);
+			employees.put(employee.getId(), employee);
+		}
+		cBoxEmployee.setSelectedItem(null);
 	}
 
 	private void enablePanel(Component component) {
@@ -386,11 +491,9 @@ public class ShiftForm extends JPanel {
 				for (Component comp : ((JPanel) component).getComponents()) {
 					cleanPanelData(comp);
 				}
-			} 
-			else if (component instanceof JTextField) {
+			} else if (component instanceof JTextField) {
 				((JTextField) component).setText("");
-			} 
-			else if (component instanceof JComboBox) {
+			} else if (component instanceof JComboBox) {
 				((JComboBox<?>) component).setSelectedIndex(-1);
 			}
 
@@ -400,8 +503,7 @@ public class ShiftForm extends JPanel {
 				if (model instanceof DefaultListModel<?>) {
 					((DefaultListModel<?>) model).clear();
 				}
-			} 
-			else if (component instanceof JScrollPane) {
+			} else if (component instanceof JScrollPane) {
 				JScrollPane scrollPane = (JScrollPane) component;
 				Component view = scrollPane.getViewport().getView();
 				cleanPanelData(view);
@@ -411,48 +513,103 @@ public class ShiftForm extends JPanel {
 				JRadioButton rb = (JRadioButton) component;
 				rb.setSelected(false);
 			}
-			
+
 		}
 
 		catch (Exception ex) {
 			return;
 		}
 	}
-	
+
 	private void disableEnableUpperCommands(boolean flag) {
-		txfSearchBar.setEnabled(flag);
-		btnInsert.setEnabled(flag);
-		btnUpdate.setEnabled(flag);
-		btnDisable.setEnabled(flag);
+		searchShift.setEnabled(flag);
+		addShift.setEnabled(flag);
+		editShift.setEnabled(flag);
+		deleteShift.setEnabled(flag);
 		btnHystorical.setEnabled(flag);
-		btnSearch.setEnabled(flag);
-		btnFilter.setEnabled(flag);
+		searchShiftButton.setEnabled(flag);
+		cancelShiftButton.setEnabled(flag);
 	}
-	
-	private boolean sendShiftToController() {
-		DAOShift daoShift = new DAOShift();		
-		ShiftController shiftController = new ShiftController(daoShift);
-		
-		//employee
-		Employee employee = null;
-		if(cBoxEmployee.getItemCount() > 0) {			
-			employee = (Employee)cBoxEmployee.getSelectedItem();
-		}				
-		
-		//orario di inizio e di fine
-		LocalDateTime startShiftDT = startShift.getDateTimePermissive();
-		LocalDateTime endShiftDT = endShift.getDateTimePermissive();
-		String notes = txfNotes.getText();
-				
-		
+
+	private ShiftEmployee getSelectedShiftFromTable() {
+
+		ShiftEmployee shift = new ShiftEmployee();
+
 		try {
-			//shiftController.execute(employee, startShiftDT, endShiftDT, shiftType, notes);
-			return true;
+			shift = shiftGetController.getShift((int) table.getValueAt(table.getSelectedRow(), 0));
+			return shift;
 		}
-		
-		catch(IllegalArgumentException ex) {
+
+		catch (Exception ex) {
 			JOptionPane.showMessageDialog(null, ex.getMessage());
-			return false;
-		}		
+		}
+		return shift;
 	}
+
+	// funzione che si attiva quando si preme sul tasto modifica
+	private void fillControls(ShiftEmployee shiftEmployee) {
+
+		Employee employee = employees.get(shiftEmployee.getEmployee().getId());
+		cBoxEmployee.setSelectedItem(employee);
+		LocalDateTime startDate = shiftEmployee.getShift().getStart();
+		LocalDateTime endDate = shiftEmployee.getShift().getEnd();
+		startShift.setDateTimePermissive(startDate);
+		endShift.setDateTimePermissive(endDate);
+		txtNotes.setText(shiftEmployee.getShift().getNotes());
+		ShiftType type = shiftEmployee.getShift().getType();
+
+		if (type == ShiftType.WORK) {
+			rdbtnWork.setSelected(true);
+		} else {
+			rdbtnHolidays.setSelected(true);
+		}
+	}
+
+	// crea shift
+	private void createShift() throws Exception {
+		shiftCreateController.add(returnNewShiftEmployee());
+	}
+
+	// modifica shift
+	private void updateShift(ShiftEmployee selectedShift) throws Exception {
+		int selectedEmployeeShiftId = selectedShift.getId(); // valori recuperati dalla tabella
+		int selectedShiftId = selectedShift.getShift().getId(); // valori recuperati dalla tabella
+
+		ShiftEmployee se = returnNewShiftEmployee(); // oggetto con nuovi valori
+		se.getShift().setId(selectedShiftId); // settare id di shift
+		se.setId(selectedEmployeeShiftId);
+
+		shiftUpdateController.update(se);
+	}
+
+	private ShiftEmployee returnNewShiftEmployee() throws Exception {
+		Employee employee = (Employee) cBoxEmployee.getSelectedItem();
+
+		LocalDateTime sdt;
+		LocalDateTime edt;
+		if (startShift.getDateTimePermissive() != null || endShift.getDateTimePermissive() != null) {
+			sdt = startShift.getDateTimePermissive();
+			edt = endShift.getDateTimePermissive();
+		}
+
+		else {
+			throw new Exception("Controlla correttamente data e ora");
+		}
+
+		Shift shift = new Shift(sdt, edt, shiftType, txtNotes.getText());
+		ShiftEmployee se = new ShiftEmployee(shift, employee);
+
+		return se;
+	}
+
+	private boolean sendObjectToController(ShiftEmployee se) throws Exception {
+
+		if (icou == IsCreatingOrUpdating.CREATE) {
+			createShift();
+		} else {
+			updateShift(se);
+		}
+		return true;
+	}
+
 }

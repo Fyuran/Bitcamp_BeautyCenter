@@ -86,14 +86,16 @@ public class DAOReservation {
 	// data, per quel trattamento
 	public List<Reservation> getAllBusyReservations(LocalDate date, Treatment treatment) throws Exception {
 		String query = "SELECT r.id as reservation_id, r.date, r.treatment_id, " + "e.id AS beautician_id "
-				+ "FROM beauty_centerdb.reservation r " + "JOIN employee e ON r.employee_id = e.id "
-				+ "WHERE r.treatment_id = ? AND DATE(r.date) = ?;";
+				+ "FROM beauty_centerdb.reservation r " + "JOIN beauty_centerdb.employee e ON r.employee_id = e.id "
+				+ "WHERE r.treatment_id = ? AND DATE(r.date) = ? AND r.is_enabled = ? AND e.is_enabled = ?;";
 
 		List<Reservation> reservations = new ArrayList<>();
 
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setInt(1, treatment.getId());
 			pstmt.setDate(2, Date.valueOf(date));
+			pstmt.setBoolean(3, true);
+			pstmt.setBoolean(4, true);
 
 			try (ResultSet rs = pstmt.executeQuery()) {
 				while (rs.next()) {
@@ -133,7 +135,7 @@ public class DAOReservation {
 				+ "r.id as reservation_id, r.date, "
 				+ "e.id AS employee_id, e.name AS employee_name, e.surname AS employee_surname, "
 				+ "t.id as treatment_id, t.type, t.duration " + "FROM beauty_centerdb.reservation r "
-				+ "JOIN beauty_centerdb.customer c ON r.customer_id = c.id " + "JOIN employee e ON r.employee_id = e.id "
+				+ "JOIN beauty_centerdb.customer c ON r.customer_id = c.id " + "JOIN beauty_centerdb.employee e ON r.employee_id = e.id "
 				+ "JOIN beauty_centerdb.treatment t ON r.treatment_id = t.id " + "WHERE r.is_enabled = ? AND r.id = ?;";
 
 		Reservation reservation = new Reservation();
@@ -159,7 +161,6 @@ public class DAOReservation {
 					int idCustomer = rs.getInt("customer_id");
 					Optional<Customer> optionalCustomer = CustomerDAO.getCustomer(idCustomer);
 
-					// Correzione: Controllo di optionalCustomer invece di optionalTreatment
 					if (optionalCustomer.isPresent()) {
 						Customer customer = optionalCustomer.get();
 						reservation.setCustomer(customer);
@@ -210,7 +211,7 @@ public class DAOReservation {
 
 	public void update(Reservation reservation)throws Exception {
 		String query = "UPDATE beauty_centerdb.reservation SET date = ?, is_paid = ?, treatment_id = ?, customer_id = ?, "
-				+ "employee_id = ?, state = ? WHERE id = ?";
+				+ "employee_id = ?, state = ? WHERE id = ?";		
 		try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 			pstmt.setTimestamp(1, Timestamp.valueOf(reservation.getDateTime()));
 			pstmt.setBoolean(2, reservation.isPaid());
@@ -220,13 +221,12 @@ public class DAOReservation {
 			pstmt.setString(6, reservation.getState().name());
 			pstmt.setInt(7, reservation.getId());
 
-			pstmt.executeUpdate(); // Consigliato utilizzare executeUpdate per operazioni di UPDATE
+			pstmt.executeUpdate();
 
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
-			throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);
-			// Puoi gestire l'eccezione in modo più specifico se necessario
+			throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);		
 		}
 	}
 
@@ -234,9 +234,9 @@ public class DAOReservation {
 		String query = "SELECT c.id AS customer_id, c.name AS customer_name, c.surname AS customer_surname, "
 				+ "r.id AS reservation_id, r.date, e.id AS employee_id, e.name AS employee_name, "
 				+ "e.surname AS employee_surname, t.id AS treatment_id, t.type, t.duration " + "FROM beauty_centerdb.reservation r "
-				+ "JOIN beauty_centerdb.customer c ON r.customer_id = c.id " + "JOIN beauty_centerdb.employee e ON r.employee_id = e.id "
+				+ "JOIN beauty_centerdb.customer c ON r.customer_id = c.id " + "JOIN employee e ON r.employee_id = e.id "
 				+ "JOIN beauty_centerdb.treatment t ON r.treatment_id = t.id "
-				+ "WHERE r.is_enabled = 1 AND (c.name LIKE ? OR c.surname LIKE ? OR t.type LIKE ?);";
+				+ "WHERE r.is_enabled = 1 AND (c.name LIKE ? OR c.surname LIKE ? OR t.type LIKE ? OR e.name LIKE ? OR e.surname LIKE ?);";
 
 		Map<Integer, Reservation> reservations = new HashMap<>();
 
@@ -245,14 +245,15 @@ public class DAOReservation {
 			pstmt.setString(1, searchPattern);
 			pstmt.setString(2, searchPattern);
 			pstmt.setString(3, searchPattern);
+			pstmt.setString(4, searchPattern);
+			pstmt.setString(5, searchPattern);
 
 			try (ResultSet rs = pstmt.executeQuery()) {
 				while (rs.next()) {
 					Reservation reservation = new Reservation();
 					reservation.setId(rs.getInt("reservation_id"));
 					reservation.setDateTime(rs.getTimestamp("date").toLocalDateTime());
-
-					// Recupero e impostazione del Treatment
+					
 					int idTreatment = rs.getInt("treatment_id");
 					Optional<Treatment> optionalTreatment = TreatmentDAO.getTreatment(idTreatment);
 					if (optionalTreatment.isPresent()) {
@@ -260,16 +261,15 @@ public class DAOReservation {
 						reservation.setTreatment(treatment);
 					}
 
-					// Recupero e impostazione del Customer
+					
 					int idCustomer = rs.getInt("customer_id");
 					Optional<Customer> optionalCustomer = CustomerDAO.getCustomer(idCustomer);
-					// Correzione: Controllo di optionalCustomer invece di optionalTreatment
+					
 					if (optionalCustomer.isPresent()) {
 						Customer customer = optionalCustomer.get();
 						reservation.setCustomer(customer);
 					}
 
-					// Recupero e impostazione dell'Employee
 					int idEmployee = rs.getInt("employee_id");
 					Optional<Employee> optionalEmployee = EmployeeDAO.getEmployee(idEmployee);
 					if (optionalEmployee.isPresent()) {
@@ -305,10 +305,7 @@ public class DAOReservation {
 		}
 		catch (SQLException e) {
 			e.printStackTrace();
-			throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);
-
-			// Puoi gestire l'eccezione in modo più specifico o loggarla utilizzando un
-			// framework di logging
+			throw new Exception("Errore nell'esecuzione della query: " + e.getMessage(), e);			
 		}
 	}
 

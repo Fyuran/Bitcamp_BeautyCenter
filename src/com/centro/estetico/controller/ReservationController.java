@@ -6,10 +6,8 @@ import java.util.Map;
 import java.util.List;
 
 import java.time.LocalTime;
-
-
+import java.time.LocalDateTime;
 import com.centro.estetico.useCases.*;
-import DAO.DAOReservation;
 
 import com.centro.estetico.bitcamp.Employee;
 import com.centro.estetico.bitcamp.Reservation;
@@ -18,29 +16,24 @@ import com.centro.estetico.bitcamp.Treatment;
 
 public class ReservationController {
 
-	//private DAOReservation daoReservation;
 	private GetReservationUseCase getReservationUseCase;
 	private CreateReservationUseCase createReservationUseCase;
 	private UpdateReservationUseCase updateReservationUseCase;
 	private DeleteReservationUseCase deleteReservationUseCase;
 
 	public ReservationController(GetReservationUseCase getReservationUseCase) {
-		//this.daoReservation = daoReservation;
 		this.getReservationUseCase = getReservationUseCase;
 	}
 	
 	public ReservationController(CreateReservationUseCase createReservationUseCase) {
-		//this.daoReservation = daoReservation;
 		this.createReservationUseCase = createReservationUseCase;
 	} 
 	
 	public ReservationController(UpdateReservationUseCase updateReservationUseCase) {
-		//this.daoReservation = daoReservation;
 		this.updateReservationUseCase = updateReservationUseCase;
 	} 
 	
 	public ReservationController(DeleteReservationUseCase deleteReservationUseCase) {
-		//this.daoReservation = daoReservation;
 		this.deleteReservationUseCase = deleteReservationUseCase;
 	} 
 	
@@ -96,6 +89,10 @@ public class ReservationController {
 		}
 		if (reservation.getDateTime() == null) {
 			throw new IllegalArgumentException("Seleziona data e ora");
+		}
+		
+		if(reservation.getDateTime().isBefore(LocalDateTime.now())) {
+			throw new IllegalArgumentException("Non puoi selezionare una data precedente a quella di oggi");
 		}
 	}
 	

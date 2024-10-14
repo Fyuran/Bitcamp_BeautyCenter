@@ -39,7 +39,6 @@ public class Employee extends User {
     }
 
 	public Employee(ResultSet rs) throws SQLException {
-
 		this(
 				rs.getInt(1),
 				new UserDetails(
@@ -140,8 +139,7 @@ public class Employee extends User {
 
 	@Override
 	public String toString() {
-		return "Employee [employeeSerial=" + employeeSerial + ", role=" + role + ", turns=" + turns + ", hiredDate="
-				+ hiredDate + ", terminationDate=" + terminationDate + ", toString()=" + super.toString() + "]";
+		return String.format("%s %s", this.getName(), this.getSurname());
 	}
 	@Override
 	public Object[] toTableRow() {
