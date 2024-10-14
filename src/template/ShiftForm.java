@@ -31,6 +31,7 @@ import com.centro.estetico.bitcamp.ShiftType;
 import com.centro.estetico.useCases.GetShiftUseCase;
 import com.centro.estetico.useCases.CreateShiftUseCase;
 import com.centro.estetico.useCases.UpdateShiftUseCase;
+import com.centro.estetico.useCases.DeleteShiftUseCase;
 
 public class ShiftForm extends JPanel {
 
@@ -71,6 +72,18 @@ public class ShiftForm extends JPanel {
 	private Map<Integer, ShiftEmployee> shifts;
 	private Map<Integer, Employee> employees;
 
+	private DAOShift daoShift;
+
+	private ShiftController shiftGetController;
+	private ShiftController shiftCreateController;
+	private ShiftController shiftUpdateController;
+	private ShiftController shiftDeleteController;
+
+	private GetShiftUseCase getShiftUseCase;
+	private CreateShiftUseCase createShiftUseCase;
+	private UpdateShiftUseCase updateShiftUseCase;
+	private DeleteShiftUseCase deleteShiftUseCase;
+
 	private ShiftEmployee shiftEmployee;
 
 	/**
@@ -79,7 +92,8 @@ public class ShiftForm extends JPanel {
 	public ShiftForm() {
 		initialize();
 		events();
-		loadShifts();
+		shifts = getAllShifts();
+		populateShiftsTable(shifts);
 		loadEmployees();
 	}
 
@@ -87,6 +101,17 @@ public class ShiftForm extends JPanel {
 		shiftType = ShiftType.WORK;
 		shifts = new HashMap<Integer, ShiftEmployee>();
 		employees = new HashMap<Integer, Employee>();
+		daoShift = new DAOShift();
+
+		getShiftUseCase = new GetShiftUseCase(daoShift);
+		createShiftUseCase = new CreateShiftUseCase(daoShift);
+		updateShiftUseCase = new UpdateShiftUseCase(daoShift);
+		deleteShiftUseCase = new DeleteShiftUseCase(daoShift);
+
+		shiftGetController = new ShiftController(getShiftUseCase);
+		shiftCreateController = new ShiftController(createShiftUseCase);
+		shiftUpdateController = new ShiftController(updateShiftUseCase);
+		shiftDeleteController = new ShiftController(deleteShiftUseCase);
 
 		setLayout(null);
 		setSize(1024, 768);
@@ -277,7 +302,25 @@ public class ShiftForm extends JPanel {
 		// cancella
 		deleteShift.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				disableEnableUpperCommands(false);
+				if (table.getSelectedRow() != -1) {
+					int answer = JOptionPane.showConfirmDialog(null, "Sei sicuro di voler cancellare questo turno?",
+							"Conferma", JOptionPane.YES_NO_OPTION);
+					
+					if (answer == JOptionPane.YES_OPTION) {
+						try {
+							shiftEmployee = getSelectedShiftFromTable();
+							shiftDeleteController.delete(shiftEmployee);
+							shifts = getAllShifts();
+							populateShiftsTable(shifts);
+						} 
+						catch (Exception ex) {
+							JOptionPane.showMessageDialog(null, ex.getMessage());
+						}
+					}
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "Seleziona un turno da cancellare");
+				}
 			}
 		});
 		// modifica
@@ -288,8 +331,9 @@ public class ShiftForm extends JPanel {
 					enablePanel(anagraphicPanel);
 					disableEnableUpperCommands(false);
 					shiftEmployee = getSelectedShiftFromTable();
-					fillControlsFromMap(shiftEmployee);
-				} else {
+					fillControls(shiftEmployee);
+				} 
+				else {
 					JOptionPane.showMessageDialog(ShiftForm.this, "Seleziona un turno");
 				}
 			}
@@ -298,11 +342,21 @@ public class ShiftForm extends JPanel {
 		// cerca
 		searchShiftButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
+					shifts = shiftGetController.getSearchedShifts(searchShift.getText());					
+					populateShiftsTable(shifts);
+				}
+				catch(Exception ex) {
+					JOptionPane.showMessageDialog(null, ex.getMessage());
+				}
 			}
 		});
 
 		cancelShiftButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				searchShift.setText("");
+				shifts = getAllShifts();
+				populateShiftsTable(shifts);
 			}
 		});
 
@@ -319,10 +373,10 @@ public class ShiftForm extends JPanel {
 						disablePanel(anagraphicPanel);
 						cleanPanelData(anagraphicPanel);
 						disableEnableUpperCommands(true);
-						loadShifts();
+						shifts = getAllShifts();
+						populateShiftsTable(shifts);
 					}
-				}
-				catch(Exception ex) {
+				} catch (Exception ex) {
 					JOptionPane.showMessageDialog(null, ex.getMessage());
 				}
 			}
@@ -350,10 +404,10 @@ public class ShiftForm extends JPanel {
 		});
 	}
 
-	private void loadShifts() {
-		shifts = getShifts(); // metodo per popolare la mappa
+	/*private void loadShifts(Map<Integer, ShiftEmployee> shifts) {
+		//shifts = getAllShifts(); // metodo per popolare la mappa
 		populateShiftsTable(shifts); // metodo per popolare la tabella dalla mappa
-	}
+	}*/
 
 	private void populateShiftsTable(Map<Integer, ShiftEmployee> shifts) {
 		String[] columnNames = { "ID", "Inizio", "Fine", "Tipo", "Operatore" };
@@ -375,12 +429,9 @@ public class ShiftForm extends JPanel {
 		table.setModel(tableModel);
 	}
 
-	private Map<Integer, ShiftEmployee> getShifts() {
-		DAOShift daoShift = new DAOShift();
-		GetShiftUseCase gruc = new GetShiftUseCase(daoShift);
-		ShiftController sc = new ShiftController(gruc);
+	private Map<Integer, ShiftEmployee> getAllShifts() {
 		try {
-			shifts = sc.getShifts();
+			shifts = shiftGetController.getShifts();
 		} catch (Exception ex) {
 			JOptionPane.showMessageDialog(null, ex.getMessage());
 		}
@@ -480,15 +531,12 @@ public class ShiftForm extends JPanel {
 		cancelShiftButton.setEnabled(flag);
 	}
 
-
 	private ShiftEmployee getSelectedShiftFromTable() {
-		DAOShift daoShift = new DAOShift();
-		GetShiftUseCase getReservationUseCase = new GetShiftUseCase(daoShift);
-		ShiftController shiftController = new ShiftController(getReservationUseCase);
+
 		ShiftEmployee shift = new ShiftEmployee();
 
 		try {
-			shift = shiftController.getShift((int) table.getValueAt(table.getSelectedRow(), 0));
+			shift = shiftGetController.getShift((int) table.getValueAt(table.getSelectedRow(), 0));
 			return shift;
 		}
 
@@ -499,7 +547,7 @@ public class ShiftForm extends JPanel {
 	}
 
 	// funzione che si attiva quando si preme sul tasto modifica
-	private void fillControlsFromMap(ShiftEmployee shiftEmployee) {
+	private void fillControls(ShiftEmployee shiftEmployee) {
 
 		Employee employee = employees.get(shiftEmployee.getEmployee().getId());
 		cBoxEmployee.setSelectedItem(employee);
@@ -519,27 +567,19 @@ public class ShiftForm extends JPanel {
 
 	// crea shift
 	private void createShift() throws Exception {
-		DAOShift daoShift = new DAOShift();
-		CreateShiftUseCase createShiftUseCase = new CreateShiftUseCase(daoShift);
-		ShiftController shiftCreateController = new ShiftController(createShiftUseCase);
-
 		shiftCreateController.add(returnNewShiftEmployee());
 	}
 
 	// modifica shift
 	private void updateShift(ShiftEmployee selectedShift) throws Exception {
-		DAOShift daoShift = new DAOShift();
-		UpdateShiftUseCase updateShiftUseCase = new UpdateShiftUseCase(daoShift);
-		ShiftController shiftupdateController = new ShiftController(updateShiftUseCase);
+		int selectedEmployeeShiftId = selectedShift.getId(); // valori recuperati dalla tabella
+		int selectedShiftId = selectedShift.getShift().getId(); // valori recuperati dalla tabella
 
-		int selectedEmployeeShiftId = selectedShift.getId(); //valori recuperati dalla tabella
-		int selectedShiftId = selectedShift.getShift().getId(); //valori recuperati dalla tabella
-		
-		ShiftEmployee se = returnNewShiftEmployee(); //oggetto con nuovi valori
-		se.getShift().setId(selectedShiftId);	//settare id di shift	
+		ShiftEmployee se = returnNewShiftEmployee(); // oggetto con nuovi valori
+		se.getShift().setId(selectedShiftId); // settare id di shift
 		se.setId(selectedEmployeeShiftId);
 
-		shiftupdateController.update(se);
+		shiftUpdateController.update(se);
 	}
 
 	private ShiftEmployee returnNewShiftEmployee() throws Exception {
@@ -556,8 +596,6 @@ public class ShiftForm extends JPanel {
 			throw new Exception("Controlla correttamente data e ora");
 		}
 
-		
-		
 		Shift shift = new Shift(sdt, edt, shiftType, txtNotes.getText());
 		ShiftEmployee se = new ShiftEmployee(shift, employee);
 

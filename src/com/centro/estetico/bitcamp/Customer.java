@@ -114,8 +114,7 @@ public class Customer extends User {
 
 	@Override
 	public String toString() {
-		return "Customer [subscription=" + subscription + ", prizes=" + prizes + ", P_IVA=" + P_IVA + ", recipientCode="
-				+ recipientCode + ", loyaltyPoints=" + loyaltyPoints + ", " + super.toString() + "]";
+		return getFullName();
 	}
 
 	public String getFullName() {

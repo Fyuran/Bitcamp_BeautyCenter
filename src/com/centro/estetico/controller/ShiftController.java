@@ -58,7 +58,7 @@ public class ShiftController {
 		}		
 	}
 	
-	public Map<Integer, Shift> getSearchedShifts(String text)throws Exception{
+	public Map<Integer, ShiftEmployee> getSearchedShifts(String text)throws Exception{
 		return getShiftUseCase.getSearchedShifts(text);
 	}
 	

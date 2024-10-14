@@ -17,7 +17,7 @@ public class Employee extends User {
     private Roles role;
     private List<Shift> turns;
     private LocalDate hiredDate;
-    private LocalDate terminationDate;
+    private LocalDate terminationDate;   
     
     //User(int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled)
     //UserDetails(String name, String surname, boolean isFemale, LocalDate BoD, String birthplace, String notes)
@@ -40,7 +40,7 @@ public class Employee extends User {
     }
 	
 	public Employee(ResultSet rs) throws SQLException {
-		
+		//String name, String surname, boolean isFemale, LocalDate BoD, String birthplace, String notes
 		this(
 				rs.getInt(1),
 				new UserDetails(
@@ -52,7 +52,7 @@ public class Employee extends User {
 				rs.getBoolean(12),
 				rs.getLong(13),
 				Roles.valueOf(rs.getString(7)),
-				DAOShift.loadShiftsForEmployeeWhitID(rs.getInt(1)),//I metodi di DAOShift non dovrebbero essere statici?
+				DAOShift.loadShiftsForEmployeeD(rs.getInt(1)),//I metodi di DAOShift non dovrebbero essere statici?
 				rs.getDate(8) != null ? rs.getDate(8).toLocalDate() : null,  
 				rs.getDate(9) != null ? rs.getDate(9).toLocalDate() : null 
 			);
@@ -138,12 +138,11 @@ public class Employee extends User {
     	}
    
     
-
 	@Override
 	public String toString() {
-		return "Employee [employeeSerial=" + employeeSerial + ", role=" + role + ", turns=" + turns + ", hiredDate="
-				+ hiredDate + ", terminationDate=" + terminationDate + ", toString()=" + super.toString() + "]";
+		return String.format("%s %s", this.getName(), this.getSurname());
 	}
+	
 	public Object[] toTableRow() {
 		return new Object[] {
 				getId(), getName(), getSurname(), getBoD(), getBirthplace(), employeeSerial, role, turns, hiredDate, terminationDate, getNotes()

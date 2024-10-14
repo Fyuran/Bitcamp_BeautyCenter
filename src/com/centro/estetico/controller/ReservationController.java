@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.List;
 
 import java.time.LocalTime;
-
+import java.time.LocalDateTime;
 import com.centro.estetico.useCases.*;
 
 import com.centro.estetico.bitcamp.Employee;
@@ -89,6 +89,10 @@ public class ReservationController {
 		}
 		if (reservation.getDateTime() == null) {
 			throw new IllegalArgumentException("Seleziona data e ora");
+		}
+		
+		if(reservation.getDateTime().isBefore(LocalDateTime.now())) {
+			throw new IllegalArgumentException("Non puoi selezionare una data precedente a quella di oggi");
 		}
 	}
 	

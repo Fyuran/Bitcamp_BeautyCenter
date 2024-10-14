@@ -116,23 +116,21 @@ public class Treatment {
 
 	@Override
 	public String toString() {
-		return "Treatments [id=" + id + ", type=" + type + ", price=" + price + ", vat=" + vat + ", duration="
-				+ duration + ", products=" + products + ", isEnabled=" + isEnabled + "]";
+		return this.type;
 	}
 
 	public List<LocalTime> getTreatmentTime() throws Exception {
 		List<LocalTime> timeSlots = new ArrayList<>();
 
 		try {
-
 			LocalTime openingHour = Main.getBeautyCenter().getOpeningHour();
 			LocalTime closingHour = Main.getBeautyCenter().getClosingHour();
 
 			for (LocalTime time = openingHour; !time.plus(duration).isAfter(closingHour); time = time.plus(duration)) {
-
 				timeSlots.add(time);
 			}
-		} catch (Exception ex) {
+		} 
+		catch (Exception ex) {
 			throw new Exception(ex.getMessage());
 		}
 		return timeSlots;
