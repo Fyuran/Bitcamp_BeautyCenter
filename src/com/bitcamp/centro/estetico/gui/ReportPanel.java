@@ -87,7 +87,7 @@ public class ReportPanel extends JPanel {
 		btnReset.setOpaque(false);
 		btnReset.setContentAreaFilled(false);
 		btnReset.setBorderPainted(false);
-		btnReset.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/cartellina.png")));
+		btnReset.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/cartellina.png")));
 		btnReset.setBounds(900, 8, 40, 30);
 		btnReset.addActionListener(event -> populateTable());
 		containerPanel.add(btnReset);
@@ -96,7 +96,7 @@ public class ReportPanel extends JPanel {
 		btnFilter.setOpaque(false);
 		btnFilter.setContentAreaFilled(false);
 		btnFilter.setBorderPainted(false);
-		btnFilter.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/filterIcon.png")));
+		btnFilter.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/filterIcon.png")));
 		btnFilter.setBounds(950, 8, 40, 30);
 		btnFilter.addActionListener(e -> populateTableByFilter());
 		containerPanel.add(btnFilter);

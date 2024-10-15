@@ -38,7 +38,7 @@ public class SetupWelcomeFrame extends JFrame {
 		// Caricamento dell'immagine
 		//ImageIcon icon = new ImageIcon("iconeGestionale/download.png");
 		JLabel imageLabel = new JLabel(
-				new ImageIcon(SetupWelcomeFrame.class.getResource("/iconeGestionale/download.png")));
+				new ImageIcon(SetupWelcomeFrame.class.getResource("/com/bitcamp/centro/estetico/resources/download.png")));
 		imageLabel.setBounds(151, 20, 723, 360);
 		imagePanel.add(imageLabel);
 

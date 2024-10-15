@@ -232,12 +232,12 @@ public class TransactionPanel extends JPanel {
 		btnSearch.setOpaque(false);
 		btnSearch.setContentAreaFilled(false);
 		btnSearch.setBorderPainted(false);
-		btnSearch.setIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/searchIcon.png")));
+		btnSearch.setIcon(new ImageIcon(TransactionPanel.class.getResource("/com/bitcamp/centro/estetico/resources/searchIcon.png")));
 		btnSearch.setBounds(206, 8, 40, 40);
 		menuPanel.add(btnSearch);
 		btnSearch.setRolloverEnabled(true);
 		btnSearch.setRolloverIcon(
-				new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/searchIcon_rollOver.png"))); // #646464
+				new ImageIcon(TransactionPanel.class.getResource("/com/bitcamp/centro/estetico/resources/searchIcon_rollOver.png"))); // #646464
 
 		JTextField txfSearchBar;
 		txfSearchBar = new JTextField();
@@ -250,45 +250,45 @@ public class TransactionPanel extends JPanel {
 		btnFilter.setOpaque(false);
 		btnFilter.setContentAreaFilled(false);
 		btnFilter.setBorderPainted(false);
-		btnFilter.setIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/filterIcon.png")));
+		btnFilter.setIcon(new ImageIcon(TransactionPanel.class.getResource("/com/bitcamp/centro/estetico/resources/filterIcon.png")));
 		btnFilter.setBounds(256, 8, 40, 40);
 		menuPanel.add(btnFilter);
 		btnFilter.setRolloverEnabled(true);
 		btnFilter.setRolloverIcon(
-				new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/filterIcon_rollOver.png"))); // #646464
+				new ImageIcon(TransactionPanel.class.getResource("/com/bitcamp/centro/estetico/resources/filterIcon_rollOver.png"))); // #646464
 
 		JButton btnInsert = new JButton("");
 		btnInsert.setOpaque(false);
 		btnInsert.setContentAreaFilled(false);
 		btnInsert.setBorderPainted(false);
-		btnInsert.setIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/Insert.png")));
+		btnInsert.setIcon(new ImageIcon(TransactionPanel.class.getResource("/com/bitcamp/centro/estetico/resources/Insert.png")));
 		btnInsert.setBounds(792, 8, 40, 40);
 		menuPanel.add(btnInsert);
 		btnInsert.setRolloverEnabled(true);
 		btnInsert.setRolloverIcon(
-				new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/Insert_rollOver.png"))); // #646464
+				new ImageIcon(TransactionPanel.class.getResource("/com/bitcamp/centro/estetico/resources/Insert_rollOver.png"))); // #646464
 
 		JButton btnUpdate = new JButton("");
 		btnUpdate.setOpaque(false);
 		btnUpdate.setContentAreaFilled(false);
 		btnUpdate.setBorderPainted(false);
-		btnUpdate.setIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/Update.png")));
+		btnUpdate.setIcon(new ImageIcon(TransactionPanel.class.getResource("/com/bitcamp/centro/estetico/resources/Update.png")));
 		btnUpdate.setBounds(842, 8, 40, 40);
 		menuPanel.add(btnUpdate);
 		btnUpdate.setRolloverEnabled(true);
 		btnUpdate.setRolloverIcon(
-				new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/Update_rollOver.png"))); // #646464
+				new ImageIcon(TransactionPanel.class.getResource("/com/bitcamp/centro/estetico/resources/Update_rollOver.png"))); // #646464
 
 		JButton btnDisable = new JButton("");
 		btnDisable.setOpaque(false);
 		btnDisable.setContentAreaFilled(false);
 		btnDisable.setBorderPainted(false);
-		btnDisable.setIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/disable.png")));
+		btnDisable.setIcon(new ImageIcon(TransactionPanel.class.getResource("/com/bitcamp/centro/estetico/resources/disable.png")));
 		btnDisable.setBounds(892, 8, 40, 40);
 		menuPanel.add(btnDisable);
 		btnDisable.setRolloverEnabled(true);
 		btnDisable.setRolloverIcon(
-				new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/disable_rollOver.png"))); // #646464
+				new ImageIcon(TransactionPanel.class.getResource("/com/bitcamp/centro/estetico/resources/disable_rollOver.png"))); // #646464
 
 		JPanel outputPanel = new JPanel();
 		outputPanel.setLayout(null);
@@ -296,27 +296,27 @@ public class TransactionPanel extends JPanel {
 		menuPanel.add(outputPanel);
 
 		JButton btnRefresh = new JButton("");
-		btnRefresh.setIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/Refresh.png")));
+		btnRefresh.setIcon(new ImageIcon(TransactionPanel.class.getResource("/com/bitcamp/centro/estetico/resources/Refresh.png")));
 		btnRefresh.setOpaque(false);
 		btnRefresh.setContentAreaFilled(false);
 		btnRefresh.setBorderPainted(false);
 		btnRefresh.setBounds(942, 8, 40, 40);
 		menuPanel.add(btnRefresh);
 		btnRefresh.setRolloverEnabled(true);
-		btnRefresh.setRolloverIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/Refresh_rollOver.png"))); // #646464
+		btnRefresh.setRolloverIcon(new ImageIcon(TransactionPanel.class.getResource("/com/bitcamp/centro/estetico/resources/Refresh_rollOver.png"))); // #646464
 
 		JButton btnDelete = new JButton("");
 		if (sessionUser.getRole() != Roles.ADMIN) {
 			btnDelete.setVisible(false);
 		}
-		btnDelete.setIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/delete.png")));
+		btnDelete.setIcon(new ImageIcon(TransactionPanel.class.getResource("/com/bitcamp/centro/estetico/resources/delete.png")));
 		btnDelete.setOpaque(false);
 		btnDelete.setContentAreaFilled(false);
 		btnDelete.setBorderPainted(false);
 		btnDelete.setBounds(742, 8, 40, 40);
 		menuPanel.add(btnDelete);
 		btnDelete.setRolloverEnabled(true);
-		btnDelete.setRolloverIcon(new ImageIcon(TransactionPanel.class.getResource("/iconeGestionale/delete_rollOver.png")));
+		btnDelete.setRolloverIcon(new ImageIcon(TransactionPanel.class.getResource("/com/bitcamp/centro/estetico/resources/delete_rollOver.png")));
 
 		lbOutput = new JLabel("");
 		lbOutput.setForeground(new Color(0, 153, 51));

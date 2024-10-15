@@ -139,7 +139,7 @@ public class ShiftForm extends JPanel {
 
 		searchShiftButton = new JButton("");
 
-		searchShiftButton.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/searchIcon.png")));
+		searchShiftButton.setIcon(new ImageIcon(ShiftForm.class.getResource("/com/bitcamp/centro/estetico/resources/searchIcon.png")));
 		searchShiftButton.setOpaque(false);
 		searchShiftButton.setContentAreaFilled(false);
 		searchShiftButton.setBorderPainted(false);
@@ -153,7 +153,7 @@ public class ShiftForm extends JPanel {
 		containerPanel.add(searchShift);
 
 		cancelShiftButton = new JButton("");
-		cancelShiftButton.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/delete.png")));
+		cancelShiftButton.setIcon(new ImageIcon(ShiftForm.class.getResource("/com/bitcamp/centro/estetico/resources/delete.png")));
 		cancelShiftButton.setOpaque(false);
 		cancelShiftButton.setContentAreaFilled(false);
 		cancelShiftButton.setBorderPainted(false);
@@ -161,7 +161,7 @@ public class ShiftForm extends JPanel {
 		containerPanel.add(cancelShiftButton);
 
 		addShift = new JButton("");
-		addShift.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/Insert.png")));
+		addShift.setIcon(new ImageIcon(ShiftForm.class.getResource("/com/bitcamp/centro/estetico/resources/Insert.png")));
 		addShift.setOpaque(false);
 		addShift.setContentAreaFilled(false);
 		addShift.setBorderPainted(false);
@@ -169,7 +169,7 @@ public class ShiftForm extends JPanel {
 		containerPanel.add(addShift);
 
 		editShift = new JButton("");
-		editShift.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/Update.png")));
+		editShift.setIcon(new ImageIcon(ShiftForm.class.getResource("/com/bitcamp/centro/estetico/resources/Update.png")));
 		editShift.setOpaque(false);
 		editShift.setContentAreaFilled(false);
 		editShift.setBorderPainted(false);
@@ -177,7 +177,7 @@ public class ShiftForm extends JPanel {
 		containerPanel.add(editShift);
 
 		deleteShift = new JButton("");
-		deleteShift.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/disable.png")));
+		deleteShift.setIcon(new ImageIcon(ShiftForm.class.getResource("/com/bitcamp/centro/estetico/resources/disable.png")));
 		deleteShift.setOpaque(false);
 		deleteShift.setContentAreaFilled(false);
 		deleteShift.setBorderPainted(false);
@@ -185,7 +185,7 @@ public class ShiftForm extends JPanel {
 		containerPanel.add(deleteShift);
 
 		btnHystorical = new JButton("");
-		btnHystorical.setIcon(new ImageIcon(ShiftForm.class.getResource("/iconeGestionale/cartellina.png")));
+		btnHystorical.setIcon(new ImageIcon(ShiftForm.class.getResource("/com/bitcamp/centro/estetico/resources/cartellina.png")));
 		btnHystorical.setOpaque(false);
 		btnHystorical.setContentAreaFilled(false);
 		btnHystorical.setBorderPainted(false);

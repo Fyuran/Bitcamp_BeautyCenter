@@ -144,7 +144,7 @@ public class EmployeePanel extends JPanel {
 		btnSearch.setOpaque(false);
 		btnSearch.setContentAreaFilled(false);
 		btnSearch.setBorderPainted(false);
-		btnSearch.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/searchIcon.png")));
+		btnSearch.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/searchIcon.png")));
 		btnSearch.setBounds(206, 8, 40, 30);
 		btnSearch.addActionListener(new ActionListener() {
 			@Override
@@ -164,7 +164,7 @@ public class EmployeePanel extends JPanel {
 		btnFilter.setOpaque(false);
 		btnFilter.setContentAreaFilled(false);
 		btnFilter.setBorderPainted(false);
-		btnFilter.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/filterIcon.png")));
+		btnFilter.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/filterIcon.png")));
 		btnFilter.setBounds(256, 8, 40, 30);
 		btnFilter.addActionListener(e -> populateTableByFilter());
 		containerPanel.add(btnFilter);
@@ -173,7 +173,7 @@ public class EmployeePanel extends JPanel {
 		btnInsert.setOpaque(false);
 		btnInsert.setContentAreaFilled(false);
 		btnInsert.setBorderPainted(false);
-		btnInsert.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/Insert.png")));
+		btnInsert.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/Insert.png")));
 		btnInsert.setBounds(720, 8, 40, 30);
 		btnInsert.addActionListener(e -> createEmployee());
 		containerPanel.add(btnInsert);
@@ -182,7 +182,7 @@ public class EmployeePanel extends JPanel {
 		btnUpdate.setOpaque(false);
 		btnUpdate.setContentAreaFilled(false);
 		btnUpdate.setBorderPainted(false);
-		btnUpdate.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/Update.png")));
+		btnUpdate.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/Update.png")));
 		btnUpdate.setBounds(770, 8, 40, 30);
 		btnUpdate.addActionListener(e -> updateEmployee());
 		containerPanel.add(btnUpdate);
@@ -191,7 +191,7 @@ public class EmployeePanel extends JPanel {
 		btnDelete.setOpaque(false);
 		btnDelete.setContentAreaFilled(false);
 		btnDelete.setBorderPainted(false);
-		btnDelete.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/delete.png")));
+		btnDelete.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/delete.png")));
 		btnDelete.setBounds(820, 8, 40, 30);
 		btnDelete.addActionListener(e -> deleteEmployee());
 		containerPanel.add(btnDelete);
@@ -200,7 +200,7 @@ public class EmployeePanel extends JPanel {
 		btnDisable.setOpaque(false);
 		btnDisable.setContentAreaFilled(false);
 		btnDisable.setBorderPainted(false);
-		btnDisable.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/disable.png")));
+		btnDisable.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/disable.png")));
 		btnDisable.setBounds(920, 8, 40, 30);
 		containerPanel.add(btnDisable);
 
@@ -213,7 +213,7 @@ public class EmployeePanel extends JPanel {
 		btnHystorical.setOpaque(false);
 		btnHystorical.setContentAreaFilled(false);
 		btnHystorical.setBorderPainted(false);
-		btnHystorical.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/iconeGestionale/cartellina.png")));
+		btnHystorical.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/cartellina.png")));
 		btnHystorical.setBounds(870, 8, 40, 30);
 		btnHystorical.addActionListener(e -> populateTable());
 		containerPanel.add(btnHystorical);

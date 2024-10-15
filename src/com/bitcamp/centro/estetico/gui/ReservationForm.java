@@ -148,19 +148,19 @@ public class ReservationForm extends JPanel {
 		outputPanel.add(tablePane);
 
 		addReservation = new JButton();
-		addReservation.setIcon(new ImageIcon(ReservationForm.class.getResource("/iconeGestionale/Insert.png")));
+		addReservation.setIcon(new ImageIcon(ReservationForm.class.getResource("/com/bitcamp/centro/estetico/resources/Insert.png")));
 		addReservation.setBounds(943, 7, 24, 21);
 		outputPanel.add(addReservation);
 
 		editReservation = new JButton();
 
-		editReservation.setIcon(new ImageIcon(ReservationForm.class.getResource("/iconeGestionale/disable.png")));
+		editReservation.setIcon(new ImageIcon(ReservationForm.class.getResource("/com/bitcamp/centro/estetico/resources/disable.png")));
 		editReservation.setBounds(977, 7, 24, 21);
 		outputPanel.add(editReservation);
 
 		deleteReservation = new JButton("");
 		deleteReservation.setBounds(1011, 7, 24, 21);
-		deleteReservation.setIcon(new ImageIcon(ReservationForm.class.getResource("/iconeGestionale/delete.png")));
+		deleteReservation.setIcon(new ImageIcon(ReservationForm.class.getResource("/com/bitcamp/centro/estetico/resources/delete.png")));
 		outputPanel.add(deleteReservation);
 
 		btnHystorical = new JButton("");
@@ -274,13 +274,13 @@ public class ReservationForm extends JPanel {
 		searchReservationButton = new JButton();
 		searchReservationButton.setBounds(188, 18, 27, 24);
 		searchReservationButton
-				.setIcon(new ImageIcon(ReservationForm.class.getResource("/iconeGestionale/searchIcon.png")));
+				.setIcon(new ImageIcon(ReservationForm.class.getResource("/com/bitcamp/centro/estetico/resources/searchIcon.png")));
 		add(searchReservationButton);
 
 		cancelReservationButton = new JButton();
 		cancelReservationButton.setBounds(225, 18, 36, 24);
 		cancelReservationButton
-				.setIcon(new ImageIcon(ReservationForm.class.getResource("/iconeGestionale/delete.png")));
+				.setIcon(new ImageIcon(ReservationForm.class.getResource("/com/bitcamp/centro/estetico/resources/delete.png")));
 		add(cancelReservationButton);
 
 	}

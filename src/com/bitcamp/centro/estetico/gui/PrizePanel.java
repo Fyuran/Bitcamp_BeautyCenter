@@ -115,7 +115,7 @@ public class PrizePanel extends JPanel {
 
 
 
-		btnSearch.setIcon(new ImageIcon(PrizePanel.class.getResource("/iconeGestionale/searchIcon.png")));
+		btnSearch.setIcon(new ImageIcon(PrizePanel.class.getResource("/com/bitcamp/centro/estetico/resources/searchIcon.png")));
 		btnSearch.setOpaque(false);
 		btnSearch.setContentAreaFilled(false);
 		btnSearch.setBorderPainted(false);
@@ -131,7 +131,7 @@ public class PrizePanel extends JPanel {
 				btnAnnulla.setVisible(true);
 			}
 		});
-		btnInsert.setIcon(new ImageIcon(PrizePanel.class.getResource("/iconeGestionale/Insert.png")));
+		btnInsert.setIcon(new ImageIcon(PrizePanel.class.getResource("/com/bitcamp/centro/estetico/resources/Insert.png")));
 		btnInsert.setOpaque(false);
 		btnInsert.setContentAreaFilled(false);
 		btnInsert.setBorderPainted(false);
@@ -151,7 +151,7 @@ public class PrizePanel extends JPanel {
 				JOptionPane.showMessageDialog(null, "Seleziona una riga da aggiornare.");
 			}
 		});
-		btnUpdate.setIcon(new ImageIcon(PrizePanel.class.getResource("/iconeGestionale/Update.png")));
+		btnUpdate.setIcon(new ImageIcon(PrizePanel.class.getResource("/com/bitcamp/centro/estetico/resources/Update.png")));
 		btnUpdate.setOpaque(false);
 		btnUpdate.setContentAreaFilled(false);
 		btnUpdate.setBorderPainted(false);
@@ -159,7 +159,7 @@ public class PrizePanel extends JPanel {
 		containerPanel.add(btnUpdate);
 
 		JButton btnDisable = new JButton("");
-		btnDisable.setIcon(new ImageIcon(PrizePanel.class.getResource("/iconeGestionale/disattivo.png")));
+		btnDisable.setIcon(new ImageIcon(PrizePanel.class.getResource("/com/bitcamp/centro/estetico/resources/disattivo.png")));
 		btnDisable.setOpaque(false);
 		btnDisable.setContentAreaFilled(false);
 		btnDisable.setBorderPainted(false);
@@ -200,7 +200,7 @@ public class PrizePanel extends JPanel {
 
 
 		JButton btnHystorical = new JButton("");
-		btnHystorical.setIcon(new ImageIcon(PrizePanel.class.getResource("/iconeGestionale/cartellina.png")));
+		btnHystorical.setIcon(new ImageIcon(PrizePanel.class.getResource("/com/bitcamp/centro/estetico/resources/cartellina.png")));
 		btnHystorical.setOpaque(false);
 		btnHystorical.setContentAreaFilled(false);
 		btnHystorical.setBorderPainted(false);

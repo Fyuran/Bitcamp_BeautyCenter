@@ -156,19 +156,19 @@ public class CustomerPanel extends JPanel {
 
 		// Pulsante per salvare o aggiornare il cliente
 		JButton btnSave = new JButton("Salva");
-		btnSave.setIcon(new ImageIcon(CustomerPanel.class.getResource("/iconeGestionale/InsertUser.png")));
+		btnSave.setIcon(new ImageIcon(CustomerPanel.class.getResource("/com/bitcamp/centro/estetico/resources/InsertUser.png")));
 		btnSave.setBounds(580, 550, 120, 25);
 		add(btnSave);
 
 		// Pulsante per eliminare il cliente selezionato
 		JButton btnDelete = new JButton("Elimina");
-		btnDelete.setIcon(new ImageIcon(CustomerPanel.class.getResource("/iconeGestionale/deleteUser.png")));
+		btnDelete.setIcon(new ImageIcon(CustomerPanel.class.getResource("/com/bitcamp/centro/estetico/resources/deleteUser.png")));
 		btnDelete.setBounds(580, 600, 120, 25);
 		add(btnDelete);
 
 		// Pulsante per abilitare/disabilitare il cliente selezionato
 		JButton btnToggleStatus = new JButton("Abilita/Disabilita");
-		btnToggleStatus.setIcon(new ImageIcon(CustomerPanel.class.getResource("/iconeGestionale/userDisable.png")));
+		btnToggleStatus.setIcon(new ImageIcon(CustomerPanel.class.getResource("/com/bitcamp/centro/estetico/resources/userDisable.png")));
 		btnToggleStatus.setBounds(740, 550, 120, 25);
 		add(btnToggleStatus);
 

@@ -53,7 +53,7 @@ public class LoginFrame extends JFrame {
         imagePanel.setBounds(0, 0, 1024, 305);
         imagePanel.setBackground(Color.WHITE);
 
-        JLabel imageLabel = new JLabel(new ImageIcon(LoginFrame.class.getResource("/iconeGestionale/download.png")));
+        JLabel imageLabel = new JLabel(new ImageIcon(LoginFrame.class.getResource("/com/bitcamp/centro/estetico/resources/download.png")));
         imageLabel.setBounds(152, 64, 723, 219);
         imagePanel.add(imageLabel);
 
