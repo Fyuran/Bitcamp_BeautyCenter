@@ -1,9 +1,3 @@
-/**
- * 
- */
-/**
- * 
- */
 module centroEstetico {
 	requires java.sql;
 	requires codice.fiscale;

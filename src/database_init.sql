@@ -51,8 +51,7 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`customer` (
   `recipient_code` varchar(8) DEFAULT NULL,
   `notes` text,
   `loyalty_points` int NOT NULL DEFAULT '0',
-  `is_enabled` tinyint DEFAULT '1',
-  `serial` bigint DEFAULT NULL,
+  `is_enabled` tinyint DEFAULT '1'
   PRIMARY KEY (`id`),
   CONSTRAINT `customer_FK1` FOREIGN KEY (`credentials_id`) REFERENCES `beauty_centerdb`.`user_credentials` (`id`) ON UPDATE CASCADE
 );
