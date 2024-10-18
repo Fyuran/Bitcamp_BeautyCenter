@@ -28,9 +28,7 @@ public class Treatment {
 		this.type = rs.getString(2);
 		this.price = rs.getBigDecimal(3);
 		this.vat = VATDao.getVAT(rs.getInt(4)).get();
-		java.sql.Time sqlTime = rs.getTime(5);
-		LocalTime localTime = sqlTime.toLocalTime();
-		this.duration = Duration.between(LocalTime.MIDNIGHT, localTime);
+		this.duration = getDurationFromLocalTime(rs.getTime(5).toLocalTime());
 		this.products=TreatmentDAO.getProductsOfTreatment(rs.getInt(1));
 		this.isEnabled=rs.getBoolean(6);
 
@@ -110,6 +108,10 @@ public class Treatment {
 				duration.toSecondsPart());
 	}
 
+	public Duration getDurationFromLocalTime(LocalTime time) {
+		return Duration.ofSeconds(time.toSecondOfDay());
+	}
+
 	public String durationToPattern(String pattern) { // ex HH:mm:ss
 		LocalTime time = getLocalTimeFromDuration();
 		return time.format(DateTimeFormatter.ofPattern(pattern));
@@ -137,9 +139,9 @@ public class Treatment {
 		}
 		return timeSlots;
 	}
-
+	//"ID", "Nome trattamento", "Prezzo", "IVA%", "Durata"
 	public Object[] toTableRow() {
-		return new Object[] { id, type, price, vat, duration, products, isEnabled };
+		return new Object[] { id, type, price, vat, duration, isEnabled };
 	}
 
 	public void addProducts(Product... products) {

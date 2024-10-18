@@ -1,294 +1,205 @@
 package com.bitcamp.centro.estetico.gui;
 
-import java.awt.Color;
 import java.awt.Font;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.text.MaskFormatter;
+import javax.swing.event.ListSelectionListener;
 
 import com.bitcamp.centro.estetico.DAO.CustomerDAO;
-import com.bitcamp.centro.estetico.DAO.SubscriptionDAO;
-import com.bitcamp.centro.estetico.DAO.UserCredentialsDAO;
-import com.bitcamp.centro.estetico.DAO.VATDao;
-import com.bitcamp.centro.estetico.models.*;
+import com.bitcamp.centro.estetico.gui.render.CustomTableCellRenderer;
+import com.bitcamp.centro.estetico.models.Customer;
+import com.github.lgooddatepicker.components.DatePicker;
 
-public class CustomerPanel extends JPanel {
+public class CustomerPanel extends BasePanel<Customer> {
 
 	private static final long serialVersionUID = 1L;
-	private JTextField txfSurname;
-	private JTextField txfSearchBar;
-	private JTextField txfName;
-	private JTextField txfPhone;
-	private JComboBox<String> cBoxGenre;
-	private JTextField txfEmail;
-	private JTextField txfBirthdate;
-	private JTextField txfComuneNascita;
-	private JTextField txfNotes;
-	private JTextField txfPIVA;
-	private JTextField txfRecipientCode;
-	private DateTimeFormatter format;
 
-	// Campi per l'abbonamento
-	private JComboBox<SubPeriod> cBoxSubPeriod; // Per il periodo dell'abbonamento
-	private JTextField txfStartDate; // Data di inizio
-	private JTextField txfDiscount; // Sconto
+	private static JTextField txfName;
+	private static JTextField txfSurname;
+	private static JTextField txfSearchBar;
+	private static JTextField txfPhone;
+	private static JTextField txfMail;
+	private static JTextField txfAddress;
+	private static JTextField txfIban;
+	private static JTextField txfBirthplace;
+	private static JRadioButton femaleRadioBtn;
+	private static JRadioButton maleRadioBtn;
+	private static DatePicker txfBirthday;
+	private static JTextArea txfNotes;
+	private static JTextField txfPIVA;
+	private static JTextField txfRecipientCode;
 
-	private JTable table;
-	private DefaultTableModel tableModel;
+	private static JLabel lbOutput;
+
+	private static final int _ISENABLEDCOL = 14;
 
 	public CustomerPanel() {
 		setLayout(null);
-		setSize(1024, 768);
 		setName("Clienti");
-		format = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		setTitle("GESTIONE CLIENTI");
+		setSize(1024,768);
+		btnSearch.setBounds(206, 8, 40, 40);
+		txfSearchBar.setBounds(23, 14, 168, 24);
+		btnFilter.setBounds(256, 8, 40, 40);
+		btnInsert.setBounds(792, 8, 40, 40);
+		btnUpdate.setBounds(842, 8, 40, 40);
+		btnDisable.setBounds(892, 8, 40, 40);
+		btnDelete.setBounds(742, 8, 40, 40);
+		lbOutput.setBounds(306, 8, 438, 41);
 
-		JLabel titleTab = new JLabel("GESTIONE CLIENTI");
-		titleTab.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
-		titleTab.setBounds(415, 11, 179, 32);
-		add(titleTab);
+		table.setDefaultRenderer(Object.class, new CustomTableCellRenderer(customerModel, _ISENABLEDCOL));
 
-		JPanel containerPanel = new JPanel();
-		containerPanel.setLayout(null);
-		containerPanel.setBackground(new Color(255, 255, 255));
-		containerPanel.setBounds(10, 54, 1004, 347);
-		add(containerPanel);
+		// label e textfield degli input
+		JLabel lblName = new JLabel("Nome:");
+		lblName.setBounds(3, 26, 170, 14);
+		lblName.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		String[] columnNames = {"ID", "Nome", "Cognome", "Telefono", "Email", "Data di Nascita", "Sesso",
-				"Comune di Nascita", "Codice fiscale", "Codice Ricezione", "Punti Fedeltà", "Abbonamento", "Note" };
-		tableModel = new DefaultTableModel(columnNames, 0);
-
-		table = new JTable(tableModel);
-		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setBounds(23, 60, 959, 276);
-		containerPanel.add(scrollPane);
-
-		JButton btnSearch = new JButton("Cerca");
-		btnSearch.setBounds(300, 20, 120, 25);
-		containerPanel.add(btnSearch);
-
-		// Campi di input per inserire o modificare un cliente
 		txfName = new JTextField();
-		txfName.setText("Nome");
-		txfName.setBounds(50, 400, 120, 25);
-		add(txfName);
+		txfName.setBounds(169, 23, 220, 20);
+		txfName.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfName.setColumns(10);
+
+		JLabel lblSurname = new JLabel("Cognome:");
+		lblSurname.setBounds(3, 65, 170, 17);
+		lblSurname.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
 		txfSurname = new JTextField();
-		txfSurname.setText("Cognome");
-		txfSurname.setBounds(180, 400, 120, 25);
-		add(txfSurname);
+		txfSurname.setBounds(169, 63, 220, 20);
+		txfSurname.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfSurname.setColumns(10);
+
+		JLabel lblBirthday = new JLabel("Data di nascita:");
+		lblBirthday.setBounds(3, 108, 170, 14);
+		lblBirthday.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+
+		txfMail = new JTextField();
+		txfMail.setBounds(709, 105, 220, 20);
+		txfMail.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfMail.setColumns(10);
 
 		txfPhone = new JTextField();
-		txfPhone.setText("Phone");
-		txfPhone.setBounds(310, 400, 120, 25);
-		add(txfPhone);
+		txfPhone.setBounds(709, 145, 220, 20);
+		txfPhone.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfPhone.setColumns(10);
 
-		txfEmail = new JTextField();
-		txfEmail.setText("Email");
-		txfEmail.setBounds(440, 400, 120, 25);
-		add(txfEmail);
+		txfAddress = new JTextField();
+		txfAddress.setBounds(709, 23, 220, 20);
+		txfAddress.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfAddress.setColumns(10);
 
-		
-		MaskFormatter dateMaskBirthDay;
-		try {// per settare il formato data
-			dateMaskBirthDay = new MaskFormatter("##/##/####");
-			txfBirthdate = new JFormattedTextField(dateMaskBirthDay);
-			txfBirthdate.setColumns(10);			
-			txfBirthdate.setBounds(570, 400, 120, 25);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		add(txfBirthdate);
+		JLabel lblMail = new JLabel("Mail:");
+		lblMail.setBounds(491, 108, 170, 14);
+		lblMail.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		txfComuneNascita = new JTextField();
-		txfComuneNascita.setText("Comune di nascita");
-		txfComuneNascita.setBounds(50, 450, 120, 25);
-		add(txfComuneNascita);
+		JLabel lblPhone = new JLabel("Telefono:");
+		lblPhone.setBounds(491, 148, 170, 14);
+		lblPhone.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		txfNotes = new JTextField();
-		txfNotes.setText("Note");
-		txfNotes.setBounds(180, 450, 120, 25);
-		add(txfNotes);
+		JLabel lblAddress = new JLabel("Indirizzo:");
+		lblAddress.setBounds(491, 26, 170, 14);
+		lblAddress.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		cBoxGenre = new JComboBox<>();
-		cBoxGenre.setModel(new DefaultComboBoxModel<>(new String[] { "Maschio", "Femmina" }));
-		cBoxGenre.setBounds(310, 450, 120, 25);
-		add(cBoxGenre);
+		txfBirthday = new DatePicker();
+		txfBirthday.setBounds(169, 103, 220, 25);
 
-		txfPIVA = new JTextField();
-		txfPIVA.setText("Piva");
-		txfPIVA.setBounds(440, 450, 120, 25);
-		add(txfPIVA);
+		JLabel lblBirthPlace = new JLabel("Città di nascita:");
+		lblBirthPlace.setBounds(491, 66, 170, 14);
+		lblBirthPlace.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		txfRecipientCode = new JTextField();
-		txfRecipientCode.setText("RecipientCode Stringa");
-		txfRecipientCode.setBounds(570, 450, 120, 25);
-		add(txfRecipientCode);
+		txfBirthplace = new JTextField();
+		txfBirthplace.setBounds(709, 63, 220, 20);
+		txfBirthplace.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfBirthplace.setColumns(10);
 
-		// Aggiunta dei campi per l'abbonamento
-		cBoxSubPeriod = new JComboBox<>(SubPeriod.values()); // Presupponendo che SubPeriod sia un enum
-		cBoxSubPeriod.setBounds(50, 500, 120, 25);
-		add(cBoxSubPeriod);
+		ButtonGroup genderBtnGroup = new ButtonGroup();
+		maleRadioBtn = new JRadioButton("Uomo");
+		maleRadioBtn.setBounds(491, 222, 75, 23);
+		maleRadioBtn.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		genderBtnGroup.add(maleRadioBtn);
 
-		txfStartDate = new JTextField();
-		txfStartDate.setText("StartDate");
-		txfStartDate.setBounds(180, 500, 120, 25);
-		MaskFormatter dateMaskStattDate;
-		try {// per settare il formato data
-			dateMaskStattDate = new MaskFormatter("##/##/####");
-			txfStartDate = new JFormattedTextField(dateMaskStattDate);
-			txfStartDate.setColumns(10);
-			txfStartDate.setBounds(209, 506, 220, 20);
-			add(txfStartDate);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		femaleRadioBtn = new JRadioButton("Donna");
+		femaleRadioBtn.setBounds(568, 222, 75, 23);
+		femaleRadioBtn.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		genderBtnGroup.add(femaleRadioBtn);
 
-		txfDiscount = new JTextField();
-		txfDiscount.setText("Discount");
-		txfDiscount.setBounds(440, 500, 120, 25);
-		add(txfDiscount);
+		JLabel notesLbl = new JLabel("Note:");
+		notesLbl.setBounds(491, 279, 61, 16);
+		notesLbl.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		// Pulsante per salvare o aggiornare il cliente
-		JButton btnSave = new JButton("Salva");
-		btnSave.setIcon(new ImageIcon(CustomerPanel.class.getResource("/com/bitcamp/centro/estetico/resources/InsertUser.png")));
-		btnSave.setBounds(580, 550, 120, 25);
-		add(btnSave);
+		txfNotes = new JTextArea();
+		txfNotes.setBounds(709, 251, 220, 72);
+		txfNotes.setBorder(UIManager.getBorder("TextField.border"));
 
-		// Pulsante per eliminare il cliente selezionato
-		JButton btnDelete = new JButton("Elimina");
-		btnDelete.setIcon(new ImageIcon(CustomerPanel.class.getResource("/com/bitcamp/centro/estetico/resources/deleteUser.png")));
-		btnDelete.setBounds(580, 600, 120, 25);
-		add(btnDelete);
+		txfIban = new JTextField();
+		txfIban.setBounds(169, 303, 220, 20);
+		txfIban.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 12));
+		txfIban.setColumns(10);
 
-		// Pulsante per abilitare/disabilitare il cliente selezionato
-		JButton btnToggleStatus = new JButton("Abilita/Disabilita");
-		btnToggleStatus.setIcon(new ImageIcon(CustomerPanel.class.getResource("/com/bitcamp/centro/estetico/resources/userDisable.png")));
-		btnToggleStatus.setBounds(740, 550, 120, 25);
-		add(btnToggleStatus);
-
-		// Carica i dati nella tabella
-		loadCustomerData();
-
-		// Eventi dei pulsanti
-		btnSave.addActionListener(e->addCustomer());
-
-		btnDelete.addActionListener(e->deleteCustomer());
-
-		btnToggleStatus.addActionListener(e->toggleCustomerStatus());
+		JLabel lbIban = new JLabel("IBAN:");
+		lbIban.setBounds(3, 306, 170, 14);
+		lbIban.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 	}
 
-	// Metodo per caricare i dati dalla DAO alla tabella
-	void loadCustomerData() {
-		clearTable();
-//		clearFields();
-		List<Customer> customers = CustomerDAO.getAllCustomers();
-		if (customers.isEmpty()) {
-			tableModel.addRow(new String[] { "Sembra non ci siano impiegati presenti", "" });
-			return;
-		}
-		for (Customer c : customers) {
-			if (c.isEnabled()) {
-				tableModel.addRow(new String[] {
-						String.valueOf(c.getId()),
-						c.getName(),
-						c.getSurname(),
-						c.getPhone(),
-						c.getMail(),
-						c.getBoD().format(format),
-						c.isFemale()?"Donna":"Uomo",
-						c.getBirthplace(),
-						c.getEU_TIN().getValue(),
-						c.getRecipientCode(),
-						String.valueOf(c.getLoyaltyPoints()),
-						c.getSubscription()==null?"Nessun abbonamento":String.valueOf(c.getSubscription().getId()),
-						c.getNotes()
-						
-						});
-//				{"ID", "Nome", "Cognome", "Telefono", "Email", "Data di Nascita", "Sesso",
-//				"Comune di Nascita", "P_IVA", "Codice Ricezione", "Punti Fedeltà", "Abbonamento", "Note" };
+	@Override
+	void search() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'search'");
+	}
+
+	@Override
+	Optional<Customer> insertElement() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'insertElement'");
+	}
+
+	@Override
+	int updateElement() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'updateElement'");
+	}
+
+	@Override
+	int deleteElement() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'deleteElement'");
+	}
+
+	@Override
+	int disableElement() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'disableElement'");
+	}
+
+	@Override
+	void populateTable() {
+		customerModel.setRowCount(0);
+		List<Object[]> data = CustomerDAO.toTableRowAll();
+		if (!data.isEmpty()) {
+			for (Object[] row : data) {
+				customerModel.addRow(row);
 			}
-		}
-
-	}
-
-	// Metodo per salvare o aggiornare il cliente
-	private void addCustomer() {
-		// Recupero dei dati dall'interfaccia
-		
-		String name = txfName.getText();
-		String surname = txfSurname.getText();
-		
-		//Subscription sub=Subscription
-		
-		String piva = txfPIVA.getText();
-		String recipientCode = txfRecipientCode.getText();
-		int loyaltyPoints = 0;
-		
-		//Creazione subperiod
-		System.out.println(cBoxSubPeriod.getSelectedItem().toString());
-		SubPeriod subP=SubPeriod.toEnum(cBoxSubPeriod.getSelectedItem().toString());
-		String startSubDateString=txfStartDate.getText();
-		LocalDate startSubDate=LocalDate.parse(startSubDateString, format);
-		BigDecimal price=new BigDecimal(10);
-		VAT vat=VATDao.getVAT(1).get();
-		double discount=Double.parseDouble(txfDiscount.getText());
-		Subscription sub=new Subscription(subP,startSubDate,price,vat,discount,true);
-		Subscription updatedSub=SubscriptionDAO.insertSubscription(sub).get();
-		
-		
-		String username=name+surname+"123";
-		String password="customerPassword123";
-		String address="Via dei cojoni 123";
-		String iban=null;
-		String phone=txfPhone.getText();
-		String mail=txfEmail.getText();
-		
-		UserCredentials cred=new UserCredentials(username,password.toCharArray(),address,iban,phone,mail);
-		UserCredentials updatedCred=UserCredentialsDAO.insertUserCredentials(cred).get();
-		
-		
-		
-		boolean isFemale=cBoxGenre.getSelectedItem().equals("Femmina");
-		String birthdate = txfBirthdate.getText(); // Assicurati che il formato sia corretto
-		LocalDate birthDay=LocalDate.parse(birthdate, format);
-		String comuneNascita = txfComuneNascita.getText();
-		String notes = txfNotes.getText();
-		UserDetails det=new UserDetails(name,surname,isFemale,birthDay,comuneNascita,notes);
-		
-		Customer c=new Customer(det,updatedCred,piva,recipientCode,loyaltyPoints,updatedSub,null);
-
-		
-		CustomerDAO.insertCustomer(c); // Implementa la logica di inserimento/aggiornamento
-		loadCustomerData();
-	}
-
-	// Metodo per eliminare un cliente
-	private void deleteCustomer() {
-		int selectedRow = table.getSelectedRow();
-		if (selectedRow >= 0) {
-			int customerId = Integer.parseInt(String.valueOf(tableModel.getValueAt(selectedRow, 0)));
-			CustomerDAO.toggleEnabledCustomer(customerId);
-			loadCustomerData();
+		} else {
+			lbOutput.setText("Lista Clienti vuota");
 		}
 	}
 
-	// Metodo per abilitare o disabilitare un cliente
-	private void toggleCustomerStatus() {
-		int selectedRow = table.getSelectedRow();
-		if (selectedRow >= 0) {
-			int customerId = Integer.parseInt(String.valueOf(tableModel.getValueAt(selectedRow, 0)));
-			CustomerDAO.toggleEnabledCustomer(customerId); // Implementa questa logica nel tuo DAO
-			loadCustomerData();
-		}
+	@Override
+	void clearTxfFields() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'clearTxfFields'");
 	}
-	private void clearTable() {
-		tableModel.getDataVector().removeAllElements();
-		revalidate();
+
+	@Override
+	ListSelectionListener getListSelectionListener() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'getListSelectionListener'");
+	}
+
+	@Override
+	boolean isDataValid() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'isDataValid'");
 	}
 }

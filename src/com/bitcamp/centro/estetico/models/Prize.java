@@ -121,10 +121,10 @@ public class Prize {
 				", amount=" + amount + ", isEnabled=" + isEnabled + "]";
 	}
 
-
+	//"ID", "Nome", "Punti Necessari", "Tipo", "Importo"
 	public Object[] toTableRow() {
 		return new Object[] {
-				id, name, threshold, type, expirationDate, amount, isEnabled
+				id, name, threshold, type, amount, expirationDate
 		};
 	}
 }

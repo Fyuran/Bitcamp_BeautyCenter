@@ -23,20 +23,20 @@ import com.github.lgooddatepicker.components.DatePicker;
 public class SetupFirstAccountFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private static JTextField txtSurname;
-	private static JTextField txtName;
-	private static JTextField txtIban;
+	private static JTextField txfSurname;
+	private static JTextField txfName;
+	private static JTextField txfIban;
 
-	private static JTextField txtMail;
-	private static JTextField txtPhone;
-	private static JTextField txtAddress;
-	private static JTextField txtUsername;
-	private static JPasswordField txtPassword;
-	private static JTextField txtBirthplace;
+	private static JTextField txfMail;
+	private static JTextField txfPhone;
+	private static JTextField txfAddress;
+	private static JTextField txfUsername;
+	private static JPasswordField txfPassword;
+	private static JTextField txfBirthplace;
 	private static JRadioButton femaleRadioBtn;
 	private static JRadioButton maleRadioBtn;
-	private static JTextArea txtNotes;
-	private static DatePicker txtBirthday;
+	private static JTextArea txfNotes;
+	private static DatePicker txfBirthday;
 	private static JLabel lbOutput;
 	private static JButton btnAbort;
 	private static JButton btnNext;
@@ -67,20 +67,20 @@ public class SetupFirstAccountFrame extends JFrame {
 		lblName.setBounds(34, 92, 170, 14);
 		add(lblName);
 
-		txtName = new JTextField();
-		txtName.setColumns(10);
-		txtName.setBounds(200, 89, 220, 20);
-		add(txtName);
+		txfName = new JTextField();
+		txfName.setColumns(10);
+		txfName.setBounds(200, 89, 220, 20);
+		add(txfName);
 
 		JLabel lblSurname = new JLabel("Cognome:");
 		lblSurname.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblSurname.setBounds(34, 131, 170, 17);
 		add(lblSurname);
 
-		txtSurname = new JTextField();
-		txtSurname.setColumns(10);
-		txtSurname.setBounds(200, 129, 220, 20);
-		add(txtSurname);
+		txfSurname = new JTextField();
+		txfSurname.setColumns(10);
+		txfSurname.setBounds(200, 129, 220, 20);
+		add(txfSurname);
 
 		JLabel lblBirthday = new JLabel("Data di nascita:");
 		lblBirthday.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
@@ -92,25 +92,25 @@ public class SetupFirstAccountFrame extends JFrame {
 		lblIVA.setBounds(34, 212, 170, 14);
 		add(lblIVA);
 
-		txtIban = new JTextField();
-		txtIban.setColumns(10);
-		txtIban.setBounds(200, 209, 220, 20);
-		add(txtIban);
+		txfIban = new JTextField();
+		txfIban.setColumns(10);
+		txfIban.setBounds(200, 209, 220, 20);
+		add(txfIban);
 
-		txtMail = new JTextField();
-		txtMail.setColumns(10);
-		txtMail.setBounds(740, 169, 220, 20);
-		add(txtMail);
+		txfMail = new JTextField();
+		txfMail.setColumns(10);
+		txfMail.setBounds(740, 169, 220, 20);
+		add(txfMail);
 
-		txtPhone = new JTextField();
-		txtPhone.setColumns(10);
-		txtPhone.setBounds(740, 209, 220, 20);
-		add(txtPhone);
+		txfPhone = new JTextField();
+		txfPhone.setColumns(10);
+		txfPhone.setBounds(740, 209, 220, 20);
+		add(txfPhone);
 
-		txtAddress = new JTextField();
-		txtAddress.setColumns(10);
-		txtAddress.setBounds(740, 89, 220, 20);
-		add(txtAddress);
+		txfAddress = new JTextField();
+		txfAddress.setColumns(10);
+		txfAddress.setBounds(740, 89, 220, 20);
+		add(txfAddress);
 
 		JLabel lblMail = new JLabel("Mail:");
 		lblMail.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
@@ -132,20 +132,20 @@ public class SetupFirstAccountFrame extends JFrame {
 		lblUsername.setBounds(34, 252, 170, 14);
 		add(lblUsername);
 
-		txtUsername = new JTextField();
-		txtUsername.setColumns(10);
-		txtUsername.setBounds(200, 249, 220, 20);
-		add(txtUsername);
+		txfUsername = new JTextField();
+		txfUsername.setColumns(10);
+		txfUsername.setBounds(200, 249, 220, 20);
+		add(txfUsername);
 
 		JLabel lblPassword = new JLabel("Password:");
 		lblPassword.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblPassword.setBounds(34, 292, 170, 14);
 		add(lblPassword);
 
-		txtPassword = new JPasswordField();
-		txtPassword.setColumns(10);
-		txtPassword.setBounds(200, 289, 220, 20);
-		add(txtPassword);
+		txfPassword = new JPasswordField();
+		txfPassword.setColumns(10);
+		txfPassword.setBounds(200, 289, 220, 20);
+		add(txfPassword);
 
 		JCheckBox visibleCheck = new JCheckBox("Mostra password");
 		visibleCheck.setFont(new Font("MS Reference Sans Serif", Font.ITALIC, 11));
@@ -154,9 +154,9 @@ public class SetupFirstAccountFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(visibleCheck.isSelected()) {
-					txtPassword.setEchoChar((char) 0);
+					txfPassword.setEchoChar((char) 0);
 				} else {
-					txtPassword.setEchoChar('•');
+					txfPassword.setEchoChar('•');
 				}
 			}
 		});
@@ -167,10 +167,10 @@ public class SetupFirstAccountFrame extends JFrame {
 		lblBirthPlace.setBounds(522, 130, 170, 14);
 		add(lblBirthPlace);
 
-		txtBirthplace = new JTextField();
-		txtBirthplace.setColumns(10);
-		txtBirthplace.setBounds(740, 129, 220, 20);
-		add(txtBirthplace);
+		txfBirthplace = new JTextField();
+		txfBirthplace.setColumns(10);
+		txfBirthplace.setBounds(740, 129, 220, 20);
+		add(txfBirthplace);
 
 		maleRadioBtn = new JRadioButton("Uomo");
 		maleRadioBtn.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
@@ -190,10 +190,10 @@ public class SetupFirstAccountFrame extends JFrame {
 		notesLbl.setBounds(522, 251, 61, 16);
 		add(notesLbl);
 
-		txtNotes = new JTextArea();
-		txtNotes.setBorder(UIManager.getBorder("FormattedTextField.border"));
-		txtNotes.setBounds(740, 252, 220, 54);
-		add(txtNotes);
+		txfNotes = new JTextArea();
+		txfNotes.setBorder(UIManager.getBorder("FormattedTextField.border"));
+		txfNotes.setBounds(740, 252, 220, 54);
+		add(txfNotes);
 
 		lbOutput = new JLabel("");
 		lbOutput.setForeground(new Color(0, 102, 51));
@@ -202,9 +202,9 @@ public class SetupFirstAccountFrame extends JFrame {
 		lbOutput.setBounds(10, 48, 1004, 20);
 		add(lbOutput);
 
-		txtBirthday = new DatePicker();
-		txtBirthday.setBounds(200, 169, 220, 25);
-		add(txtBirthday);
+		txfBirthday = new DatePicker();
+		txfBirthday.setBounds(200, 169, 220, 25);
+		add(txfBirthday);
 
 		btnAbort = new JButton("Annulla");
 		btnAbort.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
@@ -236,38 +236,38 @@ public class SetupFirstAccountFrame extends JFrame {
 
 		btnInsert.addActionListener(e -> createEmployee());
 		
-		placeholderHelper.addPlaceholder(txtName, "*");
-		placeholderHelper.addPlaceholder(txtSurname, "*");
-		placeholderHelper.addPlaceholder(txtIban, "*");
-		placeholderHelper.addPlaceholder(txtMail, "*");
-		placeholderHelper.addPlaceholder(txtPhone, "*");
-		placeholderHelper.addPlaceholder(txtAddress, "*");
-		placeholderHelper.addPlaceholder(txtUsername, "*");
-		placeholderHelper.addPlaceholder(txtBirthplace, "*");
+		placeholderHelper.addPlaceholder(txfName, "*");
+		placeholderHelper.addPlaceholder(txfSurname, "*");
+		placeholderHelper.addPlaceholder(txfIban, "*");
+		placeholderHelper.addPlaceholder(txfMail, "*");
+		placeholderHelper.addPlaceholder(txfPhone, "*");
+		placeholderHelper.addPlaceholder(txfAddress, "*");
+		placeholderHelper.addPlaceholder(txfUsername, "*");
+		placeholderHelper.addPlaceholder(txfBirthplace, "*");
 	}
 
 	private static void createEmployee() {
 		if(!validateInputs()) return;
 
-		String name = txtName.getText();
-		String surname = txtSurname.getText();
-		String birthplace = txtBirthplace.getText();
-		LocalDate BoD = txtBirthday.getDate();
+		String name = txfName.getText();
+		String surname = txfSurname.getText();
+		String birthplace = txfBirthplace.getText();
+		LocalDate BoD = txfBirthday.getDate();
 		LocalDate hired = LocalDate.now();
-		String notes = txtNotes.getText();
+		String notes = txfNotes.getText();
 		long employeeSerial = Employee.generateSerial();
-		String username = txtUsername.getText();
-		char[] password = txtPassword.getPassword();
-		String address = txtAddress.getText();
-		String iban = txtIban.getText();
-		String phone = txtPhone.getText();
-		String mail = txtMail.getText();
+		String username = txfUsername.getText();
+		char[] password = txfPassword.getPassword();
+		String address = txfAddress.getText();
+		String iban = txfIban.getText();
+		String phone = txfPhone.getText();
+		String mail = txfMail.getText();
 
 		UserDetails det = new UserDetails(name, surname, getGender(), BoD, birthplace, notes);
 		UserCredentials cred = new UserCredentials(username, password, address, iban, phone, mail);
 		cred = UserCredentialsDAO.insertUserCredentials(cred).get();
 		Employee employee = new Employee(det, cred, employeeSerial, Roles.ADMIN, Collections.emptyList(),
-				hired, null);
+				hired, null, null);
 		EmployeeDAO.insertEmployee(employee);
 
 		lbOutput.setText("Nuovo utente creato correttamente");
@@ -285,38 +285,38 @@ public class SetupFirstAccountFrame extends JFrame {
 	}
 
 	private static void clearFields() {
-		txtName.setText("");
-		txtSurname.setText("");
-		txtIban.setText("");
-		txtMail.setText("");
-		txtPhone.setText("");
-		txtAddress.setText("");
-		txtBirthday.clear();
-		txtUsername.setText("");
-		txtPassword.setText("");
-		txtBirthplace.setText("");
-		txtNotes.setText("");
+		txfName.setText("");
+		txfSurname.setText("");
+		txfIban.setText("");
+		txfMail.setText("");
+		txfPhone.setText("");
+		txfAddress.setText("");
+		txfBirthday.clear();
+		txfUsername.setText("");
+		txfPassword.setText("");
+		txfBirthplace.setText("");
+		txfNotes.setText("");
 	}
 
 	private static boolean validateInputs() {
 		try {
-			inputValidator.validateName(txtName.getText());
-			inputValidator.validateSurname(txtSurname.getText());
-			inputValidator.validateIban(txtIban.getText());
-			inputValidator.validateEmail(txtMail.getText());
-			inputValidator.validatePhoneNumber(txtPhone.getText());
-			inputValidator.validateAlphanumeric(txtAddress.getText(), "Indirizzo");
-			inputValidator.validateAlphanumeric(txtUsername.getText(), "Username");
-			inputValidator.validatePassword(txtPassword.getPassword());
-			inputValidator.validateAlphanumeric(txtBirthplace.getText(), "Luogo di nascita");
-			inputValidator.isValidCity(txtBirthplace.getText());
+			inputValidator.validateName(txfName);
+			inputValidator.validateSurname(txfSurname);
+			inputValidator.validateIban(txfIban);
+			inputValidator.validateEmail(txfMail);
+			inputValidator.validatePhoneNumber(txfPhone);
+			inputValidator.validateAlphanumeric(txfAddress, "Indirizzo");
+			inputValidator.validateAlphanumeric(txfUsername, "Username");
+			inputValidator.validatePassword(txfPassword);
+			inputValidator.validateAlphanumeric(txfBirthplace, "Luogo di nascita");
+			inputValidator.isValidCity(txfBirthplace);
 		} catch (inputValidatorException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 			e.printStackTrace();
 			return false;
 		}
 
-		return txtBirthday.isTextFieldValid();
+		return txfBirthday.isTextFieldValid();
 	}
 }
 // Prova

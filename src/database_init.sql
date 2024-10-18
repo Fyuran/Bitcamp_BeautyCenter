@@ -16,18 +16,20 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`beauty_center` (
   `is_enabled` tinyint DEFAULT '1',
   PRIMARY KEY (`id`)
 );
-  
+
+
 CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`vat` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
-  `amount` DOUBLE NOT NULL,
+  `amount` DOUBLE UNSIGNED NOT NULL,
   `is_enabled` tinyint DEFAULT '1',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `amount_UNIQUE` (`amount`)
 );
 
 CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`user_credentials` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(100) DEFAULT NULL,
-  `password` varchar(100) DEFAULT NULL,
+  `password` varchar(200) DEFAULT NULL,
   `address` varchar(100) DEFAULT NULL,
   `iban` varchar(40) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,

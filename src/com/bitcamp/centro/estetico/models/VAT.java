@@ -49,10 +49,10 @@ public class VAT {
 		this.isEnabled = isEnabled;
 	}
 
-	// "#", "%"
+	// "id", "IVA%", "STATO"
 	public Object[] toTableRow() {
 		return new Object[] {
-				id, amount
+				id, amount, isEnabled
 		};
 	}
 

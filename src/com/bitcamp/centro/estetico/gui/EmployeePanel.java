@@ -6,54 +6,47 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 
 import com.bitcamp.centro.estetico.DAO.EmployeeDAO;
 import com.bitcamp.centro.estetico.DAO.UserCredentialsDAO;
-import com.bitcamp.centro.estetico.models.Employee;
-import com.bitcamp.centro.estetico.models.Roles;
-import com.bitcamp.centro.estetico.models.UserCredentials;
-import com.bitcamp.centro.estetico.models.UserDetails;
+import com.bitcamp.centro.estetico.gui.render.CustomTableCellRenderer;
+import com.bitcamp.centro.estetico.models.*;
 import com.bitcamp.centro.estetico.utils.inputValidator;
 import com.bitcamp.centro.estetico.utils.inputValidator.emptyInputException;
 import com.bitcamp.centro.estetico.utils.inputValidator.inputValidatorException;
 import com.github.lgooddatepicker.components.DatePicker;
 
-public class EmployeePanel extends JPanel {
-
+public class EmployeePanel extends BasePanel<Employee> {
 	private static final long serialVersionUID = 1L;
-	private static int selectedId;
-	private static JTextField txtSurname;
-	private static JTextField txtSearchBar;
-	private static JTextField txtName;
+	private static int selectedId = -1;
 
-	// Modello della tabella (scope a livello di classe per poter aggiornare la
-	// tabella)
-	private static DefaultTableModel tableModel;
-	private static JTextField txtMail;
-	private static JTextField txtPhone;
-	private static JTextField txtAddress;
-	private static DatePicker txtBirthday;
-	private static DatePicker txtHired;
-	private static DatePicker txtTermination;
-	private static JTextField txtUsername;
-	private static JPasswordField txtPassword;
-	private static JLabel msgLbl;
-	private static JTextField txtBirthplace;
+	private static JTextField txfSurname;
+	private static JTextField txfName;
+	private static JTextField txfMail;
+	private static JTextField txfPhone;
+	private static JTextField txfAddress;
+	private static JComboBox<Treatment> treatmentsComboBox;
+	private static DatePicker txfBirthday;
+	private static DatePicker txfHired;
+	private static DatePicker txfTermination;
+	private static JTextField txfUsername;
+	private static JPasswordField txfPassword;
+	private static JLabel lbOutput;
+	private static JTextField txfBirthplace;
 	private static JRadioButton femaleRadioBtn;
 	private static JRadioButton maleRadioBtn;
-	private static JTextArea txtNotes;
-	private static JComboBox<String> roleComboBox;
+	private static JTextArea txfNotes;
+	private static JComboBox<Roles> roleComboBox;
 	private static long selectedSerial;
-	private static JTextField txtIban;
+	private static JTextField txfIban;
 	private static JPanel ctrlGroup;
 
+	private static final int _ISENABLEDCOL = 15;
 	/**
 	 * Create the panel.
 	 */
@@ -61,244 +54,104 @@ public class EmployeePanel extends JPanel {
 		setLayout(null);
 		setSize(1024, 768);
 		setName("Operatori");
-		JLabel titleTab = new JLabel("GESTIONE OPERATORI");
-		titleTab.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
-		titleTab.setBounds(415, 11, 206, 32);
-		add(titleTab);
-
-		JPanel containerPanel = new JPanel();
-		containerPanel.setLayout(null);
-		containerPanel.setBorder(new LineBorder(new Color(0, 0, 0), 3));
-		containerPanel.setBackground(new Color(255, 255, 255));
-		containerPanel.setBounds(10, 54, 1004, 347);
-		add(containerPanel);
-
-		// Modello della tabella con colonne
-		String[] columnNames = { "ID", "Numero seriale", "Nome", "Cognome", "Data di nascita", "Assunzione", "Scadenza",
-				"Ruolo", "Username", "Indirizzo", "Città di provenienza", "Mail", "Telefono", "IBAN" };
-		tableModel = new DefaultTableModel(columnNames, 0);
-		// Creazione della tabella
-		JTable table = new JTable(tableModel);
-		// Listener della tabella per pescare i nomi che servono
-		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			@Override
-			public void valueChanged(ListSelectionEvent event) {
-				if (!event.getValueIsAdjusting()) {
-					int selectedRow = table.getSelectedRow();
-					if (selectedRow != -1) {
-						selectedId = (int) tableModel.getValueAt(selectedRow, 0);
-						selectedSerial = (long) tableModel.getValueAt(selectedRow, 1);
-						String name = String.valueOf(tableModel.getValueAt(selectedRow, 2));
-						String surname = String.valueOf(tableModel.getValueAt(selectedRow, 3));
-						LocalDate BoD = (LocalDate) tableModel.getValueAt(selectedRow, 4);
-						LocalDate hiredDate = (LocalDate) tableModel.getValueAt(selectedRow, 5);
-						LocalDate terminationDate = (LocalDate) tableModel.getValueAt(selectedRow, 6);
-						String roleString = String.valueOf(tableModel.getValueAt(selectedRow, 7));
-						String username = String.valueOf(tableModel.getValueAt(selectedRow, 8));
-						String address = String.valueOf(tableModel.getValueAt(selectedRow, 9));
-						String birthplace = String.valueOf(tableModel.getValueAt(selectedRow, 10));
-						String mail = String.valueOf(tableModel.getValueAt(selectedRow, 11));
-						String phone = String.valueOf(tableModel.getValueAt(selectedRow, 12));
-						String iban = String.valueOf(tableModel.getValueAt(selectedRow, 13));
-
-						txtName.setText(name);
-						txtSurname.setText(surname);
-
-						txtBirthday.setDate(BoD);
-						txtHired.setDate(hiredDate);
-						txtTermination.setDate(terminationDate);
-
-						roleComboBox.setSelectedItem(roleString);
-						txtUsername.setText(username);
-						txtAddress.setText(address);
-						txtBirthplace.setText(birthplace);
-						txtMail.setText(mail);
-						txtPhone.setText(phone);
-						txtIban.setText(iban);
-
-						Employee thisEmployee = EmployeeDAO.getEmployee(selectedId).get();
-						if (thisEmployee.isFemale()) {
-							maleRadioBtn.setSelected(false);
-							femaleRadioBtn.setSelected(true);
-						} else {
-							maleRadioBtn.setSelected(true);
-							femaleRadioBtn.setSelected(false);
-						}
-
-						// { "ID", "Nome", "Cognome", "Data di nascita", "Data assunzione", "Ruolo",
-						// "Username" };
-
-						// Il listener ascolta la riga selezionata e la usa per popolare i campi
-
-					}
-				}
-			}
-		});
-
-		// Aggiungere la tabella all'interno di uno JScrollPane per lo scroll
-		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setBounds(23, 60, 959, 276);
-		containerPanel.add(scrollPane);
-
-		JButton btnSearch = new JButton("");
-		btnSearch.setOpaque(false);
-		btnSearch.setContentAreaFilled(false);
-		btnSearch.setBorderPainted(false);
-		btnSearch.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/searchIcon.png")));
-		btnSearch.setBounds(206, 8, 40, 30);
-		btnSearch.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				System.out.println(txtName.getText());
-			}
-		});
-		containerPanel.add(btnSearch);
-
-		txtSearchBar = new JTextField();
-		txtSearchBar.setColumns(10);
-		txtSearchBar.setBackground(UIManager.getColor("CheckBox.background"));
-		txtSearchBar.setBounds(23, 14, 168, 24);
-		containerPanel.add(txtSearchBar);
-
-		JButton btnFilter = new JButton("");
-		btnFilter.setOpaque(false);
-		btnFilter.setContentAreaFilled(false);
-		btnFilter.setBorderPainted(false);
-		btnFilter.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/filterIcon.png")));
-		btnFilter.setBounds(256, 8, 40, 30);
-		btnFilter.addActionListener(e -> populateTableByFilter());
-		containerPanel.add(btnFilter);
-
-		JButton btnInsert = new JButton("");
-		btnInsert.setOpaque(false);
-		btnInsert.setContentAreaFilled(false);
-		btnInsert.setBorderPainted(false);
-		btnInsert.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/Insert.png")));
-		btnInsert.setBounds(720, 8, 40, 30);
-		btnInsert.addActionListener(e -> createEmployee());
-		containerPanel.add(btnInsert);
-
-		JButton btnUpdate = new JButton("");
-		btnUpdate.setOpaque(false);
-		btnUpdate.setContentAreaFilled(false);
-		btnUpdate.setBorderPainted(false);
-		btnUpdate.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/Update.png")));
-		btnUpdate.setBounds(770, 8, 40, 30);
-		btnUpdate.addActionListener(e -> updateEmployee());
-		containerPanel.add(btnUpdate);
-
-		JButton btnDelete = new JButton("");
-		btnDelete.setOpaque(false);
-		btnDelete.setContentAreaFilled(false);
-		btnDelete.setBorderPainted(false);
-		btnDelete.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/delete.png")));
-		btnDelete.setBounds(820, 8, 40, 30);
-		btnDelete.addActionListener(e -> deleteEmployee());
-		containerPanel.add(btnDelete);
-
-		JButton btnDisable = new JButton("");
-		btnDisable.setOpaque(false);
-		btnDisable.setContentAreaFilled(false);
-		btnDisable.setBorderPainted(false);
-		btnDisable.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/disable.png")));
-		btnDisable.setBounds(920, 8, 40, 30);
-		containerPanel.add(btnDisable);
-
-		JPanel outputPanel = new JPanel();
-		outputPanel.setLayout(null);
+		setTitle("GESTIONE OPERATORI");
+		scrollPane.setBounds(23, 60, 1031, 276);
+		btnSearch.setBounds(206, 8, 40, 40);
+		txfSearchBar.setBounds(23, 14, 168, 24);
+		btnFilter.setBounds(256, 8, 40, 40);
+		btnInsert.setBounds(914, 8, 40, 40);
+		btnUpdate.setBounds(964, 8, 40, 40);
+		btnDisable.setBounds(1014, 8, 40, 40);
+		btnDelete.setBounds(864, 8, 40, 40);
+		lbOutput.setBounds(306, 8, 438, 41);
 		outputPanel.setBounds(23, 60, 959, 276);
-		containerPanel.add(outputPanel);
+		ctrlGroup.setBounds(40, 413, 1034, 344);
 
-		JButton btnHystorical = new JButton("");
-		btnHystorical.setOpaque(false);
-		btnHystorical.setContentAreaFilled(false);
-		btnHystorical.setBorderPainted(false);
-		btnHystorical.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/cartellina.png")));
-		btnHystorical.setBounds(870, 8, 40, 30);
-		btnHystorical.addActionListener(e -> populateTable());
-		containerPanel.add(btnHystorical);
+		table = new JTable(employeeModel);
+		table.setDefaultRenderer(Object.class, new CustomTableCellRenderer(employeeModel, _ISENABLEDCOL));
+		table.getSelectionModel().addListSelectionListener(getListSelectionListener());
 
-		ctrlGroup = new JPanel();
-		ctrlGroup.setBounds(40, 413, 929, 323);
-		add(ctrlGroup);
-		ctrlGroup.setLayout(null);
-
-		// label e textfield degli input
 		JLabel lblName = new JLabel("Nome:");
 		lblName.setBounds(3, 26, 170, 14);
 		ctrlGroup.add(lblName);
 		lblName.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		txtName = new JTextField();
-		txtName.setBounds(169, 23, 220, 20);
-		ctrlGroup.add(txtName);
-		txtName.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		txtName.setColumns(10);
+		txfName = new JTextField();
+		txfName.setBounds(169, 23, 220, 20);
+		ctrlGroup.add(txfName);
+		txfName.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfName.setColumns(10);
 
 		JLabel lblSurname = new JLabel("Cognome:");
 		lblSurname.setBounds(3, 65, 170, 17);
 		ctrlGroup.add(lblSurname);
 		lblSurname.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		txtSurname = new JTextField();
-		txtSurname.setBounds(169, 63, 220, 20);
-		ctrlGroup.add(txtSurname);
-		txtSurname.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		txtSurname.setColumns(10);
+		txfSurname = new JTextField();
+		txfSurname.setBounds(169, 63, 220, 20);
+		ctrlGroup.add(txfSurname);
+		txfSurname.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfSurname.setColumns(10);
 
 		JLabel lblBirthday = new JLabel("Data di nascita:");
 		lblBirthday.setBounds(3, 108, 170, 14);
 		ctrlGroup.add(lblBirthday);
 		lblBirthday.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		txtMail = new JTextField();
-		txtMail.setBounds(709, 105, 220, 20);
-		ctrlGroup.add(txtMail);
-		txtMail.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		txtMail.setColumns(10);
+		txfMail = new JTextField();
+		txfMail.setBounds(805, 105, 220, 20);
+		ctrlGroup.add(txfMail);
+		txfMail.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfMail.setColumns(10);
 
-		txtPhone = new JTextField();
-		txtPhone.setBounds(709, 145, 220, 20);
-		ctrlGroup.add(txtPhone);
-		txtPhone.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		txtPhone.setColumns(10);
+		txfPhone = new JTextField();
+		txfPhone.setBounds(805, 145, 220, 20);
+		ctrlGroup.add(txfPhone);
+		txfPhone.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfPhone.setColumns(10);
 
-		txtAddress = new JTextField();
-		txtAddress.setBounds(709, 23, 220, 20);
-		ctrlGroup.add(txtAddress);
-		txtAddress.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		txtAddress.setColumns(10);
+		txfAddress = new JTextField();
+		txfAddress.setBounds(805, 23, 220, 20);
+		ctrlGroup.add(txfAddress);
+		txfAddress.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfAddress.setColumns(10);
 
 		JLabel lblMail = new JLabel("Mail:");
-		lblMail.setBounds(491, 108, 170, 14);
+		lblMail.setBounds(623, 108, 170, 14);
 		ctrlGroup.add(lblMail);
 		lblMail.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
 		JLabel lblPhone = new JLabel("Telefono:");
-		lblPhone.setBounds(491, 148, 170, 14);
+		lblPhone.setBounds(623, 148, 170, 14);
 		ctrlGroup.add(lblPhone);
 		lblPhone.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
 		JLabel lblAddress = new JLabel("Indirizzo:");
-		lblAddress.setBounds(491, 26, 170, 14);
+		lblAddress.setBounds(623, 26, 170, 14);
 		ctrlGroup.add(lblAddress);
 		lblAddress.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		txtBirthday = new DatePicker();
-		txtBirthday.setBounds(169, 103, 220, 25);
-		ctrlGroup.add(txtBirthday);
+		txfBirthday = new DatePicker();
+		txfBirthday.setBounds(169, 103, 220, 25);
+		ctrlGroup.add(txfBirthday);
 
-		txtHired = new DatePicker();
-		txtHired.setBounds(169, 143, 220, 25);
-		ctrlGroup.add(txtHired);
+		txfHired = new DatePicker();
+		txfHired.setBounds(169, 143, 220, 25);
+		ctrlGroup.add(txfHired);
 
 		JLabel lblRole = new JLabel("Ruolo:");
-		lblRole.setBounds(491, 186, 170, 14);
+		lblRole.setBounds(623, 186, 170, 14);
 		ctrlGroup.add(lblRole);
 		lblRole.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
 		roleComboBox = new JComboBox<>();
-		roleComboBox.setBounds(709, 180, 220, 27);
+		roleComboBox.setBounds(805, 180, 220, 25);
+		ctrlGroup.add(roleComboBox);
+		roleComboBox.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		roleComboBox.setBorder(UIManager.getBorder("ComboBox.border"));
+		roleComboBox.setBackground(Color.WHITE);
+
+		treatmentsComboBox = new JComboBox<>();
 		ctrlGroup.add(roleComboBox);
 		roleComboBox.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 		roleComboBox.setBorder(UIManager.getBorder("TextArea.border"));
@@ -308,76 +161,72 @@ public class EmployeePanel extends JPanel {
 		ctrlGroup.add(lblUsername);
 		lblUsername.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		txtUsername = new JTextField();
-		txtUsername.setBounds(169, 223, 220, 20);
-		ctrlGroup.add(txtUsername);
-		txtUsername.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		txtUsername.setColumns(10);
+		txfUsername = new JTextField();
+		txfUsername.setBounds(169, 223, 220, 20);
+		ctrlGroup.add(txfUsername);
+		txfUsername.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfUsername.setColumns(10);
 
 		JLabel lblPassword = new JLabel("Password:");
 		lblPassword.setBounds(3, 266, 170, 14);
 		ctrlGroup.add(lblPassword);
 		lblPassword.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		txtPassword = new JPasswordField();
-		txtPassword.setBounds(169, 263, 220, 20);
-		ctrlGroup.add(txtPassword);
-		txtPassword.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		txtPassword.setActionCommand("676");
-		txtPassword.setColumns(10);
+		txfPassword = new JPasswordField();
+		txfPassword.setBounds(169, 263, 220, 20);
+		ctrlGroup.add(txfPassword);
+		txfPassword.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfPassword.setActionCommand("676");
+		txfPassword.setColumns(10);
 		JCheckBox visibleCheck = new JCheckBox("Mostra password");
 		visibleCheck.setBounds(0, 281, 121, 14);
 		ctrlGroup.add(visibleCheck);
 		visibleCheck.setFont(new Font("MS Reference Sans Serif", Font.ITALIC, 11));
 
-		msgLbl = new JLabel("");
-		msgLbl.setBounds(196, 0, 625, 16);
-		ctrlGroup.add(msgLbl);
-
 		JLabel lblBirthPlace = new JLabel("Città di nascita:");
-		lblBirthPlace.setBounds(491, 66, 170, 14);
+		lblBirthPlace.setBounds(623, 66, 170, 14);
 		ctrlGroup.add(lblBirthPlace);
 		lblBirthPlace.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		txtBirthplace = new JTextField();
-		txtBirthplace.setBounds(709, 63, 220, 20);
-		ctrlGroup.add(txtBirthplace);
-		txtBirthplace.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		txtBirthplace.setColumns(10);
+		txfBirthplace = new JTextField();
+		txfBirthplace.setBounds(805, 63, 220, 20);
+		ctrlGroup.add(txfBirthplace);
+		txfBirthplace.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfBirthplace.setColumns(10);
 
 		ButtonGroup genderBtnGroup = new ButtonGroup();
 		maleRadioBtn = new JRadioButton("Uomo");
-		maleRadioBtn.setBounds(491, 222, 75, 23);
+		maleRadioBtn.setBounds(805, 222, 75, 23);
 		ctrlGroup.add(maleRadioBtn);
 		maleRadioBtn.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 		genderBtnGroup.add(maleRadioBtn);
 
 		femaleRadioBtn = new JRadioButton("Donna");
-		femaleRadioBtn.setBounds(568, 222, 75, 23);
+		femaleRadioBtn.setBounds(882, 222, 75, 23);
 		ctrlGroup.add(femaleRadioBtn);
 		femaleRadioBtn.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 		genderBtnGroup.add(femaleRadioBtn);
 
 		JLabel notesLbl = new JLabel("Note:");
-		notesLbl.setBounds(491, 279, 61, 16);
+		notesLbl.setBounds(623, 265, 170, 14);
 		ctrlGroup.add(notesLbl);
 		notesLbl.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		txtNotes = new JTextArea();
-		txtNotes.setBounds(709, 251, 220, 72);
-		ctrlGroup.add(txtNotes);
-		txtNotes.setBorder(UIManager.getBorder("TextField.border"));
+		txfNotes = new JTextArea();
+		txfNotes.setBounds(805, 263, 220, 20);
+		ctrlGroup.add(txfNotes);
+		txfNotes.setBorder(UIManager.getBorder("TextField.border"));
 
 		JLabel lbHired = new JLabel("Assunzione:");
 		lbHired.setBounds(3, 148, 170, 14);
 		ctrlGroup.add(lbHired);
 		lbHired.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		txtIban = new JTextField();
-		txtIban.setBounds(169, 303, 220, 20);
-		ctrlGroup.add(txtIban);
-		txtIban.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 12));
-		txtIban.setColumns(10);
+		txfIban = new JTextField();
+		txfIban.setBounds(169, 303, 220, 20);
+		ctrlGroup.add(txfIban);
+		txfIban.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 12));
+		txfIban.setColumns(10);
 
 		JLabel lbIban = new JLabel("IBAN:");
 		lbIban.setBounds(3, 306, 170, 14);
@@ -389,183 +238,61 @@ public class EmployeePanel extends JPanel {
 		ctrlGroup.add(lbTermination);
 		lbTermination.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
 
-		txtTermination = new DatePicker();
-		txtTermination.setBounds(169, 183, 220, 25);
-		ctrlGroup.add(txtTermination);
+		txfTermination = new DatePicker();
+		txfTermination.setBounds(169, 183, 220, 25);
+		ctrlGroup.add(txfTermination);
+		
+		treatmentsComboBox = new JComboBox<>();
+		treatmentsComboBox.setBorder(UIManager.getBorder("TextField.border"));
+		treatmentsComboBox.setBounds(805, 303, 220, 25);
+		treatmentsComboBox.setBackground(Color.WHITE);
+		ctrlGroup.add(treatmentsComboBox);
+		
+		JLabel lbTreatment = new JLabel("Trattamento");
+		lbTreatment.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		lbTreatment.setBounds(623, 305, 170, 14);
+		ctrlGroup.add(lbTreatment);
 		visibleCheck.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (visibleCheck.isSelected()) {
-					txtPassword.setEchoChar((char) 0);
+					txfPassword.setEchoChar((char) 0);
 				} else {
-					txtPassword.setEchoChar('•');
+					txfPassword.setEchoChar('•');
 				}
 			}
 		});
 		for (Roles r : Roles.values()) {
-			roleComboBox.addItem(r.toString());
+			roleComboBox.addItem(r);
 		}
-
-		populateTable();
 	}
 
-	private static void clearTable() {
-		tableModel.setRowCount(0);
-	}
+	private void fillRowsByFilter() {
 
-	private static void clearFields() {
-		txtName.setText("");
-		txtSurname.setText("");
-		txtBirthday.clear();
-		txtHired.clear();
-		txtPhone.setText("");
-		txtMail.setText("");
-		txtAddress.setText("");
-		txtIban.setText("");
-		txtUsername.setText("");
-		txtPassword.setText("");
-		txtBirthplace.setText("");
-		txtNotes.setText("");
-	}
-
-	static void populateTable() {
-		clearTable();
-		clearFields();
-		List<Object[]> data = EmployeeDAO.toTableRowAll(c -> c.isEnabled());
-		if (data.isEmpty()) {
-			tableModel.addRow(new String[] { "Sembra non ci siano impiegati presenti", "" });
+		lbOutput.setText("");
+		if (txfSearchBar.getText().isBlank() || txfSearchBar.getText().isEmpty()) {
+			lbOutput.setText("Inserire un filtro!");
 			return;
 		}
-		for (Object[] row : data) {
-			tableModel.addRow(row);
-		}
 
-	}
+		clearTxfFields();
+		employeeModel.setRowCount(0);
+		treatmentsComboBox.removeAllItems();
+		treatments.parallelStream()
+				.forEach(t -> treatmentsComboBox.addItem(t));
 
-	private static void populateTableByFilter() {
-		msgLbl.setText("");
-		if (txtSearchBar.getText().isBlank() || txtSearchBar.getText().isEmpty()) {
-			msgLbl.setText("Inserire un filtro!");
-			return;
-		}
-		clearTable();
-		List<Employee> employees = EmployeeDAO.getAllEmployees();
 		if (employees.isEmpty()) {
-			tableModel.addRow(new String[] { "Sembra non ci siano operatori presenti", "" });
+			lbOutput.setText("Lista operatori vuota");
 			return;
 		}
 		for (Employee employee : employees) {
 			if (employee.isEnabled() && employee.getTerminationDate() == null
-					&& employee.getSurname().equalsIgnoreCase(txtSearchBar.getText())) {
-						tableModel.addRow(new String[] { String.valueOf(employee.getId()),
-						String.valueOf(employee.getEmployeeSerial()), employee.getName(), employee.getSurname(),
-						String.valueOf(employee.getBoD()), String.valueOf(employee.getHiredDate()),
-						employee.getRole().toString(), employee.getUserCredentials().getUsername(),
-						employee.getAddress(), employee.getBirthplace(), employee.getMail(), employee.getPhone(),
-						employee.getIban() });
-				// {"ID","Nome","Cognome","Data di nascita","Data
-				// assunzione","Ruolo","Username"};
+					&& employee.getSurname().equalsIgnoreCase(txfSearchBar.getText())) {
+				employeeModel.addRow(employee.toTableRow());
 			}
 		}
 
-		txtSearchBar.setText("");
-	}
-
-	private static void createEmployee() {
-		try { // all fields must be filled
-			isDataValid();
-		} catch (inputValidatorException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
-			return;
-		}
-
-		String name = txtName.getText();
-		String surname = txtSurname.getText();
-		String birthplace = txtBirthplace.getText();
-		LocalDate BoD = txtBirthday.getDate();
-		LocalDate hired = txtHired.getDate();
-		String notes = txtNotes.getText();
-		long employeeSerial = Employee.generateSerial();
-		Roles role = Roles.toEnum(roleComboBox.getSelectedItem().toString());
-		String username = txtUsername.getText();
-		char[] password = txtPassword.getPassword();
-		String address = txtAddress.getText();
-		String iban = txtIban.getText();
-		String phone = txtPhone.getText();
-		String mail = txtMail.getText();
-
-		UserDetails det = new UserDetails(name, surname, getGender(), BoD, birthplace, notes);
-		UserCredentials cred = new UserCredentials(username, password, address, iban, phone, mail);
-		cred = UserCredentialsDAO.insertUserCredentials(cred).get();
-		Employee employee = new Employee(det, cred, employeeSerial, role, Collections.emptyList(), hired, null);
-		employee = EmployeeDAO.insertEmployee(employee).get();
-
-		System.out.println(employee);
-
-		msgLbl.setText("Nuovo utente creato correttamente");
-		populateTable();
-	}
-
-	private static void updateEmployee() {
-		try {
-			isDataValid();
-		} catch (inputValidatorException e) {
-			if (!(e instanceof emptyInputException)) { // fields can be empty
-				JOptionPane.showMessageDialog(null, e.getMessage());
-				return;
-			}
-		}
-		int id = selectedId;
-		String name = txtName.getText();
-		String surname = txtSurname.getText();
-		String birthplace = txtBirthplace.getText();
-		// isFemale
-		LocalDate BoD = txtBirthday.getDate();
-		LocalDate hired = txtHired.getDate();
-		String notes = txtNotes.getText();
-		// isEnabled
-		long employeeSerial = selectedSerial;
-		// shifts
-		// hiredDate
-		Roles role = Roles.toEnum(roleComboBox.getSelectedItem().toString());
-		// terminationDate
-		String username = txtUsername.getText();
-		char[] password = txtPassword.getPassword();
-		String address = txtAddress.getText();
-		String iban = txtIban.getText();
-		String phone = txtPhone.getText();
-		String mail = txtMail.getText();
-
-		Employee employee = EmployeeDAO.getEmployee(id).get();
-		employee.setName(name);
-		employee.setSurname(surname);
-		employee.setBirthplace(birthplace);
-		employee.setBoD(BoD);
-		employee.setHiredDate(hired);
-		employee.setNotes(notes);
-		employee.setEmployeeSerial(employeeSerial);
-		employee.setRole(role);
-		employee.setUsername(username);
-		employee.setPassword(password);
-		employee.setAddress(address);
-		employee.setIban(iban);
-		employee.setPhone(phone);
-		employee.setMail(mail);
-
-		EmployeeDAO.updateEmployee(id, employee);
-
-		System.out.println(employee);
-
-		msgLbl.setText(name + " " + surname + " modificato correttamente");
-		populateTable();
-	}
-
-	public static void deleteEmployee() {
-
-		msgLbl.setText("");
-		EmployeeDAO.toggleEnabledEmployee(selectedId);
-		msgLbl.setText("Utente rimosso correttamente");
-		populateTable();
+		txfSearchBar.setText("");
 	}
 
 	private static boolean getGender() {
@@ -575,23 +302,264 @@ public class EmployeePanel extends JPanel {
 		return false;
 	}
 
-	private static boolean isDataValid() throws inputValidatorException {
+	@Override
+	void search() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'search'");
+	}
+
+	@Override
+	Optional<Employee> insertElement() {
+		try { // all fields must be filled
+			isDataValid();
+		} catch (inputValidatorException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return Optional.empty();
+		}
+
+		String name = txfName.getText();
+		String surname = txfSurname.getText();
+		String birthplace = txfBirthplace.getText();
+
+		LocalDate BoD = txfBirthday.getDate();
+		LocalDate hired = txfHired.getDate();
+		LocalDate termination = txfTermination.getDate();
+
+		String notes = txfNotes.getText();
+
+		long employeeSerial = Employee.generateSerial();
+		Roles role = Roles.toEnum(roleComboBox.getSelectedItem().toString());
+
+		String username = txfUsername.getText();
+		char[] password = txfPassword.getPassword();
+		String address = txfAddress.getText();
+		String iban = txfIban.getText();
+		String phone = txfPhone.getText();
+		String mail = txfMail.getText();
+		Treatment treatment = (Treatment) treatmentsComboBox.getSelectedItem();
+
+		UserCredentials cred = new UserCredentials(username, password, address, iban, phone, mail);
+		if(!UserCredentialsDAO.isUsernameUnique(username)) return Optional.empty();
+
+		UserDetails det = new UserDetails(name, surname, getGender(), BoD, birthplace, notes);
+		cred = UserCredentialsDAO.insertUserCredentials(cred).get();
+		Employee employee = new Employee(det, cred, employeeSerial, role, Collections.emptyList(), hired, termination,
+				treatment);
+				
+			
+		lbOutput.setText("Nuovo utente creato");
+		return EmployeeDAO.insertEmployee(employee);
+	}
+
+	@Override
+	int updateElement() {
 		try {
-			inputValidator.validateName(txtName.getText());
-			inputValidator.validateSurname(txtSurname.getText());
-			inputValidator.validateIban(txtIban.getText());
-			inputValidator.validateEmail(txtMail.getText());
-			inputValidator.validatePhoneNumber(txtPhone.getText());
-			inputValidator.validateAlphanumeric(txtAddress.getText(), "Indirizzo");
-			inputValidator.validateAlphanumeric(txtUsername.getText(), "Username");
-			inputValidator.validatePassword(txtPassword.getPassword());
-			inputValidator.validateAlphanumeric(txtBirthplace.getText(), "Luogo di nascita");
-			inputValidator.isValidCity(txtBirthplace.getText());
+			isDataValid();
+		} catch (inputValidatorException e) {
+			if (!(e instanceof emptyInputException)) { // fields can be empty
+				JOptionPane.showMessageDialog(null, e.getMessage());
+				return -1;
+			}
+			e.errorComponent.setBorder(UIManager.getBorder("TextField.border")); //reset field's border in update mode
+		}
+		int id = selectedId;
+		if (id <= 0) {
+			JOptionPane.showMessageDialog(null, "Nessun operatore selezionato");
+			return -1; // do not allow invalid ids to be passed to update
+		}
+
+		String name = txfName.getText();
+		String surname = txfSurname.getText();
+		String birthplace = txfBirthplace.getText();
+		// isFemale
+		LocalDate BoD = txfBirthday.getDate();
+		LocalDate hired = txfHired.getDate();
+		LocalDate termination = txfTermination.getDate();
+		String notes = txfNotes.getText();
+		// isEnabled
+		long employeeSerial = selectedSerial;
+		// shifts
+		// hiredDate
+		Roles role = (Roles) roleComboBox.getSelectedItem();
+		Treatment treatment = (Treatment) treatmentsComboBox.getSelectedItem();
+
+		// terminationDate
+		String username = txfUsername.getText();
+		char[] password = txfPassword.getPassword();
+		String address = txfAddress.getText();
+		String iban = txfIban.getText();
+		String phone = txfPhone.getText();
+		String mail = txfMail.getText();
+
+		Employee employee = EmployeeDAO.getEmployee(id).get();
+		employee.setName(name);
+		employee.setSurname(surname);
+		employee.setBirthplace(birthplace);
+		employee.setBoD(BoD);
+		employee.setHiredDate(hired);
+		employee.setTerminationDate(termination);
+		employee.setNotes(notes);
+		employee.setEmployeeSerial(employeeSerial);
+		employee.setRole(role);
+		employee.setUsername(username);
+		employee.setPassword(password);
+		employee.setAddress(address);
+		employee.setIban(iban);
+		employee.setPhone(phone);
+		employee.setMail(mail);
+		employee.setTreatment(treatment);
+
+		lbOutput.setText(name + " " + surname + " modificato");
+		return EmployeeDAO.updateEmployee(id, employee);
+	}
+
+	@Override
+	int deleteElement() {
+		try {
+			int row = table.getSelectedRow();
+			if (row == -1) {
+				throw new IllegalArgumentException("Nessuna riga scelta");
+			}
+			final int id = (int) employeeModel.getValueAt(row, 0);
+			lbOutput.setText("Operatore cancellato");
+			populateTable();
+			return EmployeeDAO.deleteEmployee(id);
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "Impossibile cancellare: " + e.getMessage(), "Errore di database",
+					JOptionPane.ERROR_MESSAGE);
+		}
+		return -1;
+	}
+
+	@Override
+	int disableElement() {
+		try {
+			int row = table.getSelectedRow();
+			if (row == -1) {
+				throw new IllegalArgumentException("Nessuna riga scelta");
+			}
+			final int id = (int) employeeModel.getValueAt(row, 0);
+			boolean currentFlag = (boolean) employeeModel.getValueAt(row, _ISENABLEDCOL);
+			employeeModel.setValueAt(!currentFlag, row, _ISENABLEDCOL);
+			table.repaint();
+			
+			lbOutput.setText(currentFlag ? "Operatore abilitato" : "Operatore disabilitato");
+			return EmployeeDAO.toggleEnabledEmployee(id);
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "Errori dati da disabilitare: " + e.getMessage(), "Errore di disabilitazione",
+					JOptionPane.ERROR_MESSAGE);
+		}
+		return -1;
+	}
+
+	@Override
+	void populateTable() {
+		employeeModel.setRowCount(0);
+		clearTxfFields();
+
+		treatmentsComboBox.removeAllItems();
+		treatments.parallelStream()
+				.filter(t -> t.isEnabled())
+				.forEach(t -> treatmentsComboBox.addItem(t));
+
+
+		if (!employees.isEmpty()) {
+			employees.parallelStream()
+					.forEach(e -> employeeModel.addRow(e.toTableRow()));
+		} else {
+			lbOutput.setText("Lista Transazioni vuota");
+		}
+	}
+
+	@Override
+	void clearTxfFields() {
+		txfName.setText("");
+		txfSurname.setText("");
+		txfBirthday.clear();
+		txfHired.clear();
+		txfPhone.setText("");
+		txfMail.setText("");
+		txfAddress.setText("");
+		txfIban.setText("");
+		txfUsername.setText("");
+		txfPassword.setText("");
+		txfBirthplace.setText("");
+		txfNotes.setText("");
+	}
+
+	@Override
+	ListSelectionListener getListSelectionListener() {
+		return new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent event) {
+				if (!event.getValueIsAdjusting()) {
+					int selectedRow = table.getSelectedRow();
+					if (selectedRow <= -1) return;
+
+					selectedId = (int) employeeModel.getValueAt(selectedRow, 0);
+					selectedSerial = (long) employeeModel.getValueAt(selectedRow, 1);
+					String name = (String) employeeModel.getValueAt(selectedRow, 2);
+					String surname = (String) employeeModel.getValueAt(selectedRow, 3);
+					LocalDate BoD = (LocalDate) employeeModel.getValueAt(selectedRow, 4);
+					LocalDate hiredDate = (LocalDate) employeeModel.getValueAt(selectedRow, 5);
+					LocalDate terminationDate = (LocalDate) employeeModel.getValueAt(selectedRow, 6);
+					Roles role = (Roles) employeeModel.getValueAt(selectedRow, 7);
+					String username = (String) employeeModel.getValueAt(selectedRow, 8);
+					String address = (String) employeeModel.getValueAt(selectedRow, 9);
+					String birthplace = (String) employeeModel.getValueAt(selectedRow, 10);
+					String mail = (String) employeeModel.getValueAt(selectedRow, 11);
+					String phone = (String) employeeModel.getValueAt(selectedRow, 12);
+					String iban = (String) employeeModel.getValueAt(selectedRow, 13);
+					Treatment treatment = (Treatment) employeeModel.getValueAt(selectedRow, 14);
+
+					txfName.setText(name);
+					txfSurname.setText(surname);
+
+					txfBirthday.setDate(BoD);
+					txfHired.setDate(hiredDate);
+					txfTermination.setDate(terminationDate);
+
+					roleComboBox.setSelectedItem(role);
+					treatmentsComboBox.setSelectedItem(treatment);
+
+					txfUsername.setText(username);
+					txfAddress.setText(address);
+					txfBirthplace.setText(birthplace);
+					txfMail.setText(mail);
+					txfPhone.setText(phone);
+					txfIban.setText(iban);
+
+					Employee thisEmployee = EmployeeDAO.getEmployee(selectedId).get();
+					if (thisEmployee.isFemale()) {
+						maleRadioBtn.setSelected(false);
+						femaleRadioBtn.setSelected(true);
+					} else {
+						maleRadioBtn.setSelected(true);
+						femaleRadioBtn.setSelected(false);
+					}
+				}
+			}
+		};
+	}
+
+	@Override
+	boolean isDataValid() {
+		try {
+			inputValidator.validateName(txfName);
+			inputValidator.validateSurname(txfSurname);
+			inputValidator.validateIban(txfIban);
+			inputValidator.validateEmail(txfMail);
+			inputValidator.validatePhoneNumber(txfPhone);
+			inputValidator.validateAlphanumeric(txfAddress, "Indirizzo");
+			inputValidator.validateAlphanumeric(txfUsername, "Username");
+			inputValidator.validatePassword(txfPassword);
+			inputValidator.validateAlphanumeric(txfBirthplace, "Luogo di nascita");
+			inputValidator.isValidCity(txfBirthplace);
 		} catch (inputValidatorException e) {
 			throw e;
 		}
 
-		return txtBirthday.isTextFieldValid();
+		return txfBirthday.isTextFieldValid();
 	}
 }
 // Prova

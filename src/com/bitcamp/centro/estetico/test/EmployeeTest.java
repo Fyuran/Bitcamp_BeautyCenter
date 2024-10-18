@@ -50,7 +50,7 @@ public class EmployeeTest {
             LocalDate terminationDate = LocalDate.of(2050, 10, 9);// Consideriamo che non sia ancora terminato
 
             // Creare l'oggetto Employee
-            Employee employee = new Employee(details, userCredentials, serial, role, shifts, hiredDate, terminationDate);
+            Employee employee = new Employee(details, userCredentials, serial, role, shifts, hiredDate, terminationDate, null);
 
             // Inserire l'Employee nel database
             try {

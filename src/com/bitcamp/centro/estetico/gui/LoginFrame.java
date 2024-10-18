@@ -8,12 +8,13 @@ import javax.swing.*;
 import com.bitcamp.centro.estetico.DAO.BeautyCenterDAO;
 import com.bitcamp.centro.estetico.DAO.UserCredentialsDAO;
 import com.bitcamp.centro.estetico.models.Employee;
+import com.bitcamp.centro.estetico.models.Main;
 import com.bitcamp.centro.estetico.utils.inputValidator;
 import com.bitcamp.centro.estetico.utils.inputValidator.inputValidatorException;
 
 public class LoginFrame extends JFrame {
     private static final long serialVersionUID = 1L;
-    private JTextField txtUsername;
+    private JTextField txfUsername;
     private JPasswordField passwordText;
     private JLabel userMsgLabel;
     private JLabel passwordMsgLabel;
@@ -92,10 +93,10 @@ public class LoginFrame extends JFrame {
         passwordLabel.setBounds(37, 54, 63, 16);
         loginDataPanel.add(passwordLabel);
 
-        txtUsername = new JTextField();
-        txtUsername.setColumns(10);
-        txtUsername.setBounds(117, 16, 152, 26);
-        loginDataPanel.add(txtUsername);
+        txfUsername = new JTextField();
+        txfUsername.setColumns(10);
+        txfUsername.setBounds(117, 16, 152, 26);
+        loginDataPanel.add(txfUsername);
 
         JLabel lblUsername = new JLabel("Username:");
         lblUsername.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 11));
@@ -145,24 +146,28 @@ public class LoginFrame extends JFrame {
         getRootPane().setDefaultButton(loginBtn);
 
         setVisible(true);
+
+        if(Main._DEBUG_MODE_FULL) {
+            Employee currentEmployee = UserCredentialsDAO.getEmployeeOfUsername("fyuran").get();
+            new MainFrame(currentEmployee, BeautyCenterDAO.getFirstBeautyCenter().get());
+            dispose();
+        }
     }
 
     // Metodo di login
     public void login() {
         userMsgLabel.setText("");
         passwordMsgLabel.setText("");
-        String username = txtUsername.getText();
+        String username = txfUsername.getText();
         char[] password = passwordText.getPassword();
 
         try {
-            inputValidator.validateAlphanumeric(txtUsername.getText(), "Username"); // Validazione dell'username
-            inputValidator.validatePassword(password);
+            inputValidator.validateAlphanumeric(txfUsername, "Username"); // Validazione dell'username
+            inputValidator.validatePassword(passwordText);
         } catch (inputValidatorException e) {
             JOptionPane.showMessageDialog(null, e.getMessage());
 	        return;
         }
-
-
         // Verifica delle credenziali
         boolean isAuthenticated = UserCredentialsDAO.isValidPassword(username, password);
         if (isAuthenticated) {
@@ -175,7 +180,7 @@ public class LoginFrame extends JFrame {
         }
 
      // Svuota i campi
-        txtUsername.setText("");
+        txfUsername.setText("");
         passwordText.setText("");
     }
 }

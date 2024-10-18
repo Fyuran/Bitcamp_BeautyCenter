@@ -1,5 +1,6 @@
 package com.bitcamp.centro.estetico.gui;
 
+import java.awt.Dimension;
 import java.util.concurrent.CompletableFuture;
 
 import javax.swing.JFrame;
@@ -33,31 +34,13 @@ public class MainFrame extends JFrame {
 		sessionUser = employee;
 		mainFrame = this;
 		
-		mainPane.addChangeListener(e -> {
-			JPanel panel = (JPanel) mainPane.getSelectedComponent();
-			if(panel instanceof UserAccessPanel p)
-				p.populateShiftTable();
-			else if(panel instanceof CustomerPanel p)
-				p.loadCustomerData();
-			else if(panel instanceof EmployeePanel)
-				EmployeePanel.populateTable();
-			else if(panel instanceof PrizePanel p)
-				p.loadActivePrizesToTable();
-			else if(panel instanceof ProductPanel p)
-				p.populateTable();
-			else if(panel instanceof TreatmentPanel p)
-				p.populateTable();
-			else if(panel instanceof TransactionPanel p)
-				p.fillRows();
-			else if(panel instanceof SubscriptionPanel p)
-				p.fillRows();
-
-		});
 		setSize(1024, 768);
+		setMinimumSize(new Dimension(1024, 768));
 		setLocationRelativeTo(null);
 		setTitle("Gestione " + (bc == null ? "Centro Estetico" : bc.getName()));
 
-		CompletableFuture.runAsync(() -> mainPane.add(new UserAccessPanel(employee)));
+		//CompletableFuture.runAsync(() -> mainPane.add(new UserAccessPanel()));
+		mainPane.add(new UserAccessPanel());
 		CompletableFuture.runAsync(() -> mainPane.add(new ReservationForm()));
 		CompletableFuture.runAsync(() -> mainPane.add(new CustomerPanel()));
 
@@ -67,14 +50,21 @@ public class MainFrame extends JFrame {
 		add(mainPane);
 		setVisible(true);
 
+		mainPane.addChangeListener(e -> {
+			JPanel panel = (JPanel) mainPane.getSelectedComponent();
+			if(panel instanceof BasePanel p) p.populateTable();
+		});
 	}
 
 	public static void buildAdminFrame() {
 		CompletableFuture.runAsync(() -> mainPane.add(new EmployeePanel()));
+		//mainPane.add(new EmployeePanel());
 		CompletableFuture.runAsync(() -> mainPane.add(new PrizePanel()));
 		CompletableFuture.runAsync(() -> mainPane.add(new ProductPanel()));
 		CompletableFuture.runAsync(() -> mainPane.add(new TreatmentPanel()));
+		//mainPane.add(new TreatmentPanel());
 		CompletableFuture.runAsync(() -> mainPane.add(new TransactionPanel()));
+		//mainPane.add(new TransactionPanel());
 		CompletableFuture.runAsync(() -> mainPane.add(new SubscriptionPanel()));
 		CompletableFuture.runAsync(() -> mainPane.add(new ShiftForm()));
 	}

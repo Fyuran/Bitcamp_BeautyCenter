@@ -63,10 +63,6 @@ public abstract class CustomerDAO {
 		if(isEmpty()) return opt;
 		
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			if(id <= 0) {
-				throw new SQLException("invalid id: " + id);
-			}
-
 			stat.setInt(1, id);  //WHERE id = ?
 
 			ResultSet rs = stat.executeQuery();

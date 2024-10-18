@@ -9,7 +9,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 
 public class UserCredentials {
 	private final int id;
-    private String username;//Non criptata
+    private String username;
     private char[] password;//Criptata
     private String address;
     private String iban;

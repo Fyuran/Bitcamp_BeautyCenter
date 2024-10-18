@@ -1,473 +1,268 @@
 package com.bitcamp.centro.estetico.gui;
 
-import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 
-import com.bitcamp.centro.estetico.DAO.ProductDAO;
 import com.bitcamp.centro.estetico.DAO.TreatmentDAO;
 import com.bitcamp.centro.estetico.DAO.VATDao;
-import com.bitcamp.centro.estetico.models.Product;
+import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.Treatment;
 import com.bitcamp.centro.estetico.models.VAT;
 import com.bitcamp.centro.estetico.utils.inputValidator;
 import com.bitcamp.centro.estetico.utils.inputValidator.inputValidatorException;
 
-public class TreatmentPanel extends JPanel {
+public class TreatmentPanel extends BasePanel<Treatment> {
 
 	private static final long serialVersionUID = 1L;
-	private JTextField txtPrice;
-	private JTextField txtSearchBar;
-	private JTextField txtName;
-	private JComboBox<String> cBoxIVA;
-	private JTextField txtDuration;
-	private List<Product> products;
-	private JLabel msgLbl;
-	private int selectedId;
-	private DefaultTableModel productModel;
+	private static JTextField txfPrice;
+	private static JTextField txfName;
+	private static JComboBox<VAT> VATComboBox;
+	private static JTextField txfDuration;
+	private static int selectedId;
+	private static final int _ISENABLEDCOL = 3;
 
-	// Modello della tabella (scope a livello di classe per poter aggiornare la
-	// tabella)
-	DefaultTableModel tableModel;
-
-	/**
-	 * Create the panel.
-	 */
 	public TreatmentPanel() {
 		setLayout(null);
 		setSize(1024, 768);
 		setName("Trattamenti");
-		products = new ArrayList<>();
+		setTitle("GESTIONE TRATTAMENTI");
+		lbTitle.setBounds(415, 11, 220, 32);
+		menuPanel.setBounds(10, 54, 1004, 347);
+		
+		table.setModel(treatmentModel);
+		table.removeColumn(table.getColumnModel().getColumn(_ISENABLEDCOL));
 
-		JLabel titleTab = new JLabel("GESTIONE TRATTAMENTI");
-		titleTab.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
-		titleTab.setBounds(415, 11, 220, 32);
-		add(titleTab);
-
-		JPanel containerPanel = new JPanel();
-		containerPanel.setLayout(null);
-		containerPanel.setBorder(new LineBorder(new Color(0, 0, 0), 3));
-		containerPanel.setBackground(new Color(255, 255, 255));
-		containerPanel.setBounds(10, 54, 1004, 347);
-		add(containerPanel);
-
-		// Modello della tabella con colonne
-		String[] columnNames = { "ID", "Nome trattamento", "Prezzo", "IVA%", "Durata" };
-		tableModel = new DefaultTableModel(columnNames, 0);
-
-		// Creazione della tabella
-		JTable table = new JTable(tableModel);
-
-		// Listener della tabella per pescare i nomi che servono
-		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			@Override
-			public void valueChanged(ListSelectionEvent event) {
-				if (!event.getValueIsAdjusting()) {
-					int selectedRow = table.getSelectedRow();
-					if (selectedRow != -1) {
-						clearProdutTable();
-						selectedId = Integer.parseInt(String.valueOf(table.getValueAt(selectedRow, 0)));
-						String name = String.valueOf(table.getValueAt(selectedRow, 1));
-						String price = String.valueOf(String.valueOf(table.getValueAt(selectedRow, 2)));
-						String vat = String.valueOf(table.getValueAt(selectedRow, 3) + "%");
-						String duration = String.valueOf(table.getValueAt(selectedRow, 4));
-						products=TreatmentDAO.getProductsOfTreatment(selectedId);
-						System.out.println(products.size());
-						populateProductsTable(products);
-
-						System.out.println(vat);
-						// double vat=Double.parseDouble(vatString.substring(0,vatString.length()-1));
-
-						// { "ID", "Nome trattamento", "Prezzo", "IVA%", "Durata" };
-						// Il listener ascolta la riga selezionata e la usa per popolare i campi
-
-						txtName.setText(name);
-						cBoxIVA.setSelectedItem(vat);
-						txtPrice.setText(price);
-						txtPrice.setText(price);
-						txtDuration.setText(duration);
-						table.clearSelection();
-
-					}
-				}
-			}
-		});
-
-
-		//tabella prodotti per trattamento
-		 String[] columnProductNames = {"ID","Prodotto", "Categoria"};
-			productModel = new DefaultTableModel(columnProductNames, 0);
-			JTable productTable = new JTable(productModel);
-			productTable.setEnabled(false);
-
-			JScrollPane productScrollPane = new JScrollPane(productTable);
-			productScrollPane.setBounds(577, 474, 437, 181);
-			add(productScrollPane);
-
-
-		// Aggiungere la tabella all'interno di uno JScrollPane per lo scroll
-		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setBounds(23, 60, 959, 276);
-		containerPanel.add(scrollPane);
-
-		JButton btnSearch = new JButton("");
-		btnSearch.setOpaque(false);
-		btnSearch.setContentAreaFilled(false);
-		btnSearch.setBorderPainted(false);
-		btnSearch.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/searchIcon.png")));
 		btnSearch.setBounds(206, 8, 40, 30);
-		containerPanel.add(btnSearch);
-
-		txtSearchBar = new JTextField();
-		txtSearchBar.setColumns(10);
-		txtSearchBar.setBackground(UIManager.getColor("CheckBox.background"));
-		txtSearchBar.setBounds(23, 14, 168, 24);
-		containerPanel.add(txtSearchBar);
-
-		JButton btnFilter = new JButton("");
-		btnFilter.setOpaque(false);
-		btnFilter.setContentAreaFilled(false);
-		btnFilter.setBorderPainted(false);
-		btnFilter.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/filterIcon.png")));
+		txfSearchBar.setBounds(23, 14, 168, 24);
 		btnFilter.setBounds(256, 8, 40, 30);
-		btnFilter.addActionListener(e -> populateTableByFilter());
-		containerPanel.add(btnFilter);
-
-		JButton btnInsert = new JButton("");
-		btnInsert.setOpaque(false);
-		btnInsert.setContentAreaFilled(false);
-		btnInsert.setBorderPainted(false);
-		btnInsert.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/Insert.png")));
 		btnInsert.setBounds(720, 8, 40, 30);
-		btnInsert.addActionListener(e -> createTreatment());
-		containerPanel.add(btnInsert);
-
-		JButton btnUpdate = new JButton("");
-		btnUpdate.setOpaque(false);
-		btnUpdate.setContentAreaFilled(false);
-		btnUpdate.setBorderPainted(false);
-		btnUpdate.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/Update.png")));
 		btnUpdate.setBounds(770, 8, 40, 30);
-		btnUpdate.addActionListener(e -> updateTreatment());
-		containerPanel.add(btnUpdate);
-
-		JButton btnDelete = new JButton("");
-		btnDelete.setOpaque(false);
-		btnDelete.setContentAreaFilled(false);
-		btnDelete.setBorderPainted(false);
-		btnDelete.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/delete.png")));
 		btnDelete.setBounds(820, 8, 40, 30);
-		btnDelete.addActionListener(e -> deleteTreatment());
-		containerPanel.add(btnDelete);
-
-		JButton btnDisable = new JButton("");
-		btnDisable.setOpaque(false);
-		btnDisable.setContentAreaFilled(false);
-		btnDisable.setBorderPainted(false);
-		btnDisable.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/disable.png")));
 		btnDisable.setBounds(920, 8, 40, 30);
-		containerPanel.add(btnDisable);
-
-		JPanel outputPanel = new JPanel();
-		outputPanel.setLayout(null);
 		outputPanel.setBounds(23, 60, 959, 276);
-		containerPanel.add(outputPanel);
 
-		JButton btnHystorical = new JButton("");
-		btnHystorical.setOpaque(false);
-		btnHystorical.setContentAreaFilled(false);
-		btnHystorical.setBorderPainted(false);
-		btnHystorical.setIcon(new ImageIcon(TreatmentPanel.class.getResource("/com/bitcamp/centro/estetico/resources/cartellina.png")));
-		btnHystorical.setBounds(870, 8, 40, 30);
-		btnHystorical.addActionListener(e -> populateTable());
-		containerPanel.add(btnHystorical);
+		productModel = new NonEditableTableModel(new String[] { "ID", "Prodotto", "Categoria"}, 0);
+		JTable productTable = new JTable(productModel);
+		productTable.setEnabled(false);
 
-		// label e textfield degli input
-		JLabel lblName = new JLabel("Nome trattamento*:");
-		lblName.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblName.setBounds(43, 437, 170, 14);
-		add(lblName);
+		JScrollPane productScrollPane = new JScrollPane(productTable);
+		productScrollPane.setBounds(577, 474, 437, 181);
+		add(productScrollPane);
 
-		txtName = new JTextField();
-		txtName.setColumns(10);
-		txtName.setBounds(209, 436, 220, 20);
-		add(txtName);
+		JLabel lbName = new JLabel("Nome trattamento*:");
+		lbName.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
+		lbName.setBounds(43, 437, 170, 14);
+		add(lbName);
+
+		txfName = new JTextField();
+		txfName.setColumns(10);
+		txfName.setBounds(209, 436, 220, 20);
+		add(txfName);
 
 		JLabel lblPrice = new JLabel("Prezzo:");
 		lblPrice.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblPrice.setBounds(43, 474, 170, 17);
 		add(lblPrice);
 
-		txtPrice = new JTextField();
-		txtPrice.setColumns(10);
-		txtPrice.setBounds(209, 474, 220, 20);
-		add(txtPrice);
+		txfPrice = new JTextField();
+		txfPrice.setColumns(10);
+		txfPrice.setBounds(209, 474, 220, 20);
+		add(txfPrice);
 
-		JLabel lblIVa = new JLabel("IVA*:");
-		lblIVa.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblIVa.setBounds(43, 513, 170, 14);
-		add(lblIVa);
+		JLabel lbVAT = new JLabel("IVA*:");
+		lbVAT.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
+		lbVAT.setBounds(43, 513, 170, 14);
+		add(lbVAT);
 
-		List<VAT> ivas = VATDao.getAllVAT();
-		int i = 0;
-		String[] ivasToString = new String[ivas.size()];
-		for (VAT iva : ivas) {
-			ivasToString[i] = iva.toString();
-			i++;
-		}
-		cBoxIVA = new JComboBox<>(ivasToString);
-		cBoxIVA.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 11));
-		cBoxIVA.setBounds(209, 511, 220, 22);
-		add(cBoxIVA);
+		VATComboBox = new JComboBox<>();
+		VATComboBox.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 11));
+		VATComboBox.setBounds(209, 511, 220, 22);
+		add(VATComboBox);
 
-		JLabel lblDuration = new JLabel("Durata (minuti):");
-		lblDuration.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblDuration.setBounds(43, 553, 170, 14);
-		add(lblDuration);
+		JLabel lbDuration = new JLabel("Durata (minuti):");
+		lbDuration.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
+		lbDuration.setBounds(43, 553, 170, 14);
+		add(lbDuration);
 
-		txtDuration = new JTextField();
-		txtDuration.setColumns(10);
-		txtDuration.setBounds(209, 552, 220, 20);
-		add(txtDuration);
+		txfDuration = new JTextField();
+		txfDuration.setColumns(10);
+		txfDuration.setBounds(209, 552, 220, 20);
+		add(txfDuration);
 
-		JButton productButton = new JButton("Seleziona i prodotti");
-		productButton.setBounds(530, 432, 166, 29);
-		productButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				new ProductSelector(TreatmentPanel.this);
-			}
-		});
-		add(productButton);
-		msgLbl = new JLabel("");
-		msgLbl.setBounds(248, 413, 625, 16);
-		add(msgLbl);
-
-
-		populateTable();
-
-	}
-
-	public void getProducts(List<Integer> productIds) {
-		products.clear();
-		for (int id : productIds) {
-			Product p = ProductDAO.getProduct(id).get();
-			products.add(p);
-			System.out.println(id);
-		}
-		for (Product p : products) {
-			System.out.println(p);
-		}
-		populateProductsTable(products);
-		msgLbl.setText("Prodotti selezionati correttamente");
-	}
-
-	void populateTable() {
-		clearTable();
-		List<Treatment> treatments = TreatmentDAO.getAllTreatments();
-		if (treatments.isEmpty()) {
-			tableModel.addRow(new String[] { "Sembra non ci siano trattamenti presenti", "" });
-			return;
-		}
-		for (Treatment t : treatments) {
-			if (t.isEnabled()) {
-				tableModel.addRow(new String[] { String.valueOf(t.getId()), t.getType(), String.valueOf(t.getPrice()),
-						t.getVat().toString(), String.valueOf(t.getDuration().toMinutes()) });
-			}
-			// { "ID","Nome trattamento", "Prezzo", "IVA%", "Durata" };
-		}
-	}
-
-	private void clearTable() {
-		tableModel.getDataVector().removeAllElements();
-		revalidate();
-	}
-	private void clearProdutTable(){
-		productModel.getDataVector().removeAllElements();
-		revalidate();
-	}
-
-	private void createTreatment() {
-		System.out.println(isDataValid(true));
-		if (isDataValid(true)) {
-			String name = txtName.getText();
-			BigDecimal price = new BigDecimal(txtPrice.getText());
-			String vatString=String.valueOf(cBoxIVA.getSelectedItem().toString());
-			double vatAmount = Double.parseDouble(vatString.substring(0, vatString.length() - 1));
-			VAT vat = VATDao.getVATByAmount(vatAmount).get();
-			int durationInt = Integer.parseInt(txtDuration.getText());
-			Duration duration = Duration.ofMinutes(durationInt);
-
-
-//
-			// prodottiSelezionati
-			// isEnabled
-
-			Treatment t = new Treatment(name, price, vat, duration, products, true);
-
-			Treatment tUpdated=TreatmentDAO.insertTreatment(t).get();
-			//per aggiungere i prodotti nella tabella tratmentproduct
-			for(Product p:products) {
-				TreatmentDAO.addProductToTreatment(tUpdated, p);
-			}
-			msgLbl.setText(name + " inserito correttamente");
-			populateTable();
-		}
-
-	}
-
-	private boolean isDataValid(boolean mustNameBeUnique) {
-		msgLbl.setText("");
-		if (mustNameBeUnique) {
-			if (!TreatmentDAO.isTreatmentNameUnique(txtName.getText())) {
-				msgLbl.setText("Nome del trattamento già presente");
-				return false;
-			}
-		}
-		try {
-			inputValidator.validateName(txtName.getText());
-		} catch (inputValidatorException e) {
-			msgLbl.setText(e.getMessage());
-			e.printStackTrace();
-			return false;
-		}
-
-		if(Integer.parseInt(txtDuration.getText())>1200) {
-			msgLbl.setText("Inserire una durata in minuti valida");
-			return false;
-		}
-		return true;
+		JButton productBtn = new JButton("Seleziona i prodotti");
+		productBtn.setBounds(530, 432, 166, 29);
+		productBtn.addActionListener(e -> new ProductSelector(TreatmentPanel.this));
+		add(productBtn);
+		lbOutput = new JLabel("");
+		lbOutput.setBounds(248, 413, 625, 16);
+		add(lbOutput);
 	}
 
 	private void populateTableByFilter() {
-		msgLbl.setText("");
-		if (txtSearchBar.getText().isBlank() || txtSearchBar.getText().isEmpty()) {
-			msgLbl.setText("Inserire un filtro!");
+		lbOutput.setText("");
+		if (txfSearchBar.getText().isBlank() || txfSearchBar.getText().isEmpty()) {
+			lbOutput.setText("Inserire un filtro!");
 			return;
 		}
 		clearTable();
-		List<Treatment> treatments = TreatmentDAO.getAllTreatments();
+
 		if (products.isEmpty()) {
-			tableModel.addRow(new String[] { "Sembra non ci siano trattamenti presenti", "" });
+			treatmentModel.addRow(new String[] { "Sembra non ci siano trattamenti presenti", "" });
 			return;
 		}
 		for (Treatment t : treatments) {
-			if (t.isEnabled() && t.getType().toLowerCase().contains(txtSearchBar.getText().toLowerCase())) {
-				tableModel.addRow(new String[] { String.valueOf(t.getId()), t.getType(), String.valueOf(t.getPrice()),
+			if (t.isEnabled() && t.getType().toLowerCase().contains(txfSearchBar.getText().toLowerCase())) {
+				treatmentModel.addRow(new String[] { String.valueOf(t.getId()), t.getType(), String.valueOf(t.getPrice()),
 						t.getVat().toString(), String.valueOf(t.getDuration()) });
 			}
 		}
-		txtSearchBar.setText("");
+		txfSearchBar.setText("");
 	}
 
-	private void updateTreatment() {
-		if (isDataValid(false)) {
-			String name = txtName.getText();
-			BigDecimal price = new BigDecimal(txtPrice.getText());
-			String vatString=String.valueOf(cBoxIVA.getSelectedItem().toString());
-			double vatAmount = Double.parseDouble(vatString.substring(0, vatString.length() - 1));
-			VAT vat = VATDao.getVATByAmount(vatAmount).get();
-			int durationInt = Integer.parseInt(txtDuration.getText());
-			Duration duration = Duration.ofMinutes(durationInt);
-			// prodottiSelezionati
-			// isEnabled
-			Treatment oldTreatment=TreatmentDAO.getTreatment(selectedId).get();
-			for(Product p:oldTreatment.getProducts()) {
-				TreatmentDAO.removeProductFromTreatment(oldTreatment, p);
-			}
-			Treatment t = new Treatment(name, price, vat, duration, products, true);
-
-			TreatmentDAO.updateTreatment(selectedId, t);
-			//per aggiungere i prodotti nella tabella tratmentproduct
-			for(Product p:products) {
-				TreatmentDAO.addProductToTreatment(oldTreatment, p);
-			}
-			clearFields();
-			populateTable();
-
-		}
-
-	}
-	void populateProductsTable(List<Product> products) {
-		if (products.isEmpty()) {
-			productModel.addRow(new String[] { "Sembra non ci siano prodotti presenti", "" });
-			return;
-		}
-		for (Product p : products) {
-			productModel.addRow(new String[] {String.valueOf(p.getId()),p.getName(),p.getType().getDescription()});
-		}
-	}
-
-	private void deleteTreatment() {
-		msgLbl.setText("");
-		TreatmentDAO.toggleEnabledTreatment(selectedId);
-		msgLbl.setText("Trattamento rimosso correttamente");
-		populateTable();
-	}
-
-	private void clearFields() {
-		txtName.setText("");
-		txtPrice.setText("");
-		txtDuration.setText("");
+	@Override
+	public void clearTxfFields() {
+		txfName.setText("");
+		txfPrice.setText("");
+		txfDuration.setText("");
 		products.clear();
 	}
 
-	public JTextField getTxtPrice() {
-		return txtPrice;
+	@Override
+	public void search() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'search'");
 	}
 
-	public void setTxtPrice(JTextField txtPrice) {
-		this.txtPrice = txtPrice;
+	@Override
+	public Optional<Treatment> insertElement() {
+		if (!isDataValid()) return Optional.empty();
+		String name = txfName.getText();
+		BigDecimal price = new BigDecimal(txfPrice.getText());
+		String vatString = String.valueOf(VATComboBox.getSelectedItem().toString());
+		double vatAmount = Double.parseDouble(vatString.substring(0, vatString.length() - 1));
+		VAT vat = VATDao.getVATByAmount(vatAmount).get();
+		int durationInt = Integer.parseInt(txfDuration.getText());
+		Duration duration = Duration.ofMinutes(durationInt);
+
+		Treatment treatment = new Treatment(name, price, vat, duration, products, true);
+
+		Optional<Treatment> opt = TreatmentDAO.insertTreatment(treatment);
+		TreatmentDAO.addProductsToTreatment(treatment, products);
+
+		lbOutput.setText(name + " inserito correttamente");
+		clearTxfFields();
+		refreshTable();
+		
+		return opt;
 	}
 
-	public JTextField getTxfSearchBar() {
-		return txtSearchBar;
+	@Override
+	public int updateElement() {
+		if (!isDataValid()) return -1;
+		String name = txfName.getText();
+		BigDecimal price = new BigDecimal(txfPrice.getText());
+		String vatString = String.valueOf(VATComboBox.getSelectedItem().toString());
+		double vatAmount = Double.parseDouble(vatString.substring(0, vatString.length() - 1));
+		VAT vat = VATDao.getVATByAmount(vatAmount).get();
+		int durationInt = Integer.parseInt(txfDuration.getText());
+		Duration duration = Duration.ofMinutes(durationInt);
+		// prodottiSelezionati
+		// isEnabled
+		Treatment t = new Treatment(name, price, vat, duration, products, true);
+
+		clearTxfFields();
+		refreshTable();
+		return TreatmentDAO.updateTreatment(selectedId, t);
 	}
 
-	public void setTxfSearchBar(JTextField txfSearchBar) {
-		this.txtSearchBar = txfSearchBar;
+	@Override
+	public int deleteElement() {
+		try {
+			int row = table.getSelectedRow();
+			if (row == -1) {
+				throw new IllegalArgumentException("no row selected");
+			}
+			final int id = (int) treatmentModel.getValueAt(row, 0);
+			lbOutput.setText("Trattamento cancellato");
+			refreshTable();
+			return TreatmentDAO.deleteTreatment(id);
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "Impossibile cancellare: " + e.getMessage(), "Errore di database",
+					JOptionPane.ERROR_MESSAGE);
+		}
+		return -1;
 	}
 
-	public JTextField getTxfName() {
-		return txtName;
+	@Override
+	public int disableElement() {
+		lbOutput.setText("Trattamento rimosso correttamente");
+		refreshTable();
+		return TreatmentDAO.toggleEnabledTreatment(selectedId);
 	}
 
-	public void setTxfName(JTextField txfName) {
-		this.txtName = txfName;
+	@Override
+	public void populateTable() {
+		clearTable();
+		if (treatments.isEmpty()) return;
+		treatments.parallelStream()
+				.filter(t -> t.isEnabled() || isAdmin())
+				.forEach(t -> treatmentModel.addRow(t.toTableRow()));
+
+		if (products.isEmpty()) return;
+		products.parallelStream()
+				.filter(t -> t.isEnabled())
+				.forEach(p -> productModel.addRow(p.toTableRow()));
 	}
 
-	public JComboBox<String> getcBoxIVA() {
-		return cBoxIVA;
+	@Override
+	public boolean isDataValid() {
+		if (!TreatmentDAO.isTreatmentNameUnique(txfName.getText())) {
+			lbOutput.setText("Nome del trattamento già presente");
+			return false;
+		}
+		try {
+			inputValidator.validateName(txfName);
+		} catch (inputValidatorException e) {
+			lbOutput.setText(e.getMessage());
+			e.printStackTrace();
+		}
+		return false;
 	}
 
-	public void setcBoxIVA(JComboBox<String> cBoxIVA) {
-		this.cBoxIVA = cBoxIVA;
-	}
+	@Override
+	public ListSelectionListener getListSelectionListener() {
+		return new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent event) {
+				if (!event.getValueIsAdjusting()) {
+					int selectedRow = table.getSelectedRow();
+					if (selectedRow != -1) {
 
-	public JTextField getTxtDuration() {
-		return txtDuration;
-	}
+						selectedId = Integer.parseInt(String.valueOf(treatmentModel.getValueAt(selectedRow, 0)));
+						String name = String.valueOf(treatmentModel.getValueAt(selectedRow, 1));
+						String price = String.valueOf(String.valueOf(treatmentModel.getValueAt(selectedRow, 2)));
+						String vat = String.valueOf(treatmentModel.getValueAt(selectedRow, 3) + "%");
+						Duration duration = (Duration) treatmentModel.getValueAt(selectedRow, 4);
+						products = TreatmentDAO.getProductsOfTreatment(selectedId);
+						populateTable();
 
-	public void setTxtDuration(JTextField txtDuration) {
-		this.txtDuration = txtDuration;
-	}
+						txfName.setText(name);
+						VATComboBox.setSelectedItem(vat);
+						txfPrice.setText(price);
+						txfPrice.setText(price);
+						txfDuration.setText(String.valueOf(duration.toMinutes()));
+						table.clearSelection();
 
-	public DefaultTableModel getTableModel() {
-		return tableModel;
-	}
-
-	public void setTableModel(DefaultTableModel tableModel) {
-		this.tableModel = tableModel;
+					}
+				}
+			}
+		};
 	}
 }

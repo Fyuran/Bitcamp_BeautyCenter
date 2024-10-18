@@ -14,13 +14,13 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 
 import com.bitcamp.centro.estetico.DAO.CustomerDAO;
 import com.bitcamp.centro.estetico.DAO.DAOReservation;
 import com.bitcamp.centro.estetico.DAO.DAOShift;
 import com.bitcamp.centro.estetico.DAO.TreatmentDAO;
 import com.bitcamp.centro.estetico.controller.ReservationController;
+import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.*;
 import com.bitcamp.centro.estetico.useCases.CreateReservationUseCase;
 import com.bitcamp.centro.estetico.useCases.DeleteReservationUseCase;
@@ -471,12 +471,7 @@ public class ReservationForm extends JPanel {
 		String[] columnNames = { "ID", "Cliente", "Data e Ora", "Operatore", "Servizio", "Durata" };
 
 		// Creazione di un modello di tabella personalizzato
-		DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false; // Impedisce la modifica di qualsiasi cella
-			}
-		};
+		NonEditableTableModel model = new NonEditableTableModel(columnNames, 0);
 
 		for (Map.Entry<Integer, Reservation> entry : reservations.entrySet()) {
 			Reservation reservation = entry.getValue();
@@ -492,9 +487,9 @@ public class ReservationForm extends JPanel {
 			Object[] rowData = { reservation.getId(), reservation.getCustomer(),
 					reservation.getDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
 					reservation.getEmployee(), reservation.getTreatment().getType(), formattedDuration };
-			tableModel.addRow(rowData);
+			model.addRow(rowData);
 		}
-		table.setModel(tableModel);
+		table.setModel(model);
 	}
 
 	private void getVisibleInvisibleCalendar(JCalendar calendar) {

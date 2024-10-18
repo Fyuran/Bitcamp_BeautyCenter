@@ -12,9 +12,9 @@ import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 
 import com.bitcamp.centro.estetico.DAO.TransactionDAO;
+import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.PayMethod;
 import com.bitcamp.centro.estetico.models.Transaction;
 import com.toedter.calendar.JDateChooser;
@@ -22,16 +22,16 @@ import com.toedter.calendar.JDateChooser;
 public class ReportPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
-	private JTextField txtSearchBar;
+	private JTextField txfSearchBar;
 	private JDateChooser startDateChooser;
 	private JDateChooser endDateChooser;
 	private JComboBox<PayMethod> payMethodSelector;
-	private JTextField txtCardPercentage;
-	private JTextField txtTotalAmount;
-	private JTextField txtCurrencyPercentage;
+	private JTextField txfCardPercentage;
+	private JTextField txfTotalAmount;
+	private JTextField txfCurrencyPercentage;
 	// Modello della tabella (scope a livello di classe per poter aggiornare la
 	// tabella)
-	DefaultTableModel tableModel;
+	private NonEditableTableModel model;
 	private JLabel msgLbl;
 	private int selectedId;
 
@@ -56,10 +56,10 @@ public class ReportPanel extends JPanel {
 
 		// Modello della tabella con colonne
 		String[] columnNames = { "id", "€", "CLIENTE", "DATA", "PAGAMENTO", "SERVIZI" };
-		tableModel = new DefaultTableModel(columnNames, 0);
+		model = new NonEditableTableModel(columnNames, 0);
 
 		// Creazione della tabella
-		JTable table = new JTable(tableModel);
+		JTable table = new JTable(model);
 		// Listener della tabella per pescare i nomi che servono
 		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
@@ -107,11 +107,11 @@ public class ReportPanel extends JPanel {
 		lblSearchBar.setBounds(23, 14, 168, 24);
 		containerPanel.add(lblSearchBar);
 
-		txtSearchBar = new JTextField();
-		txtSearchBar.setColumns(10);
-		txtSearchBar.setBackground(UIManager.getColor("CheckBox.background"));
-		txtSearchBar.setBounds(153, 14, 168, 24);
-		containerPanel.add(txtSearchBar);
+		txfSearchBar = new JTextField();
+		txfSearchBar.setColumns(10);
+		txfSearchBar.setBackground(UIManager.getColor("CheckBox.background"));
+		txfSearchBar.setBounds(153, 14, 168, 24);
+		containerPanel.add(txfSearchBar);
 		
 		JLabel lblPayMethod = new JLabel("Pagamento:");
 		lblPayMethod.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
@@ -152,36 +152,36 @@ public class ReportPanel extends JPanel {
 		lblTotalAmount.setBounds(43, 437, 170, 14);
 		add(lblTotalAmount);
 
-		txtTotalAmount = new JTextField();
-		txtTotalAmount.setColumns(10);
-		txtTotalAmount.setBounds(259, 436, 220, 20);
-		txtTotalAmount.setText("0");
-		txtTotalAmount.setEnabled(false);
-		add(txtTotalAmount);
+		txfTotalAmount = new JTextField();
+		txfTotalAmount.setColumns(10);
+		txfTotalAmount.setBounds(259, 436, 220, 20);
+		txfTotalAmount.setText("0");
+		txfTotalAmount.setEnabled(false);
+		add(txfTotalAmount);
 		
 		JLabel lblCardPercentage = new JLabel("% pagamenti con carta:");
 		lblCardPercentage.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblCardPercentage.setBounds(43, 467, 170, 14);
 		add(lblCardPercentage);
 
-		txtCardPercentage = new JTextField();
-		txtCardPercentage.setColumns(10);
-		txtCardPercentage.setBounds(259, 466, 220, 20);
-		txtCardPercentage.setText("0");
-		txtCardPercentage.setEnabled(false);
-		add(txtCardPercentage);
+		txfCardPercentage = new JTextField();
+		txfCardPercentage.setColumns(10);
+		txfCardPercentage.setBounds(259, 466, 220, 20);
+		txfCardPercentage.setText("0");
+		txfCardPercentage.setEnabled(false);
+		add(txfCardPercentage);
 		
 		JLabel lblCurrencyPercentage = new JLabel("% pagamenti contanti:");
 		lblCurrencyPercentage.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblCurrencyPercentage.setBounds(553, 467, 170, 14);
 		add(lblCurrencyPercentage);
 
-		txtCurrencyPercentage = new JTextField();
-		txtCurrencyPercentage.setColumns(10);
-		txtCurrencyPercentage.setBounds(769, 466, 220, 20);
-		txtCurrencyPercentage.setText("0");
-		txtCurrencyPercentage.setEnabled(false);
-		add(txtCurrencyPercentage);
+		txfCurrencyPercentage = new JTextField();
+		txfCurrencyPercentage.setColumns(10);
+		txfCurrencyPercentage.setBounds(769, 466, 220, 20);
+		txfCurrencyPercentage.setText("0");
+		txfCurrencyPercentage.setEnabled(false);
+		add(txfCurrencyPercentage);
 
 		msgLbl = new JLabel("");
 		msgLbl.setBounds(389, 606, 625, 16);
@@ -195,26 +195,26 @@ public class ReportPanel extends JPanel {
 		clearTable();
 		List<Transaction> transactions = TransactionDAO.getAllTransactions();
 		if (transactions.isEmpty()) {
-			tableModel.addRow(new String[] { "Sembra non ci siano transazioni presenti", "" });
+			model.addRow(new String[] { "Sembra non ci siano transazioni presenti", "" });
 			return;
 		}
 		List<Transaction> filteredTransactions = new ArrayList<Transaction>();
 		for (Transaction t : transactions) {
 			if (t.isEnabled()) {
 				filteredTransactions.add(t);
-				tableModel.addRow(new String[] { String.valueOf(t.getId()), String.valueOf(t.getPrice()), t.getCustomer().getName() + " " + t.getCustomer().getSurname(), String.valueOf(t.getDateTime()), String.valueOf(t.getPaymentMethod()), String.valueOf(t.getServices())});
+				model.addRow(new String[] { String.valueOf(t.getId()), String.valueOf(t.getPrice()), t.getCustomer().getName() + " " + t.getCustomer().getSurname(), String.valueOf(t.getDateTime()), String.valueOf(t.getPaymentMethod()), String.valueOf(t.getServices())});
 			}
 		}
 		calculateReport(filteredTransactions);
 	}
 
 	private void clearTable() {
-		tableModel.getDataVector().removeAllElements();
+		model.getDataVector().removeAllElements();
 		revalidate();
 	}
 	
 	private void clearFilters() {
-		txtSearchBar.setText("");
+		txfSearchBar.setText("");
 		payMethodSelector.setSelectedIndex(0);
 		startDateChooser.setDate(null);
 		endDateChooser.setDate(null);
@@ -222,11 +222,11 @@ public class ReportPanel extends JPanel {
 
 	private void populateTableByFilter() {
 		msgLbl.setText("");
-		if (txtSearchBar.getText().isBlank() && startDateChooser.getDate() == null && endDateChooser.getDate() == null && payMethodSelector.getSelectedItem() == null) {
+		if (txfSearchBar.getText().isBlank() && startDateChooser.getDate() == null && endDateChooser.getDate() == null && payMethodSelector.getSelectedItem() == null) {
 			msgLbl.setText("Inserire un filtro!");
 			return;
 		}
-		String customerName = txtSearchBar.getText();
+		String customerName = txfSearchBar.getText();
 		PayMethod payMethod = payMethodSelector.getItemAt(payMethodSelector.getSelectedIndex());
 		
 		clearTable();
@@ -251,11 +251,11 @@ public class ReportPanel extends JPanel {
 			
 			if (t.isEnabled() && filterName && filterPayMethod && filterStartDate && filterEndDate) {
 				filteredTransactions.add(t);
-				tableModel.addRow(new String[] { String.valueOf(t.getId()), String.valueOf(t.getPrice()), t.getCustomer().getName() + " " + t.getCustomer().getSurname(), String.valueOf(t.getDateTime()), String.valueOf(t.getPaymentMethod()), String.valueOf(t.getServices())});
+				model.addRow(new String[] { String.valueOf(t.getId()), String.valueOf(t.getPrice()), t.getCustomer().getName() + " " + t.getCustomer().getSurname(), String.valueOf(t.getDateTime()), String.valueOf(t.getPaymentMethod()), String.valueOf(t.getServices())});
 			}
 		}
 		if (filteredTransactions.isEmpty()) {
-			tableModel.addRow(new String[] { "Sembra non ci siano transazioni presenti che soddifino i filtri richiesti", "" });
+			model.addRow(new String[] { "Sembra non ci siano transazioni presenti che soddifino i filtri richiesti", "" });
 			return;
 		}
 		calculateReport(filteredTransactions);
@@ -286,9 +286,9 @@ public class ReportPanel extends JPanel {
 	        String cardPercentageString = cardPercentage + "%";
 	        String currencyPercentageString = currencyPercentage + "%";
 
-	        txtTotalAmount.setText(totalAmountString);
-	        txtCardPercentage.setText(cardPercentageString);
-	        txtCurrencyPercentage.setText(currencyPercentageString);
+	        txfTotalAmount.setText(totalAmountString);
+	        txfCardPercentage.setText(cardPercentageString);
+	        txfCurrencyPercentage.setText(currencyPercentageString);
 	    }
 	}
 }

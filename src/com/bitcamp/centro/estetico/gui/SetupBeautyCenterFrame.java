@@ -277,15 +277,15 @@ public class SetupBeautyCenterFrame extends JFrame {
 	// Metodo per validare gli input
 	private static boolean validateInputs() {
 		try {
-			inputValidator.validateAlphanumeric(txfName.getText(), "Nome");
-			inputValidator.validatePhoneNumber(txfPhone.getText());
-			inputValidator.validateEmail(txfPEC.getText());
-			inputValidator.validateEmail(txfEmail.getText());
-			inputValidator.validateAlphanumeric(txfSedeLegale.getText(), "Sede legale");
-			inputValidator.validateAlphanumeric(txfSedeOperativa.getText(), "Sede operativa");
-			inputValidator.validateAlphanumeric(txfRea.getText(), "REA");
-			inputValidator.validatePIva(txfPIva.getText());
-			inputValidator.validateRea(txfRea.getText());
+			inputValidator.validateAlphanumeric(txfName, "Nome");
+			inputValidator.validatePhoneNumber(txfPhone);
+			inputValidator.validateEmail(txfPEC);
+			inputValidator.validateEmail(txfEmail);
+			inputValidator.validateAlphanumeric(txfSedeLegale, "Sede legale");
+			inputValidator.validateAlphanumeric(txfSedeOperativa, "Sede operativa");
+			inputValidator.validateAlphanumeric(txfRea, "REA");
+			inputValidator.validatePIva(txfPIva);
+			inputValidator.validateRea(txfRea);
 		} catch (inputValidatorException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 			e.printStackTrace();

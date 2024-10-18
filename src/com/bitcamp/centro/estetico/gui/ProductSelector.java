@@ -9,20 +9,16 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 
 import com.bitcamp.centro.estetico.DAO.ProductDAO;
+import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.Product;
 
 public class ProductSelector extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
-	DefaultTableModel tableModel;
-	private JTable productTable;
 	private JComboBox<String> filterComboBox;
 	private JTextField filterText;
-	private ArrayList<Integer> productIds;
     private TreatmentPanel parentPanel;
 
 	public ProductSelector(TreatmentPanel parentPanel) {
@@ -65,8 +61,8 @@ public class ProductSelector extends JFrame {
 
 		// Tabella prodotti
         String[] columnNames = {"ID","Prodotto", "Categoria"};
-		tableModel = new DefaultTableModel(columnNames, 0);
-		productTable = new JTable(tableModel);
+		model = new NonEditableTableModel(columnNames, 0);
+		productTable = new JTable(model);
 
 		 productTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 	    	productIds=new ArrayList<>();
@@ -97,7 +93,7 @@ public class ProductSelector extends JFrame {
 	}
 
 	public void clearTable() {
-		tableModel.getDataVector().removeAllElements();
+		model.getDataVector().removeAllElements();
 		revalidate();
 	}
 
@@ -105,11 +101,11 @@ public class ProductSelector extends JFrame {
 		clearTable();
 		List<Product> products = ProductDAO.getAllProducts();
 		if (products.isEmpty()) {
-			tableModel.addRow(new String[] { "Sembra non ci siano prodotti presenti", "" });
+			model.addRow(new String[] { "Sembra non ci siano prodotti presenti", "" });
 			return;
 		}
 		for (Product p : products) {
-    		tableModel.addRow(new String[] {String.valueOf(p.getId()),p.getName(),p.getType().getDescription()});
+    		model.addRow(new String[] {String.valueOf(p.getId()),p.getName(),p.getType().getDescription()});
 		}
 	}
 
@@ -117,7 +113,7 @@ public class ProductSelector extends JFrame {
 		clearTable();
 		List<Product> products = ProductDAO.getAllProducts();
 		if (products.isEmpty()) {
-			tableModel.addRow(new String[] { "Sembra non ci siano prodotti presenti", "" });
+			model.addRow(new String[] { "Sembra non ci siano prodotti presenti", "" });
 			return;
 		}
 		String filter = filterComboBox.getSelectedItem().toString();
@@ -125,14 +121,14 @@ public class ProductSelector extends JFrame {
 		case "Nome":
 			for (Product p : products) {
 				if (p.getName().toLowerCase().contains(filterText.getText().toLowerCase())) {
-					tableModel.addRow(new String[] { p.getName(), p.getType().getDescription() });
+					model.addRow(new String[] { p.getName(), p.getType().getDescription() });
 				}
 			}
 			break;
 		case "Categoria":
 			for (Product p : products) {
 				if (p.getType().getDescription().toLowerCase().contains(filterText.getText().toLowerCase())) {
-					tableModel.addRow(new String[] { p.getName(), p.getType().getDescription() });
+					model.addRow(new String[] { p.getName(), p.getType().getDescription() });
 				}
 			}
 			break;
@@ -142,7 +138,7 @@ public class ProductSelector extends JFrame {
 
 	}
 	public void sendProduct() {
-    	parentPanel.getProducts(productIds);
+    	//parentPanel.getProducts(productIds); //TODO: Fix this
     	this.dispose();
     }
 

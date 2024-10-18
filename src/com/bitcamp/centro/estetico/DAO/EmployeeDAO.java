@@ -11,16 +11,18 @@ import java.util.function.Predicate;
 import com.bitcamp.centro.estetico.models.Employee;
 import com.bitcamp.centro.estetico.models.Main;
 import com.bitcamp.centro.estetico.models.Roles;
+import com.bitcamp.centro.estetico.models.Treatment;
 
 public abstract class EmployeeDAO {
 	private static Connection conn = Main.getConnection();
 
 	public final static Optional<Employee> insertEmployee(Employee obj) {
 		String query = "INSERT INTO beauty_centerdb.employee("
-				+ "name, surname, is_female, birthday, birthplace, role, hired, termination, credentials_id, notes, is_enabled, serial) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
+				+ "name, surname, is_female, birthday, birthplace, role, hired, "
+				+ "termination, credentials_id, notes, is_enabled, serial, treatment_id) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-		try(PreparedStatement stat = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+		try (PreparedStatement stat = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 			LocalDate terminationDate = obj.getTerminationDate();
 
 			stat.setString(1, obj.getName());
@@ -37,19 +39,20 @@ public abstract class EmployeeDAO {
 			stat.setString(10, obj.getNotes());
 			stat.setBoolean(11, obj.isEnabled());
 			stat.setLong(12, obj.getEmployeeSerial());
+			stat.setInt(13, obj.getTreatment().getId());
 
 			stat.executeUpdate();
 			conn.commit();
 
 			ResultSet generatedKeys = stat.getGeneratedKeys();
-			if(generatedKeys.next()) {
+			if (generatedKeys.next()) {
 				int id = generatedKeys.getInt(1);
 				return Optional.ofNullable(new Employee(id, obj));
 			}
 			throw new SQLException("Could not retrieve id");
-		} catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if (conn != null) {
 				try {
 					conn.rollback();
 				} catch (SQLException e1) {
@@ -64,22 +67,20 @@ public abstract class EmployeeDAO {
 		String query = "SELECT * FROM beauty_centerdb.employee WHERE id = ?";
 
 		Optional<Employee> opt = Optional.empty();
-		if(isEmpty()) return opt;
-		
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			if(id <= 0) {
-				throw new SQLException("invalid id: " + id);
-			}
-			stat.setInt(1, id);  //WHERE id = ?
+		if (isEmpty())
+			return opt;
+
+		try (PreparedStatement stat = conn.prepareStatement(query)) {
+			stat.setInt(1, id); // WHERE id = ?
 
 			ResultSet rs = stat.executeQuery();
 			conn.commit();
-			if(rs.next()) {
+			if (rs.next()) {
 				opt = Optional.ofNullable(new Employee(rs));
 			}
-		} catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if (conn != null) {
 				try {
 					conn.rollback();
 				} catch (SQLException e1) {
@@ -95,15 +96,15 @@ public abstract class EmployeeDAO {
 
 		String query = "SELECT * FROM beauty_centerdb.employee";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try (PreparedStatement stat = conn.prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
 			conn.commit();
-			while(rs.next()) {
+			while (rs.next()) {
 				list.add(new Employee(rs));
 			}
-		} catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if (conn != null) {
 				try {
 					conn.rollback();
 				} catch (SQLException e1) {
@@ -117,15 +118,15 @@ public abstract class EmployeeDAO {
 	public final static boolean isEmpty() {
 		String query = "SELECT * FROM beauty_centerdb.employee LIMIT 1";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try (PreparedStatement stat = conn.prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
 			conn.commit();
-			if(rs.next()) {
+			if (rs.next()) {
 				return false;
 			}
-		} catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if (conn != null) {
 				try {
 					conn.rollback();
 				} catch (SQLException e1) {
@@ -142,7 +143,7 @@ public abstract class EmployeeDAO {
 
 	public final static List<Employee> filterEmployeesBy(Predicate<? super Employee> pred) {
 		List<Employee> employees = getAllEmployees();
-		if(!employees.isEmpty()) {
+		if (!employees.isEmpty()) {
 			return employees.stream().filter(pred).toList();
 		}
 		return Collections.emptyList();
@@ -153,20 +154,20 @@ public abstract class EmployeeDAO {
 				+ "SET `name` = ?, `surname` = ?, "
 				+ "`is_female` = ?, `birthday` = ?, `birthplace` = ?, "
 				+ "`role` = ?, `hired` = ?, `termination` = ?, "
-				+ "`credentials_id` = ?, `notes` = ?, `is_enabled` = ?, `serial` = ? "
+				+ "`credentials_id` = ?, `notes` = ?, `is_enabled` = ?, `serial` = ?, `treatment_id` = ? "
 				+ "WHERE `id` = ?;";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			if(id <= 0) {
+		try (PreparedStatement stat = conn.prepareStatement(query)) {
+			if (id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
 			int UserCredentialsId = obj.getUserCredentials().getId();
-			if(UserCredentialsId <= 0) {
+			if (UserCredentialsId <= 0) {
 				throw new SQLException("invalid UserCredentials id: " + UserCredentialsId);
 			}
 
 			LocalDate terminationDate = obj.getTerminationDate();
-			
+
 			stat.setString(1, obj.getName());
 			stat.setString(2, obj.getSurname());
 			stat.setBoolean(3, obj.isFemale());
@@ -180,15 +181,19 @@ public abstract class EmployeeDAO {
 			stat.setBoolean(11, obj.isEnabled());
 			stat.setLong(12, obj.getEmployeeSerial());
 
-			stat.setInt(13, id);  //WHERE id = ?
+			Treatment treatment = obj.getTreatment();
+			if(treatment == null) stat.setNull(13,java.sql.Types.INTEGER);
+			else stat.setInt(13, treatment.getId());
+
+			stat.setInt(14, id); // WHERE id = ?
 
 			int exec = stat.executeUpdate();
 			conn.commit();
 
 			return exec;
-		} catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if (conn != null) {
 				try {
 					conn.rollback();
 				} catch (SQLException e1) {
@@ -198,6 +203,7 @@ public abstract class EmployeeDAO {
 		}
 		return -1;
 	}
+
 	public static int updateEmployee(Employee employee) {
 		return updateEmployee(employee.getId(), employee);
 	}
@@ -207,23 +213,23 @@ public abstract class EmployeeDAO {
 				+ "SET is_enabled = ? "
 				+ "WHERE id = ?";
 		UserCredentialsDAO.toggleEnabledUserCredentials(obj.getUserCredentials());
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			if(obj.getId() <= 0) {
+		try (PreparedStatement stat = conn.prepareStatement(query)) {
+			if (obj.getId() <= 0) {
 				throw new SQLException("invalid id: " + obj.getId());
 			}
 
-			boolean toggle = !obj.isEnabled(); //toggle enable or disable state
+			boolean toggle = !obj.isEnabled(); // toggle enable or disable state
 			obj.setEnabled(toggle);
 			stat.setBoolean(1, toggle);
-			stat.setInt(2, obj.getId()); //WHERE id = ?
+			stat.setInt(2, obj.getId()); // WHERE id = ?
 			int exec = stat.executeUpdate();
 
 			conn.commit();
 
 			return exec;
-		} catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if (conn != null) {
 				try {
 					conn.rollback();
 				} catch (SQLException e1) {
@@ -238,24 +244,23 @@ public abstract class EmployeeDAO {
 		return toggleEnabledEmployee(getEmployee(id).get());
 	}
 
-
 	public final static int deleteEmployee(int id) {
 		String query = "DELETE FROM beauty_centerdb.employee WHERE id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			if(id <= 0) {
+		try (PreparedStatement stat = conn.prepareStatement(query)) {
+			if (id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
 
-			stat.setInt(1, id); //WHERE id = ?
+			stat.setInt(1, id); // WHERE id = ?
 
 			int exec = stat.executeUpdate();
 			conn.commit();
 
 			return exec;
-		} catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if (conn != null) {
 				try {
 					conn.rollback();
 				} catch (SQLException e1) {
@@ -266,19 +271,41 @@ public abstract class EmployeeDAO {
 		return -1;
 	}
 
+	public static final boolean isSerialUnique(long serial) {
+		String query = "SELECT serial FROM beauty_centerdb.employee WHERE serial = ? LIMIT 1";
+
+		try (PreparedStatement stat = conn.prepareStatement(query)) {
+			stat.setLong(1, serial);
+			ResultSet rs = stat.executeQuery();
+			conn.commit();
+			return !rs.next();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return true;
+	}
+
 	public final static List<Object[]> toTableRowAll() {
 		List<Employee> list = getAllEmployees();
 		List<Object[]> data = new ArrayList<>(list.size());
-		for(int i = 0; i < list.size(); i++) {
+		for (int i = 0; i < list.size(); i++) {
 			data.add(list.get(i).toTableRow());
 		}
 
 		return data;
 	}
+
 	public final static List<Object[]> toTableRowAll(Predicate<? super Employee> pred) {
 		List<Employee> list = getAllEmployees().parallelStream().filter(pred).toList();
 		List<Object[]> data = new ArrayList<>(list.size());
-		for(int i = 0; i < list.size(); i++) {
+		for (int i = 0; i < list.size(); i++) {
 			data.add(list.get(i).toTableRow());
 		}
 

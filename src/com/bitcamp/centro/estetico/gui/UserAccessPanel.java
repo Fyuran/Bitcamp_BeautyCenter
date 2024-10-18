@@ -10,9 +10,9 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.table.DefaultTableModel;
 
 import com.bitcamp.centro.estetico.DAO.EmployeeDAO;
+import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.Employee;
 import com.bitcamp.centro.estetico.models.Shift;
 
@@ -21,8 +21,8 @@ public class UserAccessPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private DateTimeFormatter dayFormat;
 	private DateTimeFormatter timeFormat;
-	private DefaultTableModel tableModel;
-	private Employee activeUser;
+	private NonEditableTableModel model;
+	private Employee sessionUser = MainFrame.getSessionUser();
 	private JLabel lblName;
 	private JLabel lblUsername;
 	private JLabel lblSurname;
@@ -39,18 +39,13 @@ public class UserAccessPanel extends JPanel {
 	 *
 	 * @throws PropertyVetoException
 	 */
-	public UserAccessPanel(Employee employee) {
-		if (employee == null) {
-			JOptionPane.showMessageDialog(this, "Errore di connessione");
-			System.exit(1);
-		}
-		this.activeUser = employee;
+	public UserAccessPanel() {
 		dayFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		timeFormat = DateTimeFormatter.ofPattern("hh:mm");
 		setLayout(null);
 		setSize(1024, 768);
 		setName("Area personale");
-		JLabel titleTab = new JLabel("Benvenuto " + activeUser.getName());
+		JLabel titleTab = new JLabel("Benvenuto " + sessionUser.getName());
 		titleTab.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
 		titleTab.setBounds(415, 11, 206, 32);
 		add(titleTab);
@@ -105,10 +100,10 @@ public class UserAccessPanel extends JPanel {
 		dataPanel.add(lblPhone);
 
 		String[] columnNames = { "Giorno", "Inizio turno", "Fine turno", "Tipologia" };
-		tableModel = new DefaultTableModel(columnNames, 0);
+		model = new NonEditableTableModel(columnNames, 0);
 
 		// Creazione della tabella
-		JTable shiftTable = new JTable(tableModel);
+		JTable shiftTable = new JTable(model);
 
 		// Aggiungere la tabella all'interno di uno JScrollPane per lo scroll
 		JScrollPane shiftScrollsPane = new JScrollPane(shiftTable);
@@ -133,20 +128,19 @@ public class UserAccessPanel extends JPanel {
 	}
 
 	void populateShiftTable() {
-		System.out.println("ID impiegato: " + activeUser.getId());
 		// popolamento tabella
 		int i=1;
 
-		for (Shift shift : activeUser.getShift()) {
+		for (Shift shift : sessionUser.getShift()) {
 
 			if (!shift.isShiftOver()) {
 				String day = shift.getStart().format(dayFormat);
 				String start = shift.getStart().format(timeFormat);
 				String end = shift.getEnd().format(timeFormat);
-				String type=shift.getType().toString();
+				String type = shift.getType() == null ? null : shift.getType().toString();
 				System.out.println("Turno "+i+":\n ID: "+shift.getId()+"\nGiorno: "+day+ "\nDa a: "+start+"-"+end+"\nTipo: "+type);
 				i++;
-				tableModel.addRow(new String[] { day, start, end, type });
+				model.addRow(new String[] { day, start, end, type });
 
 
 			}
@@ -154,19 +148,19 @@ public class UserAccessPanel extends JPanel {
 	}
 
 	public void updateData() {
-		lblName.setText("Nome: " + activeUser.getName());
-		lblSurname.setText("Cognome: " + activeUser.getSurname());
-		lblRole.setText("Ruolo: " + activeUser.getRole().toString());
-		lblAddress.setText("Indirizzo: " + activeUser.getAddress() + ", " + activeUser.getBirthplace());
-		lblIBAN.setText("IBAN: " + activeUser.getIban());
-		lblHireDate.setText("Data di assunzione: " + activeUser.getHiredDate());
-		lblUsername.setText("Username: " + activeUser.getUsername());
-		lblMail.setText("Mail: " + activeUser.getMail());
-		lblPhone.setText("Telefono: " + activeUser.getPhone());
+		lblName.setText("Nome: " + sessionUser.getName());
+		lblSurname.setText("Cognome: " + sessionUser.getSurname());
+		lblRole.setText("Ruolo: " + sessionUser.getRole().toString());
+		lblAddress.setText("Indirizzo: " + sessionUser.getAddress() + ", " + sessionUser.getBirthplace());
+		lblIBAN.setText("IBAN: " + sessionUser.getIban());
+		lblHireDate.setText("Data di assunzione: " + sessionUser.getHiredDate());
+		lblUsername.setText("Username: " + sessionUser.getUsername());
+		lblMail.setText("Mail: " + sessionUser.getMail());
+		lblPhone.setText("Telefono: " + sessionUser.getPhone());
 	}
 
 	public void changePassword() {
-		ChangePassDialog changePassDialog = new ChangePassDialog(activeUser);
+		ChangePassDialog changePassDialog = new ChangePassDialog(sessionUser);
 		changePassDialog.setAlwaysOnTop(true);
 		updateActiveUser();
 
@@ -174,14 +168,14 @@ public class UserAccessPanel extends JPanel {
 	}
 
 	public void changeUsername() {
-		ChangeUserDialog changeUserDialog = new ChangeUserDialog(this,activeUser);
+		ChangeUserDialog changeUserDialog = new ChangeUserDialog(this,sessionUser);
 		changeUserDialog.setAlwaysOnTop(true);
 		updateActiveUser();
 		updateData();
 
 	}
 	public void updateActiveUser() {
-		this.activeUser=EmployeeDAO.getEmployee(activeUser.getId()).get();
+		this.sessionUser=EmployeeDAO.getEmployee(sessionUser.getId()).get();
 	}
 
 }

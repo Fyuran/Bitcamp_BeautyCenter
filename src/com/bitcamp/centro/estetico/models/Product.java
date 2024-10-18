@@ -133,9 +133,10 @@ public class Product {
 				+ price + ", vat=" + vat + ", type=" + type + ", isEnabled=" + isEnabled + "]";
 	}
 
+	//"ID", "Prodotto", "Categoria", "Quantità", "Quantità minima", "Prezzo", "IVA%"
 	public Object[] toTableRow() {
 		return new Object[] {
-				id, name, amount, minStock, price, vat, type, isEnabled
+				id, name, type, amount, minStock, price, vat
 		};
 	}
 }

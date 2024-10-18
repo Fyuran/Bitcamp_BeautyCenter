@@ -1,7 +1,6 @@
 package com.bitcamp.centro.estetico.DAO;
 
 import java.sql.*;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,9 +20,7 @@ public abstract class TreatmentDAO {
 			stat.setString(1, obj.getType());
 			stat.setBigDecimal(2, obj.getPrice());
 			stat.setInt(3, obj.getVat().getId());
-			LocalTime localTime=LocalTime.MIDNIGHT.plus(obj.getDuration());
-			java.sql.Time sqlTime = java.sql.Time.valueOf(localTime);
-			stat.setTime(4, sqlTime);
+			stat.setTime(4, Time.valueOf(obj.getLocalTimeFromDuration()));
 			stat.setBoolean(5, obj.isEnabled());
 
 			//
@@ -62,9 +59,7 @@ public abstract class TreatmentDAO {
 		if(isEmpty()) return opt;
 		
 		try (PreparedStatement stat = conn.prepareStatement(query)) {
-			if(id <= 0) {
-				throw new SQLException("invalid id: " + id);
-			}
+
 			stat.setInt(1, id); // WHERE id = ?
 
 			ResultSet rs = stat.executeQuery();
@@ -131,18 +126,21 @@ public abstract class TreatmentDAO {
 		return true;
 	}
 
-	public final static int addProductToTreatment(Treatment treatment, Product product) {
+	public final static int[] addProductsToTreatment(Treatment treatment, Product... products) {
 		String query = "INSERT INTO beauty_centerdb.producttreatment(product_id, treatment_id) "
 				+ "VALUES (?, ?)";
 
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			stat.setInt(1, product.getId());
-			stat.setInt(2, treatment.getId());
+			
+			for(Product product: products) {
+				stat.setInt(1, product.getId());
+				stat.setInt(2, treatment.getId());
+				stat.addBatch();
+			}
 
-			int exec = stat.executeUpdate();
+			int[] exec = stat.executeBatch();
 			conn.commit();
-
-			treatment.addProducts(product);
+			treatment.addProducts(products);
 
 			return exec;
 		} catch (SQLException e) {
@@ -155,7 +153,10 @@ public abstract class TreatmentDAO {
 				}
 			}
 		}
-		return -1;
+		return new int[]{};
+	}
+	public final static int[] addProductsToTreatment(Treatment treatment, List<Product> products) {
+		return addProductsToTreatment(treatment, products.toArray(new Product[products.size()]));
 	}
 
 	public final static int removeProductFromTreatment(Treatment treatment, Product product) {
@@ -257,7 +258,7 @@ public abstract class TreatmentDAO {
 			stat.setString(1, obj.getType());
 			stat.setBigDecimal(2, obj.getPrice());
 			stat.setInt(3, obj.getVat().getId());
-			stat.setInt(4, (int) obj.getDuration().toSeconds());
+			stat.setTime(4, Time.valueOf(obj.getLocalTimeFromDuration()));
 			stat.setBoolean(5, obj.isEnabled());
 
 			stat.setInt(6, id); // WHERE id = ?

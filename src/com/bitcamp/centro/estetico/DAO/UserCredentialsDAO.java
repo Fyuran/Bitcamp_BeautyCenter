@@ -20,7 +20,7 @@ public abstract class UserCredentialsDAO {
 
 		try (PreparedStatement stat = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 			stat.setString(1, obj.getUsername());
-			stat.setString(2, obj.getPassword().toString());
+			stat.setString(2, String.copyValueOf(obj.getPassword()));
 			stat.setString(3, obj.getAddress());
 			stat.setString(4, obj.getIban());
 			stat.setString(5, obj.getPhone());
@@ -57,9 +57,6 @@ public abstract class UserCredentialsDAO {
 			return opt;
 
 		try (PreparedStatement stat = conn.prepareStatement(query)) {
-			if(id <= 0) {
-				throw new SQLException("invalid id: " + id);
-			}
 			stat.setInt(1, id); // WHERE id = ?
 
 			ResultSet rs = stat.executeQuery();
@@ -266,7 +263,7 @@ public abstract class UserCredentialsDAO {
 			if (id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
-			stat.setString(1, String.valueOf(password));
+			stat.setString(1, String.copyValueOf(password));
 
 			stat.setInt(2, id); // WHERE id = ?
 
@@ -411,10 +408,17 @@ public abstract class UserCredentialsDAO {
 		try (PreparedStatement pstmt = conn.prepareStatement(query)) {
 			pstmt.setString(1, username);
 			ResultSet rs = pstmt.executeQuery();
+			conn.commit();
 			return !rs.next(); // row is valid? return NOT unique
 		} catch (SQLException e) {
 			e.printStackTrace();
-
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
 		}
 		return false;
 	}

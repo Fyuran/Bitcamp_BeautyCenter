@@ -12,6 +12,7 @@ import com.bitcamp.centro.estetico.gui.SetupWelcomeFrame;
 
 public class Main {
 	private static Connection conn;
+	public static boolean _DEBUG_MODE_FULL = true;
 
 	public Main(String url, String username, String password) {
 		try {

@@ -1,11 +1,9 @@
 package com.bitcamp.centro.estetico.gui;
 
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -13,9 +11,11 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 
+import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
+
 public class ReportVenditePDF {
-	static DefaultTableModel model;
-	String[] columnNames= {"Prodotto", "Vendite", "Incassi (€)", "Spese (€)"};  // Nomi delle colonne
+	private static NonEditableTableModel model;
+	private static String[] columnNames= {"Prodotto", "Vendite", "Incassi (€)", "Spese (€)"};  // Nomi delle colonne
 
 
     public ReportVenditePDF() {
@@ -35,7 +35,7 @@ public class ReportVenditePDF {
 
 
         // Modello della tabella
-        model = new DefaultTableModel(data, columnNames);
+        model = new NonEditableTableModel(data, columnNames);
         frame.getContentPane().setLayout(null);
 
         // Creazione della tabella
@@ -197,7 +197,7 @@ public class ReportVenditePDF {
         });
 
         // Listener per applicare il filtro
-        filtraButton.addActionListener((ActionEvent e) -> {
+        filtraButton.addActionListener(e -> {
             String filtro = filtroField.getText();
             filtraDati(filtro);
         });
@@ -207,7 +207,7 @@ public class ReportVenditePDF {
     }
 
     // Metodo per esportare i dati della tabella in un file PDF usando Apache PDFBox
-    private static void esportaInPDF(File file, DefaultTableModel model) throws IOException {
+    private static void esportaInPDF(File file, NonEditableTableModel model) throws IOException {
         PDDocument document = new PDDocument();
         PDPage page = new PDPage();
         document.addPage(page);
@@ -254,7 +254,7 @@ public class ReportVenditePDF {
     	/*Questa funzione crea un grosso problema: quando fa una ricerca per filtro
     	 i prodotti non corrispondenti vengono rimossi permanentemente.
     	 Da modificare nel seguente modo:
-    	 va creato un DefaultTableModel locale in cui si aggiungono tutti i prodotti
+    	 va creato un NonEditableTableModel locale in cui si aggiungono tutti i prodotti
     	 corrispondenti usando una query sql.
     	 Per ora non la tocco perché non sono sicuro di cosa sia il valore "spesa"
     	 e di come sarà gestita la query - Daniele*/

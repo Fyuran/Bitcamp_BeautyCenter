@@ -11,8 +11,8 @@ import com.bitcamp.centro.estetico.models.Employee;
 public class ChangeUserDialog extends JDialog {
 
 	private static final long serialVersionUID = 1L;
-	private JTextField txtNewUsername;
-	private JPasswordField txtPassword;
+	private JTextField txfNewUsername;
+	private JPasswordField txfPassword;
 	private Employee activeUser;
 	private UserAccessPanel parentPanel;
 
@@ -35,9 +35,9 @@ public class ChangeUserDialog extends JDialog {
 		lblPasswordCheck.setBounds(6, 84, 149, 16);
 		getContentPane().add(lblPasswordCheck);
 
-		txtNewUsername = new JTextField();
-		txtNewUsername.setBounds(179, 39, 182, 26);
-		getContentPane().add(txtNewUsername);
+		txfNewUsername = new JTextField();
+		txfNewUsername.setBounds(179, 39, 182, 26);
+		getContentPane().add(txfNewUsername);
 
 		JButton confirmBtn = new JButton("Conferma");
 		confirmBtn.addActionListener(e -> updateUsername());
@@ -45,9 +45,9 @@ public class ChangeUserDialog extends JDialog {
 
 		getContentPane().add(confirmBtn);
 
-		txtPassword = new JPasswordField();
-		txtPassword.setBounds(179, 79, 182, 26);
-		getContentPane().add(txtPassword);
+		txfPassword = new JPasswordField();
+		txfPassword.setBounds(179, 79, 182, 26);
+		getContentPane().add(txfPassword);
 
 		JCheckBox visibleCheck = new JCheckBox("Mostra password");
 		visibleCheck.setBounds(179, 117, 182, 23);
@@ -55,9 +55,9 @@ public class ChangeUserDialog extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (visibleCheck.isSelected()) {
-					txtPassword.setEchoChar((char) 0);
+					txfPassword.setEchoChar((char) 0);
 				} else {
-					txtPassword.setEchoChar('•');
+					txfPassword.setEchoChar('•');
 				}
 			}
 		});
@@ -73,7 +73,7 @@ public class ChangeUserDialog extends JDialog {
 	private void updateUsername() {
 		if (!isDataValid()) return;
 		
-		String username = txtNewUsername.getText();
+		String username = txfNewUsername.getText();
 		activeUser.setUsername(username);
 		
 		UserCredentialsDAO.updateEmployeeUserCredentials(activeUser);
@@ -85,11 +85,11 @@ public class ChangeUserDialog extends JDialog {
 	}
 
 	private boolean isDataValid() {
-		if (!UserCredentialsDAO.isUsernameUnique(txtNewUsername.getText())) {
+		if (!UserCredentialsDAO.isUsernameUnique(txfNewUsername.getText())) {
 			JOptionPane.showMessageDialog(this, "Nuovo username già in uso");
 			return false;
 		}
-		if (!activeUser.isValidPassword(txtPassword.getPassword())) {
+		if (!activeUser.isValidPassword(txfPassword.getPassword())) {
 			System.out.println(activeUser.getUsername());
 			JOptionPane.showMessageDialog(this, "Password errata");
 			return false;

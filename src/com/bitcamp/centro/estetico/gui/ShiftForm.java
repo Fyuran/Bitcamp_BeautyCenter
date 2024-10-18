@@ -13,11 +13,11 @@ import java.util.Map;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
-import javax.swing.table.DefaultTableModel;
 
 import com.bitcamp.centro.estetico.DAO.DAOShift;
 import com.bitcamp.centro.estetico.DAO.EmployeeDAO;
 import com.bitcamp.centro.estetico.controller.ShiftController;
+import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.*;
 import com.bitcamp.centro.estetico.useCases.CreateShiftUseCase;
 import com.bitcamp.centro.estetico.useCases.DeleteShiftUseCase;
@@ -30,7 +30,7 @@ public class ShiftForm extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private JLabel lblEndShift;
 	private JTextField searchShift;
-	private JTextField txtNotes;
+	private JTextField txfNotes;
 	private int selectedRow = -1;
 	private ButtonGroup group;
 	private DateTimePicker startShift;
@@ -54,7 +54,7 @@ public class ShiftForm extends JPanel {
 	private JLabel lblNotes;
 	private JTable table;
 	private JPanel anagraphicPanel;
-	private DefaultTableModel tableModel;
+	private NonEditableTableModel model;
 	private JButton confirmBtn;
 	private JButton cancelBtn;
 
@@ -118,10 +118,10 @@ public class ShiftForm extends JPanel {
 
 		// Modello della tabella con colonne
 		String[] columnNames = { "Operatore", "Inizio Turno", "Fine Turno", "Tipo Turno", "Note" };
-		tableModel = new DefaultTableModel(columnNames, 0);
+		model = new NonEditableTableModel(columnNames, 0);
 
 		// Creazione della tabella
-		table = new JTable(tableModel);
+		table = new JTable(model);
 
 		// Aggiungere la tabella all'interno di uno JScrollPane per lo scroll
 		scrollPane = new JScrollPane(table);
@@ -213,11 +213,11 @@ public class ShiftForm extends JPanel {
 		rdbtnHolidays.setEnabled(false);
 		anagraphicPanel.add(rdbtnHolidays);
 
-		txtNotes = new JTextField();
-		txtNotes.setColumns(10);
-		txtNotes.setBounds(145, 194, 220, 59);
-		txtNotes.setEnabled(false);
-		anagraphicPanel.add(txtNotes);
+		txfNotes = new JTextField();
+		txfNotes.setColumns(10);
+		txfNotes.setBounds(145, 194, 220, 59);
+		txfNotes.setEnabled(false);
+		anagraphicPanel.add(txfNotes);
 
 		lblOperator = new JLabel("Operatore:");
 		lblOperator.setBounds(10, 10, 170, 14);
@@ -405,21 +405,16 @@ public class ShiftForm extends JPanel {
 	private void populateShiftsTable(Map<Integer, ShiftEmployee> shifts) {
 		String[] columnNames = { "ID", "Inizio", "Fine", "Tipo", "Operatore" };
 
-		DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false; // Impedisce la modifica di qualsiasi cella
-			}
-		};
+		NonEditableTableModel model = new NonEditableTableModel(columnNames, 0);
 
 		for (Map.Entry<Integer, ShiftEmployee> entry : shifts.entrySet()) {
 			ShiftEmployee shiftEmployee = entry.getValue();
 
 			Object[] rowData = { entry.getKey(), shiftEmployee.getShift().getStart(), shiftEmployee.getShift().getEnd(),
 					shiftEmployee.getShift().getType(), shiftEmployee.getEmployee().toString() };
-			tableModel.addRow(rowData);
+			model.addRow(rowData);
 		}
-		table.setModel(tableModel);
+		table.setModel(model);
 	}
 
 	private Map<Integer, ShiftEmployee> getAllShifts() {
@@ -548,7 +543,7 @@ public class ShiftForm extends JPanel {
 		LocalDateTime endDate = shiftEmployee.getShift().getEnd();
 		startShift.setDateTimePermissive(startDate);
 		endShift.setDateTimePermissive(endDate);
-		txtNotes.setText(shiftEmployee.getShift().getNotes());
+		txfNotes.setText(shiftEmployee.getShift().getNotes());
 		ShiftType type = shiftEmployee.getShift().getType();
 
 		if (type == ShiftType.WORK) {
@@ -589,7 +584,7 @@ public class ShiftForm extends JPanel {
 			throw new Exception("Controlla correttamente data e ora");
 		}
 
-		Shift shift = new Shift(sdt, edt, shiftType, txtNotes.getText());
+		Shift shift = new Shift(sdt, edt, shiftType, txfNotes.getText());
 		ShiftEmployee se = new ShiftEmployee(shift, employee);
 
 		return se;

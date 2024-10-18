@@ -114,10 +114,6 @@ public abstract class BeautyCenterDAO {
 		if(isEmpty()) return opt;
 		
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
-			if(id <= 0) {
-				throw new SQLException("invalid id: " + id);
-			}
-
 			stat.setInt(1, id);
 
 			ResultSet rs = stat.executeQuery();

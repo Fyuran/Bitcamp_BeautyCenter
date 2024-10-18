@@ -1,191 +1,48 @@
 package com.bitcamp.centro.estetico.gui;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 
-import com.bitcamp.centro.estetico.DAO.CustomerDAO;
 import com.bitcamp.centro.estetico.DAO.SubscriptionDAO;
 import com.bitcamp.centro.estetico.DAO.VATDao;
+import com.bitcamp.centro.estetico.gui.render.CustomTableCellRenderer;
 import com.bitcamp.centro.estetico.models.*;
 import com.github.lgooddatepicker.components.DatePicker;
 
-public class SubscriptionPanel extends JPanel{
-	private static class NonEditableTableModel extends DefaultTableModel { // non editable model for tables
-		private static final long serialVersionUID = 746772300141997929L;
-
-		public NonEditableTableModel(Object[] columnNames, int rowCount) {
-			super(columnNames, rowCount);
-		}
-
-		@Override
-		public boolean isCellEditable(int row, int column) {
-			// all cells false
-			return false;
-		}
-	}
-
-	private static class RowIsEnabledCellRenderer extends DefaultTableCellRenderer {
-
-		private static final long serialVersionUID = -5727490185915218173L;
-
-		@Override
-		protected void setValue(Object value) {
-			if (value == null) {
-				setText("");
-			} else {
-				String s = value.toString();
-				if (s.equalsIgnoreCase("true")) {
-					setText("Si");
-				} else if (s.equalsIgnoreCase("false")) {
-					setText("No");
-				} else {
-					setText(s);
-				}
-
-				if (value instanceof Customer c) {
-					setText(c.getFullName());
-				}
-			}
-		}
-
-		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-				int row, int column) {
-
-			boolean isEnabled = (boolean) model.getValueAt(row, 8);
-
-			if (!isEnabled) {// if isEnabled
-				setBackground(Color.LIGHT_GRAY);
-			} else {
-				setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
-			}
-			if (isSelected) {
-				setBorder(new LineBorder(new Color(0, 56, 98), 1));
-			} else {
-				setBorder(new EmptyBorder(1, 1, 1, 1));
-			}
-			setFont(table.getFont());
-			setValue(value);
-			return this;
-		}
-
-	}
-
-	// customer cell render for list overriding default toString() call when
-	// rendering cells
-	private static class CustomerListCellRenderer extends DefaultListCellRenderer {
-		private static final long serialVersionUID = -1600461002451054914L;
-
-		private CustomerListCellRenderer() {
-			setOpaque(true);
-		}
-
-		@Override
-		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
-				boolean cellHasFocus) {
-			Customer customer = (Customer) value;
-			setText(customer.getFullName() + " " + customer.getEU_TIN().getValue());
-
-			if (isSelected) {
-				setBackground(list.getSelectionBackground());
-				setForeground(list.getSelectionForeground());
-			} else {
-				setBackground(list.getBackground());
-				setForeground(list.getForeground());
-			}
-
-			return this;
-		}
-	}
-
-	private enum filters {
-		ID, DATE, IS_ENABLED
-
-	}
-
-	void fillRows() {
-		isRefreshing = true;
-		model.setRowCount(0);
-		customerListModel.clear();
-		CustomerDAO.getAllCustomers().forEach(c -> customerListModel.addElement(c));
-		List<Object[]> data = SubscriptionDAO.toTableRowAll();
-		if (!data.isEmpty()) {
-			for (Object[] row : data) {
-				model.addRow(row);
-			}
-		} else {
-			lbOutput.setText("Lista Abbonamenti vuota");
-		}
-		isRefreshing = false;
-	}
-
+public class SubscriptionPanel extends BasePanel<Subscription>{
 	private static final long serialVersionUID = 1712892330014716939L;
-
-	private static NonEditableTableModel model;
-	private static DefaultListModel<Customer> customerListModel = new DefaultListModel<>();
-	private static CustomerListCellRenderer ccr = new CustomerListCellRenderer();
-
-	private static JTable table = new JTable();
-	private static JFrame parent = MainFrame.getMainFrame();
-	private static Employee sessionUser = MainFrame.getSessionUser();
-
-	private static List<Subscription> subscriptions = SubscriptionDAO.getAllSubscriptions();
-
 	// actions
-	private static JPanel actionsPanel;
 	private static JFormattedTextField priceTextField;
 	private static JList<Customer> customersJList = new JList<>();
 	private static DatePicker datePicker;
 	private static JComboBox<VAT> choiceVAT;
-	private static JLabel lbOutput;
-	private static boolean isRefreshing = false; // need to sync refreshing with event listener for lists or else it will throw
 	private static JComboBox<SubPeriod> choiceSubPeriod;
 	private static JFormattedTextField discountTextField;
+	
+	private static DefaultListModel<Customer> customerListModel;
+
+	private static final int _ISENABLEDCOL = 8;
 
 	public SubscriptionPanel() {
-		parent.setSize(1040, 900);
+		setSize(1024, 768);
 		setName("Abbonamenti");
 		setLayout(null);
-		setSize(1040, 900);
-		parent.setResizable(false); // user resizable
-
-		JLabel titleTab = new JLabel("GESTIONE ABBONAMENTI");
-		titleTab.setHorizontalAlignment(SwingConstants.CENTER);
-		titleTab.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
-		titleTab.setBounds(10, 11, 1004, 32);
-		add(titleTab);
-
-		JPanel menuPanel = new JPanel();
-		menuPanel.setLayout(null);
-		menuPanel.setBorder(new LineBorder(new Color(0, 0, 0), 3));
-		menuPanel.setBackground(new Color(255, 255, 255));
+		setTitle("Gestione Abbonamenti");
 		menuPanel.setBounds(10, 54, 1004, 593);
-		add(menuPanel);
 
-		// Modello della tabella con colonne
-		model = new NonEditableTableModel( //id, price, vat, subperiod, start, end, discount, isEnabled
-				new String[] { "ID", "Prezzo", "IVA", "Periodo", "Inizio", "Fine", "Sconto applicato", "Cliente", "Abilitata" }, 0);
-
-		// Creazione della tabella
-		table.setModel(model);
-		table.setDefaultRenderer(Object.class, new RowIsEnabledCellRenderer());
-		table.setFillsViewportHeight(true);
-		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		table.setFocusable(false);
+		table.setModel(subscriptionModel);
+		table.setDefaultRenderer(Object.class, new CustomTableCellRenderer(subscriptionModel, _ISENABLEDCOL));
 		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent event) {
@@ -194,16 +51,16 @@ public class SubscriptionPanel extends JPanel{
 				}
 				int row = table.getSelectedRow();
 				lbOutput.setText("");
-				BigDecimal price = (BigDecimal) model.getValueAt(row, 1); // price
+				BigDecimal price = (BigDecimal) subscriptionModel.getValueAt(row, 1); // price
 				priceTextField.setText(price.toString());
 
-				LocalDate localDate =  (LocalDate) model.getValueAt(row, 4);
+				LocalDate localDate =  (LocalDate) subscriptionModel.getValueAt(row, 4);
 				datePicker.setDate(localDate);
 
-				choiceVAT.setSelectedItem(model.getValueAt(row, 2));
-				discountTextField.setText(Double.toString((double) model.getValueAt(row, 6)));
+				choiceVAT.setSelectedItem(subscriptionModel.getValueAt(row, 2));
+				discountTextField.setText(Double.toString((double) subscriptionModel.getValueAt(row, 6)));
 
-				Customer customer = (Customer) model.getValueAt(row, 7);
+				Customer customer = (Customer) subscriptionModel.getValueAt(row, 7);
 				for (Object obj : customerListModel.toArray()) {
 					if (obj instanceof Customer c && customer != null) {
 						if (c.getFullName().equals(customer.getFullName())) {
@@ -311,7 +168,7 @@ public class SubscriptionPanel extends JPanel{
 
 		lbOutput = new JLabel("");
 		lbOutput.setForeground(new Color(0, 153, 51));
-		lbOutput.setFont(new Font("Tahoma", Font.BOLD, 16));
+		lbOutput.setFont(new Font("Microsoft Sans Serif", Font.BOLD, 16));
 		lbOutput.setHorizontalAlignment(SwingConstants.CENTER);
 		lbOutput.setBounds(306, 8, 438, 41);
 		menuPanel.add(lbOutput);
@@ -335,7 +192,7 @@ public class SubscriptionPanel extends JPanel{
 				subscription = SubscriptionDAO.insertSubscription(subscription).get();
 				SubscriptionDAO.addSubscriptionToCustomer(customer, subscription, start);
 				lbOutput.setText("Abbonamento inserito");
-				fillRows();
+				refreshTable();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				JOptionPane.showMessageDialog(new JFrame(), "Dati errati o mancanti\n" + ex.getLocalizedMessage(), "Errore di inserimento",
@@ -349,7 +206,7 @@ public class SubscriptionPanel extends JPanel{
 				if (row == -1) {
 					throw new IllegalArgumentException("no row selected");
 				}
-				final int id = (int) model.getValueAt(row, 0);
+				final int id = (int) subscriptionModel.getValueAt(row, 0);
 				BigDecimal price = BigDecimal.valueOf(Double.parseDouble(priceTextField.getText()));
 				LocalDate start = datePicker.getDate();
 
@@ -357,15 +214,15 @@ public class SubscriptionPanel extends JPanel{
 				VAT vat = VATDao.getVAT(choiceVAT.getSelectedIndex()).get();
 				Customer customer = customersJList.getSelectedValue();
 
-				double discount = (double) model.getValueAt(row, 6);
-				boolean isEnabled = (boolean) model.getValueAt(row, 8);
+				double discount = (double) subscriptionModel.getValueAt(row, 6);
+				boolean isEnabled = (boolean) subscriptionModel.getValueAt(row, 8);
 
 				Subscription subscription = new Subscription(subperiod, start, price, vat, discount, isEnabled);
 				SubscriptionDAO.updateSubscription(id, subscription);
 				SubscriptionDAO.addSubscriptionToCustomer(customer, subscription, start);
 
 				lbOutput.setText("Abbonamento aggiornato");
-				fillRows();
+				refreshTable();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				JOptionPane.showMessageDialog(new JFrame(), "Dati errati o mancanti\n"  + ex.getLocalizedMessage(), "Errore di aggiornamento",
@@ -379,9 +236,8 @@ public class SubscriptionPanel extends JPanel{
 				if (row == -1) {
 					throw new IllegalArgumentException("no row selected");
 				}
-				int col = 8;
-				boolean currentFlag = (boolean) model.getValueAt(row, col);
-				table.setValueAt(!currentFlag, row, col);
+				boolean currentFlag = (boolean) subscriptionModel.getValueAt(row, _ISENABLEDCOL);
+				subscriptionModel.setValueAt(!currentFlag, row, _ISENABLEDCOL);
 				table.repaint();
 				Subscription trans = subscriptions.get(row);
 				trans.setEnabled(!currentFlag);
@@ -400,17 +256,17 @@ public class SubscriptionPanel extends JPanel{
 				if (row == -1) {
 					throw new IllegalArgumentException("no row selected");
 				}
-				final int id = (int) model.getValueAt(row, 0);
+				final int id = (int) subscriptionModel.getValueAt(row, 0);
 				SubscriptionDAO.deleteSubscription(id);
 				lbOutput.setText("Abbonamento cancellato");
-				fillRows();
+				refreshTable();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				JOptionPane.showMessageDialog(new JFrame(), "Impossibile cancellare\n" + ex.getLocalizedMessage(), "Errore di database",
 						JOptionPane.ERROR_MESSAGE);
 			}
 		});
-		btnRefresh.addActionListener(e -> fillRows());
+		btnRefresh.addActionListener(e -> refreshTable());
 		actionsPanel.setBounds(20, 658, 994, 181);
 		add(actionsPanel);
 		SpringLayout springLayoutActions = new SpringLayout();
@@ -462,7 +318,7 @@ public class SubscriptionPanel extends JPanel{
 
 		customersJList.setModel(customerListModel);
 		customersJList.setSelectedIndex(0);
-		customersJList.setCellRenderer(ccr);
+		customersJList.setCellRenderer(customListCellRenderer);
 
 		JLabel lbCustomerChoice = new JLabel("Scelta Cliente");
 		springLayoutActions.putConstraint(SpringLayout.NORTH, lbCustomerChoice, 81, SpringLayout.NORTH, customerListScrollPane);
@@ -507,7 +363,70 @@ public class SubscriptionPanel extends JPanel{
 		springLayoutActions.putConstraint(SpringLayout.NORTH, lbDiscount, 3, SpringLayout.NORTH, discountTextField);
 		springLayoutActions.putConstraint(SpringLayout.WEST, lbDiscount, 0, SpringLayout.WEST, lbPrice);
 		actionsPanel.add(lbDiscount);
+	}
 
-		fillRows();
+	@Override
+	void search() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'search'");
+	}
+
+	@Override
+	Optional<Subscription> insertElement() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'insertElement'");
+	}
+
+	@Override
+	int updateElement() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'updateElement'");
+	}
+
+	@Override
+	int deleteElement() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'deleteElement'");
+	}
+
+	@Override
+	int disableElement() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'disableElement'");
+	}
+
+	@Override
+	void populateTable() {
+		subscriptionModel.setRowCount(0);
+		customerListModel.clear();
+
+		customers.parallelStream()
+		.forEach(c -> customerListModel.addElement(c));
+
+		List<Subscription> subscriptions = SubscriptionDAO.getAllSubscriptions();
+		if (!subscriptions.isEmpty()) {
+			subscriptions.parallelStream()
+			.forEach(t -> subscriptionModel.addRow(t.toTableRow()));
+		} else {
+			lbOutput.setText("Lista Transazioni vuota");
+		}
+	}
+
+	@Override
+	void clearTxfFields() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'clearTxfFields'");
+	}
+
+	@Override
+	ListSelectionListener getListSelectionListener() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'getListSelectionListener'");
+	}
+
+	@Override
+	boolean isDataValid() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'isDataValid'");
 	}
 }
