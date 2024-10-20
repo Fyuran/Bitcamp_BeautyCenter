@@ -5,12 +5,7 @@ import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 
 import com.bitcamp.centro.estetico.DAO.EmployeeDAO;
-import com.bitcamp.centro.estetico.gui.EmployeePanel;
-import com.bitcamp.centro.estetico.gui.ProductPanel;
-import com.bitcamp.centro.estetico.gui.TreatmentPanel;
-import com.bitcamp.centro.estetico.gui.UserAccessPanel;
-import com.bitcamp.centro.estetico.gui.gestioneClienti;
-import com.bitcamp.centro.estetico.gui.gestioneTurni;
+import com.bitcamp.centro.estetico.gui.*;
 import com.bitcamp.centro.estetico.models.Employee;
 import com.bitcamp.centro.estetico.models.Main;
 
@@ -21,7 +16,7 @@ public class TestFrame extends JFrame {
 	ProductPanel panelP;
 	UserAccessPanel panelU;
 	gestioneTurni panelG;
-	gestioneClienti panelC;
+	CustomerPanel panelC;
 
 	/*
 	 * Employee( 
@@ -39,7 +34,7 @@ public class TestFrame extends JFrame {
 		new Main("jdbc:mysql://localhost:3306/beauty_centerdb", "root", "gen1chir0Takahashi");
 		Employee employee = EmployeeDAO.getEmployee(26).get();
 
-		panelC=new gestioneClienti();
+		panelC=new CustomerPanel();
 		panelU = new UserAccessPanel(employee);
 		panelT = new TreatmentPanel();
 		panelE = new EmployeePanel();

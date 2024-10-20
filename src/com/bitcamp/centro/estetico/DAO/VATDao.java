@@ -71,7 +71,10 @@ public abstract class VATDao {
 		}
 		return opt;
 	}
-	
+	public static Optional<VAT> getVAT(VAT vat) {
+		return getVAT(vat.getId());
+	}
+
 	public static Optional<VAT> getVATByAmount(double amount) {
 		String query = "SELECT * FROM beauty_centerdb.vat WHERE amount = ?";
 		

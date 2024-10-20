@@ -47,8 +47,8 @@ public class containerAdmin extends JFrame {
         tabbedPane.setBounds(0, 0, 1032, 729); 
 
         
-        gestioneClienti gestioneClienti = new gestioneClienti();
-        gestionePremi gestionePremi = new gestionePremi();
+        CustomerPanel gestioneClienti = new CustomerPanel();
+        PrizePanel gestionePremi = new PrizePanel();
         gestioneTurni gestioneTurni = new gestioneTurni();
         gestioneProdotti gestioneProdotti = new gestioneProdotti();
         

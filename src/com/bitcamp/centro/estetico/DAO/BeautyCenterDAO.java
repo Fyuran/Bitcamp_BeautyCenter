@@ -1,10 +1,6 @@
 package com.bitcamp.centro.estetico.DAO;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Time;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -107,6 +103,54 @@ public abstract class BeautyCenterDAO {
 			}	
 		}
 		return opt;
+	}
+	
+	public static Optional<BeautyCenter> getFirst() {
+		String query = "SELECT * FROM beauty_centerdb.beauty_center LIMIT 1";
+
+		Optional<BeautyCenter> opt = Optional.empty();
+		if(isEmpty()) return opt;
+		
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			ResultSet rs = stat.executeQuery();
+			conn.commit();
+			if(rs.next()) {
+				opt = Optional.ofNullable(new BeautyCenter(rs));
+			}
+
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return opt;
+	}
+	
+	public static boolean isEmpty() {
+		String query = "SELECT * FROM beauty_centerdb.beauty_center LIMIT 1";
+
+		try(PreparedStatement stat = conn.prepareStatement(query)) {
+			ResultSet rs = stat.executeQuery();
+			conn.commit();
+			if(rs.next()) {
+				return false;
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return true;
 	}
 	
 	public static int updateBeautyCenter(int id, BeautyCenter obj) {

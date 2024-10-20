@@ -5,12 +5,7 @@ import java.awt.Font;
 import java.beans.PropertyVetoException;
 import java.time.format.DateTimeFormatter;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EtchedBorder;
@@ -141,8 +136,9 @@ public class UserAccessPanel extends JPanel {
 		System.out.println("ID impiegato: " + activeUser.getId());
 		// popolamento tabella
 		int i=1;
-
-		for (Shift shift : activeUser.getShift()) {
+		var shifts =  activeUser.getShift();
+		if(shifts == null) return;
+		for (Shift shift : shifts) {
 			
 			if (!shift.isShiftOver()) {
 				String day = shift.getStart().format(dayFormat);

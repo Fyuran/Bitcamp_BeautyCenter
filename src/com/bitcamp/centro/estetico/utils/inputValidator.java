@@ -186,6 +186,9 @@ public class inputValidator {
         }
         return result;
     }
+    public static boolean validatePassword(char[] password) {
+        return validatePassword(String.valueOf(password));
+    }
   //metodo per validare iban
     public static boolean validateIban(String iban, boolean isIbanMandatory) {
 //    	if(isIbanMandatory) {

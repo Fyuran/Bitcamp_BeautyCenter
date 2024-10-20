@@ -122,11 +122,15 @@ public class Customer extends User {
 		return getName() + " " + getSurname();
 	}
 	
-	//(String name, String surname, boolean isFemale, LocalDate BoD, String birthplace, String notes)
 	public Object[] toTableRow() {
 		return new Object[] {
-				getId(), getName(), getSurname(), getBoD(), getBirthplace(), P_IVA, recipientCode, loyaltyPoints, getNotes()
+				getId(), isFemale(), getName(), getSurname(), getPhone(), getMail(), getAddress(), getBoD(), getBirthplace(),
+				getEU_TIN(), P_IVA, recipientCode, loyaltyPoints, getSubscription(), getNotes(), getIban(), isEnabled()
 		};
 	}
+
+    public void setLoyaltyPoints(int loyaltyPoints) {
+        this.loyaltyPoints = loyaltyPoints;
+    }
 	
 }

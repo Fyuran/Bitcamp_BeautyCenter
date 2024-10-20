@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
 
-import com.bitcamp.centro.estetico.DAO.ShiftDAO;
 import com.bitcamp.centro.estetico.DAO.UserCredentialsDAO;
 
 public class Employee extends User {
@@ -51,7 +50,7 @@ public class Employee extends User {
 				rs.getBoolean(12),
 				rs.getLong(13),
 				Roles.valueOf(rs.getString(7)),
-				DAOShift.loadShiftsForEmployeeWhitID(rs.getInt(1)),//I metodi di DAOShift non dovrebbero essere statici?
+				null,//DAOShift.loadShiftsForEmployeeWhitID(rs.getInt(1))
 				rs.getDate(8) != null ? rs.getDate(8).toLocalDate() : null,  
 				rs.getDate(9) != null ? rs.getDate(9).toLocalDate() : null 
 			);

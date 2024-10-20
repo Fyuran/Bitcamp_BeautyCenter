@@ -1,10 +1,6 @@
 package com.bitcamp.centro.estetico.DAO;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -220,6 +216,28 @@ public abstract class EmployeeDAO {
 		return -1;
 	}
 	
+	public static boolean isEmpty() {
+		String query = "SELECT * FROM beauty_centerdb.employee LIMIT 1";
+
+		try (PreparedStatement stat = conn.prepareStatement(query)) {
+			ResultSet rs = stat.executeQuery();
+			conn.commit();
+			if (rs.next()) {
+				return false;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return true;
+	}
+
 	public static List<Object[]> toTableRowAll() {
 		List<Employee> list = getAllEmployees();
 		List<Object[]> data = new ArrayList<>(list.size());
