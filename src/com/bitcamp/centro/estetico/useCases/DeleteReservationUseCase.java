@@ -1,11 +1,11 @@
 package com.bitcamp.centro.estetico.useCases;
-import com.bitcamp.centro.estetico.DAO.DAOReservation;
+import com.bitcamp.centro.estetico.DAO.ReservationDAO;
 import com.bitcamp.centro.estetico.models.Reservation;
 
 public class DeleteReservationUseCase {
 	
-	private DAOReservation daoReservation;
-	public DeleteReservationUseCase(DAOReservation daoReservation) {
+	private ReservationDAO daoReservation;
+	public DeleteReservationUseCase(ReservationDAO daoReservation) {
 		this.daoReservation = daoReservation;
 	}
 	

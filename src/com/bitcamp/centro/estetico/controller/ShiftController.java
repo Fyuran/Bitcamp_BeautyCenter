@@ -1,86 +1,86 @@
 package com.bitcamp.centro.estetico.controller;
 
-//import wrappersForDisplayMember.*;
-/*import java.time.Instant;
-import java.time.LocalDate;*/
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-//import java.time.ZoneId;
+import java.util.Map;
 
-import com.bitcamp.centro.estetico.DAO.DAOShift;
-import com.bitcamp.centro.estetico.models.Employee;
-import com.bitcamp.centro.estetico.models.IsCreatingOrUpdating;
-import com.bitcamp.centro.estetico.models.Shift;
-import com.bitcamp.centro.estetico.models.ShiftType;
+import com.bitcamp.centro.estetico.models.ShiftEmployee;
+import com.bitcamp.centro.estetico.useCases.CreateShiftUseCase;
+import com.bitcamp.centro.estetico.useCases.DeleteShiftUseCase;
+import com.bitcamp.centro.estetico.useCases.GetShiftUseCase;
+import com.bitcamp.centro.estetico.useCases.UpdateShiftUseCase;
 
-/*import com.toedter.calendar.JCalendar;
-import javax.swing.JOptionPane;*/
 
 public class ShiftController {
+
+	private GetShiftUseCase getShiftUseCase;
+	private CreateShiftUseCase createShiftUseCase;
+	private UpdateShiftUseCase updateShiftUseCase;
+	private DeleteShiftUseCase deleteShiftUseCase;
 	
-	private DAOShift daoShift;
-	public ShiftController(DAOShift daoShift) {
-		this.daoShift = daoShift;
+
+	public ShiftController(GetShiftUseCase getShiftUseCase) {		
+		this.getShiftUseCase = getShiftUseCase;
 	}
 	
-	public void saveOrUpdateReservation(Shift shift, Employee employee, LocalDateTime shiftStart, LocalDateTime shiftEnd, ShiftType shiftType, String notes, IsCreatingOrUpdating icou) {
-		
-		validateInputs(employee, shiftStart, shiftEnd, shiftType, notes);		
-		populateShift(shift, shiftStart, shiftEnd, shiftType, notes);
-		
-		if (icou == IsCreatingOrUpdating.CREATE) {
-			daoShift.insert(shift, employee);
-		} else {
-			daoShift.update(shift, employee);
-		}
+	public ShiftController(CreateShiftUseCase createShiftUseCase) {		
+		this.createShiftUseCase = createShiftUseCase;
+	} 
+	
+	public ShiftController(UpdateShiftUseCase updateShiftUseCase) {		
+		this.updateShiftUseCase = updateShiftUseCase;
+	} 
+	
+	public ShiftController(DeleteShiftUseCase deleteShiftUseCase) {		
+		this.deleteShiftUseCase = deleteShiftUseCase;
+	} 
+	
+	public void add(ShiftEmployee shiftEmployee)throws Exception{
+		validateInputs(shiftEmployee);		
+		createShiftUseCase.execute(shiftEmployee);
+	}
+	
+	public void update(ShiftEmployee shiftEmployee)throws Exception {
+		validateInputs(shiftEmployee);
+		updateShiftUseCase.execute(shiftEmployee);
 	}
 
-	public void validateInputs(Employee employee, LocalDateTime shiftStart, LocalDateTime shiftEnd, ShiftType shiftType, String notes) {
-		
-		if (employee == null) {
+	public void delete(ShiftEmployee shiftEmployee)throws Exception {
+		deleteShiftUseCase.execute(shiftEmployee);
+	}
+	
+	public Map<Integer, ShiftEmployee> getShifts()throws Exception{		
+		return getShiftUseCase.getShifts();
+	}
+	
+	public ShiftEmployee getShift(int id) throws Exception{
+		if(id <= 0) {
+			throw new Exception("Id non valido");
+		}
+		else {
+			return getShiftUseCase.getShift(id);
+		}		
+	}
+	
+	public Map<Integer, ShiftEmployee> getSearchedShifts(String text)throws Exception{
+		return getShiftUseCase.getSearchedShifts(text);
+	}
+	
+	
+	private void validateInputs(ShiftEmployee shiftEmployee) {		
+		if(shiftEmployee.getShift() == null) {
+			throw new IllegalArgumentException("Oggetto non valido");
+		}
+		if (shiftEmployee.getShift().getStart() == null) {
+			throw new IllegalArgumentException("Data di inizio turno non valida");
+		}
+		if (shiftEmployee.getShift().getEnd() == null) {
+			throw new IllegalArgumentException("Data di fine turno non valida");
+		}
+		if (shiftEmployee.getShift().getStart().isAfter(shiftEmployee.getShift().getEnd())) {
+			throw new IllegalArgumentException("La data di inizio non può essere successiva a quella di fine");
+		}
+		if (shiftEmployee.getEmployee() == null) {
 			throw new IllegalArgumentException("Seleziona un estetista");
 		}
-						
-		if (shiftStart == null) {
-			throw new IllegalArgumentException("Seleziona una data e un'ora di inizio");
-		}
-		
-		if (shiftEnd == null) {
-			throw new IllegalArgumentException("Seleziona una data e un'ora di fine");
-		}
-
-		if (shiftStart.toLocalTime() == LocalTime.MIDNIGHT) {
-			throw new IllegalArgumentException("La data di inizio turno deve essere attuale o futura");
-	    }
-	    
-	    if (shiftEnd.toLocalTime() == LocalTime.MIDNIGHT) {
-	    	throw new IllegalArgumentException("La data di inizio turno deve essere attuale o futura");
-	    }
-		
-		if(shiftStart.isAfter(shiftEnd)) {
-			throw new IllegalArgumentException("La data di inizio turno non può essere successiva a quella di fine turno");
-		}
-				
-		if (shiftType == null) {
-			throw new IllegalArgumentException("Seleziona se si tratta di un turno lavorativo o ferie");
-		}
-			
-		//createShiftUseCase.execute();
-		/* 1. crea il turno e ottieni l'id
-		 * 2. fai una query che crea uno shiftemployee con gli id di shift e shiftemployee
-		 * */
-		//daoShift.insert(new Shift(shiftStart, shiftEnd, shiftType, notes), employee);
-	}
-	
-	private void populateShift(Shift shift, LocalDateTime shiftStart, LocalDateTime shiftEnd, ShiftType shiftType, String notes) {
-		
-		shift.setStart(shiftStart);
-		shift.setEnd(shiftEnd);
-		shift.setNotes(notes);
-		shift.setType(shiftType);
-		// reservation.setState(); // Se richiesto, imposta lo stato
-		// reservation.setPaid(); // Se richiesto, imposta lo stato di pagamento
-	}
-
+	}		
 }
 

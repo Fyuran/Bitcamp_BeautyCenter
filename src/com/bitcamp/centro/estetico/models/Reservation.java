@@ -11,23 +11,23 @@ public class Reservation {
 	private boolean isPaid;
 	private ReservationState state;
 	private boolean isEnabled;
-	
+
 	public Reservation() {
 		this.isPaid = false;
 		this.isEnabled = true;
-		this.state = ReservationState.CREATED;
+		//this.state = state;
 	}
-	
-	public Reservation(Customer customer, Treatment treatment, Employee employee, LocalDateTime datetime) {
+
+	public Reservation(Customer customer, Treatment treatment, Employee employee, LocalDateTime datetime, ReservationState state) {
 		this.customer = customer;
 		this.treatment = treatment;
 		this.employee = employee;
 		this.dateTime = datetime;
 		this.isPaid = false;
 		this.isEnabled = true;
-		this.state = ReservationState.CREATED;
+		this.state = state;
 	}
-	
+
 	public boolean isEnabled() {
 		return isEnabled;
 	}
@@ -103,9 +103,9 @@ public class Reservation {
 	}
 
 
-	public void setDateTime(LocalDateTime dateTime) {		
+	public void setDateTime(LocalDateTime dateTime) {
 		this.dateTime = dateTime;
 	}
-	
-		
+
+
 }
