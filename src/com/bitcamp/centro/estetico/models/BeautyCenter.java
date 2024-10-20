@@ -5,9 +5,9 @@ import java.sql.SQLException;
 import java.time.LocalTime;
 import java.util.List;
 
-import com.bitcamp.centro.estetico.DAO.VATDao;
+import com.bitcamp.centro.estetico.DAO.VAT_DAO;
 
-public class BeautyCenter {
+public class BeautyCenter implements Model{
 	private final int id;
 	private String name;
 	private String phone;
@@ -40,7 +40,7 @@ public class BeautyCenter {
 		this.openingHour = openingHour;
 		this.closingHour = closingHour;
 		this.isEnabled = isEnabled;
-		infoVat = VATDao.getAllVAT();
+		infoVat = VAT_DAO.getInstance().getAll();
 	}
 
 	public BeautyCenter(String name, String phone, String certifiedMail,
@@ -77,9 +77,11 @@ public class BeautyCenter {
 			rs.getBoolean(12)
 		);
 	}
+	@Override
 	public boolean isEnabled() {
 		return isEnabled;
 	}
+	@Override
 	public int getId() {
 		return id;
 	}

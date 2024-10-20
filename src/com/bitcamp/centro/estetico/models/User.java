@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import it.kamaladafrica.codicefiscale.CodiceFiscale;
 
-public abstract class  User {
+public abstract class User implements Model{
 	private final int id;
 	private UserDetails details;
 	private UserCredentials userCredentials;
@@ -17,6 +17,7 @@ public abstract class  User {
 		this.isEnabled = isEnabled;
 	}
 
+	@Override
 	public int getId() {
 		return id;
 	}
@@ -29,6 +30,7 @@ public abstract class  User {
 		return userCredentials;
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return isEnabled;
 	}
@@ -57,8 +59,8 @@ public abstract class  User {
 	    return details.getBirthplace();
 	}
 
-    public boolean isFemale() {
-        return details.isFemale();
+    public Gender getGender() {
+        return details.getGender();
     }
 
 	public LocalDate getBoD() {
@@ -86,8 +88,12 @@ public abstract class  User {
 	    details.setBirthplace(birthplace);
 	}
 
-	public void setIsFemale(boolean isFemale) {
-        details.setIsFemale(isFemale);
+	public void setGender(Gender gender) {
+        details.setGender(gender);
+    }
+	public void setGender(boolean isFemale) {
+        if(isFemale) details.setGender(Gender.FEMALE);
+		else details.setGender(Gender.MALE);
     }
 
 	public void setBoD(LocalDate BoD) {

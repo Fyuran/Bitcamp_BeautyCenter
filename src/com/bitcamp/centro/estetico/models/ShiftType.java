@@ -14,12 +14,12 @@ public enum ShiftType {
 		switch(s.toLowerCase()) {
 			case "lavoro": return ShiftType.WORK;
 			case "ferie": return ShiftType.HOLIDAYS;
+
 			case "work": return ShiftType.WORK;
-			case "holydays": return ShiftType.HOLIDAYS;
+			case "holidays": return ShiftType.HOLIDAYS;
 			default: return null;
 		}
 	}
-
 
 	public int toSQLOrdinal() {
 		return this.ordinal() + 1;

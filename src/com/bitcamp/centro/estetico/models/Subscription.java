@@ -7,10 +7,10 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import com.bitcamp.centro.estetico.DAO.SubscriptionDAO;
-import com.bitcamp.centro.estetico.DAO.VATDao;
+import com.bitcamp.centro.estetico.DAO.VAT_DAO;
 
 
-public class Subscription {
+public class Subscription implements Model{
     private final int id;
     private SubPeriod subperiod;
     private LocalDate start;
@@ -45,7 +45,7 @@ public class Subscription {
 			SubPeriod.valueOf(rs.getString(2)),
 			start.orElse(null),
 			rs.getBigDecimal(3),
-			VATDao.getVAT(rs.getInt(4)).get(),
+			VAT_DAO.getInstance().get(rs.getInt(4)).get(),
 			rs.getDouble(5),
 			rs.getBoolean(6)
 		);
@@ -75,10 +75,10 @@ public class Subscription {
         }
     }
 
+	@Override
 	public int getId() {
 		return id;
 	}
-
 
 	public SubPeriod getSubPeriod() {
 		return subperiod;
@@ -104,7 +104,7 @@ public class Subscription {
 		this.price = price;
 	}
 
-	public VAT getVat() {
+	public VAT get() {
 		return vat;
 	}
 
@@ -112,6 +112,7 @@ public class Subscription {
 		this.vat = vat;
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return isEnabled;
 	}
@@ -136,7 +137,7 @@ public class Subscription {
    //"ID", "Prezzo","IVA","Periodo", "Inizio", "Fine", "Sconto applicato", "Cliente", "Abilitata"
 	public Object[] toTableRow() {
 		return new Object[] {
-				id, price, vat, subperiod, start, end, discount, SubscriptionDAO.getCustomerOfSubscription(id).orElse(null), isEnabled
+				id, price, vat, subperiod, start, end, discount, SubscriptionDAO.getInstance().getCustomerOfSubscription(id).orElse(null), isEnabled
 		};
 	}
 

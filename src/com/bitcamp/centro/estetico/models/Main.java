@@ -3,7 +3,6 @@ package com.bitcamp.centro.estetico.models;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.NoSuchElementException;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -37,10 +36,9 @@ public class Main {
 		}
 	}
 
-	public static Connection getConnection() {
+	public static Connection getConnection() throws SQLException {
 		if (conn == null) {
-			JOptionPane.showMessageDialog(null, "Errore impossibile connettersi al database ", "Errore", JOptionPane.ERROR_MESSAGE);
-			throw new NoSuchElementException("connection is null");
+			throw new SQLException("connection is null");
 		}
 		return conn;
 	}
@@ -49,7 +47,7 @@ public class Main {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				new Main("jdbc:mysql://204.216.214.56:1806", "bitcampUser", "password");
+				new Main("jdbc:mysql://204.216.214.56:1806", "bitcampUser", "newPassword");
 				new SetupWelcomeFrame();
 			}
 		});

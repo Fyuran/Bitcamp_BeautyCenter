@@ -2,32 +2,26 @@ package com.bitcamp.centro.estetico.models;
 import java.time.LocalDateTime;
 
 
-public class Reservation {
-	private int id;
+public class Reservation implements Model{
+	private final int id;
 	private Customer customer;
 	private Treatment treatment;
 	private Employee employee;
 	private LocalDateTime dateTime;
-	private boolean isPaid;
 	private ReservationState state;
 	private boolean isEnabled;
 
-	public Reservation() {
-		this.isPaid = false;
-		this.isEnabled = true;
-		this.state = ReservationState.CREATED;
-	}
-
-	public Reservation(Customer customer, Treatment treatment, Employee employee, LocalDateTime datetime) {
+	private Reservation(int id, Customer customer, Treatment treatment, Employee employee, LocalDateTime datetime, ReservationState state, boolean isEnabled) {
+		this.id = id;
 		this.customer = customer;
 		this.treatment = treatment;
 		this.employee = employee;
 		this.dateTime = datetime;
-		this.isPaid = false;
-		this.isEnabled = true;
-		this.state = ReservationState.CREATED;
+		this.state = state;
+		this.isEnabled = isEnabled;
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return isEnabled;
 	}
@@ -36,17 +30,6 @@ public class Reservation {
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
 	}
-
-
-	public boolean isPaid() {
-		return isPaid;
-	}
-
-
-	public void setPaid(boolean isPaid) {
-		this.isPaid = isPaid;
-	}
-
 
 	public ReservationState getState() {
 		return state;
@@ -57,16 +40,10 @@ public class Reservation {
 		this.state = state;
 	}
 
-
+	@Override
 	public int getId() {
 		return id;
 	}
-
-
-	public void setId(int id) {
-		this.id = id;
-	}
-
 
 	public Customer getCustomer() {
 		return customer;

@@ -9,9 +9,9 @@ import java.time.format.FormatStyle;
 
 import com.bitcamp.centro.estetico.DAO.BeautyCenterDAO;
 import com.bitcamp.centro.estetico.DAO.CustomerDAO;
-import com.bitcamp.centro.estetico.DAO.VATDao;
+import com.bitcamp.centro.estetico.DAO.VAT_DAO;
 
-public class Transaction {
+public class Transaction implements Model {
 	private final int id;
 	private BigDecimal price;
 	private VAT vat;
@@ -63,14 +63,15 @@ public class Transaction {
 			rs.getBigDecimal(2),
 			PayMethod.toEnum(rs.getString(4)),
 			rs.getTimestamp(3).toLocalDateTime(),
-			CustomerDAO.getCustomer(rs.getInt(6)).orElseThrow(),
-			VATDao.getVAT(rs.getInt(5)).orElseThrow(),
-			BeautyCenterDAO.getBeautyCenter(rs.getInt(7)).orElseThrow(),
+			CustomerDAO.getInstance().get(rs.getInt(6)).orElseThrow(),
+			VAT_DAO.getInstance().get(rs.getInt(5)).orElseThrow(),
+			BeautyCenterDAO.getInstance().get(rs.getInt(7)).orElseThrow(),
 			rs.getString(8),
 			rs.getBoolean(9)
 		);
 	}
 
+	@Override
 	public int getId() {
 		return id;
 	}
@@ -91,7 +92,7 @@ public class Transaction {
 		return customer;
 	}
 
-	public VAT getVat() {
+	public VAT get() {
 		return vat;
 	}
 
@@ -103,6 +104,7 @@ public class Transaction {
 		return services;
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return isEnabled;
 	}
@@ -145,7 +147,6 @@ public class Transaction {
 				id, price, dateTime.format(dtf), paymentMethod, vat, customer, services, isEnabled
 		};
 	}
-
 
 	@Override
 	public String toString() {

@@ -6,9 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
 
-import com.bitcamp.centro.estetico.DAO.DAOShift;
 import com.bitcamp.centro.estetico.DAO.EmployeeDAO;
-import com.bitcamp.centro.estetico.DAO.TreatmentDAO;
 import com.bitcamp.centro.estetico.DAO.UserCredentialsDAO;
 
 public class Employee extends User {
@@ -17,27 +15,24 @@ public class Employee extends User {
     private List<Shift> turns;
     private LocalDate hiredDate;
     private LocalDate terminationDate;
-	private Treatment treatment;
 
 	//User(int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled)
-    //UserDetails(String name, String surname, boolean isFemale, LocalDate BoD, String birthplace, String notes)
+    //UserDetails(String name, String surname, boolean gender, LocalDate BoD, String birthplace, String notes)
 	private Employee(
 			int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled,
 
-			long employeeSerial, Roles role, List<Shift> turns, LocalDate hiredDate, LocalDate terminationDate, Treatment treatment) {
+			long employeeSerial, Roles role, List<Shift> turns, LocalDate hiredDate, LocalDate terminationDate) {
 		super(id, details, userCredentials, isEnabled);
 		this.employeeSerial = employeeSerial;
 		this.turns = turns;
 		this.hiredDate = hiredDate;
 		this.role = role;
 		this.terminationDate = terminationDate;
-		this.treatment = treatment;
-
 	}
 	public Employee(
 			UserDetails details, UserCredentials userCredentials,
-            long employeeSerial, Roles role, List<Shift> turns, LocalDate hiredDate, LocalDate terminationDate, Treatment treatment) {
-		this(-1, details, userCredentials, true, employeeSerial, role, turns, hiredDate, terminationDate, treatment);
+            long employeeSerial, Roles role, List<Shift> turns, LocalDate hiredDate, LocalDate terminationDate) {
+		this(-1, details, userCredentials, true, employeeSerial, role, turns, hiredDate, terminationDate);
     }
 
 	public Employee(ResultSet rs) throws SQLException {
@@ -48,21 +43,21 @@ public class Employee extends User {
 					rs.getBoolean(4), rs.getDate(5).toLocalDate(),
 					rs.getString(6), rs.getString(11)
 				),
-				UserCredentialsDAO.getUserCredentials(rs.getInt(10)).get(),
+				UserCredentialsDAO.getInstance().get(rs.getInt(10)).get(),
 				rs.getBoolean(12),
 				rs.getLong(13),
 				Roles.toEnum(rs.getString(7)),
-				DAOShift.loadShiftsForEmployeeId(rs.getInt(1)),//I metodi di DAOShift non dovrebbero essere statici?
+				null, //TODO: implement shifts
 				rs.getDate(8) != null ? rs.getDate(8).toLocalDate() : null,
-				rs.getDate(9) != null ? rs.getDate(9).toLocalDate() : null,
-				TreatmentDAO.getTreatment(rs.getInt(14)).orElse(null)
+				rs.getDate(9) != null ? rs.getDate(9).toLocalDate() : null
 			);
 	}
 
 	public Employee(int id, Employee obj) {
 		this(id, obj.getDetails(), obj.getUserCredentials(), obj.isEnabled(), obj.employeeSerial, obj.role, obj.turns,
-				obj.hiredDate, obj.terminationDate, obj.getTreatment());
+				obj.hiredDate, obj.terminationDate);
 	}
+ 
 	public long getEmployeeSerial() {
 		return employeeSerial;
 	}
@@ -122,14 +117,7 @@ public class Employee extends User {
 	public static long generateSerial() {
 		Random rand = new Random();
 		long serial = rand.nextInt(90000, Integer.MAX_VALUE);
-		return EmployeeDAO.isSerialUnique(serial) ? serial : generateSerial();
-	}
-
-	public Treatment getTreatment() {
-		return treatment;
-	}
-	public void setTreatment(Treatment treatment) {
-		this.treatment = treatment;
+		return EmployeeDAO.getInstance().isSerialUnique(serial) ? serial : generateSerial();
 	}
 
 	@Override
@@ -138,13 +126,13 @@ public class Employee extends User {
 	}
 	
 	
-	//"ID", "Numero seriale", "Nome", "Cognome", "Data di nascita", "Assunzione", "Scadenza",
-	//"Ruolo", "Username", "Indirizzo", "Città di provenienza", "Mail", "Telefono", "IBAN", "Trattamento", "Abilitato"
+	//"ID", "Sesso", "Numero seriale", "Codice Fiscale", "Nome", "Cognome", "Data di nascita", "Assunzione", "Scadenza",
+	//"Ruolo", "Username", "Indirizzo", "Città natale", "Mail", "Telefono", "IBAN", "Abilitato"
 	@Override
 	public Object[] toTableRow() {
 		return new Object[] {
-				getId(), employeeSerial, getName(), getSurname(), getBoD(), hiredDate, terminationDate, role,
-				getUsername(), getAddress(), getBirthplace(), getMail(), getPhone(), getIban(), treatment, isEnabled()
+				getId(), getGender(), employeeSerial, getEU_TIN(), getName(), getSurname(), getBoD(), hiredDate, terminationDate, role,
+				getUsername(), getAddress(), getBirthplace(), getMail(), getPhone(), getIban(), isEnabled()
 		};
 	}
 }

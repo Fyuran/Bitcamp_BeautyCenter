@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Optional;
 
-public class Prize {
+public class Prize implements Model{
     private final int id;
     private String name;
     private int threshold;
@@ -52,6 +52,7 @@ public class Prize {
 		this(id, obj.name, obj.threshold, obj.type, obj.expirationDate, obj.amount, obj.isEnabled);
 	}
 
+	@Override
 	public int getId() {
 		return id;
 	}
@@ -105,6 +106,7 @@ public class Prize {
 		this.amount = amount;
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return isEnabled;
 	}

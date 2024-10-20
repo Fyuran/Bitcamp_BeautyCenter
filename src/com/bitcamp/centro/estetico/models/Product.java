@@ -1,14 +1,12 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.bitcamp.centro.estetico.DAO.VATDao;
+import com.bitcamp.centro.estetico.DAO.VAT_DAO;
 
-public class Product {
+public class Product implements Model{
 	private final int id;
 	private String name;
 	private int amount;
@@ -42,11 +40,12 @@ public class Product {
 
 	public Product(ResultSet rs) throws SQLException {
 		this(rs.getInt(1), rs.getString(2), rs.getInt(3),
-			rs.getInt(4), rs.getBigDecimal(5), VATDao.getVAT(rs.getInt(6)).get(),
+			rs.getInt(4), rs.getBigDecimal(5), VAT_DAO.getInstance().get(rs.getInt(6)).get(),
 			ProductCat.valueOf(rs.getString(7)), rs.getBoolean(8)
 		);
 	}
 
+	@Override
 	public int getId() {
 		return id;
 	}
@@ -83,7 +82,7 @@ public class Product {
 		this.price = price;
 	}
 
-	public VAT getVat() {
+	public VAT get() {
 		return vat;
 	}
 
@@ -99,32 +98,13 @@ public class Product {
 		this.type = type;
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return isEnabled;
 	}
 
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
-	}
-
-	public static boolean isNameUnique(String productName) {
-		String query="SELECT * FROM beauty_centerdb.product WHERE name=? LIMIT 1";
-		String name="";
-		Connection conn=Main.getConnection();
-		try(PreparedStatement pstmt = conn.prepareStatement(query)){
-			pstmt.setString(1, productName);
-			ResultSet rs=pstmt.executeQuery();
-			if(rs.next()) {
-				name=rs.getString("name");
-
-			}
-			System.out.println("Nome cercato: "+productName);
-			System.out.println("Nome trovato: "+name);
-			return name.equals("");
-		}catch(SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
 	}
 
 	@Override

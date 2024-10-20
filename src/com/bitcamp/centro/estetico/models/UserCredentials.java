@@ -7,7 +7,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 
 
 
-public class UserCredentials {
+public class UserCredentials implements Model{
 	private final int id;
     private String username;
     private char[] password;//Criptata
@@ -68,7 +68,8 @@ public class UserCredentials {
  	public boolean isValidPassword(char[] password) {
  	    return BCrypt.verifyer().verify(password, this.password).verified;
  	}
- 	
+	
+	 @Override
 	public int getId() {
 		return id;
 	}
@@ -132,6 +133,7 @@ public class UserCredentials {
 		this.isEnabled = isEnabled;
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return isEnabled;
 	}

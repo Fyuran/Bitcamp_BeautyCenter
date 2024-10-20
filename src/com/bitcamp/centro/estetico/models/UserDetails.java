@@ -12,30 +12,24 @@ public class UserDetails {
 	private String name;
 	private String surname;
 	private String birthplace;
-	private boolean isFemale;
+	private Gender gender;
 	private LocalDate BoD;
 	private String notes;
 	private CodiceFiscale EU_TIN;// codice fiscale
 
 	// Costruttore
-	public UserDetails(String name, String surname, boolean isFemale, LocalDate BoD, String birthplace, String notes) {
+	public UserDetails(String name, String surname, Gender gender, LocalDate BoD, String birthplace, String notes) {
 		this.name = name;
 		this.surname = surname;
 		this.birthplace = birthplace;
-		this.isFemale = isFemale;
+		this.gender = gender;
 		this.BoD = BoD;
 		this.notes = notes;
-		this.EU_TIN = calculateEU_TIN(name, surname, birthplace, isFemale, BoD);
+		this.EU_TIN = calculateEU_TIN(name, surname, birthplace, gender, BoD);
 	}
 
-	public UserDetails() {
-		this.name = "";
-		this.surname = "";
-		this.birthplace = "";
-		this.isFemale = false;
-		this.BoD = LocalDate.EPOCH;
-		this.notes = "";
-		this.EU_TIN = null;
+	public UserDetails(String name, String surname, boolean gender, LocalDate BoD, String birthplace, String notes) {
+		this(name, surname, Gender.fromBool(gender), BoD, birthplace, notes);
 	}
 
 	//Getter
@@ -51,8 +45,8 @@ public class UserDetails {
 	    return birthplace;
 	}
 
-	protected boolean isFemale() {
-        return isFemale;
+	protected Gender getGender() {
+        return gender;
     }
 
 	protected LocalDate getBoD() {
@@ -80,8 +74,8 @@ public class UserDetails {
 	    this.birthplace = birthplace;
 	}
 
-	protected void setIsFemale(boolean isFemale) {
-        this.isFemale = isFemale;
+	protected void setGender(Gender gender) {
+        this.gender = gender;
     }
 
 	protected void setBoD(LocalDate BoD) {
@@ -94,7 +88,7 @@ public class UserDetails {
 
 	private static CodiceFiscale calculateEU_TIN(
 			String name, String surname, String birthplace,
-			boolean isFemale, LocalDate BoD
+			Gender gender, LocalDate BoD
 		) {
 		CityByName cities = CityProvider.ofDefault();
 		City city = null;
@@ -109,7 +103,7 @@ public class UserDetails {
 				.firstname(name)
 				.lastname(surname)
 				.birthDate(BoD)
-				.isFemale(isFemale)
+				.isFemale(gender.toBoolean())
 				.city(city)
 				.build();
 
@@ -118,8 +112,8 @@ public class UserDetails {
 
 	@Override
 	public String toString() {
-		return "UserDetails [name=" + name + ", surname=" + surname + ", birthplace=" + birthplace + ", isFemale="
-				+ isFemale + ", BoD=" + BoD + ", notes=" + notes + ", EU_TIN=" + EU_TIN + "]";
+		return "UserDetails [name=" + name + ", surname=" + surname + ", birthplace=" + birthplace + ", gender="
+				+ gender + ", BoD=" + BoD + ", notes=" + notes + ", EU_TIN=" + EU_TIN + "]";
 	}
 
 }

@@ -11,9 +11,9 @@ import java.util.List;
 
 import com.bitcamp.centro.estetico.DAO.BeautyCenterDAO;
 import com.bitcamp.centro.estetico.DAO.TreatmentDAO;
-import com.bitcamp.centro.estetico.DAO.VATDao;
+import com.bitcamp.centro.estetico.DAO.VAT_DAO;
 
-public class Treatment {
+public class Treatment implements Model {
 	private int id;
 	private String type;
 	private BigDecimal price;
@@ -27,9 +27,9 @@ public class Treatment {
 		this.id = rs.getInt(1);
 		this.type = rs.getString(2);
 		this.price = rs.getBigDecimal(3);
-		this.vat = VATDao.getVAT(rs.getInt(4)).get();
+		this.vat = VAT_DAO.getInstance().get(rs.getInt(4)).get();
 		this.duration = getDurationFromLocalTime(rs.getTime(5).toLocalTime());
-		this.products=TreatmentDAO.getProductsOfTreatment(rs.getInt(1));
+		this.products=TreatmentDAO.getInstance().getProductsOfTreatment(rs.getInt(1));
 		this.isEnabled=rs.getBoolean(6);
 
 	}
@@ -55,6 +55,7 @@ public class Treatment {
 		this(id, obj.type, obj.price, obj.vat, obj.duration, obj.products, obj.isEnabled);
 	}
 
+	@Override
 	public int getId() {
 		return id;
 	}
@@ -75,7 +76,7 @@ public class Treatment {
 		this.price = price;
 	}
 
-	public VAT getVat() {
+	public VAT get() {
 		return vat;
 	}
 
@@ -95,6 +96,7 @@ public class Treatment {
 		return products;
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return isEnabled;
 	}
@@ -127,8 +129,8 @@ public class Treatment {
 
 		try {
 
-			LocalTime openingHour = BeautyCenterDAO.getFirstBeautyCenter().get().getOpeningHour();
-			LocalTime closingHour = BeautyCenterDAO.getFirstBeautyCenter().get().getClosingHour();
+			LocalTime openingHour = BeautyCenterDAO.getInstance().getFirst().get().getOpeningHour();
+			LocalTime closingHour = BeautyCenterDAO.getInstance().getFirst().get().getClosingHour();
 
 			for (LocalTime time = openingHour; !time.plus(duration).isAfter(closingHour); time = time.plus(duration)) {
 				timeSlots.add(time);

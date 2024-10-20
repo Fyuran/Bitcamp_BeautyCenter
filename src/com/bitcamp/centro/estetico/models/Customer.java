@@ -17,7 +17,7 @@ public class Customer extends User {
 
 	// User(int id, UserDetails details, UserCredentials userCredentials, boolean
 	// isEnabled)
-	// UserDetails(String name, String surname, boolean isFemale, LocalDate BoD,
+	// UserDetails(String name, String surname, boolean gender, LocalDate BoD,
 	// String birthplace, String notes)
 	public Customer(
 			int id, UserDetails details, UserCredentials userCredentials, boolean isEnabled,
@@ -39,13 +39,13 @@ public class Customer extends User {
 						rs.getString(2), rs.getString(3),
 						rs.getBoolean(4), rs.getDate(5).toLocalDate(),
 						rs.getString(6), rs.getString(11)),
-				UserCredentialsDAO.getUserCredentials(rs.getInt(8)).get(),
+				UserCredentialsDAO.getInstance().get(rs.getInt(8)).get(),
 				rs.getBoolean(13),
 				rs.getString(9),
 				rs.getString(10),
 				rs.getInt(12),
-				SubscriptionDAO.getSubscriptionOfCustomer(rs.getInt(1)).orElse(null),
-				PrizeDAO.getAllPrizesAssignedToCustomer(rs.getInt(1)));
+				SubscriptionDAO.getInstance().getSubscriptionOfCustomer(rs.getInt(1)).orElse(null),
+				PrizeDAO.getInstance().getAllPrizesAssignedToCustomer(rs.getInt(1)));
 	}
 
 	public Customer(UserDetails details, UserCredentials userCredentials, String P_IVA, String recipientCode,
@@ -112,6 +112,10 @@ public class Customer extends User {
 		this.loyaltyPoints += loyaltyPoints;
 	}
 
+	public void setLoyaltyPoints(int loyaltyPoints) {
+		this.loyaltyPoints = loyaltyPoints;
+	}
+
 	@Override
 	public String toString() {
 		return getFullName();
@@ -121,13 +125,11 @@ public class Customer extends User {
 		return getName() + " " + getSurname();
 	}
 
- 	//"ID", "Nome", "Cognome", "Telefono", "Email", "Data di Nascita", "Sesso", "Comune di Nascita",
-	// "Codice fiscale", "P.IVA", "Codice Ricezione", "Punti Fedeltà", "Abbonamento", "Note", "Abilitato"
 	@Override
 	public Object[] toTableRow() {
 		return new Object[] {
-				getId(), getName(), getSurname(), getPhone(), getMail(), getBoD(), isFemale(), getBirthplace(),
-				getEU_TIN(), P_IVA, recipientCode, loyaltyPoints, getSubscription(), getNotes(), isEnabled()
+				getId(), getGender(), getName(), getSurname(), getPhone(), getMail(), getAddress(), getBoD(), getBirthplace(),
+				getEU_TIN(), P_IVA, recipientCode, loyaltyPoints, getSubscription(), getNotes(), getIban(), isEnabled()
 		};
 	}
 
