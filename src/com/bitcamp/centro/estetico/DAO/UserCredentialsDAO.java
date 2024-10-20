@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.bitcamp.centro.estetico.models.Employee;
 import com.bitcamp.centro.estetico.models.Main;
 import com.bitcamp.centro.estetico.models.Roles;
 import com.bitcamp.centro.estetico.models.UserCredentials;
@@ -101,6 +102,55 @@ public abstract class UserCredentialsDAO {
 			}	
 		}
 		return opt;
+	}
+
+	public static Optional<Employee> getEmployeeOfUsername(String username) {
+		String query = "SELECT id FROM beauty_centerdb.user_credentials WHERE username = ?";
+
+		try (PreparedStatement stat = conn.prepareStatement(query)) {
+			stat.setString(1, username); // WHERE username = ?
+
+			ResultSet rs = stat.executeQuery();
+			conn.commit();
+			if (rs.next()) {
+				var employee = getEmployeeOfUserCredentials(rs.getInt(1));
+				return employee;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return Optional.empty();
+	}
+
+	public static Optional<Employee> getEmployeeOfUserCredentials(int id) {
+		String query = "SELECT * FROM beauty_centerdb.employee WHERE credentials_id = ?";
+
+		try (PreparedStatement stat = conn.prepareStatement(query)) {
+			stat.setInt(1, id); // WHERE credentials_id = ?
+
+			ResultSet rs = stat.executeQuery();
+			conn.commit();
+			if (rs.next()) {
+				return Optional.ofNullable(new Employee(rs));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			if (conn != null) {
+				try {
+					conn.rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return Optional.empty();
 	}
 
 	public static List<UserCredentials> getAllUserCredentials() {
