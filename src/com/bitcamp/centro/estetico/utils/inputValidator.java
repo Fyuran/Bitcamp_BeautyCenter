@@ -11,6 +11,9 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 
+import com.bitcamp.centro.estetico.gui.render.JSplitLbPf;
+import com.bitcamp.centro.estetico.gui.render.JSplitLbTxf;
+
 import it.kamaladafrica.codicefiscale.city.CityByName;
 import it.kamaladafrica.codicefiscale.city.CityProvider;
 
@@ -52,6 +55,9 @@ public class inputValidator {
 		}
 		textField.setBorder(UIManager.getBorder("TextField.border"));
 	}
+	public static void validateName(JSplitLbTxf textField) {
+		validateName(textField.getJTextField());
+	}
 
 	// Metodo per validare cognomi
 	public static void validateSurname(JTextField textField) {
@@ -65,6 +71,9 @@ public class inputValidator {
 			throw new regexNoMatchException("Il cognome deve contenere solo lettere e spazi, lunghezza tra 2 e 50 caratteri.", textField);
 		}
 		textField.setBorder(UIManager.getBorder("TextField.border"));
+	}
+	public static void validateSurname(JSplitLbTxf textField) {
+		validateSurname(textField.getJTextField());
 	}
 
 	// Metodo per validare numeri di telefono
@@ -80,6 +89,9 @@ public class inputValidator {
 		}
 		textField.setBorder(UIManager.getBorder("TextField.border"));
 	}
+	public static void validatePhoneNumber(JSplitLbTxf textField) {
+		validatePhoneNumber(textField.getJTextField());
+	}
 
 	// Metodo per validare indirizzi email
 	public static void validateEmail(JTextField textField) {
@@ -93,6 +105,9 @@ public class inputValidator {
 			throw new regexNoMatchException("Formato email non valido.", textField);
 		}
 		textField.setBorder(UIManager.getBorder("TextField.border"));
+	}
+	public static void validateEmail(JSplitLbTxf textField) {
+		validateEmail(textField.getJTextField());
 	}
 
 	// Metodo per validare codice fiscale (Italiano, 16)
@@ -108,6 +123,9 @@ public class inputValidator {
 		}
 		textField.setBorder(UIManager.getBorder("TextField.border"));
 	}
+	public static void validateCodiceFiscale(JSplitLbTxf textField) {
+		validateCodiceFiscale(textField.getJTextField());
+	}
 
 	// Metodo per validare partita IVA (11 numeri)
 	public static void validatePIva(JTextField textField) {
@@ -121,6 +139,9 @@ public class inputValidator {
 			throw new regexNoMatchException("La partita IVA deve essere composta da 11 cifre numeriche.", textField);
 		}
 		textField.setBorder(UIManager.getBorder("TextField.border"));
+	}
+	public static void validatePIva(JSplitLbTxf textField) {
+		validatePIva(textField.getJTextField());
 	}
 
 	// Metodo per validare l'aliquota (percentuale tra 0 e 100 con massimo 2
@@ -141,6 +162,9 @@ public class inputValidator {
 		}
 		textField.setBorder(UIManager.getBorder("TextField.border"));
 	}
+	public static void validateVAT(JSplitLbTxf textField) {
+		validateVAT(textField.getJTextField());
+	}
 	
 	// Metodo per validare numeri interi
 	public static void validateNumber(JTextField textField, int min, int max) {
@@ -157,6 +181,9 @@ public class inputValidator {
 			throw new invalidInputException( "Il numero deve essere compreso tra " + min + " e " + max + ".", textField);
 		}
 		textField.setBorder(UIManager.getBorder("TextField.border"));
+	}
+	public static void validateNumber(JSplitLbTxf textField, int min, int max) {
+		validateNumber(textField.getJTextField(), min, max);
 	}
 
 	// Metodo per validare input alfanumerici generici
@@ -175,6 +202,9 @@ public class inputValidator {
 		}
 		textField.setBorder(UIManager.getBorder("TextField.border"));
 	}
+	public static void validateAlphanumeric(JSplitLbTxf textField, String title) {
+		validateAlphanumeric(textField.getJTextField(), title);
+	}
 
 	// Metodo per validare password (min 8 caratteri, almeno 1 lettera, 1 numero e 1
 	// carattere speciale)
@@ -190,6 +220,9 @@ public class inputValidator {
 		}
 		textField.setBorder(UIManager.getBorder("TextField.border"));
 	}
+	public static void validatePassword(JSplitLbPf passwordField) {
+		validatePassword(passwordField.getJPasswordField());
+	}
 
 	// metodo per validare iban
 	public static void validateIban(JTextField textField) {
@@ -204,6 +237,9 @@ public class inputValidator {
 		}
 		textField.setBorder(UIManager.getBorder("TextField.border"));
 	}
+	public static void validateIban(JSplitLbTxf textField) {
+		validateIban(textField.getJTextField());
+	}
 
 	public static void validateRea(JTextField textField) {
 		String text = textField.getText().trim();
@@ -217,6 +253,9 @@ public class inputValidator {
 		}
 		textField.setBorder(UIManager.getBorder("TextField.border"));
 	}
+	public static void validateRea(JSplitLbTxf textField) {
+		validateRea(textField.getJTextField());
+	}
 
 	public static void isValidCity(JTextField textField) {
 		String text = textField.getText().trim();
@@ -228,5 +267,8 @@ public class inputValidator {
 			throw new invalidInputException( "Città " + text + " non trovata.", textField);
 		}
 		textField.setBorder(UIManager.getBorder("TextField.border"));
+	}
+	public static void isValidCity(JSplitLbTxf textField) {
+		isValidCity(textField.getJTextField());
 	}
 }
