@@ -17,7 +17,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
 import com.bitcamp.centro.estetico.models.Customer;
-import com.bitcamp.centro.estetico.models.Gender;
 import com.bitcamp.centro.estetico.models.Subscription;
 
 import it.kamaladafrica.codicefiscale.CodiceFiscale;
@@ -45,9 +44,6 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
         }
         else if(value instanceof Optional opt) {
             setValue(opt.orElse(null)); //callback to setValue
-        }
-        else if(value instanceof Gender g) {
-            setText(g.getGender());
         }
         else if (value instanceof Customer c) {
             setText(c.getFullName());

@@ -15,7 +15,7 @@ public class TransactionPanelTest {
 	        public void run() {
 	        	Main main = new Main("jdbc:mysql://localhost:1806", "root", "bitcampPassword");
 	            JFrame frame = new JFrame();
-	            TransactionPanel panel = new TransactionPanel(frame);
+	            TransactionPanel panel = new TransactionPanel();
 	            frame.setSize(1040, 900);
 	            frame.getContentPane().add(panel);
 	            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

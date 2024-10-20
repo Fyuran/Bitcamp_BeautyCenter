@@ -5,17 +5,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 
@@ -72,7 +62,7 @@ public class gestioneTurni extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		btnSearch.setIcon(new ImageIcon(gestioneTurni.class.getResource("/iconeGestionale/searchIcon.png")));
+		btnSearch.setIcon(new ImageIcon(gestioneTurni.class.getResource("/com/bitcamp/centro/estetico/resources/searchIcon.png")));
 		btnSearch.setOpaque(false);
 		btnSearch.setContentAreaFilled(false);
 		btnSearch.setBorderPainted(false);
@@ -90,7 +80,7 @@ public class gestioneTurni extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		btnFilter.setIcon(new ImageIcon(gestioneTurni.class.getResource("/iconeGestionale/filterIcon.png")));
+		btnFilter.setIcon(new ImageIcon(gestioneTurni.class.getResource("/com/bitcamp/centro/estetico/resources/filterIcon.png")));
 		btnFilter.setOpaque(false);
 		btnFilter.setContentAreaFilled(false);
 		btnFilter.setBorderPainted(false);
@@ -102,7 +92,7 @@ public class gestioneTurni extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		btnInsert.setIcon(new ImageIcon(gestioneTurni.class.getResource("/iconeGestionale/Insert.png")));
+		btnInsert.setIcon(new ImageIcon(gestioneTurni.class.getResource("/com/bitcamp/centro/estetico/resources/Insert.png")));
 		btnInsert.setOpaque(false);
 		btnInsert.setContentAreaFilled(false);
 		btnInsert.setBorderPainted(false);
@@ -114,7 +104,7 @@ public class gestioneTurni extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		btnUpdate.setIcon(new ImageIcon(gestioneTurni.class.getResource("/iconeGestionale/Update.png")));
+		btnUpdate.setIcon(new ImageIcon(gestioneTurni.class.getResource("/com/bitcamp/centro/estetico/resources/Update.png")));
 		btnUpdate.setOpaque(false);
 		btnUpdate.setContentAreaFilled(false);
 		btnUpdate.setBorderPainted(false);
@@ -126,7 +116,7 @@ public class gestioneTurni extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		btnDisable.setIcon(new ImageIcon(gestioneTurni.class.getResource("/iconeGestionale/disable.png")));
+		btnDisable.setIcon(new ImageIcon(gestioneTurni.class.getResource("/com/bitcamp/centro/estetico/resources/disable.png")));
 		btnDisable.setOpaque(false);
 		btnDisable.setContentAreaFilled(false);
 		btnDisable.setBorderPainted(false);
@@ -138,7 +128,7 @@ public class gestioneTurni extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		btnHystorical.setIcon(new ImageIcon(gestioneTurni.class.getResource("/iconeGestionale/cartellina.png")));
+		btnHystorical.setIcon(new ImageIcon(gestioneTurni.class.getResource("/com/bitcamp/centro/estetico/resources/cartellina.png")));
 		btnHystorical.setOpaque(false);
 		btnHystorical.setContentAreaFilled(false);
 		btnHystorical.setBorderPainted(false);

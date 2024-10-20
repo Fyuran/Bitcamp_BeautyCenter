@@ -31,6 +31,10 @@ public class UserCredentials {
     	this(-1, username, password, address, iban, phone, mail);
     }
     
+	public UserCredentials(String username, char[] password, String address, String iban, String phone, String mail) {
+    	this(-1, username, String.valueOf(password), address, iban, phone, mail);
+    }
+
     public UserCredentials(int id, UserCredentials obj) {
     	this(id, obj.username, obj.password, obj.address, obj.iban, obj.phone, obj.mail);
     }
