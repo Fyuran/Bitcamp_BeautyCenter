@@ -6,8 +6,8 @@ public enum PayMethod {
 
 	private final String type;
 
-	private PayMethod(String s) {
-		this.type = s;
+	private PayMethod(String type) {
+		this.type = type;
 	}
 
 	public static PayMethod toEnum(String s) {

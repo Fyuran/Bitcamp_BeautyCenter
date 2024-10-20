@@ -1,4 +1,4 @@
-package com.bitcamp.centro.estetico.gui.render;
+package com.bitcamp.centro.estetico.utils;
 
 import javax.swing.JList;
 import javax.swing.JSplitPane;

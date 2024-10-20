@@ -1,4 +1,4 @@
-package com.bitcamp.centro.estetico.gui.render;
+package com.bitcamp.centro.estetico.utils;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -43,6 +43,7 @@ public class JSplitPanel extends JComponent {
             rightPanel.add(component);
             rightPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         }
+        component.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
         return component;
     }
 

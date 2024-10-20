@@ -142,9 +142,8 @@ public class Transaction implements Model {
 	}
 
 	public Object[] toTableRow() {
-		DateTimeFormatter dtf = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
 		return new Object[] {
-				id, price, dateTime.format(dtf), paymentMethod, vat, customer, services, isEnabled
+				id, price, dateTime, paymentMethod, vat, customer, services, isEnabled
 		};
 	}
 

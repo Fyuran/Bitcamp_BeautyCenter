@@ -1,4 +1,4 @@
-package com.bitcamp.centro.estetico.gui.render;
+package com.bitcamp.centro.estetico.utils;
 
 import java.awt.Font;
 import java.util.ArrayList;

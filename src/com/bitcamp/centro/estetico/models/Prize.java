@@ -28,7 +28,7 @@ public class Prize implements Model{
     }
 
     public Prize(String name, int threshold, PrizeType type, LocalDate expirationDate, double amount) {
-    	this(-1, name, threshold, type, Optional.of(expirationDate), amount, true);
+    	this(-1, name, threshold, type, Optional.ofNullable(expirationDate), amount, true);
     }
 
     // Costruttore vuoto
@@ -123,10 +123,10 @@ public class Prize implements Model{
 				", amount=" + amount + ", isEnabled=" + isEnabled + "]";
 	}
 
-	//"ID", "Nome", "Punti Necessari", "Tipo", "Importo"
+	//"ID", "Nome", "Punti Necessari", "Tipo", "€ in Buono", "Scadenza", "Abilitato"
 	public Object[] toTableRow() {
 		return new Object[] {
-				id, name, threshold, type, amount, expirationDate
+				id, name, threshold, type, amount, expirationDate, isEnabled
 		};
 	}
 }

@@ -1,17 +1,14 @@
-package com.bitcamp.centro.estetico.gui.render;
+package com.bitcamp.centro.estetico.utils;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.util.HashMap;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JSplitPane;
 
 public abstract class JSplitLabel extends JSplitPane {
-
-	protected static HashMap<String, Object> values;
 	protected JLabel label;
 
     private JSplitLabel(int newOrientation, JComponent newLeftComponent, JComponent newRightComponent) {
@@ -25,8 +22,6 @@ public abstract class JSplitLabel extends JSplitPane {
 
 		newLeftComponent.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
 		newRightComponent.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
-
-		values = new HashMap<>();
 	}
 
     public JSplitLabel(int newOrientation, String text, JComponent newRightComponent) {
@@ -56,17 +51,9 @@ public abstract class JSplitLabel extends JSplitPane {
 		label.setMinimumSize(new Dimension(x, y));
 	}
 
-    public static void setValues(HashMap<String, Object> values) {
-		JSplitLabel.values = values;
-	}
-
 	@Override
 	public void setFont(Font font) {
 		leftComponent.setFont(font);
 		rightComponent.setFont(font);
-	}
-
-	public static HashMap<String, Object> getValues() {
-		return new HashMap<>(values); //do not reference the original hashmap
 	}
 }
