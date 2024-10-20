@@ -72,9 +72,9 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`transaction` (
   KEY `transactionFK_idx` (`customer_id`),
   KEY `transactionFK2_idx` (`vat_id`),
   KEY `transactionFK3` (`beauty_id`),
-  CONSTRAINT `transactionFK1` FOREIGN KEY (`customer_id`) REFERENCES `beauty_centerdb`.`customer` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT `transactionFK2` FOREIGN KEY (`vat_id`) REFERENCES `beauty_centerdb`.`vat` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT `transactionFK3` FOREIGN KEY (`beauty_id`) REFERENCES `beauty_centerdb`.`beauty_center` (`id`) ON DELETE NO ACTION ON UPDATE CASCADE
+  CONSTRAINT `transactionFK1` FOREIGN KEY (`customer_id`) REFERENCES `beauty_centerdb`.`customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactionFK2` FOREIGN KEY (`vat_id`) REFERENCES `beauty_centerdb`.`vat` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactionFK3` FOREIGN KEY (`beauty_id`) REFERENCES `beauty_centerdb`.`beauty_center` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`product` (
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`product` (
   CONSTRAINT `vat_id`
     FOREIGN KEY (`vat_id`)
     REFERENCES `beauty_centerdb`.`vat` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE);
     
     CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`treatment` (
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`product` (
   CONSTRAINT `vat_id_treatment`
     FOREIGN KEY (`vat_id`)
     REFERENCES `beauty_centerdb`.`vat` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE);
     
 CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`producttreatment` (
@@ -116,8 +116,8 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`producttreatment` (
   PRIMARY KEY (`id`),
   KEY `pt_fk1_idx` (`product_id`),
   KEY `pt_fk2_idx` (`treatment_id`),
-  CONSTRAINT `pt_fk1` FOREIGN KEY (`product_id`) REFERENCES `beauty_centerdb`.`product` (`id`) ON UPDATE CASCADE,
-  CONSTRAINT `pt_fk2` FOREIGN KEY (`treatment_id`) REFERENCES `beauty_centerdb`.`treatment` (`id`) ON UPDATE CASCADE
+  CONSTRAINT `pt_fk1` FOREIGN KEY (`product_id`) REFERENCES `beauty_centerdb`.`product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pt_fk2` FOREIGN KEY (`treatment_id`) REFERENCES `beauty_centerdb`.`treatment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`employee` (
@@ -141,12 +141,12 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`employee` (
   CONSTRAINT `employee_fk1`
     FOREIGN KEY (`credentials_id`)
     REFERENCES `beauty_centerdb`.`user_credentials` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `employee_fk2`
     FOREIGN KEY (`treatment_id`)
     REFERENCES `beauty_centerdb`.`treatment` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE);
     
     
@@ -167,17 +167,17 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservation` (
   CONSTRAINT `reservation_fk1`
     FOREIGN KEY (`treatment_id`)
     REFERENCES `beauty_centerdb`.`treatment` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `reservation_fk2`
     FOREIGN KEY (`customer_id`)
     REFERENCES `beauty_centerdb`.`customer` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `reservation_fk3`
     FOREIGN KEY (`employee_id`)
     REFERENCES `beauty_centerdb`.`employee` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE);
   
   
@@ -200,15 +200,15 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservation` (
   CONSTRAINT `shiftemployee_fk1`
     FOREIGN KEY (`shift_id`)
     REFERENCES `beauty_centerdb`.`shift` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `shiftemployee_fk2`
     FOREIGN KEY (`employee_id`)
     REFERENCES `beauty_centerdb`.`employee` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE);
     
-    /*CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservationemployee` (
+  CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservationemployee` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `reservation_id` INT UNSIGNED NOT NULL,
   `employee_id` INT UNSIGNED NOT NULL,
@@ -218,13 +218,13 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservation` (
   CONSTRAINT `reservationemployee_fk1`
     FOREIGN KEY (`reservation_id`)
     REFERENCES `beauty_centerdb`.`reservation` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `reservationemployee_fk2`
     FOREIGN KEY (`employee_id`)
     REFERENCES `beauty_centerdb`.`employee` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE CASCADE);*/
+    ON DELETE CASCADE
+    ON UPDATE CASCADE);
   
   CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`subscription` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -238,7 +238,7 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservation` (
   CONSTRAINT `subscription_FK1`
     FOREIGN KEY (`vat_id`)
     REFERENCES `beauty_centerdb`.`vat` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE);
     
     CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`customersubscription` (
@@ -252,12 +252,12 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservation` (
   CONSTRAINT `customersubscription_FK1`
     FOREIGN KEY (`customer_id`)
     REFERENCES `beauty_centerdb`.`customer` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `customersubscription_FK2`
     FOREIGN KEY (`subscription_id`)
     REFERENCES `beauty_centerdb`.`subscription` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE);
     
     CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`prize` (
@@ -280,15 +280,15 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservation` (
   CONSTRAINT `customerprize_FK1`
     FOREIGN KEY (`customer_id`)
     REFERENCES `beauty_centerdb`.`customer` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `customerprize_FK2`
     FOREIGN KEY (`prize_id`)
     REFERENCES `beauty_centerdb`.`prize` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE);
     
-    /*CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`treatmentemployee` (
+  CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`treatmentemployee` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `employee_id` INT UNSIGNED NOT NULL,
   `treatment_id` INT UNSIGNED NOT NULL,
@@ -298,10 +298,10 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservation` (
   CONSTRAINT `treatmentemployee_FK1`
     FOREIGN KEY (`employee_id`)
     REFERENCES `beauty_centerdb`.`employee` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `treatmentemployee_FK2`
     FOREIGN KEY (`treatment_id`)
     REFERENCES `beauty_centerdb`.`treatment` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE CASCADE);*/
+    ON DELETE CASCADE
+    ON UPDATE CASCADE);
