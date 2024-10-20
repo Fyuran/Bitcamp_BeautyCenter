@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
 
-import com.bitcamp.centro.estetico.DAO.DAOShift;
+import com.bitcamp.centro.estetico.DAO.ShiftDAO;
 import com.bitcamp.centro.estetico.DAO.UserCredentialsDAO;
 
 public class Employee extends User {

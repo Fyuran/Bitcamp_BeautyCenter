@@ -19,7 +19,7 @@ public class MainFrame extends JFrame{
 	private TreatmentPanel treatmentPanel;//creazione trattamenti ->Solo admin
 	
 	private UserAccessPanel userAccessPanel;//area personale ->Disponibile a tutti
-	private ReservationForm reservationForm;//prenotazione appuntamenti ->Disponibile a tutti
+	private ReservationPanel reservationForm;//prenotazione appuntamenti ->Disponibile a tutti
 	private gestioneClienti gestioneClienti;//pan per aggiungere clienti ->Disponibile a tutti
 	
 	public MainFrame(Employee employee, BeautyCenter bc) {
@@ -28,7 +28,7 @@ public class MainFrame extends JFrame{
 		setLocationRelativeTo(null);
 		setName("Gestione "+(bc==null?"Centro Estetico":bc.getName()));
 		userAccessPanel=new UserAccessPanel(employee);
-		reservationForm=new ReservationForm();
+		reservationForm=new ReservationPanel();
 		gestioneClienti=new gestioneClienti();
 		
 		mainPane.add(userAccessPanel);
