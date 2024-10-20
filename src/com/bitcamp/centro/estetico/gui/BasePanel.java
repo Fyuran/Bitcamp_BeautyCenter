@@ -13,9 +13,9 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import com.bitcamp.centro.estetico.gui.render.CustomListCellRenderer;
-import com.bitcamp.centro.estetico.gui.render.JSplitPanel;
 import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.*;
+import com.bitcamp.centro.estetico.utils.JSplitPanel;
 
 public abstract class BasePanel<T> extends JPanel {
 	enum filters {
@@ -54,13 +54,13 @@ public abstract class BasePanel<T> extends JPanel {
 			"Data di Nascita", "Assunzione", "Scadenza",
 			"Ruolo", "Username", "Indirizzo", "Città natale", "Email", "Telefono", "IBAN", "Abilitato" };
 
-	private final static String[] prizesCol = new String[] { "ID", "Nome", "Punti Necessari", "Tipo", "Importo",
+	private final static String[] prizesCol = new String[] { "ID", "Nome", "Punti Necessari", "Tipo", "€ in Buono", "Scadenza",
 			"Abilitato" };
 
 	private final static String[] subscriptionsCol = new String[] { "ID", "Prezzo", "IVA", "Periodo", "Inizio", "Fine",
 			"Sconto applicato", "Cliente", "Abilitato" };
 
-	private final static String[] transactionCol = new String[] { "ID", "€", "Data", "Pagamento", "IVA", "Cliente",
+	private final static String[] transactionCol = new String[] { "ID", "Conto", "Data", "Pagamento", "IVA", "Cliente",
 			"Servizi", "Abilitato" };
 			
 	private final static String[] credentialsCol = new String[] { "ID", "Username", "Password", "Address", "Iban",
@@ -339,11 +339,7 @@ public abstract class BasePanel<T> extends JPanel {
 	abstract void populateTable();
 
 	public void refreshTable() {
-		CompletableFuture.runAsync(() -> {
-			isRefreshing = true;
-			populateTable();
-			isRefreshing = false;
-		});
+		CompletableFuture.runAsync(() -> populateTable());
 	}
 
 	public void clearTableModel(DefaultTableModel model) {
