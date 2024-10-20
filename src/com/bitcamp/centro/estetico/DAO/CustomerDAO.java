@@ -108,11 +108,11 @@ public abstract class CustomerDAO {
 	}
 	
 	public static int updateCustomer(int id, Customer obj) {
-		String query = "UPDATE beauty_centerdb.customer "
-				+ " name = ?, surname = ?, is_female = ?, birthday = ?, birthplace = ?, "
-				+ "eu_tin = ?, credentials_id = ?, VAT = ?, recipient_code = ?, "
-				+ "notes = ?, loyalty_points = ?, is_enabled = ? "
-				+ "WHERE id = ?";
+		String query = "UPDATE beauty_centerdb.customer SET "
+			+ "name = ?, surname = ?, is_female = ?, birthday = ?, birthplace = ?, "
+			+ "eu_tin = ?, credentials_id = ?, VAT = ?, recipient_code = ?, "
+			+ "notes = ?, loyalty_points = ?, is_enabled = ? "
+			+ "WHERE id = ?";
 		
 		try(PreparedStatement stat = conn.prepareStatement(query)) {
 			
