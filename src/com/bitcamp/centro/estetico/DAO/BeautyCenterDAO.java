@@ -6,12 +6,19 @@ import java.util.List;
 import java.util.Optional;
 
 import com.bitcamp.centro.estetico.models.BeautyCenter;
-import com.bitcamp.centro.estetico.models.Main;
 
-public abstract class BeautyCenterDAO {
-	private static Connection conn = Main.getConnection();
-	
-	public final static Optional<BeautyCenter> insertBeautyCenter(BeautyCenter obj) {
+public class BeautyCenterDAO implements DAO<BeautyCenter>{	
+
+	private BeautyCenterDAO(){}
+    private static class SingletonHelper {
+        private static final BeautyCenterDAO INSTANCE = new BeautyCenterDAO();
+    }
+	public static BeautyCenterDAO getInstance() {
+		return SingletonHelper.INSTANCE;
+	}
+
+	@Override
+	public Optional<BeautyCenter> insert(BeautyCenter obj) {
 		String query = "INSERT INTO `beauty_centerdb`.`beauty_center` "
 				+ "(`name`,"
 				+ "`operating_office`,"
@@ -26,7 +33,7 @@ public abstract class BeautyCenterDAO {
 				+ "`is_enabled`) "
 				+ "VALUES(?,?,?,?,?,?,?,?,?,?,?)";
 
-		try(PreparedStatement stat = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 			stat.setString(1, obj.getName());
 			stat.setString(2, obj.getOperatingOffice());
 			stat.setString(3, obj.getRegisteredOffice());
@@ -40,7 +47,7 @@ public abstract class BeautyCenterDAO {
 			stat.setBoolean(11, obj.isEnabled());
 
 			stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			ResultSet generatedKeys = stat.getGeneratedKeys();
 			if(generatedKeys.next()) {
@@ -50,9 +57,9 @@ public abstract class BeautyCenterDAO {
 			throw new SQLException("Could not retrieve id");
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -61,20 +68,21 @@ public abstract class BeautyCenterDAO {
 		return Optional.empty();
 	}
 
-	public final static boolean isEmpty() {
+	@Override
+	public boolean isEmpty() {
 		String query = "SELECT * FROM beauty_centerdb.beauty_center LIMIT 1";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			if(rs.next()) {
 				return false;
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -83,22 +91,23 @@ public abstract class BeautyCenterDAO {
 		return true;
 	}
 
-	public final static List<BeautyCenter> getAllBeautyCenters() {
+	@Override
+	public List<BeautyCenter> getAll() {
 		List<BeautyCenter> list = new ArrayList<>();
 
 		String query = "SELECT * FROM beauty_centerdb.beauty_center";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			while(rs.next()) {
 				list.add(new BeautyCenter(rs));
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -107,26 +116,27 @@ public abstract class BeautyCenterDAO {
 		return list;
 	}
 
-	public final static Optional<BeautyCenter> getBeautyCenter(int id) {
+	@Override
+	public Optional<BeautyCenter> get(int id) {
 		String query = "SELECT * FROM beauty_centerdb.beauty_center WHERE id = ?";
 
 		Optional<BeautyCenter> opt = Optional.empty();
 		if(isEmpty()) return opt;
 		
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setInt(1, id);
 
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			if(rs.next()) {
 				opt = Optional.ofNullable(new BeautyCenter(rs));
 			}
 
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -136,24 +146,24 @@ public abstract class BeautyCenterDAO {
 	}
 	
 	
-	public final static Optional<BeautyCenter> getFirstBeautyCenter() {
+	public Optional<BeautyCenter> getFirst() {
 		String query = "SELECT * FROM beauty_centerdb.beauty_center LIMIT 1";
 
 		Optional<BeautyCenter> opt = Optional.empty();
 		if(isEmpty()) return opt;
 		
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			if(rs.next()) {
 				opt = Optional.ofNullable(new BeautyCenter(rs));
 			}
 
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -162,8 +172,8 @@ public abstract class BeautyCenterDAO {
 		return opt;
 	}
 	
-	
-	public final static int updateBeautyCenter(int id, BeautyCenter obj) {
+	@Override
+	public int update(int id, BeautyCenter obj) {
 		String query = "UPDATE `beauty_centerdb`.`beauty_center` SET "
 				+ "`name` = ?,"
 				+ "`operating_office` = ?,"
@@ -178,7 +188,7 @@ public abstract class BeautyCenterDAO {
 				+ "`is_enabled` = ? "
 				+ "WHERE id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			if(id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
@@ -197,14 +207,14 @@ public abstract class BeautyCenterDAO {
 			stat.setInt(12, id); //WHERE id = ?
 			int exec = stat.executeUpdate();
 
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -213,17 +223,18 @@ public abstract class BeautyCenterDAO {
 		return -1;
 	}
 
-	public final static int toggleEnabledBeautyCenter(int id) {
+	@Override
+	public int toggle(int id) {
 		String query = "UPDATE beauty_centerdb.beauty_center "
 				+ "SET is_enabled = ? "
 				+ "WHERE id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			if(id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
 
-			BeautyCenter obj = getBeautyCenter(id).get();
+			BeautyCenter obj = get(id).get();
 			boolean toggle = !obj.isEnabled(); //toggle enable or disable state
 			obj.setEnabled(toggle);
 
@@ -231,14 +242,14 @@ public abstract class BeautyCenterDAO {
 			stat.setInt(2, id); //WHERE id = ?
 			int exec = stat.executeUpdate();
 
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -246,43 +257,36 @@ public abstract class BeautyCenterDAO {
 		}
 		return -1;
 	}
-	public final static int toggleEnabledBeautyCenter(BeautyCenter obj) {
-		return toggleEnabledBeautyCenter(obj.getId());
+
+	@Override
+	public int toggle(BeautyCenter obj) {
+		return toggle(obj.getId());
 	}
 
-	public final static int deleteBeautyCenter(int id) {
+	@Override
+	public int delete(int id) {
 		String query = "DELETE FROM beauty_centerdb.beauty_center WHERE id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			if(id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
 			stat.setInt(1, id); //WHERE id = ?
 
 			int exec = stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
 			}
 		}
 		return -1;
-	}
-
-	public final static List<Object[]> toTableRowAll() {
-		List<BeautyCenter> list = getAllBeautyCenters();
-		List<Object[]> data = new ArrayList<>(list.size());
-		for(int i = 0; i < list.size(); i++) {
-			data.add(list.get(i).toTableRow());
-		}
-
-		return data;
 	}
 }

@@ -7,26 +7,33 @@ import java.util.List;
 import java.util.Optional;
 
 import com.bitcamp.centro.estetico.models.Customer;
-import com.bitcamp.centro.estetico.models.Main;
 import com.bitcamp.centro.estetico.models.Subscription;
 
-public abstract class SubscriptionDAO {
-	private static Connection conn = Main.getConnection();
+public class SubscriptionDAO implements DAO<Subscription> {
 
-	public final static Optional<Subscription> insertSubscription(Subscription obj) {
+	private SubscriptionDAO(){}
+    private static class SingletonHelper {
+        private static SubscriptionDAO INSTANCE = new SubscriptionDAO();
+    }
+	public static SubscriptionDAO getInstance() {
+		return SingletonHelper.INSTANCE;
+	}
+
+	@Override
+	public Optional<Subscription> insert(Subscription obj) {
 		String query = "INSERT INTO beauty_centerdb.subscription("
 				+ "subperiod, price, vat_id, discount, is_enabled) "
 				+ "VALUES (?, ?, ?, ?, ?)";
 
-		try(PreparedStatement stat = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 			stat.setInt(1, obj.getSubPeriod().toSQLOrdinal());
 			stat.setBigDecimal(2, obj.getPrice());
-			stat.setInt(3, obj.getVat().getId());
+			stat.setInt(3, obj.get().getId());
 			stat.setDouble(4, obj.getDiscount());
 			stat.setBoolean(5, obj.isEnabled());
 
 			stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			ResultSet generatedKeys = stat.getGeneratedKeys();
 			if(generatedKeys.next()) {
@@ -36,9 +43,9 @@ public abstract class SubscriptionDAO {
 			throw new SQLException("Could not retrieve id");
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -47,25 +54,26 @@ public abstract class SubscriptionDAO {
 		return Optional.empty();
 	}
 
-	public final static Optional<Subscription> getSubscription(int id) {
+	@Override
+	public Optional<Subscription> get(int id) {
 		String query = "SELECT * FROM beauty_centerdb.subscription WHERE id = ?";
 
 		Optional<Subscription> opt = Optional.empty();
 		if(isEmpty()) return opt;
 		
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setInt(1, id);  //WHERE id = ?
 
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			if(rs.next()) {
 				opt = Optional.ofNullable(new Subscription(rs, getStartOfSubscription(id)));
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -74,20 +82,21 @@ public abstract class SubscriptionDAO {
 		return opt;
 	}
 
-	public final static boolean isEmpty() {
+	@Override
+	public boolean isEmpty() {
 		String query = "SELECT * FROM beauty_centerdb.subscription LIMIT 1";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			if(rs.next()) {
 				return false;
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -96,34 +105,34 @@ public abstract class SubscriptionDAO {
 		return true;
 	}
 
-	//subperiod, price, vat_id, discount, is_enabled
-	public final static int updateSubscription(int id, Subscription obj) {
+	@Override
+	public int update(int id, Subscription obj) {
 		String query = "UPDATE beauty_centerdb.subscription "
 				+ "SET subperiod = ?, price = ?, vat_id = ?, discount = ?, is_enabled = ? "
 				+ "WHERE id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			if(id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
 
 			stat.setInt(1, obj.getSubPeriod().toSQLOrdinal());
 			stat.setBigDecimal(2, obj.getPrice());
-			stat.setInt(3, obj.getVat().getId());
+			stat.setInt(3, obj.get().getId());
 			stat.setDouble(4, obj.getDiscount());
 			stat.setBoolean(5, obj.isEnabled());
 
 			stat.setInt(6, id);  //WHERE id = ?
 
 			int exec = stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -132,12 +141,13 @@ public abstract class SubscriptionDAO {
 		return -1;
 	}
 
-	public final static int toggleEnabledSubscription(Subscription obj) {
+	@Override
+	public int toggle(Subscription obj) {
 		String query = "UPDATE beauty_centerdb.subscription "
 				+ "SET is_enabled = ? "
 				+ "WHERE id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			if(obj.getId() <= 0) {
 				throw new SQLException("invalid id: " + obj.getId());
 			}
@@ -148,14 +158,14 @@ public abstract class SubscriptionDAO {
 			stat.setInt(2, obj.getId()); //WHERE id = ?
 			int exec = stat.executeUpdate();
 
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -163,14 +173,17 @@ public abstract class SubscriptionDAO {
 		}
 		return -1;
 	}
-	public final static int toggleEnabledSubscription(int id) {
-		return toggleEnabledSubscription(getSubscription(id).get());
+
+	@Override
+	public int toggle(int id) {
+		return toggle(get(id).get());
 	}
 
-	public final static int deleteSubscription(int id) {
+	@Override
+	public int delete(int id) {
 		String query = "DELETE FROM beauty_centerdb.subscription WHERE id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			if(id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
@@ -178,14 +191,14 @@ public abstract class SubscriptionDAO {
 			stat.setInt(1, id); //WHERE id = ?
 
 			int exec = stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -194,22 +207,23 @@ public abstract class SubscriptionDAO {
 		return -1;
 	}
 
-	public final static List<Subscription> getAllSubscriptions() {
+	@Override
+	public List<Subscription> getAll() {
 		List<Subscription> list = new ArrayList<>();
 
 		String query = "SELECT * FROM beauty_centerdb.subscription";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			while(rs.next()) {
 				list.add(new Subscription(rs, getStartOfSubscription(rs.getInt(1))));
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -218,11 +232,11 @@ public abstract class SubscriptionDAO {
 		return list;
 	}
 
-	public final static int addSubscriptionToCustomer(Customer customer, Subscription subscription, LocalDate start) {
+	public int addSubscriptionToCustomer(Customer customer, Subscription subscription, LocalDate start) {
 		String query = "INSERT INTO beauty_centerdb.customersubscription(customer_id, subscription_id, start) "
 				+ "VALUES (?, ?, ?)";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setInt(1, customer.getId());
 			stat.setInt(2, subscription.getId());
 			if(start != null) {
@@ -232,7 +246,7 @@ public abstract class SubscriptionDAO {
 			}
 
 			int exec = stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			if(customer.getSubscription() != null) { //replace and delete the old one from db
 				removeSubscriptionFromCustomer(customer, customer.getSubscription());
@@ -243,9 +257,9 @@ public abstract class SubscriptionDAO {
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -254,11 +268,11 @@ public abstract class SubscriptionDAO {
 		return -1;
 	}
 
-	public final static int updateCustomerSubscription(Customer customer, Subscription subscription, LocalDate start) {
+	public int updateCustomerSubscription(Customer customer, Subscription subscription, LocalDate start) {
 		String query = "UPDATE beauty_centerdb.customersubscription SET customer_id = ?, subscription_id = ?, start = ?, "
 				+ "WHERE id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setInt(1, customer.getId());
 			stat.setInt(2, subscription.getId());
 			if(start != null) {
@@ -268,7 +282,7 @@ public abstract class SubscriptionDAO {
 			}
 
 			int exec = stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			subscription.setStart(start);
 			customer.setSubscription(subscription);
@@ -276,9 +290,9 @@ public abstract class SubscriptionDAO {
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -287,28 +301,28 @@ public abstract class SubscriptionDAO {
 		return -1;
 	}
 
-	public final static int removeSubscriptionFromCustomer(Customer customer, Subscription subscription) {
+	public int removeSubscriptionFromCustomer(Customer customer, Subscription subscription) {
 		if(customer.getSubscription() != subscription)
 		 {
 			return -1; //customer must contain this subscription
 		}
 		String query = "DELETE FROM beauty_centerdb.customersubscription WHERE customer_id = ? AND subscription_id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setInt(1, customer.getId());
 			stat.setInt(2, subscription.getId());
 
 			int exec = stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			customer.setSubscription(null);
 
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -316,28 +330,28 @@ public abstract class SubscriptionDAO {
 		}
 		return -1;
 	}
-	public final static int removeSubscriptionFromCustomer(int customer_id, int subscription_id) {
-		return removeSubscriptionFromCustomer(CustomerDAO.getCustomer(customer_id).get(), SubscriptionDAO.getSubscription(subscription_id).get());
+	public int removeSubscriptionFromCustomer(int customer_id, int subscription_id) {
+		return removeSubscriptionFromCustomer(CustomerDAO.getInstance().get(customer_id).get(), SubscriptionDAO.getInstance().get(subscription_id).get());
 	}
 
-	public final static Optional<Subscription> getSubscriptionOfCustomer(int id) {
+	public Optional<Subscription> getSubscriptionOfCustomer(int id) {
 		String query = "SELECT * FROM beauty_centerdb.customersubscription WHERE customer_id = ?";
 
 		Optional<Subscription> subscription = Optional.empty();
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setInt(1, id);  //WHERE id = ?
 
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 
 			if(rs.next()) {
-				subscription = getSubscription(rs.getInt(3)); //id, customer_id, subscription_id, start
+				subscription = get(rs.getInt(3)); //id, customer_id, subscription_id, start
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -345,28 +359,28 @@ public abstract class SubscriptionDAO {
 		}
 		return subscription;
 	}
-	public final static Optional<Subscription> getSubscriptionOfCustomer(Customer customer) {
+	public Optional<Subscription> getSubscriptionOfCustomer(Customer customer) {
 		return getSubscriptionOfCustomer(customer.getId());
 	}
 
-	public final static Optional<Customer> getCustomerOfSubscription(int id) {
+	public Optional<Customer> getCustomerOfSubscription(int id) {
 		String query = "SELECT * FROM beauty_centerdb.customersubscription WHERE subscription_id = ?";
 
 		Optional<Customer> customer = Optional.empty();
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setInt(1, id);  //WHERE id = ?
 
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 
 			if(rs.next()) {
-				customer = CustomerDAO.getCustomer(rs.getInt(2)); //id, customer_id, subscription_id, start
+				customer = CustomerDAO.getInstance().get(rs.getInt(2)); //id, customer_id, subscription_id, start
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -374,11 +388,11 @@ public abstract class SubscriptionDAO {
 		}
 		return customer;
 	}
-	public final static Optional<Customer> getCustomerOfSubscription(Subscription subscription) {
+	public Optional<Customer> getCustomerOfSubscription(Subscription subscription) {
 		return getCustomerOfSubscription(subscription.getId());
 	}
 
-	public final static Optional<LocalDate> getStartOfSubscription(int id) {
+	public Optional<LocalDate> getStartOfSubscription(int id) {
 		Optional<LocalDate> start = Optional.empty();
 		if(id <= 0) {
 			return start;
@@ -386,20 +400,20 @@ public abstract class SubscriptionDAO {
 
 		String query = "SELECT start FROM beauty_centerdb.customersubscription WHERE subscription_id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setInt(1, id);  //WHERE id = ?
 
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 
 			if(rs.next()) {
 				start = Optional.ofNullable(rs.getDate(1).toLocalDate()); // start
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -408,18 +422,9 @@ public abstract class SubscriptionDAO {
 		return start;
 
 	}
-	public final static Optional<LocalDate> getStartOfSubscription(Subscription subscription) {
+	public Optional<LocalDate> getStartOfSubscription(Subscription subscription) {
 		return getStartOfSubscription(subscription.getId());
 	}
 
-	public final static List<Object[]> toTableRowAll() {
-		List<Subscription> list = getAllSubscriptions();
-		List<Object[]> data = new ArrayList<>(list.size());
-		for(int i = 0; i < list.size(); i++) {
-			data.add(list.get(i).toTableRow());
-		}
-
-		return data;
-	}
 
 }

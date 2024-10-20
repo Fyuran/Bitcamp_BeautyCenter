@@ -5,35 +5,31 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
-import com.bitcamp.centro.estetico.models.Product;
+import com.bitcamp.centro.estetico.models.VAT;
 
-public class ProductDAO implements DAO<Product> {
+public class VAT_DAO implements DAO<VAT>{
 
-	private ProductDAO(){}
+	private VAT_DAO(){}
     private static class SingletonHelper {
-        private static ProductDAO INSTANCE = new ProductDAO();
+        private static VAT_DAO INSTANCE = new VAT_DAO();
     }
-	public static ProductDAO getInstance() {
+	public static VAT_DAO getInstance() {
 		return SingletonHelper.INSTANCE;
 	}
 
 	@Override
-	public Optional<Product> insert(Product obj) {
-		String query = "INSERT INTO beauty_centerdb.product("
-				+ "name, amount, minimum, price, vat_id, type, is_enabled) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?)";
+	public Optional<VAT> insert(VAT obj) {
+		String query = "INSERT INTO beauty_centerdb.vat(amount, is_enabled) VALUES (?, ?) ON DUPLICATE KEY UPDATE amount = ?";
 
 		try(PreparedStatement stat = getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-			stat.setString(1, obj.getName());
-			stat.setInt(2, obj.getAmount());
-			stat.setInt(3, obj.getMinStock());
-			stat.setBigDecimal(4, obj.getPrice());
-			stat.setInt(5, obj.get().getId());
-			stat.setInt(6, obj.getType().toSQLOrdinal());
-			stat.setBoolean(7, obj.isEnabled());
+			stat.setDouble(1, obj.getAmount());
+			stat.setBoolean(2, obj.isEnabled());
+			stat.setDouble(3, obj.getAmount());
 
 			stat.executeUpdate();
 			getConnection().commit();
@@ -41,9 +37,10 @@ public class ProductDAO implements DAO<Product> {
 			ResultSet generatedKeys = stat.getGeneratedKeys();
 			if(generatedKeys.next()) {
 				int id = generatedKeys.getInt(1);
-				return Optional.ofNullable(new Product(id, obj));
+				return Optional.ofNullable(new VAT(id, obj));
 			}
 			throw new SQLException("Could not retrieve id");
+
 		} catch(SQLException e) {
 			e.printStackTrace();
 			if(getConnection() != null) {
@@ -58,21 +55,48 @@ public class ProductDAO implements DAO<Product> {
 	}
 
 	@Override
-	public Optional<Product> get(int id) {
-		String query = "SELECT * FROM beauty_centerdb.product WHERE id = ?";
+	public Optional<VAT> get(int id) {
+		String query = "SELECT * FROM beauty_centerdb.vat WHERE id = ?";
 
-		Optional<Product> opt = Optional.empty();
+		Optional<VAT> opt = Optional.empty();
 		if(isEmpty()) return opt;
 		
 		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
-			stat.setInt(1, id);
+			stat.setInt(1, id);  //WHERE id = ?
 
 			ResultSet rs = stat.executeQuery();
 			getConnection().commit();
 			if(rs.next()) {
-				opt = Optional.ofNullable(new Product(rs));
+				opt = Optional.ofNullable(new VAT(rs));
 			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(getConnection() != null) {
+				try {
+					getConnection().rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return opt;
+	}
+	public Optional<VAT> get(VAT vat) {
+		return get(vat.getId());
+	}
 
+	public Optional<VAT> getVATByAmount(double amount) {
+		String query = "SELECT * FROM beauty_centerdb.vat WHERE amount = ?";
+
+		Optional<VAT> opt = Optional.empty();
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
+			stat.setDouble(1, amount);  //WHERE id = ?
+
+			ResultSet rs = stat.executeQuery();
+			getConnection().commit();
+			if(rs.next()) {
+				opt = Optional.ofNullable(new VAT(rs));
+			}
 		} catch(SQLException e) {
 			e.printStackTrace();
 			if(getConnection() != null) {
@@ -87,8 +111,33 @@ public class ProductDAO implements DAO<Product> {
 	}
 
 	@Override
+	public List<VAT> getAll() {
+		List<VAT> list = new ArrayList<>();
+
+		String query = "SELECT * FROM beauty_centerdb.vat";
+
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
+			ResultSet rs = stat.executeQuery();
+			getConnection().commit();
+			while(rs.next()) {
+				list.add(new VAT(rs));
+			}
+		} catch(SQLException e) {
+			e.printStackTrace();
+			if(getConnection() != null) {
+				try {
+					getConnection().rollback();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return list;
+	}
+
+	@Override
 	public boolean isEmpty() {
-		String query = "SELECT * FROM beauty_centerdb.product LIMIT 1";
+		String query = "SELECT * FROM beauty_centerdb.vat LIMIT 1";
 
 		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
@@ -109,40 +158,37 @@ public class ProductDAO implements DAO<Product> {
 		return true;
 	}
 
+	public List<VAT> filterBy(Predicate<? super VAT> pred) {
+		List<VAT> vats = getAll();
+		if(!vats.isEmpty()) {
+			return vats.stream().filter(pred).toList();
+		}
+		return Collections.emptyList();
+	}
+
 	@Override
-	public int update(int id, Product obj) {
-		String query = "UPDATE beauty_centerdb.product "
-				+ "SET name = ?, amount = ?, minimum = ?, "
-				+ "price = ?, vat_id = ?, type = ?, "
-				+ "is_enabled = ? "
+	public int update(int id, VAT obj) {
+		String query = "UPDATE beauty_centerdb.vat "
+				+ "SET amount = ?, is_enabled = ? "
 				+ "WHERE id = ?";
 
-		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			if(id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
-			if(obj.get().getId() <= 0) {
-				throw new SQLException("invalid VAT id: " + obj.get().getId());
-			}
 
-			stat.setString(1, obj.getName());
-			System.out.println(obj.getName());
-			stat.setInt(2, obj.getAmount());
-			stat.setInt(3, obj.getMinStock());
-			stat.setBigDecimal(4, obj.getPrice());
-			stat.setInt(5, obj.get().getId());
-			stat.setInt(6, obj.getType().toSQLOrdinal());
-			stat.setBoolean(7, obj.isEnabled());
+			stat.setDouble(1, obj.getAmount());
+			stat.setBoolean(2, obj.isEnabled());
 
-			stat.setInt(8, id); // WHERE id = ?
+			stat.setInt(3, id); //WHERE id = ?
 
 			int exec = stat.executeUpdate();
 			getConnection().commit();
 
 			return exec;
-		} catch (SQLException e) {
+		} catch(SQLException e) {
 			e.printStackTrace();
-			if (getConnection() != null) {
+			if(getConnection() != null) {
 				try {
 					getConnection().rollback();
 				} catch (SQLException e1) {
@@ -154,16 +200,12 @@ public class ProductDAO implements DAO<Product> {
 	}
 
 	@Override
-	public int toggle(Product obj) {
-		String query = "UPDATE beauty_centerdb.product "
+	public int toggle(VAT obj) {
+		String query = "UPDATE beauty_centerdb.vat "
 				+ "SET is_enabled = ? "
 				+ "WHERE id = ?";
 
 		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
-			if(obj.getId() <= 0) {
-				throw new SQLException("invalid id: " + obj.getId());
-			}
-
 			boolean toggle = !obj.isEnabled(); //toggle enable or disable state
 			obj.setEnabled(toggle);
 			stat.setBoolean(1, toggle);
@@ -193,13 +235,9 @@ public class ProductDAO implements DAO<Product> {
 
 	@Override
 	public int delete(int id) {
-		String query = "DELETE FROM beauty_centerdb.product WHERE id = ?";
+		String query = "DELETE FROM beauty_centerdb.vat WHERE id = ?";
 
 		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
-			if(id <= 0) {
-				throw new SQLException("invalid id: " + id);
-			}
-
 			stat.setInt(1, id); //WHERE id = ?
 
 			int exec = stat.executeUpdate();
@@ -219,48 +257,28 @@ public class ProductDAO implements DAO<Product> {
 		return -1;
 	}
 
-	@Override
-	public List<Product> getAll() {
-		List<Product> list = new ArrayList<>();
-
-		String query = "SELECT * FROM beauty_centerdb.product";
-
+	public boolean existByAmount(double amount) {
+		String query = "SELECT COUNT(*) FROM beauty_centerdb.vat WHERE ABS(vat.amount - ?) < 0.000001";
 		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
+			stat.setDouble(1, amount);
 			ResultSet rs = stat.executeQuery();
-			getConnection().commit();
-			while(rs.next()) {
-				list.add(new Product(rs));
-			}
-		} catch(SQLException e) {
-			e.printStackTrace();
-			if(getConnection() != null) {
-				try {
-					getConnection().rollback();
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
-			}
-		}
-		return list;
-	}
-
-	public boolean isNameUnique(String productName) {
-		String query="SELECT * FROM beauty_centerdb.product WHERE name=? LIMIT 1";
-		String name="";
-		
-		try(PreparedStatement pstmt = getConnection().prepareStatement(query)){
-			pstmt.setString(1, productName);
-			ResultSet rs=pstmt.executeQuery();
 			if(rs.next()) {
-				name=rs.getString("name");
-
+				return rs.getInt(1) == 0 ? false : true;
 			}
-			System.out.println("Nome cercato: "+productName);
-			System.out.println("Nome trovato: "+name);
-			return name.equals("");
+			return true;
 		}catch(SQLException e) {
 			e.printStackTrace();
-			return false;
+			return true;
 		}
+	}
+
+	public List<Object[]> toTableRowAll() {
+		List<VAT> list = getAll();
+		List<Object[]> data = new ArrayList<>(list.size());
+		for(int i = 0; i < list.size(); i++) {
+			data.add(list.get(i).toTableRow());
+		}
+
+		return data;
 	}
 }

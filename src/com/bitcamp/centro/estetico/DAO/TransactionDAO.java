@@ -5,30 +5,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.bitcamp.centro.estetico.models.Main;
 import com.bitcamp.centro.estetico.models.Transaction;
 
-public abstract class TransactionDAO {
-	private static Connection conn = Main.getConnection();
+public class TransactionDAO implements DAO<Transaction> {
 
-	public final static Optional<Transaction> insertTransaction(Transaction obj) {
+	private TransactionDAO(){}
+    private static class SingletonHelper {
+        private static TransactionDAO INSTANCE = new TransactionDAO();
+    }
+	public static TransactionDAO getInstance() {
+		return SingletonHelper.INSTANCE;
+	}
+
+	@Override
+	public Optional<Transaction> insert(Transaction obj) {
 		String query = "INSERT INTO beauty_centerdb.transaction("
 				+ "price, payment_method, datetime,"
 				+ "customer_id, vat_id, beauty_id, services, is_enabled)"
 				+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-		try(PreparedStatement stat = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 			stat.setBigDecimal(1, obj.getPrice());
 			stat.setInt(2, obj.getPaymentMethod().toSQLOrdinal());
 			stat.setTimestamp(3, Timestamp.valueOf(obj.getDateTime())); //DATETIME and TIMESTAMP are almost equivalent
 			stat.setInt(4, obj.getCustomer().getId());
-			stat.setInt(5, obj.getVat().getId());
+			stat.setInt(5, obj.get().getId());
 			stat.setInt(6, obj.getBeautyCenter().getId());
 			stat.setString(7, obj.getServices());
 			stat.setBoolean(8, obj.isEnabled());
 
 			stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			ResultSet generatedKeys = stat.getGeneratedKeys();
 			if(generatedKeys.next()) {
@@ -38,9 +45,9 @@ public abstract class TransactionDAO {
 			throw new SQLException("Could not retrieve id");
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -49,35 +56,23 @@ public abstract class TransactionDAO {
 		return Optional.empty();
 	}
 
-	/*		(
-			"beauty_centerdb.transaction("
-				+ "id, price, payment_method, dateTime,"
-				+ "customer_id, vat_id, beauty_id, services, is_enabled)"
-				+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-			)
-			(
-			int id, BigDecimal price, PayMethod paymentMethod,
-			LocalDateTime dateTime, Customer customer,
-			VAT vat, BeautyCenter beautyCenter, boolean isEnabled
-			)
-	*/
-
-	public final static List<Transaction> getAllTransactions() {
+	@Override
+	public List<Transaction> getAll() {
 		List<Transaction> list = new ArrayList<>();
 
 		String query = "SELECT * FROM beauty_centerdb.transaction";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			while(rs.next()) {
 				list.add(new Transaction(rs));
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -86,20 +81,21 @@ public abstract class TransactionDAO {
 		return list;
 	}
 
-	public final static boolean isEmpty() {
+	@Override
+	public boolean isEmpty() {
 		String query = "SELECT * FROM beauty_centerdb.transaction LIMIT 1";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			if(rs.next()) {
 				return false;
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -108,17 +104,18 @@ public abstract class TransactionDAO {
 		return true;
 	}
 
-	public final static Optional<Transaction> getTransaction(int id) {
+	@Override
+	public Optional<Transaction> get(int id) {
 		String query = "SELECT * FROM beauty_centerdb.transaction WHERE id = ?";
 
 		Optional<Transaction> opt = Optional.empty();
 		if(isEmpty()) return opt;
 		
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setInt(1, id);  //WHERE id = ?
 
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			Transaction trans = null;
 			if(rs.next()) {
 				trans = new Transaction(rs);
@@ -126,9 +123,9 @@ public abstract class TransactionDAO {
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -137,22 +134,22 @@ public abstract class TransactionDAO {
 		return opt;
 	}
 
-
-	public final static int updateTransaction(int id, Transaction obj) {
+	@Override
+	public int update(int id, Transaction obj) {
 		String query = "UPDATE beauty_centerdb.transaction "
 				+ " SET price = ?, payment_method = ?, datetime = ?,"
 				+ "customer_id = ?, vat_id = ?, beauty_id = ?, services = ?, is_enabled = ? "
 				+ "WHERE id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			if(id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
 			if(obj.getCustomer().getId() <= 0) {
 				throw new SQLException("invalid customer id: " + obj.getCustomer().getId());
 			}
-			if(obj.getVat().getId() <= 0) {
-				throw new SQLException("invalid VAT id: " + obj.getVat().getId());
+			if(obj.get().getId() <= 0) {
+				throw new SQLException("invalid VAT id: " + obj.get().getId());
 			}
 			if(obj.getBeautyCenter().getId() <= 0) {
 				throw new SQLException("invalid BeautyCenter id: " + obj.getBeautyCenter().getId());
@@ -162,7 +159,7 @@ public abstract class TransactionDAO {
 			stat.setInt(2, obj.getPaymentMethod().toSQLOrdinal());
 			stat.setTimestamp(3, Timestamp.valueOf(obj.getDateTime())); //DATETIME and TIMESTAMP are almost equivalent
 			stat.setInt(4, obj.getCustomer().getId());
-			stat.setInt(5, obj.getVat().getId());
+			stat.setInt(5, obj.get().getId());
 			stat.setInt(6, obj.getBeautyCenter().getId());
 			stat.setString(7, obj.getServices().toString());
 			stat.setBoolean(8, obj.isEnabled());
@@ -170,14 +167,14 @@ public abstract class TransactionDAO {
 			stat.setInt(9, id);  //WHERE id = ?
 
 			int exec = stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -186,12 +183,13 @@ public abstract class TransactionDAO {
 		return -1;
 	}
 
-	public final static int toggleEnabledTransaction(Transaction obj) {
+	@Override
+	public int toggle(Transaction obj) {
 		String query = "UPDATE beauty_centerdb.transaction "
 				+ "SET is_enabled = ? "
 				+ "WHERE id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			if(obj.getId() <= 0) {
 				throw new SQLException("invalid id: " + obj.getId());
 			}
@@ -202,14 +200,14 @@ public abstract class TransactionDAO {
 			stat.setInt(2, obj.getId()); //WHERE id = ?
 			int exec = stat.executeUpdate();
 
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -217,43 +215,36 @@ public abstract class TransactionDAO {
 		}
 		return -1;
 	}
-	public final static int toggleEnabledTransaction(int id) {
-		return toggleEnabledTransaction(getTransaction(id).get());
+
+	@Override
+	public int toggle(int id) {
+		return toggle(get(id).get());
 	}
 
-	public final static int deleteTransaction(int id) {
+	@Override
+	public int delete(int id) {
 		String query = "DELETE FROM beauty_centerdb.transaction WHERE id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			if(id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
 			stat.setInt(1, id); //WHERE id = ?
 
 			int exec = stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
 			}
 		}
 		return -1;
-	}
-
-	public final static List<Object[]> toTableRowAll() {
-		List<Transaction> list = getAllTransactions();
-		List<Object[]> data = new ArrayList<>(list.size());
-		for(int i = 0; i < list.size(); i++) {
-			data.add(list.get(i).toTableRow());
-		}
-
-		return data;
 	}
 }

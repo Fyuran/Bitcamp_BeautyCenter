@@ -6,24 +6,31 @@ import java.util.List;
 import java.util.Optional;
 
 import com.bitcamp.centro.estetico.models.Customer;
-import com.bitcamp.centro.estetico.models.Main;
 
-public abstract class CustomerDAO {
-	private static Connection conn = Main.getConnection();
+public class CustomerDAO implements DAO<Customer>{
 
-	public final static Optional<Customer> insertCustomer(Customer obj) {
+	private CustomerDAO(){}
+    private static class SingletonHelper {
+        private static final CustomerDAO INSTANCE = new CustomerDAO();
+    }
+	public static CustomerDAO getInstance() {
+		return SingletonHelper.INSTANCE;
+	}
+
+	@Override
+	public Optional<Customer> insert(Customer obj) {
 		String query = "INSERT INTO beauty_centerdb.customer("
 				+ "name, surname, is_female, birthday, birthplace, eu_tin, credentials_id, VAT, recipient_code, notes, loyalty_points, is_enabled) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-		try(PreparedStatement stat = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 			int UserCredentialsId = obj.getUserCredentials().getId();
 			if(UserCredentialsId <= 0) {
 				throw new SQLException("invalid UserCredentialsId: " + UserCredentialsId);
 			}
 			stat.setString(1, obj.getName());
 			stat.setString(2, obj.getSurname());
-			stat.setBoolean(3, obj.isFemale());
+			stat.setBoolean(3, obj.getGender().toBoolean());
 			stat.setDate(4, Date.valueOf(obj.getBoD()));
 			stat.setString(5, obj.getBirthplace());
 			stat.setString(6, obj.getEU_TIN().getValue());
@@ -35,7 +42,7 @@ public abstract class CustomerDAO {
 			stat.setBoolean(12, obj.isEnabled());
 
 			stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			ResultSet generatedKeys = stat.getGeneratedKeys();
 			if(generatedKeys.next()) {
@@ -45,9 +52,9 @@ public abstract class CustomerDAO {
 			throw new SQLException("Could not retrieve id");
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -56,25 +63,26 @@ public abstract class CustomerDAO {
 		return Optional.empty();
 	}
 
-	public final static Optional<Customer> getCustomer(int id) {
+	@Override
+	public Optional<Customer> get(int id) {
 		String query = "SELECT * FROM beauty_centerdb.customer WHERE id = ?";
 
 		Optional<Customer> opt = Optional.empty();
 		if(isEmpty()) return opt;
 		
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setInt(1, id);  //WHERE id = ?
 
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			if(rs.next()) {
 				opt = Optional.ofNullable(new Customer(rs));
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -83,22 +91,23 @@ public abstract class CustomerDAO {
 		return opt;
 	}
 
-	public final static List<Customer> getAllCustomers() {
+	@Override
+	public List<Customer> getAll() {
 		List<Customer> list = new ArrayList<>();
 
 		String query = "SELECT * FROM beauty_centerdb.customer";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			while(rs.next()) {
 				list.add(new Customer(rs));
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -107,20 +116,21 @@ public abstract class CustomerDAO {
 		return list;
 	}
 
-	public final static boolean isEmpty() {
+	@Override
+	public boolean isEmpty() {
 		String query = "SELECT * FROM beauty_centerdb.customer LIMIT 1";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			if(rs.next()) {
 				return false;
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -129,14 +139,15 @@ public abstract class CustomerDAO {
 		return true;
 	}
 
-	public final static int updateCustomer(int id, Customer obj) {
-		String query = "UPDATE beauty_centerdb.customer "
-				+ " name = ?, surname = ?, is_female = ?, birthday = ?, birthplace = ?, "
+	@Override
+	public int update(int id, Customer obj) {
+		String query = "UPDATE beauty_centerdb.customer SET "
+				+ "name = ?, surname = ?, is_female = ?, birthday = ?, birthplace = ?, "
 				+ "eu_tin = ?, credentials_id = ?, VAT = ?, recipient_code = ?, "
 				+ "notes = ?, loyalty_points = ?, is_enabled = ? "
 				+ "WHERE id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			if(id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
@@ -147,7 +158,7 @@ public abstract class CustomerDAO {
 
 			stat.setString(1, obj.getName());
 			stat.setString(2, obj.getSurname());
-			stat.setBoolean(3, obj.isFemale());
+			stat.setBoolean(3, obj.getGender().toBoolean());
 			stat.setDate(4, Date.valueOf(obj.getBoD()));
 			stat.setString(5, obj.getBirthplace());
 			stat.setString(6, obj.getEU_TIN().getValue());
@@ -161,14 +172,14 @@ public abstract class CustomerDAO {
 			stat.setInt(13, id);  //WHERE id = ?
 
 			int exec = stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -177,12 +188,13 @@ public abstract class CustomerDAO {
 		return -1;
 	}
 
-	public final static int toggleEnabledCustomer(Customer obj) {
+	@Override
+	public int toggle(Customer obj) {
 		String query = "UPDATE beauty_centerdb.customer "
 				+ "SET is_enabled = ? "
 				+ "WHERE id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			int id = obj.getId();
 			if(id <= 0) {
 				throw new SQLException("invalid id: " + id);
@@ -194,14 +206,14 @@ public abstract class CustomerDAO {
 			stat.setInt(2, id); //WHERE id = ?
 			int exec = stat.executeUpdate();
 
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -209,14 +221,16 @@ public abstract class CustomerDAO {
 		}
 		return -1;
 	}
-	public final static int toggleEnabledCustomer(int id) {
-		return toggleEnabledCustomer(getCustomer(id).get());
+	@Override
+	public int toggle(int id) {
+		return toggle(get(id).get());
 	}
 
-	public final static int deleteCustomer(int id) {
+	@Override
+	public int delete(int id) {
 		String query = "DELETE FROM beauty_centerdb.customer WHERE id = ?";
 
-		try(PreparedStatement stat = conn.prepareStatement(query)) {
+		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			if(id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
@@ -224,29 +238,19 @@ public abstract class CustomerDAO {
 			stat.setInt(1, id); //WHERE id = ?
 
 			int exec = stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch(SQLException e) {
 			e.printStackTrace();
-			if(conn != null) {
+			if(getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
 			}
 		}
 		return -1;
-	}
-
-	public final static List<Object[]> toTableRowAll() {
-		List<Customer> list = getAllCustomers();
-		List<Object[]> data = new ArrayList<>(list.size());
-		for(int i = 0; i < list.size(); i++) {
-			data.add(list.get(i).toTableRow());
-		}
-
-		return data;
 	}
 }

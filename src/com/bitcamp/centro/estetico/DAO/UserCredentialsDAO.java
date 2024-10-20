@@ -1,24 +1,38 @@
 package com.bitcamp.centro.estetico.DAO;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import com.bitcamp.centro.estetico.models.*;
+import com.bitcamp.centro.estetico.models.Employee;
+import com.bitcamp.centro.estetico.models.Roles;
+import com.bitcamp.centro.estetico.models.User;
+import com.bitcamp.centro.estetico.models.UserCredentials;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
-public abstract class UserCredentialsDAO {
-	private static Connection conn = Main.getConnection();
+public class UserCredentialsDAO implements DAO<UserCredentials> {
 
-	public final static Optional<UserCredentials> insertUserCredentials(UserCredentials obj) {
+	private UserCredentialsDAO(){}
+    private static class SingletonHelper {
+        private static UserCredentialsDAO INSTANCE = new UserCredentialsDAO();
+    }
+	public static UserCredentialsDAO getInstance() {
+		return SingletonHelper.INSTANCE;
+	}
+
+	@Override
+	public Optional<UserCredentials> insert(UserCredentials obj) {
 		String query = "INSERT INTO `beauty_centerdb`.`user_credentials`(`username`, `password`, `address`, `iban`, `phone`, `mail`, `is_enabled`)"
 				+ "VALUES(?, ?, ?, ?, ?, ?, ?);";
 
-		try (PreparedStatement stat = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+		try (PreparedStatement stat = getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 			stat.setString(1, obj.getUsername());
 			stat.setString(2, String.copyValueOf(obj.getPassword()));
 			stat.setString(3, obj.getAddress());
@@ -28,7 +42,7 @@ public abstract class UserCredentialsDAO {
 			stat.setBoolean(7, obj.isEnabled());
 
 			stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			ResultSet generatedKeys = stat.getGeneratedKeys();
 			if (generatedKeys.next()) {
@@ -38,9 +52,9 @@ public abstract class UserCredentialsDAO {
 			throw new SQLException("Could not retrieve id");
 		} catch (SQLException e) {
 			e.printStackTrace();
-			if (conn != null) {
+			if (getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -49,26 +63,27 @@ public abstract class UserCredentialsDAO {
 		return Optional.empty();
 	}
 
-	public final static Optional<UserCredentials> getUserCredentials(int id) {
+	@Override
+	public Optional<UserCredentials> get(int id) {
 		String query = "SELECT * FROM beauty_centerdb.user_credentials WHERE id = ?";
 
 		Optional<UserCredentials> opt = Optional.empty();
 		if (isEmpty())
 			return opt;
 
-		try (PreparedStatement stat = conn.prepareStatement(query)) {
+		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setInt(1, id); // WHERE id = ?
 
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			if (rs.next()) {
 				opt = Optional.ofNullable(new UserCredentials(rs));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			if (conn != null) {
+			if (getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -77,26 +92,26 @@ public abstract class UserCredentialsDAO {
 		return opt;
 	}
 
-	public static Optional<UserCredentials> getUserCredentials(String username) {
+	public Optional<UserCredentials> get(String username) {
 		String query = "SELECT * FROM beauty_centerdb.user_credentials WHERE username = ? LIMIT 1";
 
 		Optional<UserCredentials> opt = Optional.empty();
 		if (isEmpty())
 			return opt;
 
-		try (PreparedStatement stat = conn.prepareStatement(query)) {
+		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setString(1, username);
 
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			if (rs.next()) {
 				opt = Optional.ofNullable(new UserCredentials(rs));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			if (conn != null) {
+			if (getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -105,20 +120,21 @@ public abstract class UserCredentialsDAO {
 		return opt;
 	}
 
-	public final static boolean isEmpty() {
+	@Override
+	public boolean isEmpty() {
 		String query = "SELECT * FROM beauty_centerdb.user_credentials LIMIT 1";
 
-		try (PreparedStatement stat = conn.prepareStatement(query)) {
+		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			if (rs.next()) {
 				return false;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			if (conn != null) {
+			if (getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -127,30 +143,31 @@ public abstract class UserCredentialsDAO {
 		return true;
 	}
 
-	public final static List<UserCredentials> filterUserCredentialsBy(Predicate<? super UserCredentials> pred) {
-		List<UserCredentials> userCredentials = getAllUserCredentials();
+	public List<UserCredentials> filterUserCredentialsBy(Predicate<? super UserCredentials> pred) {
+		List<UserCredentials> userCredentials = getAll();
 		if (!userCredentials.isEmpty()) {
 			return userCredentials.stream().filter(pred).toList();
 		}
 		return Collections.emptyList();
 	}
 
-	public final static List<UserCredentials> getAllUserCredentials() {
+	@Override
+	public List<UserCredentials> getAll() {
 		List<UserCredentials> list = new ArrayList<>();
 
 		String query = "SELECT * FROM beauty_centerdb.user_credentials";
 
-		try (PreparedStatement stat = conn.prepareStatement(query)) {
+		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			while (rs.next()) {
 				list.add(new UserCredentials(rs));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			if (conn != null) {
+			if (getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -159,23 +176,23 @@ public abstract class UserCredentialsDAO {
 		return list;
 	}
 
-	public final static Optional<Employee> getEmployeeOfUsername(String username) {
+	public Optional<Employee> getEmployeeOfUsername(String username) {
 		String query = "SELECT id FROM beauty_centerdb.user_credentials WHERE username = ?";
 
-		try (PreparedStatement stat = conn.prepareStatement(query)) {
+		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setString(1, username); // WHERE username = ?
 
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			if (rs.next()) {
 				var employee = getEmployeeOfUserCredentials(rs.getInt(1));
 				return employee;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			if (conn != null) {
+			if (getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -184,22 +201,22 @@ public abstract class UserCredentialsDAO {
 		return Optional.empty();
 	}
 
-	public final static Optional<Employee> getEmployeeOfUserCredentials(int id) {
+	public Optional<Employee> getEmployeeOfUserCredentials(int id) {
 		String query = "SELECT * FROM beauty_centerdb.employee WHERE credentials_id = ?";
 
-		try (PreparedStatement stat = conn.prepareStatement(query)) {
+		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setInt(1, id); // WHERE credentials_id = ?
 
 			ResultSet rs = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			if (rs.next()) {
 				return Optional.ofNullable(new Employee(rs));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			if (conn != null) {
+			if (getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -208,16 +225,17 @@ public abstract class UserCredentialsDAO {
 		return Optional.empty();
 	}
 
-	public final static Optional<Employee> getEmployeeOfUserCredentials(UserCredentials obj) {
+	public Optional<Employee> getEmployeeOfUserCredentials(UserCredentials obj) {
 		return getEmployeeOfUserCredentials(obj.getId());
 	}
 
-	public final static int updateUserCredentials(int id, UserCredentials obj) {
+	@Override
+	public int update(int id, UserCredentials obj) {
 		String query = "UPDATE `beauty_centerdb`.`user_credentials` SET `username` = ?, "
 				+ "`password` = ?, `address` = ?, `iban` = ?, `phone` = ?, `mail` = ?, `is_enabled` = ? "
 				+ "WHERE `id` = ?;";
 
-		try (PreparedStatement stat = conn.prepareStatement(query)) {
+		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
 			if (id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
@@ -233,14 +251,14 @@ public abstract class UserCredentialsDAO {
 			stat.setInt(8, id); // WHERE id = ?
 
 			int exec = stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch (SQLException e) {
 			e.printStackTrace();
-			if (conn != null) {
+			if (getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -248,18 +266,18 @@ public abstract class UserCredentialsDAO {
 		}
 		return -1;
 	}
-
-	public final static int updateEmployeeUserCredentials(Employee obj) {
+	
+	public int update(Employee obj) {
 		UserCredentials uc = obj.getUserCredentials();
 		if (obj.getId() != -1)
-			return updateUserCredentials(uc.getId(), uc);
+			return update(uc.getId(), uc);
 		return -1;
 	}
 
-	public final static int updateUserCredentialsPassword(int id, char[] password) {
+	public int updatePassword(int id, char[] password) {
 		String query = "UPDATE `beauty_centerdb`.`user_credentials` SET `password` = ? WHERE `id` = ?";
 
-		try (PreparedStatement stat = conn.prepareStatement(query)) {
+		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
 			if (id <= 0) {
 				throw new SQLException("invalid id: " + id);
 			}
@@ -268,14 +286,14 @@ public abstract class UserCredentialsDAO {
 			stat.setInt(2, id); // WHERE id = ?
 
 			int exec = stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch (SQLException e) {
 			e.printStackTrace();
-			if (conn != null) {
+			if (getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -283,33 +301,34 @@ public abstract class UserCredentialsDAO {
 		}
 		return -1;
 	}
-	public final static int updateUserCredentialsPassword(UserCredentials obj, char[] password) {
-		return updateUserCredentialsPassword(obj.getId(), password);
+	public int updatePassword(UserCredentials obj, char[] password) {
+		return updatePassword(obj.getId(), password);
 	}
-	public final static int updateUserCredentialsPassword(User obj, char[] password) {
-		return updateUserCredentialsPassword(obj.getUserCredentialsId(), password);
+	public int updatePassword(User obj, char[] password) {
+		return updatePassword(obj.getUserCredentialsId(), password);
 	}
 
-	public final static int toggleEnabledUserCredentials(UserCredentials obj) {
+	@Override
+	public int toggle(UserCredentials obj) {
 		String query = "UPDATE beauty_centerdb.user_credentials "
 				+ "SET is_enabled = ? "
 				+ "WHERE id = ?";
 
-		try (PreparedStatement stat = conn.prepareStatement(query)) {
+		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
 			boolean toggle = !obj.isEnabled(); // toggle enable or disable state
 			obj.setEnabled(toggle);
 			stat.setBoolean(1, toggle);
 			stat.setInt(2, obj.getId()); // WHERE id = ?
 			int exec = stat.executeUpdate();
 
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch (SQLException e) {
 			e.printStackTrace();
-			if (conn != null) {
+			if (getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -318,25 +337,27 @@ public abstract class UserCredentialsDAO {
 		return -1;
 	}
 
-	public final static int toggleEnabledUserCredentials(int id) {
-		return toggleEnabledUserCredentials(getUserCredentials(id).get());
+	@Override
+	public int toggle(int id) {
+		return toggle(get(id).get());
 	}
 
-	public final static int deleteUserCredentials(int id) {
+	@Override
+	public int delete(int id) {
 		String query = "DELETE FROM beauty_centerdb.user_credentials WHERE id = ?";
 
-		try (PreparedStatement stat = conn.prepareStatement(query)) {
+		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setInt(1, id); // WHERE id = ?
 
 			int exec = stat.executeUpdate();
-			conn.commit();
+			getConnection().commit();
 
 			return exec;
 		} catch (SQLException e) {
 			e.printStackTrace();
-			if (conn != null) {
+			if (getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -345,42 +366,31 @@ public abstract class UserCredentialsDAO {
 		return -1;
 	}
 
-	public final static List<Object[]> toTableRowAll() {
-		List<UserCredentials> list = getAllUserCredentials();
-		List<Object[]> data = new ArrayList<>(list.size());
-		for (int i = 0; i < list.size(); i++) {
-			data.add(list.get(i).toTableRow());
-		}
-
-		return data;
-	}
-
-	// Metodo per cercare account attivi in base all'username o al ruolo
-	public final static List<UserCredentials> filterUserCredentials(String searchText) {
-		List<UserCredentials> accounts = getAllUserCredentials();
+	public List<UserCredentials> filterUserCredentials(String searchText) {
+		List<UserCredentials> accounts = getAll();
 		accounts = accounts.stream().filter(a -> a.getUsername().equalsIgnoreCase(searchText)).toList();
 		return accounts;
 	}
 
-	public static List<UserCredentials> filterUserCredentials(Roles role) {
-		List<Employee> employees = EmployeeDAO.filterEmployeesByRole(role);
+	public List<UserCredentials> filterUserCredentials(Roles role) {
+		List<Employee> employees = EmployeeDAO.getInstance().filterByRole(role);
 		List<UserCredentials> credentials = employees
 				.stream()
-				.map(c -> getUserCredentials(c.getUserCredentialsId()).get())
+				.map(c -> get(c.getUserCredentialsId()).get())
 				.toList();
 
 		return credentials;
 	}
 
 	// Metodo per verificare la password
-	public final static boolean isValidPassword(String username, char[] password) {
+	public boolean isValidPassword(String username, char[] password) {
 		String query = "SELECT password FROM beauty_centerdb.user_credentials WHERE username = ? AND is_enabled = 1";
 
-		try (PreparedStatement stat = conn.prepareStatement(query)) {
+		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setString(1, username);
 
 			ResultSet resultSet = stat.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			if (resultSet.next()) {
 				String storedPassword = resultSet.getString("password");
 
@@ -390,9 +400,9 @@ public abstract class UserCredentialsDAO {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			if (conn != null) {
+			if (getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -401,20 +411,19 @@ public abstract class UserCredentialsDAO {
 		return false; // Restituisce false se l'utente non viene trovato o se la verifica fallisce
 	}
 
-	public static boolean isUsernameUnique(String username) {
+	public boolean isUsernameUnique(String username) {
 		String query = "SELECT username FROM beauty_centerdb.user_credentials WHERE username = ? LIMIT 1";
 
-		Connection conn = Main.getConnection();
-		try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+		try (PreparedStatement pstmt = getConnection().prepareStatement(query)) {
 			pstmt.setString(1, username);
 			ResultSet rs = pstmt.executeQuery();
-			conn.commit();
+			getConnection().commit();
 			return !rs.next(); // row is valid? return NOT unique
 		} catch (SQLException e) {
 			e.printStackTrace();
-			if (conn != null) {
+			if (getConnection() != null) {
 				try {
-					conn.rollback();
+					getConnection().rollback();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
