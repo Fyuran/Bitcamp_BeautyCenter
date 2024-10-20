@@ -19,12 +19,12 @@ public class EmployeeTest {
             // Dettagli casuali per ogni Employee
             String name = "EmployeeName" + i;
             String surname = "EmployeeSurname" + i;
-            boolean isFemale = (i % 2 == 0);
+            boolean gender = (i % 2 == 0);
             LocalDate bod = LocalDate.of(1990, (i % 12) + 1, (i % 28) + 1);
             String birthplace = "Roma";
             String notes = "Note" + i;
 
-            UserDetails details = new UserDetails(name, surname, isFemale, bod, birthplace, notes);
+            UserDetails details = new UserDetails(name, surname, gender, bod, birthplace, notes);
 
             // Creazione delle credenziali dell'utente
             String username = "employee" + i;
@@ -50,11 +50,11 @@ public class EmployeeTest {
             LocalDate terminationDate = LocalDate.of(2050, 10, 9);// Consideriamo che non sia ancora terminato
 
             // Creare l'oggetto Employee
-            Employee employee = new Employee(details, userCredentials, serial, role, shifts, hiredDate, terminationDate, null);
+            Employee employee = new Employee(details, userCredentials, serial, role, shifts, hiredDate, terminationDate);
 
             // Inserire l'Employee nel database
             try {
-                EmployeeDAO.insertEmployee(employee);
+                EmployeeDAO.getInstance().insert(employee);
                 System.out.println("Employee " + i + " inserito con successo.");
             } catch (Exception e) {
                  e.printStackTrace();

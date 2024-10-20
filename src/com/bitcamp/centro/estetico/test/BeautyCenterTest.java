@@ -30,15 +30,15 @@ public final class BeautyCenterTest {
 				"DELETEME", "DELETE", "DELETE", "DELETE",
 				"DELETE", "DELETE", "DELETE", "DELETE", LocalTime.of(8, 0), LocalTime.of(20, 0));
 
-		bc = BeautyCenterDAO.insertBeautyCenter(bc).get();
-		bc2 = BeautyCenterDAO.insertBeautyCenter(bc2).get();
-		BeautyCenterDAO.toggleEnabledBeautyCenter(bc2);
+		bc = BeautyCenterDAO.getInstance().insert(bc).get();
+		bc2 = BeautyCenterDAO.getInstance().insert(bc2).get();
+		BeautyCenterDAO.getInstance().toggle(bc2);
 
-		BeautyCenter bc_get = BeautyCenterDAO.getBeautyCenter(bc.getId()).orElseThrow();
+		BeautyCenter bc_get = BeautyCenterDAO.getInstance().get(bc.getId()).orElseThrow();
 		bc_get.setName("get_Test");
 		bc_get.setOpeningHour(LocalTime.of(9, 0));
 
-		BeautyCenterDAO.updateBeautyCenter(bc.getId(), bc_get);
+		BeautyCenterDAO.getInstance().update(bc.getId(), bc_get);
 
 	}
 

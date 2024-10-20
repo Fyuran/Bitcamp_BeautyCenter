@@ -14,7 +14,7 @@ public class TestMainFrame extends JFrame {
 	        @Override
 			public void run() {
 	        	new Main("jdbc:mysql://localhost:1806", "root", "bitcampPassword");
-	            new MainFrame(EmployeeDAO.getEmployee(1).get(), BeautyCenterDAO.getFirstBeautyCenter().get());
+	            new MainFrame(EmployeeDAO.getInstance().get(1).get(), BeautyCenterDAO.getInstance().getFirst().get());
 	        }
 	    });
 	}

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import com.bitcamp.centro.estetico.DAO.BeautyCenterDAO;
 import com.bitcamp.centro.estetico.DAO.CustomerDAO;
 import com.bitcamp.centro.estetico.DAO.TransactionDAO;
-import com.bitcamp.centro.estetico.DAO.VATDao;
+import com.bitcamp.centro.estetico.DAO.VAT_DAO;
 import com.bitcamp.centro.estetico.models.*;
 
 public final class TransactionTest {
@@ -27,12 +27,12 @@ public final class TransactionTest {
 			e.printStackTrace();
 		}
 
-		BeautyCenter bc = BeautyCenterDAO.getFirstBeautyCenter().orElseThrow();
-		Customer c1 = CustomerDAO.getCustomer(1).orElseThrow();
-		VAT v1 = VATDao.getVAT(1).orElseThrow();
+		BeautyCenter bc = BeautyCenterDAO.getInstance().getFirst().orElseThrow();
+		Customer c1 = CustomerDAO.getInstance().get(1).orElseThrow();
+		VAT v1 = VAT_DAO.getInstance().get(1).orElseThrow();
 
-		Customer c2 = CustomerDAO.getCustomer(2).orElseThrow();
-		VAT v2 = VATDao.getVAT(2).orElseThrow();
+		Customer c2 = CustomerDAO.getInstance().get(2).orElseThrow();
+		VAT v2 = VAT_DAO.getInstance().get(2).orElseThrow();
 
 		/*
 		 *
@@ -46,16 +46,16 @@ public final class TransactionTest {
 
 		Transaction trans2 = new Transaction(BigDecimal.valueOf(100), PayMethod.CARD, LocalDateTime.now(), c2, v2, bc);
 
-		trans1 = TransactionDAO.insertTransaction(trans1).get();
-		trans2 = TransactionDAO.insertTransaction(trans2).get();
-		TransactionDAO.toggleEnabledTransaction(trans2);
+		trans1 = TransactionDAO.getInstance().insert(trans1).get();
+		trans2 = TransactionDAO.getInstance().insert(trans2).get();
+		TransactionDAO.getInstance().toggle(trans2);
 
-		Transaction tr_get = TransactionDAO.getTransaction(trans1.getId()).orElseThrow();
+		Transaction tr_get = TransactionDAO.getInstance().get(trans1.getId()).orElseThrow();
 		tr_get.setDateTime(LocalDateTime.of(2024, 9, 29, 15, 0));
 		tr_get.setPrice(BigDecimal.valueOf(300));
 		tr_get.setPaymentMethod(PayMethod.CARD);
 
-		TransactionDAO.updateTransaction(tr_get.getId(), tr_get);
+		TransactionDAO.getInstance().update(tr_get.getId(), tr_get);
 
 	}
 
