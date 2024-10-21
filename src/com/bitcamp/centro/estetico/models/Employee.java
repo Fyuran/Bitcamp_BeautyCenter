@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
+import com.bitcamp.centro.estetico.DAO.ShiftDAO;
 
 import com.bitcamp.centro.estetico.DAO.UserCredentialsDAO;
 
@@ -50,7 +51,7 @@ public class Employee extends User {
 				rs.getBoolean(12),
 				rs.getLong(13),
 				Roles.valueOf(rs.getString(7)),
-				null,//DAOShift.loadShiftsForEmployeeWhitID(rs.getInt(1))
+				ShiftDAO.loadShiftsForEmployeeId(rs.getInt(1)),
 				rs.getDate(8) != null ? rs.getDate(8).toLocalDate() : null,  
 				rs.getDate(9) != null ? rs.getDate(9).toLocalDate() : null 
 			);
@@ -139,8 +140,7 @@ public class Employee extends User {
 
 	@Override
 	public String toString() {
-		return "Employee [employeeSerial=" + employeeSerial + ", role=" + role + ", turns=" + turns + ", hiredDate="
-				+ hiredDate + ", terminationDate=" + terminationDate + ", toString()=" + super.toString() + "]";
+		return this.getName() + " " + this.getSurname();
 	}
 	public Object[] toTableRow() {
 		return new Object[] {

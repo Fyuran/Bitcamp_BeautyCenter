@@ -116,8 +116,7 @@ public class Treatment {
 
 	@Override
 	public String toString() {
-		return "Treatments [id=" + id + ", type=" + type + ", price=" + price + ", vat=" + vat + ", duration="
-				+ duration + ", products=" + products + ", isEnabled=" + isEnabled + "]";
+		return this.type;
 	}
 
 	public List<LocalTime> getTreatmentTime() throws Exception {
