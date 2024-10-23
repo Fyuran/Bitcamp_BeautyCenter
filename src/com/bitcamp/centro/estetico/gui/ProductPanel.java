@@ -265,6 +265,7 @@ public class ProductPanel extends JPanel {
 		System.out.println(isDataValid(true));
 		if (isDataValid(true)) {
 			String name = txtName.getText();
+			int amount=Integer.parseInt(txtAmount.getText());
 			int minStock = Integer.parseInt(txtMinStock.getText());
 			BigDecimal price = new BigDecimal(txtPrice.getText());
 			String vatString = ivaComboBox.getSelectedItem().toString();
@@ -273,7 +274,7 @@ public class ProductPanel extends JPanel {
 			ProductCat type = ProductCat.fromDescription(categoryComboBox.getSelectedItem().toString());
 			// Product(String name, int amount, int minStock, BigDecimal price, VAT vat,
 			// ProductCat type)
-			Product product = new Product(name, 0, minStock, price, vat, type);
+			Product product = new Product(name, amount, minStock, price, vat, type);
 			product = ProductDAO.insertProduct(product).get();
 			System.out.println(product);
 			msgLbl.setText(product.getName() + " inserito nel database");
