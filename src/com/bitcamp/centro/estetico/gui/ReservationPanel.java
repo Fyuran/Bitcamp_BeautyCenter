@@ -250,12 +250,12 @@ public class ReservationPanel extends JPanel {
 
 		confirmBtn = new JButton("Conferma");
 		confirmBtn.setEnabled(false);
-		confirmBtn.setBounds(613, 302, 95, 21);
+		confirmBtn.setBounds(610, 234, 95, 21);
 		anagraphicPanel.add(confirmBtn);
 
 		btnCancel = new JButton("Annulla");
 		btnCancel.setEnabled(false);
-		btnCancel.setBounds(708, 302, 85, 21);
+		btnCancel.setBounds(706, 234, 85, 21);
 		anagraphicPanel.add(btnCancel);
 
 		lblCustomers = new JLabel("Cliente");
