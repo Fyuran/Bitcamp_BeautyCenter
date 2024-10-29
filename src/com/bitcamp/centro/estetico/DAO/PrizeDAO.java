@@ -233,7 +233,7 @@ public class PrizeDAO implements DAO<Prize> {
 	}
 
 	public Optional<LocalDate> getMatchingExpirationDate(int customer_id, int prize_id) {
-		String query = "SELECT * FROM beauty_centerdb.customerprize WHERE customer_id = ? AND prize_id = ?";
+		String query = "SELECT expiration FROM beauty_centerdb.customerprize WHERE customer_id = ? AND prize_id = ?";
 
 		Optional<LocalDate> opt = Optional.empty();
 		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
@@ -244,7 +244,7 @@ public class PrizeDAO implements DAO<Prize> {
 			getConnection().commit();
 
 			if(rs.next()) {
-				opt = Optional.ofNullable(rs.getDate(3).toLocalDate()); //customer_id, prize_id, expiration
+				opt = Optional.ofNullable(rs.getDate(1).toLocalDate()); //customer_id, prize_id, expiration
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
@@ -348,9 +348,8 @@ public class PrizeDAO implements DAO<Prize> {
 		return getAllPrizesAssignedToCustomer(customer.getId());
 	}
 
-	//get all rows where customer_id == id then retrieve prizes' id from row for object retrieval function
 	public List<Customer> getAllCustomersAssignedToPrize(int id) {
-		String query = "SELECT * FROM beauty_centerdb.customerprize WHERE prize_id = ?";
+		String query = "SELECT customer_id FROM beauty_centerdb.customerprize WHERE prize_id = ?";
 
 		List<Customer> list = new ArrayList<>();
 		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
@@ -379,10 +378,10 @@ public class PrizeDAO implements DAO<Prize> {
 		return getAllCustomersAssignedToPrize(customer.getId());
 	}
 
-	public List<Prize> getAllActivePrizes() {
+	public List<Prize> getEnabled() {
 		List<Prize> list = new ArrayList<>();
 
-		String query = "SELECT * FROM beauty_centerdb.prize WHERE is_enabled = true"; // Premi attivi
+		String query = "SELECT * FROM beauty_centerdb.prize WHERE is_enabled = true";
 
 		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
 			ResultSet rs = stat.executeQuery();
@@ -401,23 +400,5 @@ public class PrizeDAO implements DAO<Prize> {
 			}
 		}
 		return list;
-	}
-
-	public List<Prize> getEnabled() {
-	    List<Prize> list = new ArrayList<>();
-	    String query = "SELECT * FROM beauty_centerdb.prize WHERE is_enabled = 1";
-
-	    try (PreparedStatement stat = getConnection().prepareStatement(query)) {
-
-	        ResultSet rs = stat.executeQuery();
-	        getConnection().commit();
-
-	        while (rs.next()) {
-	            list.add(new Prize(rs));
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-	    return list;
 	}
 }

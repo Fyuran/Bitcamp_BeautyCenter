@@ -9,7 +9,7 @@ import javax.swing.*;
 
 import com.bitcamp.centro.estetico.DAO.BeautyCenterDAO;
 import com.bitcamp.centro.estetico.DAO.EmployeeDAO;
-import com.bitcamp.centro.estetico.DAO.VATDao;
+import com.bitcamp.centro.estetico.DAO.VAT_DAO;
 import com.bitcamp.centro.estetico.models.BeautyCenter;
 import com.bitcamp.centro.estetico.models.VAT;
 import com.bitcamp.centro.estetico.utils.inputValidator;
@@ -19,6 +19,10 @@ import com.github.lgooddatepicker.components.TimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 
 public class SetupBeautyCenterFrame extends JFrame {
+
+	private static EmployeeDAO employeeDAO = EmployeeDAO.getInstance();
+	private static BeautyCenterDAO beautyCenterDAO = BeautyCenterDAO.getInstance();
+	private static VAT_DAO vat_DAO = VAT_DAO.getInstance();
 
 	private static final long serialVersionUID = 1L;
 	private static JTextField txfName;
@@ -168,7 +172,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 		btnNext.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 14));
 		btnNext.setBackground(new Color(64, 64, 64)); // green new Color(0, 204, 102)
 		btnNext.addActionListener(e -> {
-			if (EmployeeDAO.isEmpty()) {
+			if (employeeDAO.isEmpty()) {
 				new SetupFirstAccountFrame();
 			} else {
 				new LoginFrame();
@@ -183,7 +187,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 		btnInserisci.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		btnInserisci.setBounds(388, 450, 100, 30);
 		add(btnInserisci);
-		if (!BeautyCenterDAO.isEmpty()) {
+		if (!beautyCenterDAO.isEmpty()) {
 			btnInserisci.setEnabled(false);
 			btnNext.setEnabled(true);
 		}
@@ -206,10 +210,10 @@ public class SetupBeautyCenterFrame extends JFrame {
 
 				// Crea VAT di default e inseriscili nel database
 				// https://www.agenziaentrate.gov.it/portale/web/guest/iva-regole-generali-aliquote-esenzioni-pagamento/norme-generali-e-aliquote
-				VATDao.insertVAT(new VAT(4));
-				VATDao.insertVAT(new VAT(5));
-				VATDao.insertVAT(new VAT(10));
-				VATDao.insertVAT(new VAT(22));
+				vat_DAO.insert(new VAT(4));
+				vat_DAO.insert(new VAT(5));
+				vat_DAO.insert(new VAT(10));
+				vat_DAO.insert(new VAT(22));
 
 				// Crea un nuovo oggetto BeautyCenter
 				/*
@@ -221,7 +225,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 				BeautyCenter beautyCenter = new BeautyCenter(name, phone, certifiedMail, email, registeredOffice,
 						operatingOffice, rea, pIva, openingHour, closingHour);
 
-				Optional<BeautyCenter> result = BeautyCenterDAO.insertBeautyCenter(beautyCenter);
+				Optional<BeautyCenter> result = beautyCenterDAO.insert(beautyCenter);
 				if (result.isEmpty()) {
 					JOptionPane.showMessageDialog(null, "Errore durante l'inserimento dei dati.");
 					return;

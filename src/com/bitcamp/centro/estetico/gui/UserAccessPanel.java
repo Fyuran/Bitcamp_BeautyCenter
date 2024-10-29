@@ -2,7 +2,6 @@ package com.bitcamp.centro.estetico.gui;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.beans.PropertyVetoException;
 import java.time.format.DateTimeFormatter;
 
 import javax.swing.*;
@@ -17,6 +16,8 @@ import com.bitcamp.centro.estetico.models.Employee;
 import com.bitcamp.centro.estetico.models.Shift;
 
 public class UserAccessPanel extends JPanel {
+	
+	private static EmployeeDAO employeeDAO = EmployeeDAO.getInstance();
 
 	private static final long serialVersionUID = 1L;
 	private DateTimeFormatter dayFormat;
@@ -34,11 +35,6 @@ public class UserAccessPanel extends JPanel {
 	private JLabel lblBirthday;
 	private JLabel lblHireDate;
 
-	/**
-	 * Create the panel.
-	 *
-	 * @throws PropertyVetoException
-	 */
 	public UserAccessPanel() {
 		dayFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		timeFormat = DateTimeFormatter.ofPattern("hh:mm");
@@ -128,20 +124,15 @@ public class UserAccessPanel extends JPanel {
 	}
 
 	void populateShiftTable() {
-		// popolamento tabella
-		int i=1;
-
-		for (Shift shift : sessionUser.getShift()) {
-
+		var shifts = sessionUser.getShift();
+		if(shifts == null) return;
+		for (Shift shift : shifts) {
 			if (!shift.isShiftOver()) {
 				String day = shift.getStart().format(dayFormat);
 				String start = shift.getStart().format(timeFormat);
 				String end = shift.getEnd().format(timeFormat);
 				String type = shift.getType() == null ? null : shift.getType().toString();
-				System.out.println("Turno "+i+":\n ID: "+shift.getId()+"\nGiorno: "+day+ "\nDa a: "+start+"-"+end+"\nTipo: "+type);
-				i++;
 				model.addRow(new String[] { day, start, end, type });
-
 
 			}
 		}
@@ -164,18 +155,18 @@ public class UserAccessPanel extends JPanel {
 		changePassDialog.setAlwaysOnTop(true);
 		updateActiveUser();
 
-
 	}
 
 	public void changeUsername() {
-		ChangeUserDialog changeUserDialog = new ChangeUserDialog(this,sessionUser);
+		ChangeUserDialog changeUserDialog = new ChangeUserDialog(this, sessionUser);
 		changeUserDialog.setAlwaysOnTop(true);
 		updateActiveUser();
 		updateData();
 
 	}
+
 	public void updateActiveUser() {
-		this.sessionUser=EmployeeDAO.getEmployee(sessionUser.getId()).get();
+		this.sessionUser = employeeDAO.get(sessionUser.getId()).get();
 	}
 
 }

@@ -8,4 +8,5 @@ module centroEstetico {
 	requires org.apache.pdfbox;
 	requires com.github.lgooddatepicker;
 	requires layout;
+    requires junit;
 }

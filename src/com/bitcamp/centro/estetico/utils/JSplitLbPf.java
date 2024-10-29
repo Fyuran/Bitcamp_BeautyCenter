@@ -34,7 +34,6 @@ public class JSplitLbPf extends JSplitLabel {
 				passwordField.setEchoChar('•');
 			}
 		});
-
         fieldPanel.add(passwordField);
         fieldPanel.add(visible);
 	}

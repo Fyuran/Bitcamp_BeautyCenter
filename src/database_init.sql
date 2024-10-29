@@ -1,8 +1,9 @@
 
-CREATE DATABASE IF NOT EXISTS beauty_centerdb;
+CREATE DATABASE IF NOT EXISTS `beauty_centerdb`;
 
-CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`beauty_center` (
-  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+USE `beauty_centerdb`;
+CREATE TABLE `beauty_center` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `operating_office` varchar(100) NOT NULL,
   `registered_office` varchar(100) NOT NULL,
@@ -13,295 +14,209 @@ CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`beauty_center` (
   `P_IVA` varchar(12) NOT NULL,
   `opening_hour` time DEFAULT NULL,
   `closing_hour` time DEFAULT NULL,
-  `is_enabled` tinyint DEFAULT '1',
+  `is_enabled` tinyint(4) DEFAULT 1,
   PRIMARY KEY (`id`)
-);
-
-
-CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`vat` (
-  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
-  `amount` DOUBLE UNSIGNED NOT NULL,
-  `is_enabled` tinyint DEFAULT '1',
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `customer` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `surname` varchar(100) NOT NULL,
+  `is_female` tinyint(4) DEFAULT 0,
+  `birthday` date NOT NULL,
+  `birthplace` varchar(200) NOT NULL,
+  `eu_tin` varchar(20) NOT NULL,
+  `credentials_id` int(10) unsigned NOT NULL,
+  `VAT` varchar(12) DEFAULT NULL,
+  `recipient_code` varchar(8) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `loyalty_points` int(11) NOT NULL DEFAULT 0,
+  `is_enabled` tinyint(4) DEFAULT 1,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `amount_UNIQUE` (`amount`)
-);
-
-CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`user_credentials` (
-  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  KEY `customer_FK1` (`credentials_id`),
+  CONSTRAINT `customer_FK1` FOREIGN KEY (`credentials_id`) REFERENCES `user_credentials` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `customerprize` (
+  `customer_id` int(10) unsigned NOT NULL,
+  `prize_id` int(10) unsigned NOT NULL,
+  `expiration` date NOT NULL,
+  PRIMARY KEY (`customer_id`,`prize_id`),
+  KEY `customerprize_FK1_idx` (`customer_id`),
+  KEY `customerprize_FK2_idx` (`prize_id`),
+  CONSTRAINT `customerprize_FK1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customerprize_FK2` FOREIGN KEY (`prize_id`) REFERENCES `prize` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `customersubscription` (
+  `customer_id` int(10) unsigned NOT NULL,
+  `subscription_id` int(10) unsigned NOT NULL,
+  `start` date NOT NULL,
+  PRIMARY KEY (`customer_id`,`subscription_id`),
+  KEY `customersubscription_FK1_idx` (`customer_id`),
+  KEY `customersubscription_FK2_idx` (`subscription_id`),
+  CONSTRAINT `customersubscription_FK1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `customersubscription_FK2` FOREIGN KEY (`subscription_id`) REFERENCES `subscription` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `employee` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `surname` varchar(100) NOT NULL,
+  `is_female` tinyint(4) DEFAULT 0,
+  `birthday` date DEFAULT NULL,
+  `birthplace` varchar(200) NOT NULL,
+  `role` enum('PERSONNEL','SECRETARY','ADMIN') DEFAULT NULL,
+  `hired` date DEFAULT NULL,
+  `termination` date DEFAULT NULL,
+  `credentials_id` int(10) unsigned DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `is_enabled` tinyint(4) NOT NULL DEFAULT 1,
+  `serial` mediumtext NOT NULL,
+  `treatment_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `employee_fk1_idx` (`credentials_id`),
+  KEY `employee_fk2_idx` (`treatment_id`),
+  CONSTRAINT `employee_fk1` FOREIGN KEY (`credentials_id`) REFERENCES `user_credentials` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `employee_fk2` FOREIGN KEY (`treatment_id`) REFERENCES `treatment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `prize` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `threshold` int(11) NOT NULL DEFAULT 0,
+  `type` enum('TREATMENT','PRODUCT','DISCOUNT','SUBSCRIPTION') DEFAULT NULL,
+  `amount` float DEFAULT 0,
+  `is_enabled` tinyint(4) DEFAULT 1,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `product` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) DEFAULT NULL,
+  `amount` int(11) NOT NULL,
+  `minimum` int(11) DEFAULT 0,
+  `price` float NOT NULL,
+  `vat_id` int(10) unsigned DEFAULT NULL,
+  `type` enum('ORAL_CARE','SKIN_CARE','HAIR_CARE','BODY_CARE','COSMETICS','PERFUMES','OTHER') DEFAULT NULL,
+  `is_enabled` tinyint(4) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `vat_id_idx` (`id`),
+  KEY `vat_id` (`vat_id`),
+  CONSTRAINT `vat_id` FOREIGN KEY (`vat_id`) REFERENCES `vat` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `producttreatment` (
+  `product_id` int(10) unsigned NOT NULL,
+  `treatment_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`product_id`,`treatment_id`),
+  KEY `pt_fk1_idx` (`product_id`),
+  KEY `pt_fk2_idx` (`treatment_id`),
+  CONSTRAINT `pt_fk1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `pt_fk2` FOREIGN KEY (`treatment_id`) REFERENCES `treatment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `reservation` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `date` datetime NOT NULL,
+  `is_paid` tinyint(4) NOT NULL DEFAULT 0,
+  `treatment_id` int(10) unsigned DEFAULT NULL,
+  `customer_id` int(10) unsigned DEFAULT NULL,
+  `employee_id` int(10) unsigned DEFAULT NULL,
+  `state` enum('CREATED','IN_PROGRESS','CANCELLED') DEFAULT NULL,
+  `is_enabled` tinyint(4) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `reservation_fk1_idx` (`treatment_id`),
+  KEY `reservation_fk2_idx` (`customer_id`),
+  KEY `reservation_fk3_idx` (`employee_id`),
+  CONSTRAINT `reservation_fk1` FOREIGN KEY (`treatment_id`) REFERENCES `treatment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reservation_fk2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reservation_fk3` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `reservationemployee` (
+  `reservation_id` int(10) unsigned NOT NULL,
+  `employee_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`reservation_id`,`employee_id`),
+  KEY `reservationemployee_fk1_idx` (`reservation_id`),
+  KEY `reservationemployee_fk2_idx` (`employee_id`),
+  CONSTRAINT `reservationemployee_fk1` FOREIGN KEY (`reservation_id`) REFERENCES `reservation` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `reservationemployee_fk2` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `shift` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `start` datetime NOT NULL,
+  `end` datetime NOT NULL,
+  `type` enum('WORK','HOLIDAYS') DEFAULT NULL,
+  `is_enabled` tinyint(4) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `shiftemployee` (
+  `shift_id` int(10) unsigned NOT NULL,
+  `employee_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`shift_id`,`employee_id`),
+  KEY `shiftemployee_fk2_idx` (`employee_id`),
+  KEY `shiftemployee_fk1_idx` (`shift_id`),
+  CONSTRAINT `shiftemployee_fk1` FOREIGN KEY (`shift_id`) REFERENCES `shift` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `shiftemployee_fk2` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `subscription` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `subperiod` enum('MONTHLY','QUARTERLY','HALF_YEAR','YEARLY') NOT NULL,
+  `price` float NOT NULL,
+  `vat_id` int(10) unsigned DEFAULT NULL,
+  `discount` float NOT NULL,
+  `is_enabled` tinyint(4) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `subscription_FK1_idx` (`vat_id`),
+  CONSTRAINT `subscription_FK1` FOREIGN KEY (`vat_id`) REFERENCES `vat` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `transaction` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `price` double NOT NULL,
+  `datetime` datetime NOT NULL,
+  `payment_method` enum('CURRENCY','CARD') DEFAULT NULL,
+  `vat_id` int(10) unsigned DEFAULT NULL,
+  `customer_id` int(10) unsigned DEFAULT NULL,
+  `beauty_id` int(10) unsigned DEFAULT NULL,
+  `services` text NOT NULL,
+  `is_enabled` tinyint(4) DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `transactionFK_idx` (`customer_id`),
+  KEY `transactionFK2_idx` (`vat_id`),
+  KEY `transactionFK3` (`beauty_id`),
+  CONSTRAINT `transactionFK1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactionFK2` FOREIGN KEY (`vat_id`) REFERENCES `vat` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `transactionFK3` FOREIGN KEY (`beauty_id`) REFERENCES `beauty_center` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `treatment` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `type` varchar(100) NOT NULL,
+  `price` float DEFAULT NULL,
+  `vat_id` int(10) unsigned DEFAULT NULL,
+  `duration` time DEFAULT NULL,
+  `is_enabled` tinyint(4) DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `vat_id_idx` (`vat_id`),
+  CONSTRAINT `vat_id_treatment` FOREIGN KEY (`vat_id`) REFERENCES `vat` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `treatmentemployee` (
+  `employee_id` int(10) unsigned NOT NULL,
+  `treatment_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`employee_id`,`treatment_id`),
+  KEY `treatmentemployee_FK1_idx` (`employee_id`),
+  KEY `treatmentemployee_FK2_idx` (`treatment_id`),
+  CONSTRAINT `treatmentemployee_FK1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `treatmentemployee_FK2` FOREIGN KEY (`treatment_id`) REFERENCES `treatment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `user_credentials` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(100) DEFAULT NULL,
   `password` varchar(200) DEFAULT NULL,
   `address` varchar(100) DEFAULT NULL,
   `iban` varchar(40) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `mail` varchar(100) DEFAULT NULL,
-  `is_enabled` tinyint NOT NULL DEFAULT '1',
+  `is_enabled` tinyint(4) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
   UNIQUE KEY `mail_UNIQUE` (`mail`),
   UNIQUE KEY `phone_UNIQUE` (`phone`)
-);
-  
-CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`customer` (
-  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
-  `surname` varchar(100) NOT NULL,
-  `is_female` tinyint DEFAULT '0',
-  `birthday` date NOT NULL,
-  `birthplace` varchar(200) NOT NULL,
-  `eu_tin` varchar(20) NOT NULL,
-  `credentials_id` int unsigned NOT NULL,
-  `VAT` varchar(12) DEFAULT NULL,
-  `recipient_code` varchar(8) DEFAULT NULL,
-  `notes` text,
-  `loyalty_points` int NOT NULL DEFAULT '0',
-  `is_enabled` tinyint DEFAULT '1'
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `vat` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `amount` double unsigned NOT NULL,
+  `is_enabled` tinyint(4) DEFAULT 1,
   PRIMARY KEY (`id`),
-  CONSTRAINT `customer_FK1` FOREIGN KEY (`credentials_id`) REFERENCES `beauty_centerdb`.`user_credentials` (`id`) ON UPDATE CASCADE
-);
-  
-CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`transaction` (
-  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
-  `price` double NOT NULL,
-  `datetime` DATETIME NOT NULL,
-  `payment_method` ENUM('CURRENCY','CARD') NULL,
-  `vat_id` int unsigned DEFAULT NULL,
-  `customer_id` int unsigned DEFAULT NULL,
-  `beauty_id` int unsigned DEFAULT NULL,
-  `services` text NOT NULL,
-  `is_enabled` tinyint DEFAULT '1',
-  PRIMARY KEY (`id`),
-  KEY `transactionFK_idx` (`customer_id`),
-  KEY `transactionFK2_idx` (`vat_id`),
-  KEY `transactionFK3` (`beauty_id`),
-  CONSTRAINT `transactionFK1` FOREIGN KEY (`customer_id`) REFERENCES `beauty_centerdb`.`customer` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `transactionFK2` FOREIGN KEY (`vat_id`) REFERENCES `beauty_centerdb`.`vat` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `transactionFK3` FOREIGN KEY (`beauty_id`) REFERENCES `beauty_centerdb`.`beauty_center` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`product` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(100) NULL,
-  `amount` INT NOT NULL,
-  `minimum` INT NULL DEFAULT 0,
-  `price` FLOAT NOT NULL,
-  `vat_id` INT UNSIGNED NULL,
-  `type` ENUM('ORAL_CARE', 'SKIN_CARE', 'HAIR_CARE', 'BODY_CARE', 'COSMETICS', 'PERFUMES', 'OTHER') NULL,
-  `is_enabled` TINYINT NOT NULL DEFAULT 1,
-  INDEX `vat_id_idx` (`id` ASC),
-  PRIMARY KEY (`id`),
-  CONSTRAINT `vat_id`
-    FOREIGN KEY (`vat_id`)
-    REFERENCES `beauty_centerdb`.`vat` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE);
-    
-    CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`treatment` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `type` VARCHAR(100) NOT NULL,
-  `price` FLOAT NULL,
-  `vat_id` INT UNSIGNED NULL,
-  `duration` TIME NULL,
-  `is_enabled` TINYINT NULL DEFAULT 1,
-  PRIMARY KEY (`id`),
-  INDEX `vat_id_idx` (`vat_id` ASC),
-  CONSTRAINT `vat_id_treatment`
-    FOREIGN KEY (`vat_id`)
-    REFERENCES `beauty_centerdb`.`vat` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE);
-    
-CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`producttreatment` (
-  `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `product_id` int unsigned NOT NULL,
-  `treatment_id` int unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `pt_fk1_idx` (`product_id`),
-  KEY `pt_fk2_idx` (`treatment_id`),
-  CONSTRAINT `pt_fk1` FOREIGN KEY (`product_id`) REFERENCES `beauty_centerdb`.`product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `pt_fk2` FOREIGN KEY (`treatment_id`) REFERENCES `beauty_centerdb`.`treatment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`employee` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(100) NOT NULL,
-  `surname` VARCHAR(100) NOT NULL,
-  `is_female` TINYINT NULL DEFAULT 0,
-  `birthday` DATE NULL,
-  `birthplace` VARCHAR(200) NOT NULL,
-  `role` ENUM('PERSONNEL', 'SECRETARY', 'ADMIN') NULL,
-  `hired` DATE NULL,
-  `termination` DATE NULL,
-  `credentials_id` INT UNSIGNED NULL,
-  `notes` TEXT NULL,
-  `is_enabled` TINYINT NOT NULL DEFAULT 1,
-  `serial` LONG NOT NULL,
-  `treatment_id` INT UNSIGNED NULL,
-  PRIMARY KEY (`id`),
-  INDEX `employee_fk1_idx` (`credentials_id` ASC),
-  INDEX `employee_fk2_idx` (`treatment_id` ASC),
-  CONSTRAINT `employee_fk1`
-    FOREIGN KEY (`credentials_id`)
-    REFERENCES `beauty_centerdb`.`user_credentials` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `employee_fk2`
-    FOREIGN KEY (`treatment_id`)
-    REFERENCES `beauty_centerdb`.`treatment` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE);
-    
-    
-CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservation` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `date` DATE NOT NULL,
-  `time` TIME NOT NULL,
-  `is_paid` TINYINT NOT NULL DEFAULT 0,
-  `treatment_id` INT UNSIGNED NULL,
-  `customer_id` INT UNSIGNED NULL,
-  `employee_id` INT UNSIGNED NULL,
-  `state` ENUM('CREATED', 'IN_PROGRESS', 'CANCELLED') NULL,
-  `is_enabled` TINYINT NOT NULL DEFAULT 1,
-  PRIMARY KEY (`id`),
-  INDEX `reservation_fk1_idx` (`treatment_id` ASC),
-  INDEX `reservation_fk2_idx` (`customer_id` ASC),
-  INDEX `reservation_fk3_idx` (`employee_id` ASC),
-  CONSTRAINT `reservation_fk1`
-    FOREIGN KEY (`treatment_id`)
-    REFERENCES `beauty_centerdb`.`treatment` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `reservation_fk2`
-    FOREIGN KEY (`customer_id`)
-    REFERENCES `beauty_centerdb`.`customer` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `reservation_fk3`
-    FOREIGN KEY (`employee_id`)
-    REFERENCES `beauty_centerdb`.`employee` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE);
-  
-  
-    
-    CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`shift` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `start` DATETIME NOT NULL,
-  `end` DATETIME NOT NULL,
-  `type` ENUM('WORK', 'HOLYDAYS') NULL,
-  `is_enabled` TINYINT NOT NULL DEFAULT 1,
-  PRIMARY KEY (`id`));
-  
-  CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`shiftemployee` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `shift_id` INT UNSIGNED NOT NULL,
-  `employee_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `shiftemployee_fk2_idx` (`employee_Id` ASC),
-  INDEX `shiftemployee_fk1_idx` (`shift_id` ASC),
-  CONSTRAINT `shiftemployee_fk1`
-    FOREIGN KEY (`shift_id`)
-    REFERENCES `beauty_centerdb`.`shift` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `shiftemployee_fk2`
-    FOREIGN KEY (`employee_id`)
-    REFERENCES `beauty_centerdb`.`employee` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE);
-    
-  CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`reservationemployee` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `reservation_id` INT UNSIGNED NOT NULL,
-  `employee_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `reservationemployee_fk1_idx` (`reservation_id` ASC),
-  INDEX `reservationemployee_fk2_idx` (`employee_id` ASC),
-  CONSTRAINT `reservationemployee_fk1`
-    FOREIGN KEY (`reservation_id`)
-    REFERENCES `beauty_centerdb`.`reservation` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `reservationemployee_fk2`
-    FOREIGN KEY (`employee_id`)
-    REFERENCES `beauty_centerdb`.`employee` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE);
-  
-  CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`subscription` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `subperiod` ENUM('MONTHLY', 'QUARTERLY', 'HALF_YEAR', 'YEARLY') NOT NULL,
-  `price` FLOAT NOT NULL,
-  `vat_id` INT UNSIGNED NULL,
-  `discount` FLOAT NOT NULL,
-  `is_enabled` TINYINT NOT NULL DEFAULT 1,
-  PRIMARY KEY (`id`),
-  INDEX `subscription_FK1_idx` (`vat_id` ASC),
-  CONSTRAINT `subscription_FK1`
-    FOREIGN KEY (`vat_id`)
-    REFERENCES `beauty_centerdb`.`vat` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE);
-    
-    CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`customersubscription` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `customer_id` INT UNSIGNED NOT NULL,
-  `subscription_id` INT UNSIGNED NOT NULL,
-  `start` DATE NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `customersubscription_FK1_idx` (`customer_id` ASC),
-  INDEX `customersubscription_FK2_idx` (`subscription_id` ASC),
-  CONSTRAINT `customersubscription_FK1`
-    FOREIGN KEY (`customer_id`)
-    REFERENCES `beauty_centerdb`.`customer` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `customersubscription_FK2`
-    FOREIGN KEY (`subscription_id`)
-    REFERENCES `beauty_centerdb`.`subscription` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE);
-    
-    CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`prize` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(100) NOT NULL,
-  `threshold` INT NOT NULL DEFAULT 0,
-  `type` ENUM('TREATMENT', 'PRODUCT', 'DISCOUNT', 'SUBSCRIPTION') NULL,
-  `amount` FLOAT NULL DEFAULT 0,
-  `is_enabled` TINYINT NULL DEFAULT 1,
-  PRIMARY KEY (`id`));
-  
-  CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`customerprize` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `customer_id` INT UNSIGNED NOT NULL,
-  `prize_id` INT UNSIGNED NOT NULL,
-  `expiration` DATE NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `customerprize_FK1_idx` (`customer_id` ASC),
-  INDEX `customerprize_FK2_idx` (`prize_id` ASC),
-  CONSTRAINT `customerprize_FK1`
-    FOREIGN KEY (`customer_id`)
-    REFERENCES `beauty_centerdb`.`customer` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `customerprize_FK2`
-    FOREIGN KEY (`prize_id`)
-    REFERENCES `beauty_centerdb`.`prize` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE);
-    
-  CREATE TABLE IF NOT EXISTS `beauty_centerdb`.`treatmentemployee` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `employee_id` INT UNSIGNED NOT NULL,
-  `treatment_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `treatmentemployee_FK1_idx` (`employee_id` ASC) VISIBLE,
-  INDEX `treatmentemployee_FK2_idx` (`treatment_id` ASC) VISIBLE,
-  CONSTRAINT `treatmentemployee_FK1`
-    FOREIGN KEY (`employee_id`)
-    REFERENCES `beauty_centerdb`.`employee` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `treatmentemployee_FK2`
-    FOREIGN KEY (`treatment_id`)
-    REFERENCES `beauty_centerdb`.`treatment` (`id`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE);
+  UNIQUE KEY `amount_UNIQUE` (`amount`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

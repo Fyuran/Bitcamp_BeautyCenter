@@ -1,205 +1,331 @@
 package com.bitcamp.centro.estetico.gui;
 
-import java.awt.Font;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.bitcamp.centro.estetico.DAO.CustomerDAO;
+import com.bitcamp.centro.estetico.DAO.UserCredentialsDAO;
 import com.bitcamp.centro.estetico.gui.render.CustomTableCellRenderer;
 import com.bitcamp.centro.estetico.models.Customer;
-import com.github.lgooddatepicker.components.DatePicker;
+import com.bitcamp.centro.estetico.models.Gender;
+import com.bitcamp.centro.estetico.models.Prize;
+import com.bitcamp.centro.estetico.models.Subscription;
+import com.bitcamp.centro.estetico.models.UserCredentials;
+import com.bitcamp.centro.estetico.models.UserDetails;
+import com.bitcamp.centro.estetico.utils.JSplitBtnField;
+import com.bitcamp.centro.estetico.utils.JSplitDatePicker;
+import com.bitcamp.centro.estetico.utils.JSplitLbTxf;
+import com.bitcamp.centro.estetico.utils.JSplitRadialButtons;
+import com.bitcamp.centro.estetico.utils.ObjectPicker;
+import com.bitcamp.centro.estetico.utils.inputValidator;
+import com.bitcamp.centro.estetico.utils.inputValidator.emptyInputException;
+import com.bitcamp.centro.estetico.utils.inputValidator.inputValidatorException;
 
 public class CustomerPanel extends BasePanel<Customer> {
 
 	private static final long serialVersionUID = 1L;
+	private static UserCredentialsDAO userCredentialsDAO = UserCredentialsDAO.getInstance();
+	private static CustomerDAO customerDAO = CustomerDAO.getInstance();
 
-	private static JTextField txfName;
-	private static JTextField txfSurname;
-	private static JTextField txfSearchBar;
-	private static JTextField txfPhone;
-	private static JTextField txfMail;
-	private static JTextField txfAddress;
-	private static JTextField txfIban;
-	private static JTextField txfBirthplace;
-	private static JRadioButton femaleRadioBtn;
-	private static JRadioButton maleRadioBtn;
-	private static DatePicker txfBirthday;
-	private static JTextArea txfNotes;
-	private static JTextField txfPIVA;
-	private static JTextField txfRecipientCode;
+	private static JSplitLbTxf txfName;
+	private static JSplitLbTxf txfSurname;
+	private static JSplitLbTxf txfPhone;
+	private static JSplitLbTxf txfMail;
+	private static JSplitLbTxf txfAddress;
+	private static JSplitLbTxf txfIban;
+	private static JSplitLbTxf txfBirthplace;
+	private static JSplitRadialButtons genderBtns;
+	private static JSplitDatePicker txfBirthday;
+	private static JSplitLbTxf txfNotes;
+	private static JSplitLbTxf txfPIVA;
+	private static JSplitLbTxf txfRecipientCode;
+	private static JSplitLbTxf txfLoyaltyPoints;
+	private static JSplitBtnField txfSubscriptionBtnField;
+	private static JSplitBtnField txfPrizesBtnField;
 
-	private static JLabel lbOutput;
-
-	private static final int _ISENABLEDCOL = 14;
+	private static int id = -1;
+	private static Gender gender;
+	private static String name;
+	private static String surname;
+	private static Subscription selectedSubscription;
+	private static List<Prize> selectedPrizes;
+	private static boolean isEnabled = false;
 
 	public CustomerPanel() {
-		setLayout(null);
+
 		setName("Clienti");
 		setTitle("GESTIONE CLIENTI");
-		setSize(1024,768);
-		btnSearch.setBounds(206, 8, 40, 40);
-		txfSearchBar.setBounds(23, 14, 168, 24);
-		btnFilter.setBounds(256, 8, 40, 40);
-		btnInsert.setBounds(792, 8, 40, 40);
-		btnUpdate.setBounds(842, 8, 40, 40);
-		btnDisable.setBounds(892, 8, 40, 40);
-		btnDelete.setBounds(742, 8, 40, 40);
-		lbOutput.setBounds(306, 8, 438, 41);
+		setSize(1024, 768);
 
-		table.setDefaultRenderer(Object.class, new CustomTableCellRenderer(customerModel, _ISENABLEDCOL));
+		table.setModel(customerModel);
+		table.setDefaultRenderer(Object.class, new CustomTableCellRenderer(customerModel));
 
-		// label e textfield degli input
-		JLabel lblName = new JLabel("Nome:");
-		lblName.setBounds(3, 26, 170, 14);
-		lblName.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		txfName = new JSplitLbTxf("Nome");
+		txfSurname = new JSplitLbTxf("Cognome");
+		txfMail = new JSplitLbTxf("Mail");
+		txfPhone = new JSplitLbTxf("Telefono");
+		txfAddress = new JSplitLbTxf("Indirizzo");
+		txfBirthday = new JSplitDatePicker("Data di nascita");
+		txfBirthplace = new JSplitLbTxf("Città Natale");
+		genderBtns = new JSplitRadialButtons("Genere", "Maschio", "Femmina");
+		txfNotes = new JSplitLbTxf("Note");
+		txfIban = new JSplitLbTxf("IBAN");
+		txfPIVA = new JSplitLbTxf("P.IVA");
+		txfRecipientCode = new JSplitLbTxf("Codice Ricezione");
+		txfLoyaltyPoints = new JSplitLbTxf("Punti fedeltà");
+		txfSubscriptionBtnField = new JSplitBtnField("Abbonamento", "Visualizza Abbonamento");
+		txfSubscriptionBtnField.addActionListener(l -> {
+			ObjectPicker<Subscription> picker = new ObjectPicker<>(parent, "Scelta Cliente", subscriptions,
+					ListSelectionModel.SINGLE_SELECTION);
+					picker.setSelectedItems(selectedSubscription);
+					
+			picker.addActionListener(ll -> {
+				if(!picker.isSelectionEmpty()) {
+					selectedSubscription = picker.getSelectedValue();
+					picker.dispose();
+					txfSubscriptionBtnField.setFieldText(selectedSubscription.getSubPeriod().toString());
+				}
+			});
+			picker.setVisible(true);
+		});
+		txfPrizesBtnField = new JSplitBtnField("Premi", "Visualizza Pemi");
+		txfPrizesBtnField.addActionListener(l -> {
+			ObjectPicker<Prize> picker = new ObjectPicker<>(parent, "Aggiunta Premi", prizes,
+					ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+					picker.setSelectedItems(selectedPrizes);
+			picker.addActionListener(ll -> {
+				if(!picker.isSelectionEmpty()) {
+					selectedPrizes = picker.getSelectedValuesList();
+					picker.dispose();
+					int quantity = selectedPrizes.size();
+					txfPrizesBtnField.setFieldText(quantity + (quantity == 1 ? " premio scelto" : " premi scelti"));
+				}
+			});
+			picker.setVisible(true);
+		});
 
-		txfName = new JTextField();
-		txfName.setBounds(169, 23, 220, 20);
-		txfName.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		txfName.setColumns(10);
-
-		JLabel lblSurname = new JLabel("Cognome:");
-		lblSurname.setBounds(3, 65, 170, 17);
-		lblSurname.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-
-		txfSurname = new JTextField();
-		txfSurname.setBounds(169, 63, 220, 20);
-		txfSurname.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		txfSurname.setColumns(10);
-
-		JLabel lblBirthday = new JLabel("Data di nascita:");
-		lblBirthday.setBounds(3, 108, 170, 14);
-		lblBirthday.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-
-		txfMail = new JTextField();
-		txfMail.setBounds(709, 105, 220, 20);
-		txfMail.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		txfMail.setColumns(10);
-
-		txfPhone = new JTextField();
-		txfPhone.setBounds(709, 145, 220, 20);
-		txfPhone.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		txfPhone.setColumns(10);
-
-		txfAddress = new JTextField();
-		txfAddress.setBounds(709, 23, 220, 20);
-		txfAddress.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		txfAddress.setColumns(10);
-
-		JLabel lblMail = new JLabel("Mail:");
-		lblMail.setBounds(491, 108, 170, 14);
-		lblMail.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-
-		JLabel lblPhone = new JLabel("Telefono:");
-		lblPhone.setBounds(491, 148, 170, 14);
-		lblPhone.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-
-		JLabel lblAddress = new JLabel("Indirizzo:");
-		lblAddress.setBounds(491, 26, 170, 14);
-		lblAddress.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-
-		txfBirthday = new DatePicker();
-		txfBirthday.setBounds(169, 103, 220, 25);
-
-		JLabel lblBirthPlace = new JLabel("Città di nascita:");
-		lblBirthPlace.setBounds(491, 66, 170, 14);
-		lblBirthPlace.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-
-		txfBirthplace = new JTextField();
-		txfBirthplace.setBounds(709, 63, 220, 20);
-		txfBirthplace.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		txfBirthplace.setColumns(10);
-
-		ButtonGroup genderBtnGroup = new ButtonGroup();
-		maleRadioBtn = new JRadioButton("Uomo");
-		maleRadioBtn.setBounds(491, 222, 75, 23);
-		maleRadioBtn.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		genderBtnGroup.add(maleRadioBtn);
-
-		femaleRadioBtn = new JRadioButton("Donna");
-		femaleRadioBtn.setBounds(568, 222, 75, 23);
-		femaleRadioBtn.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-		genderBtnGroup.add(femaleRadioBtn);
-
-		JLabel notesLbl = new JLabel("Note:");
-		notesLbl.setBounds(491, 279, 61, 16);
-		notesLbl.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
-
-		txfNotes = new JTextArea();
-		txfNotes.setBounds(709, 251, 220, 72);
-		txfNotes.setBorder(UIManager.getBorder("TextField.border"));
-
-		txfIban = new JTextField();
-		txfIban.setBounds(169, 303, 220, 20);
-		txfIban.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 12));
-		txfIban.setColumns(10);
-
-		JLabel lbIban = new JLabel("IBAN:");
-		lbIban.setBounds(3, 306, 170, 14);
-		lbIban.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		actionsPanel.add(txfName);
+		actionsPanel.add(txfSurname);
+		actionsPanel.add(txfMail);
+		actionsPanel.add(txfPhone);
+		actionsPanel.add(txfAddress);
+		actionsPanel.add(txfBirthday);
+		actionsPanel.add(txfBirthplace);
+		actionsPanel.add(genderBtns);
+		actionsPanel.add(txfNotes);
+		actionsPanel.add(txfIban);
+		actionsPanel.add(txfPIVA);
+		actionsPanel.add(txfRecipientCode);
+		actionsPanel.add(txfLoyaltyPoints);
+		actionsPanel.add(txfSubscriptionBtnField);
+		actionsPanel.add(txfPrizesBtnField);
 	}
 
 	@Override
-	void search() {
+	public void search() {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'search'");
 	}
 
 	@Override
-	Optional<Customer> insertElement() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'insertElement'");
+	public void insertElement() {
+		try { // all fields must be filled
+			isDataValid();
+		} catch (inputValidatorException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+			return;
+		}
+
+		UserCredentials cred = new UserCredentials("", new char[0], txfAddress.getText(), txfIban.getText(),
+				txfPhone.getText(), txfMail.getText());
+		UserDetails det = new UserDetails(txfName.getText(), txfSurname.getText(), getGender(), txfBirthday.getDate(),
+				txfBirthplace.getText(), txfNotes.getText());
+		try {
+			cred = userCredentialsDAO.insert(cred).orElseThrow();
+		} catch (NoSuchElementException e) {
+			JOptionPane.showMessageDialog(null, "Campi già esistenti");
+		}
+		Customer customer = new Customer(det, cred, txfPIVA.getText(), txfRecipientCode.getText(),
+				Integer.parseInt(txfLoyaltyPoints.getText()), selectedSubscription, selectedPrizes);
+
+		lbOutput.setText("Nuovo utente creato");
+		customerDAO.insert(customer);
+		refreshTable();
 	}
 
 	@Override
-	int updateElement() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'updateElement'");
-	}
-
-	@Override
-	int deleteElement() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'deleteElement'");
-	}
-
-	@Override
-	int disableElement() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'disableElement'");
-	}
-
-	@Override
-	void populateTable() {
-		customerModel.setRowCount(0);
-		List<Object[]> data = CustomerDAO.toTableRowAll();
-		if (!data.isEmpty()) {
-			for (Object[] row : data) {
-				customerModel.addRow(row);
+	public void updateElement() {
+		try {
+			isDataValid();
+		} catch (inputValidatorException e) {
+			if (!(e instanceof emptyInputException)) { // fields can be empty
+				JOptionPane.showMessageDialog(null, e.getMessage());
+				return;
 			}
+			e.errorComponent.setBorder(UIManager.getBorder("TextField.border")); // reset field's border in update mode
+		}
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(null, "Nessun cliente selezionato");
+			return; // do not allow invalid ids to be passed to update
+		}
+
+		Customer customer = customers.parallelStream().filter(e -> e.getId() == id).findFirst().get();
+		customer.setName(txfName.getText());
+		customer.setSurname(txfSurname.getText());
+		customer.setBirthplace(txfBirthplace.getText());
+		customer.setBoD(txfBirthday.getDate());
+		customer.setNotes(txfNotes.getText());
+		customer.setAddress(txfAddress.getText());
+		customer.setPhone(txfPhone.getText());
+		customer.setMail(txfMail.getText());
+		customer.setRecipientCode(txfRecipientCode.getText());
+		customer.setLoyaltyPoints(Integer.parseInt(txfLoyaltyPoints.getText()));
+		customer.setP_IVA(txfPIVA.getText());
+		customer.setSubscription(selectedSubscription);
+		customer.addPrizes(selectedPrizes);
+		customer.setGender(gender);
+
+		lbOutput.setText(name + " " + surname + " modificato");
+		customerDAO.update(id, customer);
+		refreshTable();
+	}
+
+	@Override
+	public void deleteElement() {
+		if (table.getSelectedRow() < 0)
+			return;
+		customerDAO.delete(id);
+		lbOutput.setText("Cliente rimosso");
+		refreshTable();
+	}
+
+	@Override
+	public void disableElement() {
+		if (table.getSelectedRow() < 0)
+			return;
+		customerDAO.toggle(id);
+		lbOutput.setText(!isEnabled ? "Cliente abilitato" : "Cliente disabilitato");
+		refreshTable();
+	}
+
+	@Override
+	public void populateTable() {
+		isRefreshing = true;
+		clearTableModel(customerModel);
+		customers = customerDAO.getAll();
+		if (!customers.isEmpty()) {
+			customers.parallelStream()
+					.forEach(c -> customerModel.addRow(c.toTableRow()));
 		} else {
 			lbOutput.setText("Lista Clienti vuota");
 		}
+		isRefreshing = false;
 	}
 
 	@Override
-	void clearTxfFields() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'clearTxfFields'");
+	public void clearTxfFields() {
+		txfName.setText("");
+		txfSurname.setText("");
+		txfBirthday.clear();
+		txfAddress.setText("");
+		txfPhone.setText("");
+		txfMail.setText("");
+		txfAddress.setText("");
+		txfIban.setText("");
+		txfBirthplace.setText("");
+		txfNotes.setText("");
+		txfPIVA.setText("");
+		txfRecipientCode.setText("");
+	}
+
+	private static boolean getGender() {
+		if (genderBtns.getSelectedIndex() == 1)
+			return true;
+		return false;
+	}
+
+	/*
+	 * "ID", "Genere", "Nome", "Cognome", "Telefono", "Email",
+	 * "Data di Nascita", "Città natale", "Codice fiscale", "P.IVA",
+	 * "Codice Ricezione",
+	 * "Punti Fedeltà", "Abbonamento", "Note", "Abilitato"
+	 */
+	@Override
+	public ListSelectionListener getTableListSelectionListener() {
+		return new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent event) {
+				if (isRefreshing)
+					return;
+				int selectedRow = table.getSelectedRow();
+				if (selectedRow < 0)
+					return;
+
+				var values = getRowMap(table, customerModel);
+
+				String phone = (String) values.get("Telefono");
+				String mail = (String) values.get("Email");
+				LocalDate BoD = (LocalDate) values.get("Data di Nascita");
+				String birthplace = (String) values.get("Città natale");
+				String address = (String) values.get("Indirizzo");
+				String P_IVA = (String) values.get("P.IVA");
+				String recipientCode = (String) values.get("Codice Ricezione");
+				int loyaltyPoints = (int) values.get("Punti Fedeltà");
+				String notes = (String) values.get("Note");
+				String iban = (String) values.get("IBAN");
+
+				id = (int) values.get("ID");
+				name = (String) values.get("Nome");
+				surname = (String) values.get("Cognome");
+				gender = (Gender) values.get("Genere");
+				isEnabled = (boolean) values.get("Abilitato");
+				selectedSubscription = (Subscription) values.get("Abbonamento");
+
+				txfName.setText(name);
+				txfSurname.setText(surname);
+				txfPhone.setText(phone);
+				txfMail.setText(mail);
+				txfBirthday.setDate(BoD);
+				txfBirthplace.setText(birthplace);
+				txfIban.setText(iban);
+				txfNotes.setText(notes);
+				txfLoyaltyPoints.setText(loyaltyPoints);
+				txfPIVA.setText(P_IVA);
+				txfRecipientCode.setText(recipientCode);
+				txfAddress.setText(address);
+
+				if (gender == Gender.FEMALE) {
+					genderBtns.setSelected(1);
+				} else {
+					genderBtns.setSelected(0);
+				}
+			}
+		};
 	}
 
 	@Override
-	ListSelectionListener getListSelectionListener() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'getListSelectionListener'");
-	}
+	public boolean isDataValid() {
+		try {
+			inputValidator.validateName(txfName);
+			inputValidator.validateSurname(txfSurname);
+			inputValidator.validateIban(txfIban);
+			inputValidator.validateEmail(txfMail);
+			inputValidator.validatePhoneNumber(txfPhone);
+			inputValidator.validateAlphanumeric(txfAddress, "Indirizzo");
+			// inputValidator.validateIban(txfIban);
+			inputValidator.validateAlphanumeric(txfBirthplace, "Città natale");
+			inputValidator.isValidCity(txfBirthplace);
+		} catch (inputValidatorException e) {
+			throw e;
+		}
 
-	@Override
-	boolean isDataValid() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'isDataValid'");
+		return txfBirthday.isTextFieldValid();
 	}
 }

@@ -2,27 +2,36 @@ package com.bitcamp.centro.estetico.gui;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
-import com.bitcamp.centro.estetico.DAO.ProductDAO;
 import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.Product;
 
 public class ProductSelector extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private JComboBox<String> filterComboBox;
-	private JTextField filterText;
-    private TreatmentPanel parentPanel;
+	private static JComboBox<String> filterComboBox;
+	private static JTextField filterText;
+	private static JPanel contentPane;
+	private static JPanel parent;
+	private static JTable table;
+	private static NonEditableTableModel model;
+	private static List<Product> products = BasePanel.products;
 
-	public ProductSelector(TreatmentPanel parentPanel) {
-		this.parentPanel=parentPanel;
+	public ProductSelector(JPanel parent) {
+		this.parent = parent;
+
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(500, 100, 450, 600);
 		setTitle("Selezione Prodotti");
@@ -54,92 +63,55 @@ public class ProductSelector extends JFrame {
 		filterPanel.add(searchBtn);
 
 		JButton addBtn = new JButton("Aggiungi selezione");
-        addBtn.addActionListener(e->sendProduct());
+		addBtn.addActionListener(e -> sendProduct());
 		filterPanel.add(addBtn);
 
 		contentPane.add(filterPanel, BorderLayout.NORTH); // Aggiungi il pannello filtri in alto
 
-		// Tabella prodotti
-        String[] columnNames = {"ID","Prodotto", "Categoria"};
+		//id, name, type, amount, minStock, price, vat
+		String[] columnNames = { "ID", "Nome", "Categoria" };
 		model = new NonEditableTableModel(columnNames, 0);
-		productTable = new JTable(model);
-
-		 productTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-	    	productIds=new ArrayList<>();
-	        productTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-	            @Override
-	            public void valueChanged(ListSelectionEvent event) {
-	                productIds.clear(); 
-	                if (!event.getValueIsAdjusting()) {
-	                    int[] selectedRows = productTable.getSelectedRows(); // Per tenere conto di tutte le righe selezionate
-	                	for (int selectedRow : selectedRows) {
-	                        int productId = Integer.parseInt(String.valueOf(productTable.getValueAt(selectedRow, 0)));
-	                        productIds.add(productId); // Aggiungi ogni ID selezionato alla lista
-	                    }
-	                    System.out.println("ID selezionati: " + productIds); // Debug
-	                }
-	            }
-	        });
-
 		
-		JScrollPane productSearchScroll = new JScrollPane(productTable);
+		table = new JTable(model);
+		table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		
+		JScrollPane productSearchScroll = new JScrollPane(table);
 		contentPane.add(productSearchScroll, BorderLayout.CENTER); // Aggiungi la tabella al centro
 		populateTable();
 		setVisible(true);
 	}
 
-	public ProductSelector() {
-		// TODO Auto-generated constructor stub
-	}
-
 	public void clearTable() {
-		model.getDataVector().removeAllElements();
-		revalidate();
+		model.setRowCount(0);
 	}
 
 	public void populateTable() {
 		clearTable();
-		List<Product> products = ProductDAO.getAllProducts();
-		if (products.isEmpty()) {
-			model.addRow(new String[] { "Sembra non ci siano prodotti presenti", "" });
-			return;
-		}
-		for (Product p : products) {
-    		model.addRow(new String[] {String.valueOf(p.getId()),p.getName(),p.getType().getDescription()});
-		}
+		if (products.isEmpty()) return;
+
+		products.parallelStream()
+		.filter(p -> p.isEnabled())
+		.forEach(p -> model.addRow(p.toTableRow()));
 	}
 
-	public void filterTable() {
+	public void filterTable() { //TODO: Implement this
 		clearTable();
-		List<Product> products = ProductDAO.getAllProducts();
-		if (products.isEmpty()) {
-			model.addRow(new String[] { "Sembra non ci siano prodotti presenti", "" });
-			return;
-		}
+		if (products.isEmpty()) return;
 		String filter = filterComboBox.getSelectedItem().toString();
 		switch (filter) {
-		case "Nome":
-			for (Product p : products) {
-				if (p.getName().toLowerCase().contains(filterText.getText().toLowerCase())) {
-					model.addRow(new String[] { p.getName(), p.getType().getDescription() });
-				}
-			}
-			break;
-		case "Categoria":
-			for (Product p : products) {
-				if (p.getType().getDescription().toLowerCase().contains(filterText.getText().toLowerCase())) {
-					model.addRow(new String[] { p.getName(), p.getType().getDescription() });
-				}
-			}
-			break;
-		default:
-			populateTable();
+			case "Nome":
+				break;
+			case "Categoria":
+				break;
+			default:
+				populateTable();
 		}
 
 	}
+
 	public void sendProduct() {
-    	//parentPanel.getProducts(productIds); //TODO: Fix this
-    	this.dispose();
-    }
+		// parentPanel.getProducts(productIds); //TODO: Fix this
+		this.dispose();
+	}
 
 }

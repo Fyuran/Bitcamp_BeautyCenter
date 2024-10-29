@@ -17,27 +17,23 @@ import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.*;
 import com.bitcamp.centro.estetico.utils.JSplitPanel;
 
-public abstract class BasePanel<T> extends JPanel {
-	enum filters {
-		ID, DATE, IS_ENABLED
-
-	}
+public abstract class BasePanel<T extends Model> extends JPanel {
 
 	private static final long serialVersionUID = 1712892330024716939L;
 
-	static CustomListCellRenderer customListCellRenderer = new CustomListCellRenderer();
+	protected static CustomListCellRenderer customListCellRenderer = new CustomListCellRenderer();
 
-	JTable table;
+	protected final JTable table;
 
-	static List<Treatment> treatments = MainFrame.treatments;
-	static List<Product> products = MainFrame.products;
-	static List<Customer> customers = MainFrame.customers;
-	static List<Employee> employees = MainFrame.employees;
-	static List<Prize> prizes = MainFrame.prizes;
-	static List<Subscription> subscriptions = MainFrame.subscriptions;
-	static List<Transaction> transactions = MainFrame.transactions;
-	static List<UserCredentials> credentials = MainFrame.credentials;
-	static List<VAT> vats = MainFrame.vats;
+	protected static List<Treatment> treatments = MainFrame.treatments;
+	protected static List<Product> products = MainFrame.products;
+	protected static List<Customer> customers = MainFrame.customers;
+	protected static List<Employee> employees = MainFrame.employees;
+	protected static List<Prize> prizes = MainFrame.prizes;
+	protected static List<Subscription> subscriptions = MainFrame.subscriptions;
+	protected static List<Transaction> transactions = MainFrame.transactions;
+	protected static List<UserCredentials> credentials = MainFrame.credentials;
+	protected static List<VAT> vats = MainFrame.vats;
 
 	private final static String[] treatmentCol = new String[] { "ID", "Nome trattamento", "Prezzo", "IVA%", "Durata",
 			"Abilitato" };
@@ -68,37 +64,41 @@ public abstract class BasePanel<T> extends JPanel {
 
 	private final static String[] vatCol = new String[] { "ID", "Percentuale", "Abilitato" };
 
-	static DefaultTableModel treatmentModel = new NonEditableTableModel(treatmentCol, 0);
-	static DefaultTableModel productModel = new NonEditableTableModel(productCol, 0);
-	static DefaultTableModel customerModel = new NonEditableTableModel(customersCol, 0);
-	static DefaultTableModel employeeModel = new NonEditableTableModel(employeesCol, 0);
-	static DefaultTableModel prizeModel = new NonEditableTableModel(prizesCol, 0);
-	static DefaultTableModel subscriptionModel = new NonEditableTableModel(subscriptionsCol, 0);
-	static DefaultTableModel transactionModel = new NonEditableTableModel(transactionCol, 0);
-	static DefaultTableModel credentialsModel = new NonEditableTableModel(credentialsCol, 0);
-	static DefaultTableModel vatModel = new NonEditableTableModel(vatCol, 0);
+	protected final static DefaultTableModel treatmentModel = new NonEditableTableModel(treatmentCol, 0);
+	protected final static DefaultTableModel productModel = new NonEditableTableModel(productCol, 0);
+	protected final static DefaultTableModel customerModel = new NonEditableTableModel(customersCol, 0);
+	protected final static DefaultTableModel employeeModel = new NonEditableTableModel(employeesCol, 0);
+	protected final static DefaultTableModel prizeModel = new NonEditableTableModel(prizesCol, 0);
+	protected final static DefaultTableModel subscriptionModel = new NonEditableTableModel(subscriptionsCol, 0);
+	protected final static DefaultTableModel transactionModel = new NonEditableTableModel(transactionCol, 0);
+	protected final static DefaultTableModel credentialsModel = new NonEditableTableModel(credentialsCol, 0);
+	protected final static DefaultTableModel vatModel = new NonEditableTableModel(vatCol, 0);
 
-	static Employee sessionUser = MainFrame.getSessionUser();
-	JTextField txfSearchBar;
-	JLabel lbTitle;
+	protected final static Employee sessionUser = MainFrame.getSessionUser();
+	protected final JTextField txfSearchBar;
+	protected final JLabel lbTitle;
+
+	//frame owner
+	protected static JFrame parent;
+
 
 	// panels
-	JPanel menuPanel;
-	JPanel outputPanel;
-	JSplitPanel actionsPanel;
+	protected final JPanel menuPanel;
+	protected final JPanel outputPanel;
+	protected final JSplitPanel actionsPanel;
 
 	// buttons
-	JButton btnFilter;
-	JButton btnSearch;
-	JButton btnInsert;
-	JButton btnUpdate;
-	JButton btnDisable;
-	JButton btnRefresh;
-	JButton btnDelete;
+	private final JButton btnFilter;
+	private final JButton btnSearch;
+	private final JButton btnInsert;
+	private final JButton btnUpdate;
+	private final JButton btnDisable;
+	private final JButton btnRefresh;
+	private final JButton btnDelete;
 
 	// actions
-	JLabel lbOutput;
-	static boolean isRefreshing = false; // need to sync refreshing with event listener for lists or else it will throw
+	protected final JLabel lbOutput;
+	protected static boolean isRefreshing = false; // need to sync refreshing with event listener for lists or else it will throw
 
 	BasePanel() {
 		setMaximumSize(new Dimension(300, 300));
@@ -285,7 +285,7 @@ public abstract class BasePanel<T> extends JPanel {
 		table.setFillsViewportHeight(true);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setFocusable(false);
-		table.getSelectionModel().addListSelectionListener(getListSelectionListener());
+		table.getSelectionModel().addListSelectionListener(getTableListSelectionListener());
 		outputPanel.setBounds(10, 70, 1007, 497);
 		outputPanel.setLayout(new BoxLayout(outputPanel, BoxLayout.Y_AXIS));
 
@@ -326,18 +326,6 @@ public abstract class BasePanel<T> extends JPanel {
 		return columns;
 	}
 
-	abstract void search();
-
-	abstract void insertElement();
-
-	abstract void updateElement();
-
-	abstract void deleteElement(); // ADMIN only
-
-	abstract void disableElement(); // renders element not visible by non admins
-
-	abstract void populateTable();
-
 	public void refreshTable() {
 		CompletableFuture.runAsync(() -> populateTable());
 	}
@@ -369,9 +357,13 @@ public abstract class BasePanel<T> extends JPanel {
 		return hash;
 	}
 
-	abstract void clearTxfFields();
-
-	abstract ListSelectionListener getListSelectionListener();
-
-	abstract boolean isDataValid();
+	abstract void search();
+    abstract void insertElement();
+    abstract void updateElement();
+    abstract void deleteElement();
+    abstract void disableElement();
+    abstract void populateTable();
+    abstract void clearTxfFields();
+    abstract ListSelectionListener getTableListSelectionListener();
+    abstract boolean isDataValid();
 }

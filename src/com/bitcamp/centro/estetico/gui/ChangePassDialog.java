@@ -11,10 +11,11 @@ import com.bitcamp.centro.estetico.models.Employee;
 public class ChangePassDialog extends JDialog {
 
 	private static final long serialVersionUID = 1L;
-	private JPasswordField newPasswordTxt1;
-	private JPasswordField oldPasswordTxt;
-	private JPasswordField newPasswordTxt2;
-	private Employee activeUser;
+	private static JPasswordField newPasswordTxt1;
+	private static JPasswordField oldPasswordTxt;
+	private static JPasswordField newPasswordTxt2;
+	private static Employee activeUser;
+	private static UserCredentialsDAO userCredentialsDAO = UserCredentialsDAO.getInstance();
 
 	/**
 	 * Create the frame.
@@ -83,7 +84,7 @@ public class ChangePassDialog extends JDialog {
 		if (!isValidPassword()) return;
 		activeUser.setPassword(newPasswordTxt1.getPassword());
 		
-		UserCredentialsDAO.updateEmployeeUserCredentials(activeUser); 
+		userCredentialsDAO.update(activeUser); 
 		JOptionPane.showMessageDialog(this, "Password modificata correttamente");
 		dispose();
 

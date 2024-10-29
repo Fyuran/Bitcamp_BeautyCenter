@@ -3,6 +3,10 @@ package com.bitcamp.centro.estetico.gui.render;
 import java.awt.Color;
 import java.awt.Component;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -30,13 +34,17 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
     
     @Override
     protected void setValue(Object value) {
-        String text = value == null ? "" : String.valueOf(value); //renderer requires text as every cell is a JLabel
 
-        if (text.equalsIgnoreCase("true")) {
-            setText("Si");
-        } 
-        else if (text.equalsIgnoreCase("false")) {
-            setText("No");
+        if(value instanceof LocalDateTime dateTime) {
+            DateTimeFormatter dtf = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
+            setText(dateTime.format(dtf));
+        }
+        else if(value instanceof LocalDate date) {
+            DateTimeFormatter dtf = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT);
+            setText(date.format(dtf));
+        }
+        else if(value instanceof Optional opt) {
+            setValue(opt.orElse(null)); //callback to setValue
         }
         else if(value instanceof Gender g) {
             setText(g.getGender());
@@ -54,7 +62,16 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
             setText(cf.getValue());
         }
         else {
-            setText(text); 
+            String text = value == null ? "" : String.valueOf(value); //renderer requires text as every cell is a JLabel
+
+            if (text.equalsIgnoreCase("true")) {
+                setText("Si");
+            } 
+            else if (text.equalsIgnoreCase("false")) {
+                setText("No");
+            } else {
+                setText(text); 
+            }
         }
     }
 

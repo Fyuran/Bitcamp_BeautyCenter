@@ -11,9 +11,6 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 
-import com.bitcamp.centro.estetico.gui.render.JSplitLbPf;
-import com.bitcamp.centro.estetico.gui.render.JSplitLbTxf;
-
 import it.kamaladafrica.codicefiscale.city.CityByName;
 import it.kamaladafrica.codicefiscale.city.CityProvider;
 

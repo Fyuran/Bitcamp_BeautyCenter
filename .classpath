@@ -54,11 +54,6 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/jgoodies-common-1.2.0.jar">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/jgoodies-looks-2.4.1.jar">
 		<attributes>
 			<attribute name="module" value="true"/>

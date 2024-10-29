@@ -43,7 +43,7 @@ public class Main {
 		return conn;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) { //TODO: remove everything down here
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {

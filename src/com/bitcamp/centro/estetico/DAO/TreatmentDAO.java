@@ -138,13 +138,15 @@ public class TreatmentDAO implements DAO<Treatment> {
 
 	public int[] addProductsToTreatment(Treatment treatment, Product... products) {
 		String query = "INSERT INTO beauty_centerdb.producttreatment(product_id, treatment_id) "
-				+ "VALUES (?, ?)";
+				+ "VALUES (?, ?) ON DUPLICATE KEY UPDATE product_id = ?, treatment_id = ?";
 
 		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			
 			for(Product product: products) {
 				stat.setInt(1, product.getId());
 				stat.setInt(2, treatment.getId());
+				stat.setInt(3, product.getId());
+				stat.setInt(4, treatment.getId());
 				stat.addBatch();
 			}
 
@@ -197,7 +199,7 @@ public class TreatmentDAO implements DAO<Treatment> {
 
 	//get all rows where treatment_id == id then retrieve products' id from row for object retrieval function
 	public List<Product> getProductsOfTreatment(int id) {
-		String query = "SELECT * FROM beauty_centerdb.producttreatment WHERE treatment_id = ?";
+		String query = "SELECT product_id FROM beauty_centerdb.producttreatment WHERE treatment_id = ?";
 
 		List<Product> list = new ArrayList<>();
 		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
@@ -207,7 +209,7 @@ public class TreatmentDAO implements DAO<Treatment> {
 			getConnection().commit();
 
 			while (rs.next()) {
-				Product product = ProductDAO.getInstance().get(rs.getInt(2)).get(); // id, product_id, treatment_id
+				Product product = ProductDAO.getInstance().get(rs.getInt(1)).get(); // id, product_id, treatment_id
 				list.add(product);
 			}
 		} catch (SQLException e) {
@@ -228,7 +230,7 @@ public class TreatmentDAO implements DAO<Treatment> {
 
 	//get all rows where product_id == id then retrieve treatments' id from row for object retrieval function
 	public List<Treatment> getTreatmentsOfProduct(int id) {
-		String query = "SELECT * FROM beauty_centerdb.producttreatment WHERE product_id = ?";
+		String query = "SELECT treatment_id FROM beauty_centerdb.producttreatment WHERE product_id = ?";
 
 		List<Treatment> list = new ArrayList<>();
 		try (PreparedStatement stat = getConnection().prepareStatement(query)) {
@@ -238,7 +240,7 @@ public class TreatmentDAO implements DAO<Treatment> {
 			getConnection().commit();
 
 			while (rs.next()) {
-				Treatment treatment = get(rs.getInt(3)).get(); // id, product_id, treatment_id
+				Treatment treatment = get(rs.getInt(1)).get(); // id, product_id, treatment_id
 				list.add(treatment);
 			}
 		} catch (SQLException e) {

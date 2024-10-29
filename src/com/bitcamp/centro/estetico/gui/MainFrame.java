@@ -24,22 +24,20 @@ import com.bitcamp.centro.estetico.models.*;
 // ReservationForm  prenotazione appuntamenti - >Disponibile a tutti
 // gestioneClienti per aggiungere clienti ->Disponibile a tutti
 
-public class MainFrame extends JFrame {
-
-	private static final long serialVersionUID = 1L;
+public class MainFrame {
 	private static JTabbedPane mainPane;
 	private static Employee sessionUser;
 	private static JFrame mainFrame;
 	
-	static CompletableFuture<List<Treatment>> future1 = CompletableFuture.supplyAsync(() -> TreatmentDAO.getInstance().getAll());
-	static CompletableFuture<List<Product>> future2 = CompletableFuture.supplyAsync(() -> ProductDAO.getInstance().getAll());
-	static CompletableFuture<List<Customer>> future3 = CompletableFuture.supplyAsync(() -> CustomerDAO.getInstance().getAll());
-	static CompletableFuture<List<Employee>> future4 = CompletableFuture.supplyAsync(() -> EmployeeDAO.getInstance().getAll());
-	static CompletableFuture<List<Prize>> future5 = CompletableFuture.supplyAsync(() -> PrizeDAO.getInstance().getAll());
-	static CompletableFuture<List<Subscription>> future6 = CompletableFuture.supplyAsync(() -> SubscriptionDAO.getInstance().getAll());
-	static CompletableFuture<List<Transaction>> future7 = CompletableFuture.supplyAsync(() -> TransactionDAO.getInstance().getAll());
-	static CompletableFuture<List<UserCredentials>> future8 = CompletableFuture.supplyAsync(() -> UserCredentialsDAO.getInstance().getAll());
-	static CompletableFuture<List<VAT>> future9 = CompletableFuture.supplyAsync(() -> VAT_DAO.getInstance().getAll());
+	private static CompletableFuture<List<Treatment>> future1 = CompletableFuture.supplyAsync(() -> TreatmentDAO.getInstance().getAll());
+	private static CompletableFuture<List<Product>> future2 = CompletableFuture.supplyAsync(() -> ProductDAO.getInstance().getAll());
+	private static CompletableFuture<List<Customer>> future3 = CompletableFuture.supplyAsync(() -> CustomerDAO.getInstance().getAll());
+	private static CompletableFuture<List<Employee>> future4 = CompletableFuture.supplyAsync(() -> EmployeeDAO.getInstance().getAll());
+	private static CompletableFuture<List<Prize>> future5 = CompletableFuture.supplyAsync(() -> PrizeDAO.getInstance().getAll());
+	private static CompletableFuture<List<Subscription>> future6 = CompletableFuture.supplyAsync(() -> SubscriptionDAO.getInstance().getAll());
+	private static CompletableFuture<List<Transaction>> future7 = CompletableFuture.supplyAsync(() -> TransactionDAO.getInstance().getAll());
+	private static CompletableFuture<List<UserCredentials>> future8 = CompletableFuture.supplyAsync(() -> UserCredentialsDAO.getInstance().getAll());
+	private static CompletableFuture<List<VAT>> future9 = CompletableFuture.supplyAsync(() -> VAT_DAO.getInstance().getAll());
 
 	static List<Treatment> treatments;
 	static List<Product> products;
@@ -70,46 +68,40 @@ public class MainFrame extends JFrame {
 
 		mainPane = new JTabbedPane();
 		sessionUser = employee;
-		mainFrame = this;
+		mainFrame = new JFrame("Centro Estetico Manager");
 		
-		setSize(1024, 768);
-		setMinimumSize(new Dimension(1024, 768));
-		setLocationRelativeTo(null);
-		setTitle("Gestione " + (bc == null ? "Centro Estetico" : bc.getName()));
+		mainFrame.setSize(1024, 768);
+		mainFrame.setMinimumSize(new Dimension(1024, 768));
+		mainFrame.setLocationRelativeTo(null);
 
-		CompletableFuture.runAsync(() -> mainPane.add(new UserAccessPanel()));
-		//mainPane.add(new UserAccessPanel());
-		CompletableFuture.runAsync(() -> mainPane.add(new CustomerPanel()));
-		//mainPane.add(new CustomerPanel());
+		CompletableFuture.runAsync(() -> mainPane.add(new UserAccessPanel())).exceptionally(t -> {t.printStackTrace(); return null;});
+		CompletableFuture.runAsync(() -> mainPane.add(new CustomerPanel())).exceptionally(t -> {t.printStackTrace(); return null;});
 
 		if (employee.getRole() == Roles.ADMIN) {
 			buildAdminFrame();
 		}
-		add(mainPane);
-		setVisible(true);
+		mainFrame.add(mainPane);
+		
 
 		mainPane.addChangeListener(e -> {
 			JPanel panel = (JPanel) mainPane.getSelectedComponent();
 			if(panel instanceof BasePanel p) {
-				CompletableFuture.runAsync(() -> p.populateTable());
+				p.refreshTable();
 			}
 		});
+
+		BasePanel.parent = mainFrame;
+		mainFrame.setVisible(true);
 	}
 
 	public static void buildAdminFrame() {
-		CompletableFuture.runAsync(() -> mainPane.add(new EmployeePanel()));
-		//mainPane.add(new EmployeePanel());
-		CompletableFuture.runAsync(() -> mainPane.add(new PrizePanel()));
-		//mainPane.add(new PrizePanel());
-		CompletableFuture.runAsync(() -> mainPane.add(new ProductPanel()));
-		//mainPane.add(new ProductPanel());
-		CompletableFuture.runAsync(() -> mainPane.add(new TreatmentPanel()));
-		//mainPane.add(new TreatmentPanel());
-		CompletableFuture.runAsync(() -> mainPane.add(new TransactionPanel()));
-		//mainPane.add(new TransactionPanel());
-		CompletableFuture.runAsync(() -> mainPane.add(new SubscriptionPanel()));
-		//mainPane.add(new SubscriptionPanel());
-		CompletableFuture.runAsync(() -> mainPane.add(new VATPanel()));
+		CompletableFuture.runAsync(() -> mainPane.add(new EmployeePanel())).exceptionally(t -> {t.printStackTrace(); return null;});
+		CompletableFuture.runAsync(() -> mainPane.add(new PrizePanel())).exceptionally(t -> {t.printStackTrace(); return null;});
+		CompletableFuture.runAsync(() -> mainPane.add(new ProductPanel())).exceptionally(t -> {t.printStackTrace(); return null;});
+		CompletableFuture.runAsync(() -> mainPane.add(new TreatmentPanel())).exceptionally(t -> {t.printStackTrace(); return null;});
+		CompletableFuture.runAsync(() -> mainPane.add(new TransactionPanel())).exceptionally(t -> {t.printStackTrace(); return null;});
+		CompletableFuture.runAsync(() -> mainPane.add(new SubscriptionPanel())).exceptionally(t -> {t.printStackTrace(); return null;});
+		CompletableFuture.runAsync(() -> mainPane.add(new VATPanel())).exceptionally(t -> {t.printStackTrace(); return null;});
 	}
 
 	public static JFrame getMainFrame() {

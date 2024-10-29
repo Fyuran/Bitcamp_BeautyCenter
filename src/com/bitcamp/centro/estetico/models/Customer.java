@@ -2,6 +2,7 @@ package com.bitcamp.centro.estetico.models;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
 import com.bitcamp.centro.estetico.DAO.PrizeDAO;
@@ -88,6 +89,10 @@ public class Customer extends User {
 		}
 	}
 
+	public void addPrizes(Collection<Prize> c) {
+		prizes.addAll(c);
+	}
+
 	public String getP_IVA() {
 		return P_IVA;
 	}
@@ -133,4 +138,5 @@ public class Customer extends User {
 		};
 	}
 
+	
 }

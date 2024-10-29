@@ -22,6 +22,9 @@ import com.github.lgooddatepicker.components.DatePicker;
 
 public class SetupFirstAccountFrame extends JFrame {
 
+	private static EmployeeDAO employeeDAO = EmployeeDAO.getInstance();
+	private static UserCredentialsDAO userCredentialsDAO = UserCredentialsDAO.getInstance();
+
 	private static final long serialVersionUID = 1L;
 	private static JTextField txfSurname;
 	private static JTextField txfName;
@@ -229,7 +232,7 @@ public class SetupFirstAccountFrame extends JFrame {
 		btnInsert.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		btnInsert.setBounds(388, 380, 100, 30);
 		add(btnInsert);
-		if (!EmployeeDAO.isEmpty()) {
+		if (!employeeDAO.isEmpty()) {
 			btnInsert.setEnabled(false);
 			btnNext.setEnabled(true);
 		}
@@ -265,10 +268,10 @@ public class SetupFirstAccountFrame extends JFrame {
 
 		UserDetails det = new UserDetails(name, surname, getGender(), BoD, birthplace, notes);
 		UserCredentials cred = new UserCredentials(username, password, address, iban, phone, mail);
-		cred = UserCredentialsDAO.insertUserCredentials(cred).get();
+		cred = userCredentialsDAO.insert(cred).orElseGet(() -> userCredentialsDAO.get(username).get()); //if usercredentials already exist get that one
 		Employee employee = new Employee(det, cred, employeeSerial, Roles.ADMIN, Collections.emptyList(),
-				hired, null, null);
-		EmployeeDAO.insertEmployee(employee);
+				hired, null);
+		employeeDAO.insert(employee);
 
 		lbOutput.setText("Nuovo utente creato correttamente");
 

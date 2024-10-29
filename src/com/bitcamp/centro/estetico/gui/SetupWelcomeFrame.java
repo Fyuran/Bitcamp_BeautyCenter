@@ -14,6 +14,8 @@ import com.bitcamp.centro.estetico.DAO.EmployeeDAO;
 public class SetupWelcomeFrame extends JFrame {
 
 	private static final long serialVersionUID = 5654094869271673775L;
+	private static EmployeeDAO employeeDAO = EmployeeDAO.getInstance();
+	private static BeautyCenterDAO beautyCenterDAO = BeautyCenterDAO.getInstance();
 
 	public SetupWelcomeFrame() {
 		setTitle("Benvenuto nel Gestionale Centro Estetico");
@@ -82,15 +84,13 @@ public class SetupWelcomeFrame extends JFrame {
 		avantiButton.setFocusPainted(false);
 		avantiButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-		// Azione per il pulsante
 		avantiButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// Passa alla prossima finestra dell'installazione guidata
-				if (BeautyCenterDAO.isEmpty()) {
+				if (beautyCenterDAO.isEmpty()) {
 					new SetupBeautyCenterFrame();
 				} else {
-					if (EmployeeDAO.isEmpty()) {
+					if (employeeDAO.isEmpty()) {
 						new SetupFirstAccountFrame();
 					} else {
 						new LoginFrame();

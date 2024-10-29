@@ -8,8 +8,9 @@ import java.util.Optional;
 import javax.swing.JOptionPane;
 
 import com.bitcamp.centro.estetico.models.Main;
+import com.bitcamp.centro.estetico.models.Model;
 
-public interface DAO<T>{
+public interface DAO<T extends Model>{
     
     default Connection getConnection() {
         try {

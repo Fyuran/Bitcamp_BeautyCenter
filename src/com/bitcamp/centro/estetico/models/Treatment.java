@@ -136,8 +136,8 @@ public class Treatment implements Model {
 				timeSlots.add(time);
 			}
 		} 
-		catch (Exception ex) {
-			throw new Exception(ex.getMessage());
+		catch (Exception e) {
+			throw new Exception(e.getMessage());
 		}
 		return timeSlots;
 	}

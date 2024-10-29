@@ -13,15 +13,18 @@ import com.bitcamp.centro.estetico.utils.inputValidator;
 import com.bitcamp.centro.estetico.utils.inputValidator.inputValidatorException;
 
 public class LoginFrame extends JFrame {
-    private static final long serialVersionUID = 1L;
-    private JTextField txfUsername;
-    private JPasswordField passwordText;
-    private JLabel userMsgLabel;
-    private JLabel passwordMsgLabel;
-    private JLabel descriptionLabel;
-    private Timer descriptionTimer;
-    private int indexFraseCorrente = 0;
+    private static UserCredentialsDAO userCredentialsDAO = UserCredentialsDAO.getInstance();
+    private static BeautyCenterDAO beautyCenterDAO = BeautyCenterDAO.getInstance();
 
+    private static final long serialVersionUID = 1L;
+    private static JTextField txfUsername;
+    private static JPasswordField passwordText;
+    private static JLabel userMsgLabel;
+    private static JLabel passwordMsgLabel;
+    private static JLabel descriptionLabel;
+    private static Timer descriptionTimer;
+    private static int indexFraseCorrente = 0;   
+    
     private String[] frasi = {
             "Con il nostro gestionale, lavorare è semplice e intuitivo!",
             "Gestisci le prenotazioni con facilità.",
@@ -85,7 +88,7 @@ public class LoginFrame extends JFrame {
         JPanel loginDataPanel = new JPanel();
         loginDataPanel.setLayout(null);
         loginDataPanel.setBackground(Color.WHITE);
-        loginDataPanel.setBounds(363, 464, 449, 231);
+        loginDataPanel.setBounds(363, 464, 291, 231);
         loginDataPanell.add(loginDataPanel);
 
         JLabel passwordLabel = new JLabel("Password:");
@@ -146,20 +149,23 @@ public class LoginFrame extends JFrame {
         getRootPane().setDefaultButton(loginBtn);
 
         setVisible(true);
-
-        if(Main._DEBUG_MODE_FULL) {
-            Employee currentEmployee = UserCredentialsDAO.getEmployeeOfUsername("fyuran").get();
-            new MainFrame(currentEmployee, BeautyCenterDAO.getFirstBeautyCenter().get());
-            dispose();
-        }
     }
 
     // Metodo di login
     public void login() {
+        if(Main._DEBUG_MODE_FULL) {
+            Employee currentEmployee = userCredentialsDAO.getEmployeeOfUsername("root").get();
+            new MainFrame(currentEmployee, beautyCenterDAO.getFirst().get());
+            dispose();
+            return;
+        }
+        
         userMsgLabel.setText("");
         passwordMsgLabel.setText("");
         String username = txfUsername.getText();
         char[] password = passwordText.getPassword();
+        
+
 
         try {
             inputValidator.validateAlphanumeric(txfUsername, "Username"); // Validazione dell'username
@@ -169,10 +175,10 @@ public class LoginFrame extends JFrame {
 	        return;
         }
         // Verifica delle credenziali
-        boolean isAuthenticated = UserCredentialsDAO.isValidPassword(username, password);
+        boolean isAuthenticated = userCredentialsDAO.isValidPassword(username, password);
         if (isAuthenticated) {
-            Employee currentEmployee = UserCredentialsDAO.getEmployeeOfUsername(username).get();
-            new MainFrame(currentEmployee, BeautyCenterDAO.getFirstBeautyCenter().get());
+            Employee currentEmployee = userCredentialsDAO.getEmployeeOfUsername(username).get();
+            new MainFrame(currentEmployee, beautyCenterDAO.getFirst().get());
             dispose();
 
         } else {

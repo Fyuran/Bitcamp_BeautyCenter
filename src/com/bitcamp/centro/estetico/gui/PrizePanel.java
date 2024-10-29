@@ -1,112 +1,75 @@
 package com.bitcamp.centro.estetico.gui;
 
-import java.awt.Font;
+import java.text.NumberFormat;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
+import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.bitcamp.centro.estetico.DAO.PrizeDAO;
+import com.bitcamp.centro.estetico.gui.render.CustomTableCellRenderer;
 import com.bitcamp.centro.estetico.models.Prize;
 import com.bitcamp.centro.estetico.models.PrizeType;
+import com.bitcamp.centro.estetico.utils.JSplitComboBox;
+import com.bitcamp.centro.estetico.utils.JSplitDatePicker;
+import com.bitcamp.centro.estetico.utils.JSplitLbTxf;
 import com.bitcamp.centro.estetico.utils.inputValidator;
 import com.bitcamp.centro.estetico.utils.inputValidator.inputValidatorException;
 
 public class PrizePanel extends BasePanel<Prize> {
-
 	private static final long serialVersionUID = 1L;
-	private JTextField txfThreshold;
-	private JTextField txfName;
-	private JTextField txfPrice;
-	private JComboBox<PrizeType> typeComboBox;
-	private int selectedRow = -1;
+	private static int id = -1;
+	private static boolean isEnabled = false;
 
+	private static JSplitLbTxf txfThreshold;
+	private static JSplitLbTxf txfName;
+	private static JSplitLbTxf txfPrice;
+	private static JSplitDatePicker expiration;
+	private static JSplitComboBox<PrizeType> typeComboBox;
 
-	/**
-	 * Create the panel.
-	 */
+	private static PrizeDAO prizeDAO = PrizeDAO.getInstance();
+
 	public PrizePanel() {
 		setName("Premi");
-		setLayout(null);
+
 		setSize(1024, 768);
 		setTitle("GESTIONE  PREMI");
-
-		txfSearchBar.setBounds(23, 14, 207, 24);
-		btnSearch.setBounds(252, 8, 40, 30);
-		btnInsert.setBounds(793, 8, 40, 30);
-		btnUpdate.setBounds(843, 8, 40, 30);
-		btnDisable.setBounds(893, 8, 40, 30);
 		
-		JLabel lbName = new JLabel("Nome Premio:");
-		lbName.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lbName.setBounds(320, 439, 170, 14);
-		add(lbName);
+		table.getSelectionModel().addListSelectionListener(getTableListSelectionListener());
+		table.setDefaultRenderer(Object.class, new CustomTableCellRenderer(prizeModel));
+		table.setModel(prizeModel);
 
-		txfName = new JTextField();
-		txfName.setEnabled(false);
-		txfName.setColumns(10);
-		txfName.setBounds(514, 438, 220, 20);
-		add(txfName);
+		txfName = new JSplitLbTxf("Nome Premio");
+		actionsPanel.add(txfName);
 
-		typeComboBox = new JComboBox<>(PrizeType.values());
-		typeComboBox.setEnabled(false);
-		typeComboBox.setBounds(514, 485, 220, 22);
-		add(typeComboBox);
+		typeComboBox = new JSplitComboBox<PrizeType>("Tipo");
+		for(PrizeType pt : PrizeType.values()) {
+			typeComboBox.addItem(pt);
+		}
+		actionsPanel.add(typeComboBox);
 
-		JLabel lbType = new JLabel("Tipo Premio");
-		lbType.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lbType.setBounds(320, 487, 170, 14);
-		add(lbType);
+		txfThreshold = new JSplitLbTxf("Punti Necessari", new JFormattedTextField(NumberFormat.getInstance()));
+		actionsPanel.add(txfThreshold);
 
-		JLabel lbThreshold = new JLabel("loyaltyPoints necessari:");
-		lbThreshold.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lbThreshold.setBounds(320, 533, 170, 17);
-		add(lbThreshold);
+		txfPrice = new JSplitLbTxf("€ in Buono", new JFormattedTextField(NumberFormat.getInstance()));
+		actionsPanel.add(txfPrice);
 
-		txfThreshold = new JTextField();
-		txfThreshold.setEnabled(false);
-		txfThreshold.setColumns(10);
-		txfThreshold.setBounds(514, 533, 220, 20);
-		add(txfThreshold);
-
-		JLabel lbPrice = new JLabel("price:");
-		lbPrice.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lbPrice.setBounds(320, 586, 170, 14);
-		add(lbPrice);
-
-		txfPrice = new JTextField();
-		txfPrice.setEnabled(false);
-		txfPrice.setColumns(10);
-		txfPrice.setBounds(514, 585, 220, 20);
-		add(txfPrice);
-	}
-
-	// Metodo per caricare i premi nella tabella
-	private void loadPrizesToTable() {
-	    prizeModel.setRowCount(0);  // Resetta la tabella
-	    List<Prize> prizes = PrizeDAO.getAllPrizes();
-		prizes.parallelStream()
-		.forEach(p -> prizeModel.addRow(p.toTableRow()));
+		expiration = new JSplitDatePicker("Scadenza");
+		actionsPanel.add(expiration);
 	}
 
 	@Override
-	void search() {
+	public void search() {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'search'");
 	}
 
 	@Override
-	Optional<Prize> insertElement() {
-		if (!isDataValid()) {
-			JOptionPane.showMessageDialog(null, "Errore di validazione nei campi");
-			return Optional.empty();
-		}
+	public void insertElement() {
+		if (!isDataValid()) return;
 
 		// Recupera i valori dai campi
 		String name = txfName.getText();
@@ -114,83 +77,76 @@ public class PrizePanel extends BasePanel<Prize> {
 		PrizeType type = (PrizeType) typeComboBox.getSelectedItem();
 		double price = Double.parseDouble(txfPrice.getText());
 
-		Prize nuovoPremio = new Prize(
+		Prize newPrize = new Prize(
 			name,
 			loyaltyPoints,
 			type,
 			LocalDate.now(),
 			price
 		);
-
-		// Inserimento nel database
-		
+		lbOutput.setText("Premio inserito");
 		clearTxfFields();
-		refreshTable();  // Aggiorna la tabella
-		
-		return PrizeDAO.insertPrize(nuovoPremio);
+		prizeDAO.insert(newPrize);
+		refreshTable();
 	}
 
 	@Override
-	int updateElement() {
-		if (!isDataValid() || selectedRow < 0) {
-			JOptionPane.showMessageDialog(null, "Errore di validazione o nessuna riga selezionata");
-			return -1;
-		}
+	public void updateElement() {
+		if (!isDataValid() || id < 0) return;
 
-		// Recupera i valori dai campi
 		String name = txfName.getText();
 		int loyaltyPoints = Integer.parseInt(txfThreshold.getText());
 		PrizeType type = (PrizeType) typeComboBox.getSelectedItem();
 		double price = Double.parseDouble(txfPrice.getText());
 
-		// Ottieni l'ID del premio selezionato
-		int id = (int) prizeModel.getValueAt(selectedRow, 0);
-
-		// Recupera il premio dal database
-		Optional<Prize> premioOpt = PrizeDAO.getPrize(id);
-		if (!premioOpt.isPresent()) {
-			JOptionPane.showMessageDialog(null, "Premio non trovato.");
-			return -1;
-		}
-
-		Prize premioCorrente = premioOpt.get();
-
-		Prize premioModificato = new Prize(
+		Prize oldPrize = prizeDAO.get(id).get();
+		Prize updatedPrize = new Prize(
 			name,
 			loyaltyPoints,
 			type,
-			Optional.ofNullable(premioCorrente.getExpirationDate()).orElse(LocalDate.now()),
+			Optional.ofNullable(oldPrize.getExpirationDate()).orElse(null),
 			price
 		);
-
-		
+		lbOutput.setText("Premio aggiornato");
 		clearTxfFields();
+		prizeDAO.update(id, updatedPrize);
 		refreshTable();
-		return PrizeDAO.updatePrize(id, premioModificato);
 	}
 
 	@Override
-	int deleteElement() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'deleteElement'");
+	public void deleteElement() {
+		if (table.getSelectedRow() < 0) return;
+		lbOutput.setText("Premio rimosso");
+		prizeDAO.delete(id);
+		refreshTable();
 	}
 
 	@Override
-	int disableElement() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'disableElement'");
+	public void disableElement() {
+		if (table.getSelectedRow() < 0) return;
+		prizeDAO.toggle(id);
+		lbOutput.setText(!isEnabled ? "Premio abilitato" : "Premio disabilitato");
+		refreshTable();
 	}
 
 	@Override
-	void populateTable() {
-		prizeModel.setRowCount(0);  // Resetta la tabella
-		prizes.parallelStream()
-		.filter(p -> p.isEnabled())
-		.forEach(p -> prizeModel.addRow(p.toTableRow()));
+	public void populateTable() {
+		isRefreshing = true;
+		prizeModel.setRowCount(0);
+		clearTxfFields();
+
+		prizes = prizeDAO.getAll();
+		if (!prizes.isEmpty()) {
+			prizes.parallelStream()
+					.forEach(e -> prizeModel.addRow(e.toTableRow()));
+		} else {
+			lbOutput.setText("Lista Premi vuota");
+		}
+		isRefreshing = false;
 	}
 
 	@Override
-	void clearTxfFields() {
+	public void clearTxfFields() {
 		txfName.setText("");
 		txfPrice.setText("");
 		txfThreshold.setText("");
@@ -198,41 +154,50 @@ public class PrizePanel extends BasePanel<Prize> {
 	}
 
 	@Override
-	ListSelectionListener getListSelectionListener() {
+	public ListSelectionListener getTableListSelectionListener() {
 		return new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				txfName.setText((String) prizeModel.getValueAt(selectedRow, 1));
-				txfThreshold.setText(String.valueOf(prizeModel.getValueAt(selectedRow, 2)));
-		
-				String tipoPremioString = (String) prizeModel.getValueAt(selectedRow, 3);
-				PrizeType type = PrizeType.toEnum(tipoPremioString);  // Conversione corretta
-		
+				if (isRefreshing) return;
+				int selectedRow = table.getSelectedRow();
+				if (selectedRow < 0) return;
+				
+				var values = getRowMap(table, prizeModel);
+
+				id = (int) values.get("ID");
+				isEnabled = (boolean) values.get("Abilitato");
+				String name = (String) values.get("Nome");
+				int threshold = (int) values.get("Punti Necessari");
+				PrizeType type = (PrizeType) values.get("Tipo");
+				double price = (double) values.get("€ in Buono");
+
+				txfName.setText(name);
+				txfThreshold.setText(threshold);
 				typeComboBox.setSelectedItem(type);
-				txfPrice.setText(String.valueOf(prizeModel.getValueAt(selectedRow, 4)));
+				txfPrice.setText(price);
 			}
 		};
 	}
 
 	@Override
-	boolean isDataValid() {
+	public boolean isDataValid() {
 		try {
-			inputValidator.validateAlphanumeric(txfName, "Nome Premio"); // Validazione del nome premio
-	        inputValidator.validateNumber(txfPrice, 0, 10000); // Valore massimo arbitrario per evitare errori
+			inputValidator.validateAlphanumeric(txfName, "Nome Premio");
+	        inputValidator.validateNumber(txfPrice, 0, 10000);
 	    } catch (inputValidatorException e) {
 	        JOptionPane.showMessageDialog(null, e.getMessage());
 	        return false;
 	    }
 
-	    // Validazione della soglia dei loyaltyPoints
+	    // loyaltyPoints threshold validation
 	    try {
 	        int threshold = Integer.parseInt(txfThreshold.getText());
 	        if (threshold < 0) {
-	            JOptionPane.showMessageDialog(null, "La soglia dei loyaltyPoints deve essere un numero positivo.");
+	            JOptionPane.showMessageDialog(null, "La soglia dei punti deve essere un numero positivo.");
 	            return false;
 	        }
 	    } catch (NumberFormatException e) {
-	        JOptionPane.showMessageDialog(null, "La soglia dei loyaltyPoints non è valida. Deve essere un numero intero.");
+	        JOptionPane.showMessageDialog(null, "La soglia dei punti non è valida. Deve essere un numero intero.");
 	        return false;
 	    }
 

@@ -1,53 +1,44 @@
 package com.bitcamp.centro.estetico.gui;
 
-import java.awt.Font;
+import java.text.NumberFormat;
 import java.util.List;
-import java.util.Optional;
 
-import javax.swing.JLabel;
+import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import com.bitcamp.centro.estetico.DAO.VATDao;
+import com.bitcamp.centro.estetico.DAO.VAT_DAO;
+import com.bitcamp.centro.estetico.gui.render.CustomTableCellRenderer;
 import com.bitcamp.centro.estetico.models.VAT;
+import com.bitcamp.centro.estetico.utils.JSplitLbTxf;
 import com.bitcamp.centro.estetico.utils.inputValidator;
 import com.bitcamp.centro.estetico.utils.inputValidator.inputValidatorException;
 
 public class VATPanel extends BasePanel<VAT> {
 
+	private static VAT_DAO vat_DAO = VAT_DAO.getInstance();
+	
 	private static final long serialVersionUID = 1L;
-	private static JTextField txfAmount;
-	private static int selectedId;
+	private static int id;
+	private static double amount;
+	private static boolean isEnabled;
+
+	private static JSplitLbTxf txfAmount;
+
 
 	public VATPanel() {
-		setLayout(null);
-		setSize(1024, 768);
-		setName("VAT");
-		setTitle("ALIQUOTE IVA");
-		scrollPane.setBounds(23, 60, 959, 276);
-		btnSearch.setBounds(206, 8, 40, 30);
-		txfSearchBar.setBounds(23, 14, 168, 24);
-		btnFilter.setBounds(256, 8, 40, 30);
-		btnInsert.setBounds(770, 8, 40, 30);
-		btnUpdate.setBounds(820, 8, 40, 30);
-		btnDisable.setBounds(920, 8, 40, 30);
-		lbTitle.setBounds(415, 11, 206, 32);
 
-		table.getSelectionModel().addListSelectionListener(getListSelectionListener());
+		setSize(1024, 768);
+		setName("IVA");
+		setTitle("ALIQUOTE IVA");
+
+		table.getSelectionModel().addListSelectionListener(getTableListSelectionListener());
+		table.setDefaultRenderer(Object.class, new CustomTableCellRenderer(vatModel));
 		table.setModel(vatModel);
 
-		JLabel lblAmount = new JLabel("Valore Aliquota:");
-		lblAmount.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		lblAmount.setBounds(43, 437, 170, 14);
-		add(lblAmount);
-
-		txfAmount = new JTextField();
-		txfAmount.setColumns(10);
-		txfAmount.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		txfAmount.setBounds(209, 436, 220, 20);
-		add(txfAmount);
+		txfAmount = new JSplitLbTxf("Percentuale", new JFormattedTextField(NumberFormat.getInstance()));
+		actionsPanel.add(txfAmount);
 		
 	}
 
@@ -57,8 +48,8 @@ public class VATPanel extends BasePanel<VAT> {
 			lbOutput.setText("Inserire un filtro!");
 			return;
 		}
-		clearTable();
-		List<VAT> vats = VATDao.getAllVAT();
+		clearTable(table);
+		List<VAT> vats = vat_DAO.getAll();
 		if (vats.isEmpty()) {
 			vatModel.addRow(new String[] { "Sembra non ci siano aliquote presenti", "" });
 			return;
@@ -71,73 +62,83 @@ public class VATPanel extends BasePanel<VAT> {
 	}
 
 	@Override
-	void search() {
+	public void search() {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'search'");
 	}
 
 	@Override
-	Optional<VAT> insertElement() {
+	public void insertElement() {
 		double amount = Double.parseDouble(txfAmount.getText());
 		lbOutput.setText("Aliquota inserita");
+		vat_DAO.insert(new VAT(amount));
 		refreshTable();
-		return VATDao.insertVAT(new VAT(amount));
 	}
 
 	@Override
-	int updateElement() {
-		if (!isDataValid() && selectedId >= 0) return -1;
+	public void updateElement() {
+		if (!isDataValid() && id >= 0) return;
 		double amount = Double.parseDouble(txfAmount.getText());
 		lbOutput.setText("Aliquota modificata");
+		vat_DAO.update(id, new VAT(amount));
 		refreshTable();
-		return VATDao.updateVAT(selectedId, new VAT(amount));
 	}
 
 	@Override
-	int deleteElement() {
+	public void deleteElement() {
+		if (table.getSelectedRow() < 0) return;
 		lbOutput.setText("Aliquota rimossa");
+		vat_DAO.delete(id);
 		refreshTable();
-		return VATDao.deleteVAT(selectedId);
 	}
 
 	@Override
-	int disableElement() {
-		if(selectedId <= -1) return -1;
-		lbOutput.setText("Aliquota disabilitata");
-		return VATDao.toggleEnabledVAT(selectedId);
+	public void disableElement() {
+		if (table.getSelectedRow() < 0) return;
+		vat_DAO.toggle(id);
+		lbOutput.setText(!isEnabled ? "Aliquota abilitata" : "Aliquota disabilitata");
+		refreshTable();
 	}
 
 	@Override
-	void populateTable() {
+	public void populateTable() {
+		isRefreshing = true;
+		vats = vat_DAO.getAll();
 		if (vats.isEmpty()) return;
-		clearTable();
+		clearTable(table);
 		vats.parallelStream().forEach(v -> vatModel.addRow(v.toTableRow()));
+		isRefreshing = false;
 	}
 
 	@Override
-	void clearTxfFields() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'clearTxfFields'");
+	public void clearTxfFields() {
+		txfAmount.setText("null");
 	}
 
 
 	@Override
-	ListSelectionListener getListSelectionListener() {
+	public ListSelectionListener getTableListSelectionListener() {
 		return new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent event) {
 				if (isRefreshing) return;
-
 				int selectedRow = table.getSelectedRow();
-				if (selectedRow != -1) {
-					selectedId = (int) vatModel.getValueAt(selectedRow, 0);
-				}
+				if (selectedRow < 0) return;
+
+				var values = getRowMap(table, vatModel);
+
+				id = (int) values.get( "ID");
+				amount = (double) values.get( "Percentuale");
+				txfAmount.setText(amount);
+				isEnabled = (boolean) values.get( "Abilitato");
+
+				lbOutput.setText("");
 			}
 		};
 	}
 
 	@Override
-	boolean isDataValid() {
+	public boolean isDataValid() {
 		try {
 			inputValidator.validateVAT(txfAmount);
 		} catch (inputValidatorException e) {

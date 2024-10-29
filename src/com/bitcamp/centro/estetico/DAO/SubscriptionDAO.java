@@ -28,7 +28,7 @@ public class SubscriptionDAO implements DAO<Subscription> {
 		try(PreparedStatement stat = getConnection().prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 			stat.setInt(1, obj.getSubPeriod().toSQLOrdinal());
 			stat.setBigDecimal(2, obj.getPrice());
-			stat.setInt(3, obj.get().getId());
+			stat.setInt(3, obj.getVAT().getId());
 			stat.setDouble(4, obj.getDiscount());
 			stat.setBoolean(5, obj.isEnabled());
 
@@ -118,7 +118,7 @@ public class SubscriptionDAO implements DAO<Subscription> {
 
 			stat.setInt(1, obj.getSubPeriod().toSQLOrdinal());
 			stat.setBigDecimal(2, obj.getPrice());
-			stat.setInt(3, obj.get().getId());
+			stat.setInt(3, obj.getVAT().getId());
 			stat.setDouble(4, obj.getDiscount());
 			stat.setBoolean(5, obj.isEnabled());
 
@@ -232,9 +232,9 @@ public class SubscriptionDAO implements DAO<Subscription> {
 		return list;
 	}
 
-	public int addSubscriptionToCustomer(Customer customer, Subscription subscription, LocalDate start) {
+	public int insertSubscriptionToCustomer(Customer customer, Subscription subscription, LocalDate start) {
 		String query = "INSERT INTO beauty_centerdb.customersubscription(customer_id, subscription_id, start) "
-				+ "VALUES (?, ?, ?)";
+				+ "VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE customer_id = ?, subscription_id = ?, start = ?";
 
 		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
 			stat.setInt(1, customer.getId());
@@ -245,40 +245,17 @@ public class SubscriptionDAO implements DAO<Subscription> {
 				stat.setDate(3, null);
 			}
 
-			int exec = stat.executeUpdate();
-			getConnection().commit();
+			//duplicate key
+			stat.setInt(4, customer.getId());
+			stat.setInt(5, subscription.getId());
+			if(start != null) {
+				stat.setDate(6, Date.valueOf(start));	//throws if null
+			} else {
+				stat.setDate(6, null);
+			}
 
 			if(customer.getSubscription() != null) { //replace and delete the old one from db
 				removeSubscriptionFromCustomer(customer, customer.getSubscription());
-			}
-			subscription.setStart(start);
-			customer.setSubscription(subscription);
-
-			return exec;
-		} catch(SQLException e) {
-			e.printStackTrace();
-			if(getConnection() != null) {
-				try {
-					getConnection().rollback();
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
-			}
-		}
-		return -1;
-	}
-
-	public int updateCustomerSubscription(Customer customer, Subscription subscription, LocalDate start) {
-		String query = "UPDATE beauty_centerdb.customersubscription SET customer_id = ?, subscription_id = ?, start = ?, "
-				+ "WHERE id = ?";
-
-		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
-			stat.setInt(1, customer.getId());
-			stat.setInt(2, subscription.getId());
-			if(start != null) {
-				stat.setDate(3, Date.valueOf(start));	//throws if null
-			} else {
-				stat.setDate(3, null);
 			}
 
 			int exec = stat.executeUpdate();
@@ -335,17 +312,17 @@ public class SubscriptionDAO implements DAO<Subscription> {
 	}
 
 	public Optional<Subscription> getSubscriptionOfCustomer(int id) {
-		String query = "SELECT * FROM beauty_centerdb.customersubscription WHERE customer_id = ?";
+		String query = "SELECT subscription_id FROM beauty_centerdb.customersubscription WHERE customer_id = ?";
 
 		Optional<Subscription> subscription = Optional.empty();
 		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
-			stat.setInt(1, id);  //WHERE id = ?
+			stat.setInt(1, id);  //WHERE customer_id = ?
 
 			ResultSet rs = stat.executeQuery();
 			getConnection().commit();
 
 			if(rs.next()) {
-				subscription = get(rs.getInt(3)); //id, customer_id, subscription_id, start
+				subscription = get(rs.getInt("subscription_id")); //customer_id, subscription_id, start
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
@@ -364,17 +341,17 @@ public class SubscriptionDAO implements DAO<Subscription> {
 	}
 
 	public Optional<Customer> getCustomerOfSubscription(int id) {
-		String query = "SELECT * FROM beauty_centerdb.customersubscription WHERE subscription_id = ?";
+		String query = "SELECT customer_id FROM beauty_centerdb.customersubscription WHERE subscription_id = ?";
 
 		Optional<Customer> customer = Optional.empty();
 		try(PreparedStatement stat = getConnection().prepareStatement(query)) {
-			stat.setInt(1, id);  //WHERE id = ?
+			stat.setInt(1, id);  //WHERE subscription_id = ?
 
 			ResultSet rs = stat.executeQuery();
 			getConnection().commit();
 
 			if(rs.next()) {
-				customer = CustomerDAO.getInstance().get(rs.getInt(2)); //id, customer_id, subscription_id, start
+				customer = CustomerDAO.getInstance().get(rs.getInt(1)); //customer_id, subscription_id, start
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
