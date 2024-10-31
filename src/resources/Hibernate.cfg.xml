@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:1806/beauty_centerdb</property>
+        <property name="hibernate.connection.username">root</property>
+        <property name="hibernate.connection.password">bitcampPassword</property>
+        <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+
+        <!-- session manager-->
+        <property name="hibernate.current_session_context_class">thread</property>
+
+        <!--DEBUG -->
+        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.format_sql">true</property>
+        <property name="hibernate.highlight_sql">true</property>
+
+        <!-- schema update-->
+        <property name="hibernate.hbm2ddl.auto">update</property>
+        
+        <!-- class mapping -->
+        <mapping class="com.bitcamp.centro.estetico.models.BeautyCenter"/>
+        <mapping class="com.bitcamp.centro.estetico.models.Customer"/>
+        <mapping class="com.bitcamp.centro.estetico.models.Employee"/>
+        <mapping class="com.bitcamp.centro.estetico.models.User"/>
+        <mapping class="com.bitcamp.centro.estetico.models.Prize"/>
+        <mapping class="com.bitcamp.centro.estetico.models.Product"/>
+        <mapping class="com.bitcamp.centro.estetico.models.Reservation"/>
+        <mapping class="com.bitcamp.centro.estetico.models.Shift"/>
+        <mapping class="com.bitcamp.centro.estetico.models.Subscription"/>
+        <mapping class="com.bitcamp.centro.estetico.models.Transaction"/>
+        <mapping class="com.bitcamp.centro.estetico.models.Treatment"/>
+        <mapping class="com.bitcamp.centro.estetico.models.UserCredentials"/>
+        <mapping class="com.bitcamp.centro.estetico.models.BeautyCenter"/>
+        <mapping class="com.bitcamp.centro.estetico.models.VAT"/>
+    </session-factory>
+</hibernate-configuration>
