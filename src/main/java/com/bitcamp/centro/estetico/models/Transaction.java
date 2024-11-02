@@ -1,142 +1,151 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
-import com.bitcamp.centro.estetico.DAO.BeautyCenterDAO;
-import com.bitcamp.centro.estetico.DAO.CustomerDAO;
-import com.bitcamp.centro.estetico.DAO.VAT_DAO;
+import org.hibernate.annotations.ColumnDefault;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "transaction")
 public class Transaction implements Model {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
 	private BigDecimal price;
+
+	@OneToOne
+	@JoinColumn(name = "vat_id")
 	private VAT vat;
+
+	@Column(name = "datetime")
 	private LocalDateTime dateTime;
+
+	@Column(name = "payment_method")
 	private PayMethod paymentMethod;
+
+	@OneToOne
+	@JoinColumn(name = "customer_id", nullable = false)
 	private Customer customer;
+
+	@OneToOne
+	@JoinColumn(name = "beauty_center_id", nullable = false)
 	private BeautyCenter beautyCenter;
+
 	private String services;
+
+	@Column(name = "is_enabled")
+	@ColumnDefault(value = "true")
 	private boolean isEnabled;
 
-	private Transaction(
-			Long id, BigDecimal price, PayMethod paymentMethod,
-			LocalDateTime dateTime, Customer customer,
-			VAT vat, BeautyCenter beautyCenter, String services, boolean isEnabled
-			) {
+	public Transaction() {
+		this.isEnabled = true;
+	}
+
+	public Transaction(Long id, BigDecimal price, VAT vat, LocalDateTime dateTime, PayMethod paymentMethod,
+			Customer customer, BeautyCenter beautyCenter, String services) {
+		this(id, price, vat, dateTime, paymentMethod, customer, beautyCenter, services, true);
+	}
+
+	public Transaction(BigDecimal price, VAT vat, LocalDateTime dateTime, PayMethod paymentMethod,
+			Customer customer, BeautyCenter beautyCenter, String services) {
+		this(null, price, vat, dateTime, paymentMethod, customer, beautyCenter, services);
+	}
+
+	public Transaction(Long id, BigDecimal price, VAT vat, LocalDateTime dateTime, PayMethod paymentMethod,
+			Customer customer, BeautyCenter beautyCenter, String services, boolean isEnabled) {
 		this.id = id;
 		this.price = price;
-		this.paymentMethod = paymentMethod;
-		this.dateTime = dateTime;
-		this.customer = customer;
 		this.vat = vat;
+		this.dateTime = dateTime;
+		this.paymentMethod = paymentMethod;
+		this.customer = customer;
 		this.beautyCenter = beautyCenter;
 		this.services = services;
 		this.isEnabled = isEnabled;
 	}
 
-	public Transaction(Long id, Transaction obj) {
-		this(id, obj.price, obj.paymentMethod, obj.dateTime, obj.customer, obj.vat, obj.beautyCenter, obj.services, obj.isEnabled);
-	}
-
-	public Transaction(
-			BigDecimal price, PayMethod paymentMethod,
-			LocalDateTime dateTime, Customer customer,
-			VAT vat, BeautyCenter beautyCenter, String services
-			) {
-		this(-1, price, paymentMethod, dateTime, customer, vat, beautyCenter, services, true);
-	}
-	public Transaction(
-			BigDecimal price, PayMethod paymentMethod,
-			LocalDateTime dateTime, Customer customer,
-			VAT vat, BeautyCenter beautyCenter
-			) {
-		this(-1, price, paymentMethod, dateTime, customer, vat, beautyCenter, "", true);
-	}
-
-	public Transaction(ResultSet rs) throws SQLException {
-		this(
-			rs.getInt(1),
-			rs.getBigDecimal(2),
-			PayMethod.toEnum(rs.getString(4)),
-			rs.getTimestamp(3).toLocalDateTime(),
-			CustomerDAO.getInstance().get(rs.getInt(6)).orElseThrow(),
-			VAT_DAO.getInstance().get(rs.getInt(5)).orElseThrow(),
-			BeautyCenterDAO.getInstance().get(rs.getInt(7)).orElseThrow(),
-			rs.getString(8),
-			rs.getBoolean(9)
-		);
-	}
-
-	@Override
 	public Long getId() {
 		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public BigDecimal getPrice() {
 		return price;
 	}
 
-	public PayMethod getPaymentMethod() {
-		return paymentMethod;
-	}
-
-	public LocalDateTime getDateTime() {
-		return dateTime;
-	}
-
-	public Customer getCustomer() {
-		return customer;
-	}
-
-	public VAT get() {
-		return vat;
-	}
-
-	public BeautyCenter getBeautyCenter() {
-		return beautyCenter;
-	}
-
-	public String getServices() {
-		return services;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return isEnabled;
-	}
-
 	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
-	public void setPaymentMethod(PayMethod paymentMethod) {
-		this.paymentMethod = paymentMethod;
-	}
-
-	public void setDateTime(LocalDateTime dateTime) {
-		this.dateTime = dateTime;
-	}
-
-	public void setCustomer(Customer customer) {
-		this.customer = customer;
+	public VAT getVat() {
+		return vat;
 	}
 
 	public void setVat(VAT vat) {
 		this.vat = vat;
 	}
 
+	public LocalDateTime getDateTime() {
+		return dateTime;
+	}
+
+	public void setDateTime(LocalDateTime dateTime) {
+		this.dateTime = dateTime;
+	}
+
+	public PayMethod getPaymentMethod() {
+		return paymentMethod;
+	}
+
+	public void setPaymentMethod(PayMethod paymentMethod) {
+		this.paymentMethod = paymentMethod;
+	}
+
+	public Customer getCustomer() {
+		return customer;
+	}
+
+	public void setCustomer(Customer customer) {
+		this.customer = customer;
+	}
+
+	public BeautyCenter getBeautyCenter() {
+		return beautyCenter;
+	}
+
 	public void setBeautyCenter(BeautyCenter beautyCenter) {
 		this.beautyCenter = beautyCenter;
+	}
+
+	public String getServices() {
+		return services;
 	}
 
 	public void setServices(String services) {
 		this.services = services;
 	}
 
+	public boolean isEnabled() {
+		return isEnabled;
+	}
+
+	@Override
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
 	}
@@ -150,10 +159,9 @@ public class Transaction implements Model {
 	@Override
 	public String toString() {
 		DateTimeFormatter dtf = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
-		return price + " "  + dateTime.format(dtf) + " " +
+		return price + " " + dateTime.format(dtf) + " " +
 				paymentMethod.toString() + " " + vat.toString() + " " +
 				customer.getFullName() + " " + services;
 	}
-
 
 }

@@ -11,13 +11,18 @@ public enum TurnType {
 	}
 
 	public static TurnType toEnum(String s) {
-		switch(s.toLowerCase()) {
-			case "lavoro": return TurnType.WORK;
-			case "ferie": return TurnType.HOLIDAYS;
+		switch (s.toLowerCase()) {
+			case "lavoro":
+				return TurnType.WORK;
+			case "ferie":
+				return TurnType.HOLIDAYS;
 
-			case "work": return TurnType.WORK;
-			case "holidays": return TurnType.HOLIDAYS;
-			default: return null;
+			case "work":
+				return TurnType.WORK;
+			case "holidays":
+				return TurnType.HOLIDAYS;
+			default:
+				return null;
 		}
 	}
 

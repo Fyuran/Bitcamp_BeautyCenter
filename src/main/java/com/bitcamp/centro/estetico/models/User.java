@@ -4,12 +4,13 @@ import java.time.LocalDate;
 
 import org.hibernate.annotations.ColumnDefault;
 
-import it.kamaladafrica.codicefiscale.CodiceFiscale;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.JoinColumn;
@@ -19,29 +20,34 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "user")
 @Inheritance
-@DiscriminatorColumn(name="user_type")
+@DiscriminatorColumn(name = "user_type")
 public abstract class User implements Model {
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Embedded
 	private UserDetails details;
 
-	@OneToOne(optional = false)
-	@JoinColumn(name = "credentials_id")
+	@OneToOne(optional = false, cascade = CascadeType.PERSIST)
+	@JoinColumn(name = "credentials_id", nullable = false)
 	private UserCredentials userCredentials;
 
 	@Column(name = "is_enabled")
-	@ColumnDefault(value = "false")
+	@ColumnDefault(value = "true")
 	private boolean isEnabled;
 
 	User() {
-		this.id = null;
-		this.details = null;
-		this.userCredentials = null;
-		this.isEnabled = false;
+		this.isEnabled = true;
+	}
+
+	User(Long id, UserDetails details, UserCredentials userCredentials) {
+		this(id, details, userCredentials, true);
+	}
+
+	User(UserDetails details, UserCredentials userCredentials) {
+		this(null, details, userCredentials);
 	}
 
 	User(Long id, UserDetails details, UserCredentials userCredentials, boolean isEnabled) {
@@ -55,6 +61,7 @@ public abstract class User implements Model {
 	public Long getId() {
 		return id;
 	}
+
 	@Override
 	public void setId(Long id) {
 		this.id = id;
@@ -81,39 +88,39 @@ public abstract class User implements Model {
 		this.userCredentials = userCredentials;
 	}
 
+	@Override
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
 	}
 
 	public String getName() {
-	    return details.getName();
+		return details.getName();
 	}
 
 	public String getSurname() {
-	    return details.getSurname();
+		return details.getSurname();
 	}
 
 	public String getBirthplace() {
-	    return details.getBirthplace();
+		return details.getBirthplace();
 	}
 
-    public Gender getGender() {
-        return details.getGender();
-    }
+	public Gender getGender() {
+		return details.getGender();
+	}
 
 	public LocalDate getBoD() {
-	    return details.getBirthday();
+		return details.getBirthday();
 	}
 
 	public String getNotes() {
-	    return details.getNotes();
+		return details.getNotes();
 	}
 
-	public CodiceFiscale getEU_TIN() {
+	public String getEu_tin() {
 		return details.getEu_tin();
 	}
 
-	//Setter
 	public void setName(String name) {
 		details.setName(name);
 	}
@@ -123,23 +130,30 @@ public abstract class User implements Model {
 	}
 
 	public void setBirthplace(String birthplace) {
-	    details.setBirthplace(birthplace);
+		details.setBirthplace(birthplace);
 	}
 
 	public void setGender(Gender gender) {
-        details.setGender(gender);
-    }
+		details.setGender(gender);
+	}
+
 	public void setGender(boolean isFemale) {
-        if(isFemale) details.setGender(Gender.FEMALE);
-		else details.setGender(Gender.MALE);
-    }
+		if (isFemale)
+			details.setGender(Gender.FEMALE);
+		else
+			details.setGender(Gender.MALE);
+	}
 
 	public void setBoD(LocalDate BoD) {
-	    details.setBirthday(BoD);
+		details.setBirthday(BoD);
 	}
 
 	public void setNotes(String notes) {
-	    details.setNotes(notes);
+		details.setNotes(notes);
+	}
+
+	public void setEu_tin(String eu_tin) {
+		details.setEu_tin(eu_tin);
 	}
 
 	public Long getUserCredentialsId() {
@@ -153,17 +167,19 @@ public abstract class User implements Model {
 	public void setUsername(String username) {
 		userCredentials.setUsername(username);
 	}
-	
+
 	public char[] getPassword() {
 		return userCredentials.getPassword();
 	}
+
 	public void setPassword(char[] password) {
-		userCredentials.setPassword(password);;
+		userCredentials.setPassword(password);
 	}
+
 	public boolean isValidPassword(char[] password) {
 		return userCredentials.isValidPassword(password);
 	}
-	
+
 	public String getAddress() {
 		return userCredentials.getAddress();
 	}
@@ -198,7 +214,8 @@ public abstract class User implements Model {
 
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", details=" + details.toString() + ", userCredentials=" + userCredentials.toString() + ", isEnabled="
+		return "User [id=" + id + ", details=" + details.toString() + ", userCredentials=" + userCredentials.toString()
+				+ ", isEnabled="
 				+ isEnabled + "]";
 	}
 

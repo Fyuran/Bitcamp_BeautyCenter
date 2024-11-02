@@ -1,18 +1,19 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "employee")
 @DiscriminatorValue("E")
 public class Employee extends User {
 
@@ -22,9 +23,14 @@ public class Employee extends User {
 	private Roles role;
 
 	@OneToMany
+	@JoinTable(
+		name = "employee_treatment",
+		joinColumns = @JoinColumn(name = "employee_id", referencedColumnName = "id", nullable = false),
+		inverseJoinColumns = @JoinColumn(name = "treatment_id", referencedColumnName = "id", nullable = false)
+	)
 	private List<Treatment> enabledTreatments;
 
-	@OneToMany
+	@ManyToMany(mappedBy = "assignedEmployees", fetch = FetchType.EAGER)
 	private List<Turn> turns;
 
 	@Column(name = "hired")
@@ -37,10 +43,21 @@ public class Employee extends User {
 		super();
 		this.employeeSerial = UUID.randomUUID().toString();
 		this.role = Roles.PERSONNEL;
-		this.turns = new ArrayList<>();
-		this.enabledTreatments = new ArrayList<>();
-		this.hiredDate = null;
-		this.terminationDate = null;
+	}
+
+	public Employee(Long id, UserDetails details, UserCredentials userCredentials,
+			String employeeSerial, Roles role, List<Turn> turns, LocalDate hiredDate, LocalDate terminationDate) {
+		this(id, details, userCredentials, true, employeeSerial, role, turns, hiredDate, terminationDate);
+	}
+
+	public Employee(UserDetails details, UserCredentials userCredentials,
+			String employeeSerial, Roles role, List<Turn> turns, LocalDate hiredDate, LocalDate terminationDate) {
+		this(null, details, userCredentials, employeeSerial, role, turns, hiredDate, terminationDate);
+	}
+
+	public Employee(UserDetails details, UserCredentials userCredentials,
+			Roles role, List<Turn> turns, LocalDate hiredDate, LocalDate terminationDate) {
+		this(null, details, userCredentials, UUID.randomUUID().toString(), role, turns, hiredDate, terminationDate);
 	}
 
 	public Employee(Long id, UserDetails details, UserCredentials userCredentials, boolean isEnabled,
@@ -56,7 +73,7 @@ public class Employee extends User {
 	public String getEmployeeSerial() {
 		return employeeSerial;
 	}
-	
+
 	public void setEmployeeSerial(String employeeSerial) {
 		this.employeeSerial = employeeSerial;
 	}
@@ -117,7 +134,7 @@ public class Employee extends User {
 	@Override
 	public Object[] toTableRow() {
 		return new Object[] {
-				getId(), getGender(), employeeSerial, getEU_TIN(), getName(), getSurname(), getBoD(), hiredDate,
+				getId(), getGender(), employeeSerial, getEu_tin(), getName(), getSurname(), getBoD(), hiredDate,
 				terminationDate, role,
 				getUsername(), getAddress(), getBirthplace(), getMail(), getPhone(), getIban(), isEnabled()
 		};

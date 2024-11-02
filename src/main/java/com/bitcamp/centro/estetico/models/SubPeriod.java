@@ -15,17 +15,26 @@ public enum SubPeriod {
 	}
 
 	public static SubPeriod toEnum(String s) {
-		switch(s.toLowerCase()) {
-			case "mensile": return SubPeriod.MONTHLY;
-			case "trimestrale": return SubPeriod.QUARTERLY;
-			case "semestrale": return SubPeriod.HALF_YEAR;
-			case "annuale": return SubPeriod.YEARLY;
+		switch (s.toLowerCase()) {
+			case "mensile":
+				return SubPeriod.MONTHLY;
+			case "trimestrale":
+				return SubPeriod.QUARTERLY;
+			case "semestrale":
+				return SubPeriod.HALF_YEAR;
+			case "annuale":
+				return SubPeriod.YEARLY;
 
-			case "monthly": return SubPeriod.MONTHLY;
-			case "quarterly": return SubPeriod.QUARTERLY;
-			case "half_year": return SubPeriod.HALF_YEAR;
-			case "yearly": return SubPeriod.YEARLY;
-			default: return null;
+			case "monthly":
+				return SubPeriod.MONTHLY;
+			case "quarterly":
+				return SubPeriod.QUARTERLY;
+			case "half_year":
+				return SubPeriod.HALF_YEAR;
+			case "yearly":
+				return SubPeriod.YEARLY;
+			default:
+				return null;
 		}
 
 	}
@@ -37,6 +46,7 @@ public enum SubPeriod {
 	public String getName() {
 		return name;
 	}
+
 	public int toSQLOrdinal() {
 		return this.ordinal() + 1;
 	}

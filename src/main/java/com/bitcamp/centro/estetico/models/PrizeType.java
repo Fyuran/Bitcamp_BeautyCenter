@@ -13,17 +13,26 @@ public enum PrizeType {
 	}
 
 	public static PrizeType toEnum(String s) {
-		switch(s.toLowerCase()) {
-			case "trattamento": return PrizeType.TREATMENT;
-			case "prodotto": return PrizeType.PRODUCT;
-			case "sconto": return PrizeType.DISCOUNT;
-			case "abbonamento": return PrizeType.SUBSCRIPTION;
+		switch (s.toLowerCase()) {
+			case "trattamento":
+				return PrizeType.TREATMENT;
+			case "prodotto":
+				return PrizeType.PRODUCT;
+			case "sconto":
+				return PrizeType.DISCOUNT;
+			case "abbonamento":
+				return PrizeType.SUBSCRIPTION;
 
-			case "treatment": return PrizeType.TREATMENT;
-			case "product": return PrizeType.PRODUCT;
-			case "discount": return PrizeType.DISCOUNT;
-			case "subscription": return PrizeType.SUBSCRIPTION;
-			default: return null;
+			case "treatment":
+				return PrizeType.TREATMENT;
+			case "product":
+				return PrizeType.PRODUCT;
+			case "discount":
+				return PrizeType.DISCOUNT;
+			case "subscription":
+				return PrizeType.SUBSCRIPTION;
+			default:
+				return null;
 		}
 
 	}

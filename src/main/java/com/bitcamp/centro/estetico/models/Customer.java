@@ -6,37 +6,48 @@ import java.util.List;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "customer")
 @DiscriminatorValue("C")
 public class Customer extends User {
 
-	@OneToOne(optional = true)
-	private Subscription subscription; // can be null
+	@OneToOne(mappedBy = "customer", optional = true)
+	private Subscription subscription;
 
 	@OneToMany
-	private List<Prize> prizes; // can be null
+	@JoinTable(
+		name = "customer_prize",
+		joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id", nullable = false),
+		inverseJoinColumns = @JoinColumn(name = "prize_id", referencedColumnName = "id", nullable = false)
+	)
+	private List<Prize> prizes;
 
 	private String p_iva;
 
 	@Column(name = "recipient_code")
 	private String recipientCode;
-	
+
 	@Column(name = "loyalty_points")
 	private int loyaltyPoints;
 
 	public Customer() {
 		super();
-		this.subscription = null;
-		this.prizes = null;
-		this.p_iva = null;
-		this.recipientCode = null;
+	}
 
-		this.loyaltyPoints = -1;
+	public Customer(
+			Long id, UserDetails details, UserCredentials userCredentials,
+			String P_IVA, String recipientCode, int loyaltyPoints, Subscription subscription, List<Prize> prizes) {
+		this(id, details, userCredentials, true, P_IVA, recipientCode, loyaltyPoints, subscription, prizes);
+	}
+
+	public Customer(
+			UserDetails details, UserCredentials userCredentials,
+			String P_IVA, String recipientCode, int loyaltyPoints, Subscription subscription, List<Prize> prizes) {
+		this(null, details, userCredentials, P_IVA, recipientCode, loyaltyPoints, subscription, prizes);
 	}
 
 	public Customer(
@@ -68,6 +79,7 @@ public class Customer extends User {
 			this.prizes.add(prize);
 		}
 	}
+
 	public void addPrizes(Collection<Prize> c) {
 		addPrizes(c.toArray(new Prize[c.size()]));
 	}
@@ -122,9 +134,10 @@ public class Customer extends User {
 	@Override
 	public Object[] toTableRow() {
 		return new Object[] {
-				getId(), getGender(), getName(), getSurname(), getPhone(), getMail(), getAddress(), getBoD(), getBirthplace(),
-				getEU_TIN(), p_iva, recipientCode, loyaltyPoints, getSubscription(), getNotes(), getIban(), isEnabled()
+				getId(), getGender(), getName(), getSurname(), getPhone(), getMail(), getAddress(), getBoD(),
+				getBirthplace(),
+				getEu_tin(), p_iva, recipientCode, loyaltyPoints, getSubscription(), getNotes(), getIban(), isEnabled()
 		};
 	}
-	
+
 }

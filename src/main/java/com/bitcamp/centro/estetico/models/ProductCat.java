@@ -11,20 +11,22 @@ public enum ProductCat {
 
 	private final String description;
 
-	private ProductCat(String description ) {
+	private ProductCat(String description) {
 		this.description = description;
 	}
+
 	public String getDescription() {
 		return description;
 	}
+
 	public static ProductCat fromDescription(String description) {
-        for (ProductCat category : ProductCat.values()) {
-            if (category.getDescription().equalsIgnoreCase(description)) {
-                return category;
-            }
-        }
-        throw new IllegalArgumentException("Nessun ProductCat trovato per la descrizione: " + description);
-    }
+		for (ProductCat category : ProductCat.values()) {
+			if (category.getDescription().equalsIgnoreCase(description)) {
+				return category;
+			}
+		}
+		throw new IllegalArgumentException("Nessun ProductCat trovato per la descrizione: " + description);
+	}
 
 	public int toSQLOrdinal() {
 		return this.ordinal() + 1;
@@ -35,4 +37,3 @@ public enum ProductCat {
 		return description;
 	}
 }
-

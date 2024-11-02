@@ -1,41 +1,158 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Optional;
 
-import com.bitcamp.centro.estetico.DAO.SubscriptionDAO;
-import com.bitcamp.centro.estetico.DAO.VAT_DAO;
+import org.hibernate.annotations.ColumnDefault;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "subscription")
 public class Subscription implements Model {
+	
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
 	private SubPeriod subperiod;
+
 	private LocalDate start;
+
 	private LocalDate end;
+
 	private BigDecimal price;
+
+	@OneToOne
+	@JoinColumn(name = "vat_id", nullable = false)
 	private VAT vat;
+
 	private double discount;
+
+	@OneToOne
+	@JoinColumn(name = "customer_id", nullable = true)
+	private Customer customer;
+
+	@Column(name = "is_enabled")
+	@ColumnDefault(value = "true")
 	private boolean isEnabled;
 
-	
+	public Subscription() {
+		this.isEnabled = true;
+	}
 
-	// "ID", "Prezzo","IVA","Periodo", "Inizio", "Fine", "Sconto applicato",
-	// "Cliente", "Abilitata"
+	public Subscription(Long id, SubPeriod subperiod, LocalDate start, LocalDate end, BigDecimal price, VAT vat,
+			double discount, Customer customer) {
+		this(id, subperiod, start, end, price, vat, discount, customer, true);
+	}
+
+	public Subscription(SubPeriod subperiod, LocalDate start, LocalDate end, BigDecimal price, VAT vat,
+			double discount, Customer customer) {
+		this(null, subperiod, start, end, price, vat, discount, customer);
+	}
+
+	public Subscription(Long id, SubPeriod subperiod, LocalDate start, LocalDate end, BigDecimal price, VAT vat,
+			double discount, Customer customer, boolean isEnabled) {
+		this.id = id;
+		this.subperiod = subperiod;
+		this.start = start;
+		this.end = end;
+		this.price = price;
+		this.vat = vat;
+		this.discount = discount;
+		this.customer = customer;
+		this.isEnabled = isEnabled;
+	}
+
+	public Subscription(SubPeriod subperiod, LocalDate start, LocalDate end, BigDecimal price, VAT vat,
+			double discount) {
+				this(subperiod, start, end, price, vat, discount, null);
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public SubPeriod getSubperiod() {
+		return subperiod;
+	}
+
+	public void setSubperiod(SubPeriod subperiod) {
+		this.subperiod = subperiod;
+	}
+
+	public LocalDate getStart() {
+		return start;
+	}
+
+	public void setStart(LocalDate start) {
+		this.start = start;
+	}
+
+	public LocalDate getEnd() {
+		return end;
+	}
+
+	public void setEnd(LocalDate end) {
+		this.end = end;
+	}
+
+	public BigDecimal getPrice() {
+		return price;
+	}
+
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+
+	public VAT getVat() {
+		return vat;
+	}
+
+	public void setVat(VAT vat) {
+		this.vat = vat;
+	}
+
+	public double getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(double discount) {
+		this.discount = discount;
+	}
+
+	public Customer getCustomer() {
+		return customer;
+	}
+
+	public void setCustomer(Customer customer) {
+		this.customer = customer;
+	}
+
+	public boolean isEnabled() {
+		return isEnabled;
+	}
+
+	@Override
+	public void setEnabled(boolean isEnabled) {
+		this.isEnabled = isEnabled;
+	}
+
+	@Override
 	public Object[] toTableRow() {
 		return new Object[] {
-				id, price, vat, subperiod, start, end, discount,
-				SubscriptionDAO.getInstance().getCustomerOfSubscription(id).orElse(null), isEnabled
+				id, price, vat, subperiod, start, end, discount, customer, isEnabled
 		};
 	}
 
@@ -89,5 +206,4 @@ public class Subscription implements Model {
 			return false;
 		return true;
 	}
-
 }

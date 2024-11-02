@@ -7,6 +7,7 @@ import org.hibernate.annotations.ColumnDefault;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
@@ -17,7 +18,7 @@ import jakarta.persistence.Table;
 public class Product implements Model {
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	private String name;
@@ -36,10 +37,20 @@ public class Product implements Model {
 	private ProductCat type;
 
 	@Column(name = "is_enabled")
-	@ColumnDefault(value = "false")
+	@ColumnDefault(value = "true")
 	private boolean isEnabled;
 
+	public Product() {
+		this.isEnabled = true;
+	}
 
+	public Product(Long id, String name, int amount, int minStock, BigDecimal price, VAT vat, ProductCat type) {
+		this(id, name, amount, minStock, price, vat, type, true);
+	}
+
+	public Product(String name, int amount, int minStock, BigDecimal price, VAT vat, ProductCat type) {
+		this(null, name, amount, minStock, price, vat, type);
+	}
 
 	public Product(Long id, String name, int amount, int minStock, BigDecimal price, VAT vat, ProductCat type,
 			boolean isEnabled) {
@@ -116,6 +127,7 @@ public class Product implements Model {
 		return isEnabled;
 	}
 
+	@Override
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
 	}
@@ -126,11 +138,10 @@ public class Product implements Model {
 				+ price + ", vat=" + vat + ", type=" + type + ", isEnabled=" + isEnabled + "]";
 	}
 
-	// "ID", "Prodotto", "Categoria", "Quantità", "Quantità minima", "Prezzo",
-	// "IVA%"
+	@Override
 	public Object[] toTableRow() {
 		return new Object[] {
-				id, name, type, amount, minStock, price, vat
+				id, name, type, amount, minStock, price, vat, isEnabled
 		};
 	}
 }

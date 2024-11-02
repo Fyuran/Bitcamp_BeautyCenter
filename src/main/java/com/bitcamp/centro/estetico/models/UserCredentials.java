@@ -1,77 +1,76 @@
 package com.bitcamp.centro.estetico.models;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.hibernate.annotations.ColumnDefault;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
-
-
-public class UserCredentials implements Model{
+@Entity
+@Table(name = "user_credentials")
+public class UserCredentials implements Model {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-    private String username;
-    private char[] password;//Criptata
-    private String address;
-    private String iban;
-    private String phone;
-    private String mail;
-    private boolean isEnabled;
 
-    private UserCredentials(Long id, String username, char[] password, String address, String iban, String phone, String mail, boolean isEnabled) {
-    	this.id = id;
-        this.username = username;
-        this.password = encryptPassword(password);
-        this.address = address;
-        this.iban = iban;
-        this.phone = phone;
-        this.mail = mail;
-        this.isEnabled = isEnabled;
-    }
+	private String username;
 
-    public UserCredentials(String username, char[] password, String address, String iban, String phone, String mail) {
-    	this(-1, username, password, address, iban, phone, mail, true);
-    }
+	private char[] password;
 
-    public UserCredentials(String username, char[] password) {
-    	this(-1, username, password, null, null, null, null, true);
-    }
+	private String address;
 
-    public UserCredentials(Long id, UserCredentials obj) {
-    	this(id, obj.username, obj.password, obj.address, obj.iban, obj.phone, obj.mail, obj.isEnabled);
-    }
+	private String iban;
 
-    //id, username, password, mail, iban, phone, is_enabled
-    public UserCredentials(ResultSet rs) throws SQLException {
-		this(
-			rs.getInt(1),
-			rs.getString(2),
-			(char[]) rs.getString(3).toCharArray(),
-			rs.getString(4),
-			rs.getString(5),
-			rs.getString(6),
-			rs.getString(7),
-			rs.getBoolean(8)
-		);
+	private String phone;
+
+	private String mail;
+
+	@OneToOne(mappedBy = "userCredentials", cascade = CascadeType.PERSIST)
+	private User user;
+
+	@Column(name = "is_enabled")
+	@ColumnDefault(value = "true")
+	private boolean isEnabled;
+
+	public UserCredentials() {
+		this.isEnabled = true;
 	}
 
-	private static void purgePasswordArray(char[] password) {
-		for(int i = 0; i < password.length; i++) {
-			password[i] = Character.MIN_VALUE;
-		}
+	public UserCredentials(Long id, String username, char[] password, String address, String iban, String phone,
+			String mail, User user) {
+		this(id, username, password, address, iban, phone, mail, user, true);
 	}
-	// Metodi per gestire la criptazione e la decriptazione della password tramite la libreria Bcrypt
- 	public static char[] encryptPassword(char[] password) {
-		char[] encryptedPwd = BCrypt.withDefaults().hashToChar(5, password);
-		purgePasswordArray(password);
- 		return encryptedPwd;
- 	}
- 	public boolean isValidPassword(char[] password) {
- 	    return BCrypt.verifyer().verify(password, this.password).verified;
- 	}
-	
-	 @Override
+
+	public UserCredentials(String username, char[] password, String address, String iban, String phone,
+			String mail, User user) {
+		this(null, username, password, address, iban, phone, mail, user);
+	}
+
+	public UserCredentials(Long id, String username, char[] password, String address, String iban, String phone,
+			String mail, User user, boolean isEnabled) {
+		this.id = id;
+		this.username = username;
+		this.password = password;
+		this.address = address;
+		this.iban = iban;
+		this.phone = phone;
+		this.mail = mail;
+		this.user = user;
+		this.isEnabled = isEnabled;
+	}
+
 	public Long getId() {
 		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public String getUsername() {
@@ -80,6 +79,14 @@ public class UserCredentials implements Model{
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public char[] getPassword() {
+		return password;
+	}
+
+	public void setPassword(char[] password) {
+		this.password = password;
 	}
 
 	public String getAddress() {
@@ -114,28 +121,43 @@ public class UserCredentials implements Model{
 		this.mail = mail;
 	}
 
-
-	public char[] getPassword() {
-		return password;
+	public User getUser() {
+		return user;
 	}
 
-	public void setPassword(char[] password) {
-		this.password = encryptPassword(password);
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public boolean isEnabled() {
+		return isEnabled;
 	}
 
 	@Override
-	public String toString() {
-		return "UserCredentials [id=" + id + ", username=" + username  + ", address="
-				+ address + ", iban=" + iban + ", phone=" + phone + ", mail=" + mail + ", isEnabled=" + isEnabled + "]";
-	}
-
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
 	}
 
+	private static void purgePasswordArray(char[] password) {
+		for (int i = 0; i < password.length; i++) {
+			password[i] = Character.MIN_VALUE;
+		}
+	}
+
+	public static char[] encryptPassword(char[] password) {
+		char[] encryptedPwd = BCrypt.withDefaults().hashToChar(5, password);
+		purgePasswordArray(password);
+		return encryptedPwd;
+	}
+
+	public boolean isValidPassword(char[] password) {
+		return BCrypt.verifyer().verify(password, this.password).verified;
+	}
+
 	@Override
-	public boolean isEnabled() {
-		return isEnabled;
+	public String toString() {
+		return "UserCredentials [id=" + id + ", username=" + username + ", address="
+				+ address + ", iban=" + iban + ", phone=" + phone + ", mail=" + mail + ", isEnabled=" + isEnabled + "]";
 	}
 
 	public Object[] toTableRow() {
@@ -143,4 +165,5 @@ public class UserCredentials implements Model{
 				id, username, password, address, iban, phone, mail, isEnabled
 		};
 	}
+
 }

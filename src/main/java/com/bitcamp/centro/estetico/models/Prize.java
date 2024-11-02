@@ -9,38 +9,42 @@ import org.hibernate.annotations.ColumnDefault;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "prize")
 public class Prize implements Model {
+	
 	@Id
-	@GeneratedValue
-    private Long id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private String name;
+	private String name;
 
-    private int threshold;
+	private int threshold;
 
-    private LocalDate expirationDate;
+	private LocalDate expirationDate;
 
-    private PrizeType type;
+	private PrizeType type;
 
-    private double amount;
+	private double amount;
 
 	@Column(name = "is_enabled")
-	@ColumnDefault(value = "false")
-    private boolean isEnabled;
+	@ColumnDefault(value = "true")
+	private boolean isEnabled;
 
 	public Prize() {
-	this.id = -1L;
-	this.name = null;
-	this.threshold = -1;
-	this.expirationDate = null;
-	this.type = null;
-	this.amount = -1;
-	this.isEnabled = false;
+		this.isEnabled = true;
+	}
+
+	public Prize(Long id, String name, int threshold, LocalDate expirationDate, PrizeType type, double amount) {
+		this(id, name, threshold, expirationDate, type, amount, true);
+	}
+
+	public Prize(String name, int threshold, LocalDate expirationDate, PrizeType type, double amount) {
+		this(null, name, threshold, expirationDate, type, amount);
 	}
 
 	public Prize(Long id, String name, int threshold, LocalDate expirationDate, PrizeType type, double amount,
@@ -58,6 +62,7 @@ public class Prize implements Model {
 	public Long getId() {
 		return id;
 	}
+
 	@Override
 	public void setId(Long id) {
 		this.id = id;
@@ -117,12 +122,11 @@ public class Prize implements Model {
 		return isEnabled;
 	}
 
+	@Override
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
 	}
 
-
-	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -167,7 +171,7 @@ public class Prize implements Model {
 				", amount=" + amount + ", isEnabled=" + isEnabled + "]";
 	}
 
-	//"ID", "Nome", "Punti Necessari", "Tipo", "€ in Buono", "Scadenza", "Abilitato"
+	@Override
 	public Object[] toTableRow() {
 		return new Object[] {
 				id, name, threshold, type, amount, expirationDate, isEnabled

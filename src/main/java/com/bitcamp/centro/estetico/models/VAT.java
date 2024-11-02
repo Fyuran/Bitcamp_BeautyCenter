@@ -1,64 +1,79 @@
 package com.bitcamp.centro.estetico.models;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.hibernate.annotations.ColumnDefault;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "vat")
 public class VAT implements Model {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
 	private double amount;
+
+	@Column(name = "is_enabled")
+	@ColumnDefault(value = "true")
 	private boolean isEnabled;
 
-	private VAT(Long id, double amount, boolean isEnabled) {
+	public VAT() {
+		this.isEnabled = true;
+	}
+
+	public VAT(Long id, double amount, boolean isEnabled) {
 		this.id = id;
 		this.amount = amount;
 		this.isEnabled = isEnabled;
 	}
 
-	public VAT(Long id, VAT obj) {
-		this(id, obj.amount, obj.isEnabled);
-	}
-
-	public VAT(double amount, boolean isEnabled) {
-		this(-1, amount, isEnabled);
+	public VAT(Long id, double amount) {
+		this(id, amount, true);
 	}
 
 	public VAT(double amount) {
-		this(-1, amount, true);
+		this(null, amount);
 	}
 
-	public VAT(ResultSet rs) throws SQLException {
-		this(
-			rs.getInt(1),
-			rs.getDouble(2),
-			rs.getBoolean(3)
-		);
-	}
 	public Long getId() {
 		return id;
 	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	public double getAmount() {
 		return amount;
 	}
-	public boolean isEnabled() {
-		return isEnabled;
-	}
+
 	public void setAmount(double amount) {
 		this.amount = amount;
 	}
-	public void setEnabled(boolean isEnabled) {
-		this.isEnabled = isEnabled;
+
+	public boolean isEnabled() {
+		return isEnabled;
 	}
 
-	// "id", "IVA%", "STATO"
-	public Object[] toTableRow() {
-		return new Object[] {
-				id, amount, isEnabled
-		};
+	@Override
+	public void setEnabled(boolean isEnabled) {
+		this.isEnabled = isEnabled;
 	}
 
 	@Override
 	public String toString() {
 		return amount + "%";
+	}
+
+	public Object[] toTableRow() {
+		return new Object[] {
+				id, amount, isEnabled
+		};
 	}
 
 	@Override
@@ -84,6 +99,5 @@ public class VAT implements Model {
 			return false;
 		return true;
 	}
-
 
 }
