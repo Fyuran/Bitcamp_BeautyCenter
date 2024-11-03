@@ -3,6 +3,7 @@ package com.bitcamp.centro.estetico.models;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Map;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -16,7 +17,7 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "prize")
 public class Prize implements Model {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -29,8 +30,6 @@ public class Prize implements Model {
 
 	private PrizeType type;
 
-	private double amount;
-
 	@Column(name = "is_enabled")
 	@ColumnDefault(value = "true")
 	private boolean isEnabled;
@@ -39,22 +38,28 @@ public class Prize implements Model {
 		this.isEnabled = true;
 	}
 
-	public Prize(Long id, String name, int threshold, LocalDate expirationDate, PrizeType type, double amount) {
-		this(id, name, threshold, expirationDate, type, amount, true);
+	public Prize(Map<String, Object> map) {
+		this(
+			(Long) map.get("ID"),
+			(String) map.get("Nome"),
+			(int) map.get("Punti Necessari"),
+			(LocalDate) map.get("Scadenza"),
+			(PrizeType) map.get("Tipo"),
+			(boolean) map.get("Abilitato")
+		);
 	}
 
-	public Prize(String name, int threshold, LocalDate expirationDate, PrizeType type, double amount) {
-		this(null, name, threshold, expirationDate, type, amount);
+	public Prize(String name, int threshold, LocalDate expirationDate, PrizeType type) {
+		this(null, name, threshold, expirationDate, type, true);
 	}
 
-	public Prize(Long id, String name, int threshold, LocalDate expirationDate, PrizeType type, double amount,
+	public Prize(Long id, String name, int threshold, LocalDate expirationDate, PrizeType type,
 			boolean isEnabled) {
 		this.id = id;
 		this.name = name;
 		this.threshold = threshold;
 		this.expirationDate = expirationDate;
 		this.type = type;
-		this.amount = amount;
 		this.isEnabled = isEnabled;
 	}
 
@@ -109,14 +114,6 @@ public class Prize implements Model {
 		return customer.getLoyaltyPoints();
 	}
 
-	public double getAmount() {
-		return amount;
-	}
-
-	public void setAmount(double amount) {
-		this.amount = amount;
-	}
-
 	@Override
 	public boolean isEnabled() {
 		return isEnabled;
@@ -127,16 +124,18 @@ public class Prize implements Model {
 		this.isEnabled = isEnabled;
 	}
 
+	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + threshold;
+		result = prime * result + ((expirationDate == null) ? 0 : expirationDate.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		long temp;
-		temp = Double.doubleToLongBits(amount);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + (isEnabled ? 1231 : 1237);
 		return result;
 	}
 
@@ -149,6 +148,11 @@ public class Prize implements Model {
 		if (getClass() != obj.getClass())
 			return false;
 		Prize other = (Prize) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
@@ -156,9 +160,14 @@ public class Prize implements Model {
 			return false;
 		if (threshold != other.threshold)
 			return false;
+		if (expirationDate == null) {
+			if (other.expirationDate != null)
+				return false;
+		} else if (!expirationDate.equals(other.expirationDate))
+			return false;
 		if (type != other.type)
 			return false;
-		if (Double.doubleToLongBits(amount) != Double.doubleToLongBits(other.amount))
+		if (isEnabled != other.isEnabled)
 			return false;
 		return true;
 	}
@@ -167,14 +176,18 @@ public class Prize implements Model {
 	public String toString() {
 		DateTimeFormatter dtf = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
 		return "Prize [id=" + id + ", name=" + name + ", type=" + type.toString() + ", threshold=" + threshold +
-				", expirationDate=" + expirationDate.format(dtf) +
-				", amount=" + amount + ", isEnabled=" + isEnabled + "]";
+				", expirationDate=" + expirationDate.format(dtf) + ", isEnabled=" + isEnabled + "]";
 	}
 
 	@Override
-	public Object[] toTableRow() {
-		return new Object[] {
-				id, name, threshold, type, amount, expirationDate, isEnabled
-		};
+	public Map<String, Object> toTableRow() {
+		return Map.ofEntries(
+			Map.entry("ID", id),
+			Map.entry("Nome", name),
+			Map.entry("Punti Necessari", threshold),
+			Map.entry("Tipo", threshold),
+			Map.entry("Scadenza", expirationDate),
+			Map.entry("Abilitato", isEnabled)
+		);
 	}
 }

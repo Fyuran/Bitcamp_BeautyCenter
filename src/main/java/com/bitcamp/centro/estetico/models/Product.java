@@ -1,6 +1,7 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -23,11 +24,6 @@ public class Product implements Model {
 
 	private String name;
 
-	private int amount;
-
-	@Column(name = "minimum")
-	private int minStock;
-
 	private BigDecimal price;
 
 	@OneToOne
@@ -44,20 +40,25 @@ public class Product implements Model {
 		this.isEnabled = true;
 	}
 
-	public Product(Long id, String name, int amount, int minStock, BigDecimal price, VAT vat, ProductCat type) {
-		this(id, name, amount, minStock, price, vat, type, true);
+	public Product(Map<String, Object> map) {
+		this(			
+			(Long) map.get("ID"),
+			(String) map.get("Nome"),
+			(BigDecimal) map.get("Prezzo"),
+			(VAT) map.get("IVA"),
+			(ProductCat) map.get("Tipo"),
+			(boolean) map.get("Abilitato")
+		);
 	}
 
-	public Product(String name, int amount, int minStock, BigDecimal price, VAT vat, ProductCat type) {
-		this(null, name, amount, minStock, price, vat, type);
+	public Product(String name, BigDecimal price, VAT vat, ProductCat type) {
+		this(null, name, price, vat, type, true);
 	}
 
-	public Product(Long id, String name, int amount, int minStock, BigDecimal price, VAT vat, ProductCat type,
+	public Product(Long id, String name, BigDecimal price, VAT vat, ProductCat type,
 			boolean isEnabled) {
 		this.id = id;
 		this.name = name;
-		this.amount = amount;
-		this.minStock = minStock;
 		this.price = price;
 		this.vat = vat;
 		this.type = type;
@@ -80,22 +81,6 @@ public class Product implements Model {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public int getAmount() {
-		return amount;
-	}
-
-	public void setAmount(int amount) {
-		this.amount = amount;
-	}
-
-	public int getMinStock() {
-		return minStock;
-	}
-
-	public void setMinStock(int minStock) {
-		this.minStock = minStock;
 	}
 
 	public BigDecimal getPrice() {
@@ -134,14 +119,70 @@ public class Product implements Model {
 
 	@Override
 	public String toString() {
-		return "Product [id=" + id + ", name=" + name + ", amount=" + amount + ", minStock=" + minStock + ", price="
+		return "Product [id=" + id + ", name=" + name + ", price="
 				+ price + ", vat=" + vat + ", type=" + type + ", isEnabled=" + isEnabled + "]";
 	}
 
+	
 	@Override
-	public Object[] toTableRow() {
-		return new Object[] {
-				id, name, type, amount, minStock, price, vat, isEnabled
-		};
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((price == null) ? 0 : price.hashCode());
+		result = prime * result + ((vat == null) ? 0 : vat.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + (isEnabled ? 1231 : 1237);
+		return result;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Product other = (Product) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (price == null) {
+			if (other.price != null)
+				return false;
+		} else if (!price.equals(other.price))
+			return false;
+		if (vat == null) {
+			if (other.vat != null)
+				return false;
+		} else if (!vat.equals(other.vat))
+			return false;
+		if (type != other.type)
+			return false;
+		if (isEnabled != other.isEnabled)
+			return false;
+		return true;
+	}
+
+	@Override
+	public Map<String, Object> toTableRow() {
+		return Map.ofEntries(
+			Map.entry("ID", id),
+			Map.entry("Nome", name),
+			Map.entry("Tipo", type),
+			Map.entry("Prezzo", price),
+			Map.entry("IVA", vat),
+			Map.entry("Abilitato", isEnabled)
+		);
+	}
+
 }

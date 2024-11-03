@@ -2,8 +2,11 @@ package com.bitcamp.centro.estetico.models;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.annotations.ColumnDefault;
+
+import com.bitcamp.centro.estetico.controller.DAO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -65,13 +68,35 @@ public class BeautyCenter implements Model {
 		this.isEnabled = true;
 	}
 
-	public BeautyCenter(
-			Long id, String name, String phone, String certifiedMail,
-			String mail, String registeredOffice,
-			String operatingOffice, String REA, String P_IVA,
-			LocalTime openingHour, LocalTime closingHour, List<VAT> infoVat) {
-		this(id, name, phone, certifiedMail, mail, registeredOffice, operatingOffice, REA, P_IVA, openingHour,
-				closingHour, infoVat, true);
+	/*		Map.entry("ID", id),
+			Map.entry("Nome", name),
+			Map.entry("Telefono", phone),
+			Map.entry("Email", mail),
+			Map.entry("PEC", certifiedMail),
+			Map.entry("Sede legale", registeredOffice),
+			Map.entry("Sede operativa", operatingOffice),
+			Map.entry("REA", REA),
+			Map.entry("P.IVA", P_IVA),
+			Map.entry("Apertura", openingHour),
+			Map.entry("Chiusura", closingHour),
+			Map.entry("Abilitato", isEnabled) 
+	*/
+	public BeautyCenter(Map<String, Object> map) {
+		this(
+			(Long) map.get("ID"), 
+			(String) map.get("Nome"),  
+			(String) map.get("Telefono"),
+			(String) map.get("PEC"), 
+			(String) map.get("Email"), 
+			(String) map.get("Sede legale"),
+			(String) map.get("Sede operativa"), 
+			(String) map.get("REA"), 
+			(String) map.get("P.IVA"), 
+			(LocalTime) map.get("Apertura"),
+			(LocalTime) map.get("Chiusura"), 
+			(List<VAT>) map.getOrDefault("IVA", DAO.getAll(VAT.class)), 
+			(boolean) map.get("Abilitato")
+		);
 	}
 
 	public BeautyCenter(
@@ -80,7 +105,7 @@ public class BeautyCenter implements Model {
 			String operatingOffice, String REA, String P_IVA,
 			LocalTime openingHour, LocalTime closingHour, List<VAT> infoVat) {
 		this(null, name, phone, certifiedMail, mail, registeredOffice, operatingOffice, REA, P_IVA, openingHour,
-				closingHour, infoVat);
+				closingHour, infoVat, true);
 	}
 
 	public BeautyCenter(
@@ -211,12 +236,117 @@ public class BeautyCenter implements Model {
 		this.isEnabled = isEnabled;
 	}
 
+	
 	@Override
-	public Object[] toTableRow() {
-		return new Object[] {
-				id, name, phone, certifiedMail, mail, registeredOffice, operatingOffice, REA, P_IVA, openingHour,
-				closingHour, isEnabled
-		};
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((phone == null) ? 0 : phone.hashCode());
+		result = prime * result + ((certifiedMail == null) ? 0 : certifiedMail.hashCode());
+		result = prime * result + ((mail == null) ? 0 : mail.hashCode());
+		result = prime * result + ((registeredOffice == null) ? 0 : registeredOffice.hashCode());
+		result = prime * result + ((operatingOffice == null) ? 0 : operatingOffice.hashCode());
+		result = prime * result + ((REA == null) ? 0 : REA.hashCode());
+		result = prime * result + ((P_IVA == null) ? 0 : P_IVA.hashCode());
+		result = prime * result + ((infoVat == null) ? 0 : infoVat.hashCode());
+		result = prime * result + ((openingHour == null) ? 0 : openingHour.hashCode());
+		result = prime * result + ((closingHour == null) ? 0 : closingHour.hashCode());
+		result = prime * result + (isEnabled ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BeautyCenter other = (BeautyCenter) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (phone == null) {
+			if (other.phone != null)
+				return false;
+		} else if (!phone.equals(other.phone))
+			return false;
+		if (certifiedMail == null) {
+			if (other.certifiedMail != null)
+				return false;
+		} else if (!certifiedMail.equals(other.certifiedMail))
+			return false;
+		if (mail == null) {
+			if (other.mail != null)
+				return false;
+		} else if (!mail.equals(other.mail))
+			return false;
+		if (registeredOffice == null) {
+			if (other.registeredOffice != null)
+				return false;
+		} else if (!registeredOffice.equals(other.registeredOffice))
+			return false;
+		if (operatingOffice == null) {
+			if (other.operatingOffice != null)
+				return false;
+		} else if (!operatingOffice.equals(other.operatingOffice))
+			return false;
+		if (REA == null) {
+			if (other.REA != null)
+				return false;
+		} else if (!REA.equals(other.REA))
+			return false;
+		if (P_IVA == null) {
+			if (other.P_IVA != null)
+				return false;
+		} else if (!P_IVA.equals(other.P_IVA))
+			return false;
+		if (infoVat == null) {
+			if (other.infoVat != null)
+				return false;
+		} else if (!infoVat.equals(other.infoVat))
+			return false;
+		if (openingHour == null) {
+			if (other.openingHour != null)
+				return false;
+		} else if (!openingHour.equals(other.openingHour))
+			return false;
+		if (closingHour == null) {
+			if (other.closingHour != null)
+				return false;
+		} else if (!closingHour.equals(other.closingHour))
+			return false;
+		if (isEnabled != other.isEnabled)
+			return false;
+		return true;
+	}
+
+	@Override
+	public Map<String, Object> toTableRow() {
+		return Map.ofEntries(
+			Map.entry("ID", id),
+			Map.entry("Nome", name),
+			Map.entry("Telefono", phone),
+			Map.entry("Email", mail),
+			Map.entry("PEC", certifiedMail),
+			Map.entry("Sede legale", registeredOffice),
+			Map.entry("Sede operativa", operatingOffice),
+			Map.entry("REA", REA),
+			Map.entry("P.IVA", P_IVA),
+			Map.entry("Apertura", openingHour),
+			Map.entry("Chiusura", closingHour),
+			Map.entry("Abilitato", isEnabled)
+		);
 	}
 
 }

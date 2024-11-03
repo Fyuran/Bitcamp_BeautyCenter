@@ -3,6 +3,7 @@ package com.bitcamp.centro.estetico.models;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -55,14 +56,22 @@ public class Reservation implements Model {
 		this.isEnabled = true;
 	}
 
-	public Reservation(Long id, Customer customer, Treatment treatment, List<Employee> employees, LocalDate date,
-			LocalTime time, ReservationState state) {
-		this(id, customer, treatment, employees, date, time, state, true);
+	public Reservation(Map<String, Object> map) {
+		this(			
+			(Long) map.get("ID"),
+			(Customer) map.get("Cliente"),
+			(Treatment) map.get("Trattamento"),
+			(List<Employee>) map.get("Clienti"),
+			(LocalDate) map.get("Data"),
+			(LocalTime) map.get("Orario"),
+			(ReservationState) map.get("Stato"),
+			(boolean) map.get("Abilitato")
+		);
 	}
 
 	public Reservation(Customer customer, Treatment treatment, List<Employee> employees, LocalDate date,
 			LocalTime time, ReservationState state) {
-		this(null, customer, treatment, employees, date, time, state);
+		this(null, customer, treatment, employees, date, time, state, true);
 	}
 
 	public Reservation(Long id, Customer customer, Treatment treatment, List<Employee> employees, LocalDate date,
@@ -142,11 +151,79 @@ public class Reservation implements Model {
 		this.isEnabled = isEnabled;
 	}
 
+	
 	@Override
-	public Object[] toTableRow() {
-		return new Object[] {
-				id, customer, treatment, employees, date, time, state, isEnabled
-		};
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((customer == null) ? 0 : customer.hashCode());
+		result = prime * result + ((treatment == null) ? 0 : treatment.hashCode());
+		result = prime * result + ((employees == null) ? 0 : employees.hashCode());
+		result = prime * result + ((date == null) ? 0 : date.hashCode());
+		result = prime * result + ((time == null) ? 0 : time.hashCode());
+		result = prime * result + ((state == null) ? 0 : state.hashCode());
+		result = prime * result + (isEnabled ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Reservation other = (Reservation) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (customer == null) {
+			if (other.customer != null)
+				return false;
+		} else if (!customer.equals(other.customer))
+			return false;
+		if (treatment == null) {
+			if (other.treatment != null)
+				return false;
+		} else if (!treatment.equals(other.treatment))
+			return false;
+		if (employees == null) {
+			if (other.employees != null)
+				return false;
+		} else if (!employees.equals(other.employees))
+			return false;
+		if (date == null) {
+			if (other.date != null)
+				return false;
+		} else if (!date.equals(other.date))
+			return false;
+		if (time == null) {
+			if (other.time != null)
+				return false;
+		} else if (!time.equals(other.time))
+			return false;
+		if (state != other.state)
+			return false;
+		if (isEnabled != other.isEnabled)
+			return false;
+		return true;
+	}
+
+	@Override
+	public Map<String, Object> toTableRow() {
+		return Map.ofEntries(
+			Map.entry("ID", id),
+			Map.entry("Cliente", customer),
+			Map.entry("Trattamento", treatment),
+			Map.entry("Data", date),
+			Map.entry("Orario", time),
+			Map.entry("Stato", state),
+			Map.entry("Abilitato", isEnabled)
+		);
 	}
 
 }

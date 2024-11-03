@@ -1,6 +1,7 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -42,12 +43,17 @@ public abstract class User implements Model {
 		this.isEnabled = true;
 	}
 
-	User(Long id, UserDetails details, UserCredentials userCredentials) {
-		this(id, details, userCredentials, true);
+	public User(Map<String, Object> map) {
+		this(
+			(Long) map.get("ID"),
+			(UserDetails) map.get("Dettagli"),
+			(UserCredentials) map.get("Credenziali"),
+			(boolean) map.get("Abilitato")
+		);
 	}
 
 	User(UserDetails details, UserCredentials userCredentials) {
-		this(null, details, userCredentials);
+		this(null, details, userCredentials, true);
 	}
 
 	User(Long id, UserDetails details, UserCredentials userCredentials, boolean isEnabled) {
@@ -109,7 +115,7 @@ public abstract class User implements Model {
 		return details.getGender();
 	}
 
-	public LocalDate getBoD() {
+	public LocalDate getBirthday() {
 		return details.getBirthday();
 	}
 
@@ -219,9 +225,55 @@ public abstract class User implements Model {
 				+ isEnabled + "]";
 	}
 
-	public Object[] toTableRow() {
-		return new Object[] {
-				id, getName(), getSurname(), getBoD(), getBirthplace(), getNotes()
-		};
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((details == null) ? 0 : details.hashCode());
+		result = prime * result + ((userCredentials == null) ? 0 : userCredentials.hashCode());
+		result = prime * result + (isEnabled ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		User other = (User) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (details == null) {
+			if (other.details != null)
+				return false;
+		} else if (!details.equals(other.details))
+			return false;
+		if (userCredentials == null) {
+			if (other.userCredentials != null)
+				return false;
+		} else if (!userCredentials.equals(other.userCredentials))
+			return false;
+		if (isEnabled != other.isEnabled)
+			return false;
+		return true;
+	}
+
+	@Override
+	public Map<String, Object> toTableRow() {
+		Map<String, Object> map = Map.of(
+			"ID", id,
+			"Abilitato", isEnabled
+		);
+		map.putAll(userCredentials.toTableRow());
+		map.putAll(details.toTableRow());
+
+		return map;
 	}
 }

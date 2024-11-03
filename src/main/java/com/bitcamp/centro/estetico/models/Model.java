@@ -1,5 +1,7 @@
 package com.bitcamp.centro.estetico.models;
 
+import java.util.Map;
+
 public interface Model {
     Long getId();
 
@@ -9,5 +11,5 @@ public interface Model {
 
     void setEnabled(boolean isEnabled);
 
-    public Object[] toTableRow();
+    public Map<String, Object> toTableRow();
 }

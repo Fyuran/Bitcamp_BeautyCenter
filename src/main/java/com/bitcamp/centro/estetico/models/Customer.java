@@ -2,6 +2,9 @@ package com.bitcamp.centro.estetico.models;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import com.bitcamp.centro.estetico.controller.DAO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -38,16 +41,24 @@ public class Customer extends User {
 		super();
 	}
 
-	public Customer(
-			Long id, UserDetails details, UserCredentials userCredentials,
-			String P_IVA, String recipientCode, int loyaltyPoints, Subscription subscription, List<Prize> prizes) {
-		this(id, details, userCredentials, true, P_IVA, recipientCode, loyaltyPoints, subscription, prizes);
+	public Customer(Map<String, Object> map) {
+		this(
+			(Long) map.get("ID"), 
+			(UserDetails) map.get("Dettagli"), 
+			(UserCredentials) map.get("Credenziali"), 
+			(boolean) map.get("Abilitato"),
+			(String) map.get("P.IVA"), 
+			(String) map.get("Codice Destinatario"), 
+			(int) map.get("Punti fedeltà"), 
+			(Subscription) map.get("Abbonamento"),
+			(List<Prize>) map.get("Premi")
+		);
 	}
 
 	public Customer(
 			UserDetails details, UserCredentials userCredentials,
 			String P_IVA, String recipientCode, int loyaltyPoints, Subscription subscription, List<Prize> prizes) {
-		this(null, details, userCredentials, P_IVA, recipientCode, loyaltyPoints, subscription, prizes);
+		this(null, details, userCredentials, true, P_IVA, recipientCode, loyaltyPoints, subscription, prizes);
 	}
 
 	public Customer(
@@ -132,12 +143,62 @@ public class Customer extends User {
 	}
 
 	@Override
-	public Object[] toTableRow() {
-		return new Object[] {
-				getId(), getGender(), getName(), getSurname(), getPhone(), getMail(), getAddress(), getBoD(),
-				getBirthplace(),
-				getEu_tin(), p_iva, recipientCode, loyaltyPoints, getSubscription(), getNotes(), getIban(), isEnabled()
-		};
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((subscription == null) ? 0 : subscription.hashCode());
+		result = prime * result + ((prizes == null) ? 0 : prizes.hashCode());
+		result = prime * result + ((p_iva == null) ? 0 : p_iva.hashCode());
+		result = prime * result + ((recipientCode == null) ? 0 : recipientCode.hashCode());
+		result = prime * result + loyaltyPoints;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Customer other = (Customer) obj;
+		if (subscription == null) {
+			if (other.subscription != null)
+				return false;
+		} else if (!subscription.equals(other.subscription))
+			return false;
+		if (prizes == null) {
+			if (other.prizes != null)
+				return false;
+		} else if (!prizes.equals(other.prizes))
+			return false;
+		if (p_iva == null) {
+			if (other.p_iva != null)
+				return false;
+		} else if (!p_iva.equals(other.p_iva))
+			return false;
+		if (recipientCode == null) {
+			if (other.recipientCode != null)
+				return false;
+		} else if (!recipientCode.equals(other.recipientCode))
+			return false;
+		if (loyaltyPoints != other.loyaltyPoints)
+			return false;
+		return true;
+	}
+
+	@Override
+	public Map<String, Object> toTableRow() {
+		var map = super.toTableRow();
+		map.putAll(Map.ofEntries(
+			Map.entry("Abbonamento", subscription),
+			Map.entry("P.IVA", p_iva),
+			Map.entry("Codice Destinatario", recipientCode),
+			Map.entry("Punti fedeltà", loyaltyPoints)
+		));
+
+		return map;
 	}
 
 }

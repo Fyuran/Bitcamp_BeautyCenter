@@ -1,11 +1,15 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Map;
 
 import org.hibernate.annotations.ColumnDefault;
+
+import com.bitcamp.centro.estetico.controller.DAO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -54,14 +58,23 @@ public class Transaction implements Model {
 		this.isEnabled = true;
 	}
 
-	public Transaction(Long id, BigDecimal price, VAT vat, LocalDateTime dateTime, PayMethod paymentMethod,
-			Customer customer, BeautyCenter beautyCenter, String services) {
-		this(id, price, vat, dateTime, paymentMethod, customer, beautyCenter, services, true);
+	public Transaction(Map<String, Object> map) {
+		this(
+			(Long) map.get("ID"),
+			(BigDecimal) map.get("Prezzo"),
+			(VAT) map.get("IVA"),
+			(LocalDateTime) map.get("Data"),
+			(PayMethod) map.get("Metodo di Pagamento"),
+			(Customer) map.get("Cliente"),
+			(BeautyCenter) map.getOrDefault("Sede", DAO.get(BeautyCenter.class, 1L)),
+			(String) map.get("Servizi"),
+			(boolean) map.get("Abilitato")
+		);
 	}
 
 	public Transaction(BigDecimal price, VAT vat, LocalDateTime dateTime, PayMethod paymentMethod,
 			Customer customer, BeautyCenter beautyCenter, String services) {
-		this(null, price, vat, dateTime, paymentMethod, customer, beautyCenter, services);
+		this(null, price, vat, dateTime, paymentMethod, customer, beautyCenter, services, true);
 	}
 
 	public Transaction(Long id, BigDecimal price, VAT vat, LocalDateTime dateTime, PayMethod paymentMethod,
@@ -150,10 +163,86 @@ public class Transaction implements Model {
 		this.isEnabled = isEnabled;
 	}
 
-	public Object[] toTableRow() {
-		return new Object[] {
-				id, price, dateTime, paymentMethod, vat, customer, services, isEnabled
-		};
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((price == null) ? 0 : price.hashCode());
+		result = prime * result + ((vat == null) ? 0 : vat.hashCode());
+		result = prime * result + ((dateTime == null) ? 0 : dateTime.hashCode());
+		result = prime * result + ((paymentMethod == null) ? 0 : paymentMethod.hashCode());
+		result = prime * result + ((customer == null) ? 0 : customer.hashCode());
+		result = prime * result + ((beautyCenter == null) ? 0 : beautyCenter.hashCode());
+		result = prime * result + ((services == null) ? 0 : services.hashCode());
+		result = prime * result + (isEnabled ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Transaction other = (Transaction) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (price == null) {
+			if (other.price != null)
+				return false;
+		} else if (!price.equals(other.price))
+			return false;
+		if (vat == null) {
+			if (other.vat != null)
+				return false;
+		} else if (!vat.equals(other.vat))
+			return false;
+		if (dateTime == null) {
+			if (other.dateTime != null)
+				return false;
+		} else if (!dateTime.equals(other.dateTime))
+			return false;
+		if (paymentMethod != other.paymentMethod)
+			return false;
+		if (customer == null) {
+			if (other.customer != null)
+				return false;
+		} else if (!customer.equals(other.customer))
+			return false;
+		if (beautyCenter == null) {
+			if (other.beautyCenter != null)
+				return false;
+		} else if (!beautyCenter.equals(other.beautyCenter))
+			return false;
+		if (services == null) {
+			if (other.services != null)
+				return false;
+		} else if (!services.equals(other.services))
+			return false;
+		if (isEnabled != other.isEnabled)
+			return false;
+		return true;
+	}
+
+	@Override
+	public Map<String, Object> toTableRow() {
+		return Map.ofEntries(
+			Map.entry("ID", id),
+			Map.entry("Prezzo", price),
+			Map.entry("Data", dateTime),
+			Map.entry("Metodo di Pagamento", paymentMethod),
+			Map.entry("IVA", vat),
+			Map.entry("Cliente", customer),
+			Map.entry("Servizi", services),
+			Map.entry("Abilitato", isEnabled)
+		);
 	}
 
 	@Override

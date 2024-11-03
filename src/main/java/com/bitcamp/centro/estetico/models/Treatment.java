@@ -2,9 +2,13 @@ package com.bitcamp.centro.estetico.models;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.annotations.ColumnDefault;
+
+import com.bitcamp.centro.estetico.controller.DAO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -51,8 +55,16 @@ public class Treatment implements Model {
 		this.isEnabled = true;
 	}
 
-	public Treatment(String type, BigDecimal price, VAT vat, Duration duration, List<Product> products) {
-		this(null, type, price, vat, duration, products);
+	public Treatment(Map<String, Object> map) {
+		this(
+			(Long) map.get("ID"),
+			(String) map.get("Tipo"),
+			(BigDecimal) map.get("Prezzo"),
+			(VAT) map.get("IVA"),
+			(Duration) map.get("Durata"),
+			(List<Product>) map.get("Prodotti"),
+			(boolean) map.get("Abilitato")
+		);
 	}
 
 	public Treatment(Long id, String type, BigDecimal price, VAT vat, Duration duration, List<Product> products) {
@@ -139,8 +151,74 @@ public class Treatment implements Model {
 		}
 	}
 
-	public Object[] toTableRow() {
-		return new Object[] { id, type, price, vat, duration, isEnabled };
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((price == null) ? 0 : price.hashCode());
+		result = prime * result + ((vat == null) ? 0 : vat.hashCode());
+		result = prime * result + ((duration == null) ? 0 : duration.hashCode());
+		result = prime * result + ((products == null) ? 0 : products.hashCode());
+		result = prime * result + (isEnabled ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Treatment other = (Treatment) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
+			return false;
+		if (price == null) {
+			if (other.price != null)
+				return false;
+		} else if (!price.equals(other.price))
+			return false;
+		if (vat == null) {
+			if (other.vat != null)
+				return false;
+		} else if (!vat.equals(other.vat))
+			return false;
+		if (duration == null) {
+			if (other.duration != null)
+				return false;
+		} else if (!duration.equals(other.duration))
+			return false;
+		if (products == null) {
+			if (other.products != null)
+				return false;
+		} else if (!products.equals(other.products))
+			return false;
+		if (isEnabled != other.isEnabled)
+			return false;
+		return true;
+	}
+
+	@Override
+	public Map<String, Object> toTableRow() {
+		return Map.ofEntries(
+			Map.entry("ID", id),
+			Map.entry("Tipo", type),
+			Map.entry("Prezzo", price),
+			Map.entry("IVA", vat),
+			Map.entry("Durata", duration),
+			Map.entry("Abilitato", isEnabled)
+		);
 	}
 
 }

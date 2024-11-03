@@ -1,5 +1,7 @@
 package com.bitcamp.centro.estetico.models;
 
+import java.util.Map;
+
 import org.hibernate.annotations.ColumnDefault;
 
 import jakarta.persistence.Column;
@@ -32,12 +34,16 @@ public class VAT implements Model {
 		this.isEnabled = isEnabled;
 	}
 
-	public VAT(Long id, double amount) {
-		this(id, amount, true);
+	public VAT(Map<String, Object> map) {
+		this(
+			(Long) map.get("ID"),
+			(double) map.get("%"),
+			(boolean) map.get("Abilitato")
+		);
 	}
 
 	public VAT(double amount) {
-		this(null, amount);
+		this(null, amount, true);
 	}
 
 	public Long getId() {
@@ -70,12 +76,14 @@ public class VAT implements Model {
 		return amount + "%";
 	}
 
-	public Object[] toTableRow() {
-		return new Object[] {
-				id, amount, isEnabled
-		};
+	public Map<String, Object> toTableRow() {
+		return Map.ofEntries(
+			Map.entry("ID", id),
+			Map.entry("%", amount),
+			Map.entry("Abilitato", isEnabled)
+		);
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

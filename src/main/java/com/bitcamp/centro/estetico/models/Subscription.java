@@ -2,6 +2,7 @@ package com.bitcamp.centro.estetico.models;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Map;
 
 import org.hibernate.annotations.ColumnDefault;
 
@@ -48,14 +49,23 @@ public class Subscription implements Model {
 		this.isEnabled = true;
 	}
 
-	public Subscription(Long id, SubPeriod subperiod, LocalDate start, LocalDate end, BigDecimal price, VAT vat,
-			double discount, Customer customer) {
-		this(id, subperiod, start, end, price, vat, discount, customer, true);
+	public Subscription(Map<String, Object> map) {
+		this(
+			(Long) map.get("ID"),
+			(SubPeriod) map.get("Periodo"),
+			(LocalDate) map.get("Inizio"),
+			(LocalDate) map.get("Scadenza"),
+			(BigDecimal) map.get("Prezzo"),
+			(VAT) map.get("IVA"),
+			(double) map.get("Sconto Applicato"),
+			(Customer) map.get("Cliente"),
+			(boolean) map.get("Abilitato")
+		);
 	}
 
 	public Subscription(SubPeriod subperiod, LocalDate start, LocalDate end, BigDecimal price, VAT vat,
 			double discount, Customer customer) {
-		this(null, subperiod, start, end, price, vat, discount, customer);
+		this(null, subperiod, start, end, price, vat, discount, customer, true);
 	}
 
 	public Subscription(Long id, SubPeriod subperiod, LocalDate start, LocalDate end, BigDecimal price, VAT vat,
@@ -150,10 +160,18 @@ public class Subscription implements Model {
 	}
 
 	@Override
-	public Object[] toTableRow() {
-		return new Object[] {
-				id, price, vat, subperiod, start, end, discount, customer, isEnabled
-		};
+	public Map<String, Object> toTableRow() {
+		return Map.ofEntries(
+			Map.entry("ID", id),
+			Map.entry("Prezzo", price),
+			Map.entry("IVA", vat),
+			Map.entry("Periodo", subperiod),
+			Map.entry("Inizio", start),
+			Map.entry("Scadenza", end),
+			Map.entry("Sconto Applicato", discount),
+			Map.entry("Cliente", customer),
+			Map.entry("Abilitato", isEnabled)
+		);
 	}
 
 	@Override
