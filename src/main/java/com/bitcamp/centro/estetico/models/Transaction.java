@@ -1,16 +1,20 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.LinkedHashMap;
 import java.util.Map;
+
+import javax.swing.JButton;
+import javax.swing.ListSelectionModel;
 
 import org.hibernate.annotations.ColumnDefault;
 
-import com.bitcamp.centro.estetico.controller.DAO;
+import com.bitcamp.centro.estetico.utils.ModelViewer;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,11 +44,11 @@ public class Transaction implements Model {
 	@Column(name = "payment_method")
 	private PayMethod paymentMethod;
 
-	@OneToOne
+	@OneToOne(cascade = CascadeType.MERGE)
 	@JoinColumn(name = "customer_id", nullable = false)
 	private Customer customer;
 
-	@OneToOne
+	@OneToOne(cascade = CascadeType.MERGE)
 	@JoinColumn(name = "beauty_center_id", nullable = false)
 	private BeautyCenter beautyCenter;
 
@@ -56,20 +60,6 @@ public class Transaction implements Model {
 
 	public Transaction() {
 		this.isEnabled = true;
-	}
-
-	public Transaction(Map<String, Object> map) {
-		this(
-			(Long) map.get("ID"),
-			(BigDecimal) map.get("Prezzo"),
-			(VAT) map.get("IVA"),
-			(LocalDateTime) map.get("Data"),
-			(PayMethod) map.get("Metodo di Pagamento"),
-			(Customer) map.get("Cliente"),
-			(BeautyCenter) map.getOrDefault("Sede", DAO.get(BeautyCenter.class, 1L)),
-			(String) map.get("Servizi"),
-			(boolean) map.get("Abilitato")
-		);
 	}
 
 	public Transaction(BigDecimal price, VAT vat, LocalDateTime dateTime, PayMethod paymentMethod,
@@ -131,6 +121,7 @@ public class Transaction implements Model {
 	}
 
 	public Customer getCustomer() {
+		if(customer == null) return new Customer();
 		return customer;
 	}
 
@@ -233,16 +224,25 @@ public class Transaction implements Model {
 
 	@Override
 	public Map<String, Object> toTableRow() {
-		return Map.ofEntries(
-			Map.entry("ID", id),
-			Map.entry("Prezzo", price),
-			Map.entry("Data", dateTime),
-			Map.entry("Metodo di Pagamento", paymentMethod),
-			Map.entry("IVA", vat),
-			Map.entry("Cliente", customer),
-			Map.entry("Servizi", services),
-			Map.entry("Abilitato", isEnabled)
-		);
+		Map<String, Object> map = new LinkedHashMap<>();
+
+		JButton showCustomers = new JButton("Clienti");
+		showCustomers.addActionListener(l -> {
+			ModelViewer<Customer> picker = new ModelViewer<>("Clienti",
+					ListSelectionModel.SINGLE_SELECTION, getCustomer());
+			picker.setVisible(true);
+		});
+
+		map.put("ID", id);
+		map.put("Prezzo", price);
+		map.put("Data", dateTime);
+		map.put("Metodo di Pagamento", paymentMethod);
+		map.put("IVA", vat);
+		map.put("Cliente", showCustomers);
+		map.put("Servizi", services);
+		map.put("Abilitato", isEnabled);
+	
+		return map;
 	}
 
 	@Override

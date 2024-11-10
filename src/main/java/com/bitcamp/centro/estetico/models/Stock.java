@@ -1,9 +1,16 @@
 package com.bitcamp.centro.estetico.models;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+
+import javax.swing.JButton;
+import javax.swing.ListSelectionModel;
 
 import org.hibernate.annotations.ColumnDefault;
 
+import com.bitcamp.centro.estetico.utils.ModelViewer;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,14 +21,14 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "Stock")
+@Table(name = "stock")
 public class Stock implements Model {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "product_id", nullable = false)
     Product product;
 
@@ -37,16 +44,6 @@ public class Stock implements Model {
 
     public Stock() {
         this.isEnabled = true;
-    }
-
-    public Stock(Map<String, Object> map) {
-        this(
-            (Long) map.get("ID"),
-            (Product) map.get("Prodotto"),
-            (int) map.get("Scorta"),
-            (int) map.get("Richiesto"),
-            (boolean) map.get("Abilitato") 
-        );
     }
 
     public Stock(Product product, int currentStock, int minimumStock) {
@@ -79,6 +76,30 @@ public class Stock implements Model {
     @Override
     public void setEnabled(boolean isEnabled) {
         this.isEnabled = isEnabled;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public int getCurrentStock() {
+        return currentStock;
+    }
+
+    public void setCurrentStock(int currentStock) {
+        this.currentStock = currentStock;
+    }
+
+    public int getMinimumStock() {
+        return minimumStock;
+    }
+
+    public void setMinimumStock(int minimumStock) {
+        this.minimumStock = minimumStock;
     }
 
     @Override
@@ -123,12 +144,21 @@ public class Stock implements Model {
 
     @Override
     public Map<String, Object> toTableRow() {
-        return Map.ofEntries(
-          Map.entry("ID", id),
-          Map.entry("Prodotto", product),
-          Map.entry("Scorta", currentStock),
-          Map.entry("Richiesto", minimumStock),
-          Map.entry("Abilitato", isEnabled)  
-        );
+        Map<String, Object> map = new LinkedHashMap<>();
+
+        JButton showProducts = new JButton("Prodotti");
+        showProducts.addActionListener(l -> {
+            ModelViewer<Product> picker = new ModelViewer<>("Prodotti",
+                    ListSelectionModel.SINGLE_SELECTION, getProduct());
+            picker.setVisible(true);
+        });
+
+        map.put("ID", id);
+        map.put("Prodotto", product);
+        map.put("Scorta", currentStock);
+        map.put("Richiesto", minimumStock);
+        map.put("Abilitato", isEnabled);
+
+        return map;
     }
 }

@@ -14,20 +14,17 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
-import com.bitcamp.centro.estetico.DAO.EmployeeDAO;
 import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.Employee;
 import com.bitcamp.centro.estetico.models.Turn;
 
 public class UserAccessPanel extends JPanel {
-	
-	private static EmployeeDAO employeeDAO = EmployeeDAO.getInstance();
 
 	private static final long serialVersionUID = 1L;
 	private DateTimeFormatter dayFormat;
 	private DateTimeFormatter timeFormat;
-	private NonEditableTableModel model;
-	private Employee sessionUser = MainFrame.getSessionUser();
+	private NonEditableTableModel<Turn> model;
+	private Employee user = (Employee) MainFrame.getSessionUser();
 	private JLabel lblName;
 	private JLabel lblUsername;
 	private JLabel lblSurname;
@@ -45,7 +42,7 @@ public class UserAccessPanel extends JPanel {
 		setLayout(null);
 		setSize(1024, 768);
 		setName("Area personale");
-		JLabel titleTab = new JLabel("Benvenuto " + sessionUser.getName());
+		JLabel titleTab = new JLabel("Benvenuto " + user.getName());
 		titleTab.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
 		titleTab.setBounds(415, 11, 206, 32);
 		add(titleTab);
@@ -100,7 +97,7 @@ public class UserAccessPanel extends JPanel {
 		dataPanel.add(lblPhone);
 
 		String[] columnNames = { "Giorno", "Inizio turno", "Fine turno", "Tipologia" };
-		model = new NonEditableTableModel(columnNames, 0);
+		model = new NonEditableTableModel<>();
 
 		// Creazione della tabella
 		JTable shiftTable = new JTable(model);
@@ -128,49 +125,42 @@ public class UserAccessPanel extends JPanel {
 	}
 
 	void populateShiftTable() {
-		var shifts = sessionUser.getShift();
-		if(shifts == null) return;
-		for (Turn shift : shifts) {
-			if (!shift.isShiftOver()) {
-				String day = shift.getStart().format(dayFormat);
-				String start = shift.getStart().format(timeFormat);
-				String end = shift.getEnd().format(timeFormat);
-				String type = shift.getType() == null ? null : shift.getType().toString();
-				model.addRow(new String[] { day, start, end, type });
+		var turns = user.getTurns();
+		if (turns == null)
+			return;
+		for (Turn shift : turns) {
 
-			}
+			String day = shift.getStart().format(dayFormat);
+			String start = shift.getStart().format(timeFormat);
+			String end = shift.getEnd().format(timeFormat);
+			String type = shift.getType() == null ? null : shift.getType().toString();
+			model.addRow(new String[] { day, start, end, type });
 		}
 	}
 
 	public void updateData() {
-		lblName.setText("Nome: " + sessionUser.getName());
-		lblSurname.setText("Cognome: " + sessionUser.getSurname());
-		lblRole.setText("Ruolo: " + sessionUser.getRole().toString());
-		lblAddress.setText("Indirizzo: " + sessionUser.getAddress() + ", " + sessionUser.getBirthplace());
-		lblIBAN.setText("IBAN: " + sessionUser.getIban());
-		lblHireDate.setText("Data di assunzione: " + sessionUser.getHiredDate());
-		lblUsername.setText("Username: " + sessionUser.getUsername());
-		lblMail.setText("Mail: " + sessionUser.getMail());
-		lblPhone.setText("Telefono: " + sessionUser.getPhone());
+		lblName.setText("Nome: " + user.getName());
+		lblSurname.setText("Cognome: " + user.getSurname());
+		lblRole.setText("Ruolo: " + user.getRole().toString());
+		lblAddress.setText("Indirizzo: " + user.getAddress() + ", " + user.getBirthplace());
+		lblIBAN.setText("IBAN: " + user.getIban());
+		lblHireDate.setText("Data di assunzione: " + user.getHiredDate());
+		lblUsername.setText("Username: " + user.getUsername());
+		lblMail.setText("Mail: " + user.getMail());
+		lblPhone.setText("Telefono: " + user.getPhone());
 	}
 
 	public void changePassword() {
-		ChangePassDialog changePassDialog = new ChangePassDialog(sessionUser);
+		ChangePassDialog changePassDialog = new ChangePassDialog(user);
 		changePassDialog.setAlwaysOnTop(true);
-		updateActiveUser();
 
 	}
 
 	public void changeUsername() {
-		ChangeUserDialog changeUserDialog = new ChangeUserDialog(this, sessionUser);
+		ChangeUserDialog changeUserDialog = new ChangeUserDialog(this, user);
 		changeUserDialog.setAlwaysOnTop(true);
-		updateActiveUser();
 		updateData();
 
-	}
-
-	public void updateActiveUser() {
-		this.sessionUser = employeeDAO.get(sessionUser.getId()).get();
 	}
 
 }

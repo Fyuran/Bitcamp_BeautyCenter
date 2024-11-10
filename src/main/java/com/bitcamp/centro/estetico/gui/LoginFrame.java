@@ -1,20 +1,27 @@
 package com.bitcamp.centro.estetico.gui;
 
-import java.awt.Color;
 import java.awt.Font;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.Timer;
+import javax.swing.WindowConstants;
 
-import com.bitcamp.centro.estetico.DAO.BeautyCenterDAO;
-import com.bitcamp.centro.estetico.DAO.UserCredentialsDAO;
-import com.bitcamp.centro.estetico.models.Employee;
-import com.bitcamp.centro.estetico.models.Main;
-import com.bitcamp.centro.estetico.utils.inputValidator;
-import com.bitcamp.centro.estetico.utils.inputValidator.inputValidatorException;
+import com.bitcamp.centro.estetico.controller.DAO;
+import com.bitcamp.centro.estetico.models.BeautyCenter;
+import com.bitcamp.centro.estetico.models.User;
+import com.bitcamp.centro.estetico.utils.InputValidator;
+import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
 
 public class LoginFrame extends JFrame {
-    private static UserCredentialsDAO userCredentialsDAO = UserCredentialsDAO.getInstance();
-    private static BeautyCenterDAO beautyCenterDAO = BeautyCenterDAO.getInstance();
 
     private static final long serialVersionUID = 1L;
     private static JTextField txfUsername;
@@ -23,8 +30,8 @@ public class LoginFrame extends JFrame {
     private static JLabel passwordMsgLabel;
     private static JLabel descriptionLabel;
     private static Timer descriptionTimer;
-    private static int indexFraseCorrente = 0;   
-    
+    private static int indexFraseCorrente = 0;
+
     private String[] frasi = {
             "Con il nostro gestionale, lavorare è semplice e intuitivo!",
             "Gestisci le prenotazioni con facilità.",
@@ -49,22 +56,20 @@ public class LoginFrame extends JFrame {
         JPanel loginDataPanell = new JPanel();
         loginDataPanell.setLayout(null);
         loginDataPanell.setBounds(0, 0, 1024, 768);
-        loginDataPanell.setBackground(Color.WHITE);
 
         // Componenti dell'interfaccia utente
         JPanel imagePanel = new JPanel();
         imagePanel.setLayout(null);
         imagePanel.setBounds(0, 0, 1024, 305);
-        imagePanel.setBackground(Color.WHITE);
 
-        JLabel imageLabel = new JLabel(new ImageIcon(LoginFrame.class.getResource("/com/bitcamp/centro/estetico/resources/download.png")));
+        JLabel imageLabel = new JLabel(
+                new ImageIcon(LoginFrame.class.getResource("/com/bitcamp/centro/estetico/resources/download.png")));
         imageLabel.setBounds(152, 64, 723, 219);
         imagePanel.add(imageLabel);
 
         JPanel textPanel = new JPanel();
         textPanel.setLayout(null);
         textPanel.setBounds(142, 316, 737, 137);
-        textPanel.setBackground(Color.WHITE);
 
         JLabel welcomeLabel = new JLabel("Benvenuto nel Gestionale Centro Estetico!");
         welcomeLabel.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 24));
@@ -87,7 +92,6 @@ public class LoginFrame extends JFrame {
 
         JPanel loginDataPanel = new JPanel();
         loginDataPanel.setLayout(null);
-        loginDataPanel.setBackground(Color.WHITE);
         loginDataPanel.setBounds(363, 464, 291, 231);
         loginDataPanell.add(loginDataPanel);
 
@@ -131,15 +135,12 @@ public class LoginFrame extends JFrame {
         loginDataPanel.add(visibleCheck);
 
         JButton loginBtn = new JButton("Login");
-        loginBtn.setForeground(Color.BLACK);
         loginBtn.setFont(new Font("Arial", Font.BOLD, 16));
         loginBtn.setFocusPainted(false);
-        loginBtn.setBackground(new Color(0, 153, 0));
         loginBtn.setBounds(47, 173, 200, 40);
-        loginBtn.addActionListener(e -> login()); // Chiama il metodo login
+        loginBtn.addActionListener(e -> login());
         loginDataPanel.add(loginBtn);
 
-        // Frase scorrevole con un timer
         descriptionTimer = new Timer(5000, e -> {
             indexFraseCorrente = (indexFraseCorrente + 1) % frasi.length;
             descriptionLabel.setText(frasi[indexFraseCorrente]);
@@ -153,39 +154,37 @@ public class LoginFrame extends JFrame {
 
     // Metodo di login
     public void login() {
-        if(Main._DEBUG_MODE_FULL) {
-            Employee currentEmployee = userCredentialsDAO.getEmployeeOfUsername("root").get();
-            new MainFrame(currentEmployee, beautyCenterDAO.getFirst().get());
-            dispose();
-            return;
-        }
-        
         userMsgLabel.setText("");
         passwordMsgLabel.setText("");
         String username = txfUsername.getText();
         char[] password = passwordText.getPassword();
-        
 
+        if (Main._DEBUG_MODE_FULL) {
+            User user = DAO.getUser("root").get();
+            new MainFrame(user, DAO.get(BeautyCenter.class, 1L).get());
+            dispose();
+            return;
+        }
 
         try {
-            inputValidator.validateAlphanumeric(txfUsername, "Username"); // Validazione dell'username
-            inputValidator.validatePassword(passwordText);
-        } catch (inputValidatorException e) {
-            JOptionPane.showMessageDialog(null, e.getMessage());
-	        return;
+            InputValidator.validateAlphanumeric(txfUsername, "Username");
+            InputValidator.validatePassword(passwordText);
+        } catch (InputValidatorException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            return;
         }
-        // Verifica delle credenziali
-        boolean isAuthenticated = userCredentialsDAO.isValidPassword(username, password);
-        if (isAuthenticated) {
-            Employee currentEmployee = userCredentialsDAO.getEmployeeOfUsername(username).get();
-            new MainFrame(currentEmployee, beautyCenterDAO.getFirst().get());
+
+        User user = DAO.getUser(username).get();
+        if (user.isValidPassword(password)) {
+            new MainFrame(user, DAO.get(BeautyCenter.class, 1L).get());
             dispose();
 
         } else {
-            JOptionPane.showMessageDialog(null, "Credenziali non valide. Riprova.", "Errore di Accesso", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Credenziali non valide. Riprova.", "Errore di Accesso",
+                    JOptionPane.ERROR_MESSAGE);
         }
 
-     // Svuota i campi
+        // Svuota i campi
         txfUsername.setText("");
         passwordText.setText("");
     }

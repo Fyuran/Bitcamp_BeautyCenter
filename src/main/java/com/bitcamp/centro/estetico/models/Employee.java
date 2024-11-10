@@ -1,12 +1,17 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.bitcamp.centro.estetico.controller.DAO;
+import javax.swing.JButton;
+import javax.swing.ListSelectionModel;
 
+import com.bitcamp.centro.estetico.utils.ModelViewer;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -14,7 +19,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
 
 @Entity
 @DiscriminatorValue("E")
@@ -25,7 +29,7 @@ public class Employee extends User {
 
 	private Roles role;
 
-	@OneToMany
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	@JoinTable(
 		name = "employee_treatment",
 		joinColumns = @JoinColumn(name = "employee_id", referencedColumnName = "id", nullable = false),
@@ -33,7 +37,7 @@ public class Employee extends User {
 	)
 	private List<Treatment> enabledTreatments;
 
-	@ManyToMany(mappedBy = "assignedEmployees", fetch = FetchType.EAGER)
+	@ManyToMany(mappedBy = "assignedEmployees", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	private List<Turn> turns;
 
 	@Column(name = "hired")
@@ -46,34 +50,22 @@ public class Employee extends User {
 		super();
 		this.employeeSerial = UUID.randomUUID().toString();
 		this.role = Roles.PERSONNEL;
-	}
-
-	public Employee(Map<String, Object> map, UserDetails details, UserCredentials userCredentials) {
-		this(
-			(Long) map.get("ID"),
-			(UserDetails) map.get("Dettagli"), 
-			(UserCredentials) map.get("Credenziali"), 
-			(boolean) map.get("Abilitato"),
-			(String) map.get("Matricola"), 
-			(Roles) map.get("Codice Destinatario"), 
-			(List<Turn>) map.get("Turni"),
-			(LocalDate) map.get("Assunto"),
-			(LocalDate) map.get("Scadenza")
-		);
+		enabledTreatments = new ArrayList<>();
+		turns = new ArrayList<>();
 	}
 
 	public Employee(UserDetails details, UserCredentials userCredentials,
-			String employeeSerial, Roles role, List<Turn> turns, LocalDate hiredDate, LocalDate terminationDate) {
-		this(null, details, userCredentials, true, employeeSerial, role, turns, hiredDate, terminationDate);
+			String employeeSerial, Roles role, List<Treatment> enabledTreatments, List<Turn> turns, LocalDate hiredDate, LocalDate terminationDate) {
+		this(null, details, userCredentials, true, employeeSerial, role, enabledTreatments, turns, hiredDate, terminationDate);
 	}
 
 	public Employee(UserDetails details, UserCredentials userCredentials,
-			Roles role, List<Turn> turns, LocalDate hiredDate, LocalDate terminationDate) {
-		this(null, details, userCredentials, true, UUID.randomUUID().toString(), role, turns, hiredDate, terminationDate);
+			Roles role, List<Treatment> enabledTreatments, List<Turn> turns, LocalDate hiredDate, LocalDate terminationDate) {
+		this(null, details, userCredentials, true, UUID.randomUUID().toString(), role, enabledTreatments, turns, hiredDate, terminationDate);
 	}
 
 	public Employee(Long id, UserDetails details, UserCredentials userCredentials, boolean isEnabled,
-			String employeeSerial, Roles role, List<Turn> turns, LocalDate hiredDate, LocalDate terminationDate) {
+			String employeeSerial, Roles role, List<Treatment> enabledTreatments, List<Turn> turns, LocalDate hiredDate, LocalDate terminationDate) {
 		super(id, details, userCredentials, isEnabled);
 		this.employeeSerial = employeeSerial;
 		this.role = role;
@@ -115,6 +107,7 @@ public class Employee extends User {
 	}
 
 	public List<Treatment> getEnabledTreatments() {
+		if(enabledTreatments == null) return new ArrayList<>();
 		return enabledTreatments;
 	}
 
@@ -123,6 +116,7 @@ public class Employee extends User {
 	}
 
 	public List<Turn> getTurns() {
+		if(turns == null) return new ArrayList<>();
 		return turns;
 	}
 
@@ -198,14 +192,27 @@ public class Employee extends User {
 
 	@Override
 	public Map<String, Object> toTableRow() {
-		var map = super.toTableRow();
-		map.putAll(Map.ofEntries(
-			Map.entry("Matricola", employeeSerial),
-			Map.entry("Assunto", hiredDate),
-			Map.entry("Scadenza", terminationDate),
-			Map.entry("Ruolo", role)
-		));
+		var superMap = super.toTableRow();
+		JButton showTreatments = new JButton("Trattamenti");
+		showTreatments.addActionListener(l -> {
+			ModelViewer<Treatment> picker = new ModelViewer<>("Trattamenti",
+					ListSelectionModel.SINGLE_SELECTION, getEnabledTreatments());
+			picker.setVisible(true);
+		});
+		JButton showTurns = new JButton("Turni");
+		showTreatments.addActionListener(l -> {
+			ModelViewer<Turn> picker = new ModelViewer<>("Turni",
+					ListSelectionModel.SINGLE_SELECTION, getTurns());
+			picker.setVisible(true);
+		});
 
-		return map;
+		superMap.put("Matricola", employeeSerial);
+		superMap.put("Assunto", hiredDate);
+		superMap.put("Scadenza", terminationDate);
+		superMap.put("Ruolo", role);
+		superMap.put("Trattamenti", showTreatments);
+		superMap.put("Turni", showTurns);
+		
+		return superMap;
 	}
 }

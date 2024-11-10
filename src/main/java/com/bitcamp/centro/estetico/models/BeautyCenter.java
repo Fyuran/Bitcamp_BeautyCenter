@@ -1,6 +1,7 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.time.LocalTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -46,7 +47,7 @@ public class BeautyCenter implements Model {
 
 	private String P_IVA;
 
-	@OneToMany
+	@ManyToMany
 	@JoinTable(
 		name = "beauty_center_vat",
 		joinColumns = @JoinColumn(name = "beauty_center_id", referencedColumnName = "id", nullable = false),
@@ -68,44 +69,13 @@ public class BeautyCenter implements Model {
 		this.isEnabled = true;
 	}
 
-	/*		Map.entry("ID", id),
-			Map.entry("Nome", name),
-			Map.entry("Telefono", phone),
-			Map.entry("Email", mail),
-			Map.entry("PEC", certifiedMail),
-			Map.entry("Sede legale", registeredOffice),
-			Map.entry("Sede operativa", operatingOffice),
-			Map.entry("REA", REA),
-			Map.entry("P.IVA", P_IVA),
-			Map.entry("Apertura", openingHour),
-			Map.entry("Chiusura", closingHour),
-			Map.entry("Abilitato", isEnabled) 
-	*/
-	public BeautyCenter(Map<String, Object> map) {
-		this(
-			(Long) map.get("ID"), 
-			(String) map.get("Nome"),  
-			(String) map.get("Telefono"),
-			(String) map.get("PEC"), 
-			(String) map.get("Email"), 
-			(String) map.get("Sede legale"),
-			(String) map.get("Sede operativa"), 
-			(String) map.get("REA"), 
-			(String) map.get("P.IVA"), 
-			(LocalTime) map.get("Apertura"),
-			(LocalTime) map.get("Chiusura"), 
-			(List<VAT>) map.getOrDefault("IVA", DAO.getAll(VAT.class)), 
-			(boolean) map.get("Abilitato")
-		);
-	}
-
 	public BeautyCenter(
 			String name, String phone, String certifiedMail,
 			String mail, String registeredOffice,
 			String operatingOffice, String REA, String P_IVA,
-			LocalTime openingHour, LocalTime closingHour, List<VAT> infoVat) {
+			LocalTime openingHour, LocalTime closingHour) {
 		this(null, name, phone, certifiedMail, mail, registeredOffice, operatingOffice, REA, P_IVA, openingHour,
-				closingHour, infoVat, true);
+				closingHour, DAO.getAll(VAT.class), true);
 	}
 
 	public BeautyCenter(
@@ -176,6 +146,7 @@ public class BeautyCenter implements Model {
 	}
 
 	public List<VAT> getInfoVat() {
+		if(infoVat == null) return DAO.getAll(VAT.class);
 		return infoVat;
 	}
 
@@ -220,6 +191,7 @@ public class BeautyCenter implements Model {
 	}
 
 	public void setInfoVat(List<VAT> infoVat) {
+		if(infoVat == null) this.infoVat = DAO.getAll(VAT.class);
 		this.infoVat = infoVat;
 	}
 
@@ -333,20 +305,22 @@ public class BeautyCenter implements Model {
 
 	@Override
 	public Map<String, Object> toTableRow() {
-		return Map.ofEntries(
-			Map.entry("ID", id),
-			Map.entry("Nome", name),
-			Map.entry("Telefono", phone),
-			Map.entry("Email", mail),
-			Map.entry("PEC", certifiedMail),
-			Map.entry("Sede legale", registeredOffice),
-			Map.entry("Sede operativa", operatingOffice),
-			Map.entry("REA", REA),
-			Map.entry("P.IVA", P_IVA),
-			Map.entry("Apertura", openingHour),
-			Map.entry("Chiusura", closingHour),
-			Map.entry("Abilitato", isEnabled)
-		);
+		Map<String, Object> map = new LinkedHashMap<>();
+		map.put("ID", id);
+		map.put("Nome", name);
+		map.put("Telefono", phone);
+		map.put("Email", mail);
+		map.put("PEC", certifiedMail);
+		map.put("Sede legale", registeredOffice);
+		map.put("Sede operativa", operatingOffice);
+		map.put("REA", REA);
+		map.put("P.IVA", P_IVA);
+		map.put("Apertura", openingHour);
+		map.put("Chiusura", closingHour);
+		map.put("Abilitato", isEnabled);
+
+
+		return map;
 	}
 
 }

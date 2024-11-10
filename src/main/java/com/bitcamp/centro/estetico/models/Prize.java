@@ -3,6 +3,7 @@ package com.bitcamp.centro.estetico.models;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.hibernate.annotations.ColumnDefault;
@@ -26,6 +27,7 @@ public class Prize implements Model {
 
 	private int threshold;
 
+	@Column(name = "expiration")
 	private LocalDate expirationDate;
 
 	private PrizeType type;
@@ -36,17 +38,6 @@ public class Prize implements Model {
 
 	public Prize() {
 		this.isEnabled = true;
-	}
-
-	public Prize(Map<String, Object> map) {
-		this(
-			(Long) map.get("ID"),
-			(String) map.get("Nome"),
-			(int) map.get("Punti Necessari"),
-			(LocalDate) map.get("Scadenza"),
-			(PrizeType) map.get("Tipo"),
-			(boolean) map.get("Abilitato")
-		);
 	}
 
 	public Prize(String name, int threshold, LocalDate expirationDate, PrizeType type) {
@@ -124,8 +115,6 @@ public class Prize implements Model {
 		this.isEnabled = isEnabled;
 	}
 
-	
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -181,13 +170,14 @@ public class Prize implements Model {
 
 	@Override
 	public Map<String, Object> toTableRow() {
-		return Map.ofEntries(
-			Map.entry("ID", id),
-			Map.entry("Nome", name),
-			Map.entry("Punti Necessari", threshold),
-			Map.entry("Tipo", threshold),
-			Map.entry("Scadenza", expirationDate),
-			Map.entry("Abilitato", isEnabled)
-		);
+		Map<String, Object> map = new LinkedHashMap<>();
+		map.put("ID", id);
+		map.put("Nome", name);
+		map.put("Punti Necessari", threshold);
+		map.put("Tipo", threshold);
+		map.put("Scadenza", expirationDate);
+		map.put("Abilitato", isEnabled);
+
+		return map;
 	}
 }

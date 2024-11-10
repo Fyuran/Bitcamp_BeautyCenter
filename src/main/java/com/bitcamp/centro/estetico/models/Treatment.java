@@ -1,24 +1,30 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JButton;
+import javax.swing.ListSelectionModel;
+
 import org.hibernate.annotations.ColumnDefault;
 
-import com.bitcamp.centro.estetico.controller.DAO;
+import com.bitcamp.centro.estetico.utils.ModelViewer;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -33,13 +39,13 @@ public class Treatment implements Model {
 
 	private BigDecimal price;
 
-	@OneToOne
+	@ManyToOne(cascade = CascadeType.MERGE)
 	@JoinColumn(name = "vat_id", nullable = false)
 	private VAT vat;
 
-	private Duration duration;
+	private LocalTime duration;
 
-	@OneToMany
+	@ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
 	@JoinTable(
 		name = "treatment_product",
 		joinColumns = @JoinColumn(name = "treatment_id", referencedColumnName = "id", nullable = false),
@@ -53,25 +59,14 @@ public class Treatment implements Model {
 
 	public Treatment() {
 		this.isEnabled = true;
+		products = new ArrayList<>();
 	}
 
-	public Treatment(Map<String, Object> map) {
-		this(
-			(Long) map.get("ID"),
-			(String) map.get("Tipo"),
-			(BigDecimal) map.get("Prezzo"),
-			(VAT) map.get("IVA"),
-			(Duration) map.get("Durata"),
-			(List<Product>) map.get("Prodotti"),
-			(boolean) map.get("Abilitato")
-		);
+	public Treatment(String type, BigDecimal price, VAT vat, LocalTime duration, List<Product> products) {
+		this(null, type, price, vat, duration, products, true);
 	}
 
-	public Treatment(Long id, String type, BigDecimal price, VAT vat, Duration duration, List<Product> products) {
-		this(id, type, price, vat, duration, products, true);
-	}
-
-	public Treatment(Long id, String type, BigDecimal price, VAT vat, Duration duration, List<Product> products,
+	public Treatment(Long id, String type, BigDecimal price, VAT vat, LocalTime duration, List<Product> products,
 			boolean isEnabled) {
 		this.id = id;
 		this.type = type;
@@ -114,15 +109,16 @@ public class Treatment implements Model {
 		this.vat = vat;
 	}
 
-	public Duration getDuration() {
+	public LocalTime getTime() {
 		return duration;
 	}
 
-	public void setDuration(Duration duration) {
+	public void setTime(LocalTime duration) {
 		this.duration = duration;
 	}
 
 	public List<Product> getProducts() {
+		if(products == null) return new ArrayList<>();
 		return products;
 	}
 
@@ -211,14 +207,24 @@ public class Treatment implements Model {
 
 	@Override
 	public Map<String, Object> toTableRow() {
-		return Map.ofEntries(
-			Map.entry("ID", id),
-			Map.entry("Tipo", type),
-			Map.entry("Prezzo", price),
-			Map.entry("IVA", vat),
-			Map.entry("Durata", duration),
-			Map.entry("Abilitato", isEnabled)
-		);
+		Map<String, Object> map = new LinkedHashMap<>();
+
+		JButton showProducts = new JButton("Prodotti");
+        showProducts.addActionListener(l -> {
+            ModelViewer<Product> picker = new ModelViewer<>("Prodotti",
+                    ListSelectionModel.SINGLE_SELECTION, getProducts());
+            picker.setVisible(true);
+        });
+
+		map.put("ID", id);
+		map.put("Tipo", type);
+		map.put("Prezzo", price);
+		map.put("Prodotti", showProducts);
+		map.put("IVA", vat);
+		map.put("Durata", duration);
+		map.put("Abilitato", isEnabled);
+		
+		return map;
 	}
 
 }

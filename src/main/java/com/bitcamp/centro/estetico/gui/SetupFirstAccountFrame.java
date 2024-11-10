@@ -5,25 +5,33 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
-import java.util.Collections;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+import javax.swing.JRadioButton;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 
-import com.bitcamp.centro.estetico.DAO.EmployeeDAO;
-import com.bitcamp.centro.estetico.DAO.UserCredentialsDAO;
+import com.bitcamp.centro.estetico.controller.DAO;
 import com.bitcamp.centro.estetico.models.Employee;
+import com.bitcamp.centro.estetico.models.Gender;
 import com.bitcamp.centro.estetico.models.Roles;
 import com.bitcamp.centro.estetico.models.UserCredentials;
 import com.bitcamp.centro.estetico.models.UserDetails;
-import com.bitcamp.centro.estetico.utils.inputValidator;
-import com.bitcamp.centro.estetico.utils.inputValidator.inputValidatorException;
-import com.bitcamp.centro.estetico.utils.placeholderHelper;
+import com.bitcamp.centro.estetico.utils.InputValidator;
+import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
+import com.bitcamp.centro.estetico.utils.PlaceholderHelper;
 import com.github.lgooddatepicker.components.DatePicker;
 
 public class SetupFirstAccountFrame extends JFrame {
-
-	private static EmployeeDAO employeeDAO = EmployeeDAO.getInstance();
-	private static UserCredentialsDAO userCredentialsDAO = UserCredentialsDAO.getInstance();
 
 	private static final long serialVersionUID = 1L;
 	private static JTextField txfSurname;
@@ -57,6 +65,9 @@ public class SetupFirstAccountFrame extends JFrame {
 		setVisible(true);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		setIconImage(new ImageIcon(
+		MainFrame.class.getResource("/com/bitcamp/centro/estetico/resources/bc_icon.png")).getImage());
+
 
 		JLabel titleTab = new JLabel("CREAZIONE ACCOUNT AMMINISTRATORE");
 		titleTab.setHorizontalAlignment(SwingConstants.CENTER);
@@ -156,7 +167,7 @@ public class SetupFirstAccountFrame extends JFrame {
 		visibleCheck.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(visibleCheck.isSelected()) {
+				if (visibleCheck.isSelected()) {
 					txfPassword.setEchoChar((char) 0);
 				} else {
 					txfPassword.setEchoChar('•');
@@ -164,7 +175,7 @@ public class SetupFirstAccountFrame extends JFrame {
 			}
 		});
 		add(visibleCheck);
-		
+
 		JLabel lblBirthPlace = new JLabel("Città di nascita:");
 		lblBirthPlace.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		lblBirthPlace.setBounds(522, 130, 170, 14);
@@ -232,25 +243,26 @@ public class SetupFirstAccountFrame extends JFrame {
 		btnInsert.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		btnInsert.setBounds(388, 380, 100, 30);
 		add(btnInsert);
-		if (!employeeDAO.isEmpty()) {
+		if (!DAO.isEmpty(Employee.class)) {
 			btnInsert.setEnabled(false);
 			btnNext.setEnabled(true);
 		}
 
 		btnInsert.addActionListener(e -> createEmployee());
-		
-		placeholderHelper.addPlaceholder(txfName, "*");
-		placeholderHelper.addPlaceholder(txfSurname, "*");
-		placeholderHelper.addPlaceholder(txfIban, "*");
-		placeholderHelper.addPlaceholder(txfMail, "*");
-		placeholderHelper.addPlaceholder(txfPhone, "*");
-		placeholderHelper.addPlaceholder(txfAddress, "*");
-		placeholderHelper.addPlaceholder(txfUsername, "*");
-		placeholderHelper.addPlaceholder(txfBirthplace, "*");
+
+		PlaceholderHelper.addPlaceholder(txfName, "*");
+		PlaceholderHelper.addPlaceholder(txfSurname, "*");
+		PlaceholderHelper.addPlaceholder(txfIban, "*");
+		PlaceholderHelper.addPlaceholder(txfMail, "*");
+		PlaceholderHelper.addPlaceholder(txfPhone, "*");
+		PlaceholderHelper.addPlaceholder(txfAddress, "*");
+		PlaceholderHelper.addPlaceholder(txfUsername, "*");
+		PlaceholderHelper.addPlaceholder(txfBirthplace, "*");
 	}
 
 	private static void createEmployee() {
-		if(!validateInputs()) return;
+		if (!validateInputs())
+			return;
 
 		String name = txfName.getText();
 		String surname = txfSurname.getText();
@@ -258,7 +270,6 @@ public class SetupFirstAccountFrame extends JFrame {
 		LocalDate BoD = txfBirthday.getDate();
 		LocalDate hired = LocalDate.now();
 		String notes = txfNotes.getText();
-		long employeeSerial = Employee.generateSerial();
 		String username = txfUsername.getText();
 		char[] password = txfPassword.getPassword();
 		String address = txfAddress.getText();
@@ -267,11 +278,11 @@ public class SetupFirstAccountFrame extends JFrame {
 		String mail = txfMail.getText();
 
 		UserDetails det = new UserDetails(name, surname, getGender(), BoD, birthplace, notes);
-		UserCredentials cred = new UserCredentials(username, password, address, iban, phone, mail);
-		cred = userCredentialsDAO.insert(cred).orElseGet(() -> userCredentialsDAO.get(username).get()); //if usercredentials already exist get that one
-		Employee employee = new Employee(det, cred, employeeSerial, Roles.ADMIN, Collections.emptyList(),
-				hired, null);
-		employeeDAO.insert(employee);
+		UserCredentials cred = new UserCredentials(username, password, address, iban, phone, mail, null);
+		Employee employee = new Employee(det, cred, Roles.ADMIN, null, null, hired, hired);
+		cred.setUser(employee);
+		
+		DAO.insert(employee);
 
 		lbOutput.setText("Nuovo utente creato correttamente");
 
@@ -280,11 +291,11 @@ public class SetupFirstAccountFrame extends JFrame {
 		btnNext.setBackground(new Color(0, 204, 102));
 	}
 
-	private static boolean getGender() {
+	private static Gender getGender() {
 		if (femaleRadioBtn.isSelected()) {
-			return true;
+			return Gender.FEMALE;
 		}
-		return false;
+		return Gender.MALE;
 	}
 
 	private static void clearFields() {
@@ -303,19 +314,18 @@ public class SetupFirstAccountFrame extends JFrame {
 
 	private static boolean validateInputs() {
 		try {
-			inputValidator.validateName(txfName);
-			inputValidator.validateSurname(txfSurname);
-			inputValidator.validateIban(txfIban);
-			inputValidator.validateEmail(txfMail);
-			inputValidator.validatePhoneNumber(txfPhone);
-			inputValidator.validateAlphanumeric(txfAddress, "Indirizzo");
-			inputValidator.validateAlphanumeric(txfUsername, "Username");
-			inputValidator.validatePassword(txfPassword);
-			inputValidator.validateAlphanumeric(txfBirthplace, "Luogo di nascita");
-			inputValidator.isValidCity(txfBirthplace);
-		} catch (inputValidatorException e) {
+			InputValidator.validateName(txfName);
+			InputValidator.validateSurname(txfSurname);
+			InputValidator.validateIban(txfIban);
+			InputValidator.validateEmail(txfMail);
+			InputValidator.validatePhoneNumber(txfPhone);
+			InputValidator.validateAlphanumeric(txfAddress, "Indirizzo");
+			InputValidator.validateAlphanumeric(txfUsername, "Username");
+			InputValidator.validatePassword(txfPassword);
+			InputValidator.validateAlphanumeric(txfBirthplace, "Luogo di nascita");
+			InputValidator.isValidCity(txfBirthplace);
+		} catch (InputValidatorException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
-			e.printStackTrace();
 			return false;
 		}
 

@@ -1,91 +1,99 @@
 package com.bitcamp.centro.estetico.gui;
 
+import java.awt.Color;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import com.bitcamp.centro.estetico.DAO.SubscriptionDAO;
-import com.bitcamp.centro.estetico.DAO.VAT_DAO;
-import com.bitcamp.centro.estetico.gui.render.CustomTableCellRenderer;
+import com.bitcamp.centro.estetico.controller.DAO;
+import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.Customer;
 import com.bitcamp.centro.estetico.models.SubPeriod;
 import com.bitcamp.centro.estetico.models.Subscription;
 import com.bitcamp.centro.estetico.models.VAT;
-import com.bitcamp.centro.estetico.utils.JSplitBtnField;
+import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
+import com.bitcamp.centro.estetico.utils.InputValidator.InvalidInputException;
+import com.bitcamp.centro.estetico.utils.JSplitBtn;
 import com.bitcamp.centro.estetico.utils.JSplitComboBox;
 import com.bitcamp.centro.estetico.utils.JSplitDatePicker;
-import com.bitcamp.centro.estetico.utils.JSplitLbTxf;
-import com.bitcamp.centro.estetico.utils.ObjectPicker;
+import com.bitcamp.centro.estetico.utils.JSplitTxf;
+import com.bitcamp.centro.estetico.utils.ModelChooser;
 
-public class SubscriptionPanel extends BasePanel<Subscription> {
+public class SubscriptionPanel extends AbstractBasePanel<Subscription> {
 
-	private static SubscriptionDAO subscriptionDAO = SubscriptionDAO.getInstance();
-	private static VAT_DAO vat_DAO = VAT_DAO.getInstance();
-	private static Long id = -1;
-	private static boolean isEnabled = false;
-	private static double discount;
-	private static Customer selectedCustomer;
+	private static Subscription selectedData = new Subscription();
+	private static List<Customer> returnCustomers  = new ArrayList<>();
 
 	private static final long serialVersionUID = 1712892330014716939L;
 	// actions
-	private static JSplitLbTxf priceTextField;
+	private static JSplitTxf priceTextField;
 	private static JSplitDatePicker datePicker;
-	private static JSplitComboBox<VAT> vatComboBox;
+	private static JSplitComboBox<VAT> VATComboBox;
 	private static JSplitComboBox<SubPeriod> subPeriodComboBox;
-	private static JSplitLbTxf discountTextField;
-	private static JSplitBtnField customerBtnField;
+	private static JSplitTxf discountTextField;
+	private static JSplitBtn customerBtn;
 
-	public SubscriptionPanel() {
+	public SubscriptionPanel(JFrame parent) {
+		super(parent);
 		setSize(1024, 768);
 		setName("Abbonamenti");
 		setTitle("Gestione Abbonamenti");
 
-		table.setModel(subscriptionModel);
-		table.setDefaultRenderer(Object.class, new CustomTableCellRenderer(subscriptionModel));
-		table.getSelectionModel().addListSelectionListener(getTableListSelectionListener());
+		priceTextField = new JSplitTxf("Prezzo", new JFormattedTextField(NumberFormat.getInstance()));
+		VATComboBox = new JSplitComboBox<>("IVA");
 
-		vatComboBox = new JSplitComboBox<>("IVA");
-		vats.parallelStream().forEach(v -> vatComboBox.addItem(v));
+		customerBtn = new JSplitBtn("Cliente", "Scelta cliente");
+		customerBtn.addActionListener(l1 -> {
+			ModelChooser<Customer> picker = new ModelChooser<>(parent, "Scelta Cliente",
+					ListSelectionModel.MULTIPLE_INTERVAL_SELECTION, returnCustomers);
 
-		priceTextField = new JSplitLbTxf("Prezzo", new JFormattedTextField(NumberFormat.getInstance()));
+			customers = DAO.getAll(Customer.class);
+			var available = customers
+			.parallelStream()
+			.filter(c -> c.isEnabled())
+			.toList();
 
-		customerBtnField = new JSplitBtnField("Cliente", "Menù clienti");
-		customerBtnField.addActionListener(l -> {
-			ObjectPicker<Customer> picker = new ObjectPicker<>(parent, "Scelta Cliente", customers,
-					ListSelectionModel.SINGLE_SELECTION);
-			picker.addActionListener(ll -> {
-				if(!picker.isSelectionEmpty()) {
-					selectedCustomer = picker.getSelectedValue();
-					picker.dispose();
-					customerBtnField.setFieldText(selectedCustomer.getFullName());
-				}
-			});
+			if(!available.isEmpty()) {
+				NonEditableTableModel<Customer> model = picker.getModel();
+				model.addRows(available);
+			}
+			else
+				picker.getLbOutput().setText("Lista vuota");
+
 			picker.setVisible(true);
 		});
 
 		subPeriodComboBox = new JSplitComboBox<>("Periodo");
-		for(SubPeriod subPeriod : SubPeriod.class.getEnumConstants()) {
+		for (SubPeriod subPeriod : SubPeriod.class.getEnumConstants()) {
 			subPeriodComboBox.addItem(subPeriod);
 		}
+		subPeriodComboBox.setSelectedIndex(0);
 
 		datePicker = new JSplitDatePicker("Data inizio");
-		discountTextField = new JSplitLbTxf("Sconto applicato", new JFormattedTextField(NumberFormat.getInstance()));
+		discountTextField = new JSplitTxf("Sconto applicato", new JFormattedTextField(NumberFormat.getInstance()));
 
-		actionsPanel.add(vatComboBox);
+		actionsPanel.add(VATComboBox);
 		actionsPanel.add(priceTextField);
 		actionsPanel.add(subPeriodComboBox);
 		actionsPanel.add(datePicker);
 		actionsPanel.add(discountTextField);
-		actionsPanel.add(customerBtnField);
+		actionsPanel.add(customerBtn);
 
+		vats.stream()
+		.filter(v -> v.isEnabled())
+		.forEach(v -> VATComboBox.addItem(v));
+		VATComboBox.setSelectedIndex(0);
 	}
 
 	@Override
@@ -96,104 +104,150 @@ public class SubscriptionPanel extends BasePanel<Subscription> {
 
 	@Override
 	public void insertElement() {
+		BigDecimal price = BigDecimal.ZERO;
+		double discount = 0;
 		try {
-			BigDecimal price = BigDecimal.valueOf(Double.parseDouble(priceTextField.getText()));
-			LocalDate start = datePicker.getDate();
-			SubPeriod subperiod = (SubPeriod) subPeriodComboBox.getSelectedItem();
-			VAT vat = vat_DAO.get(vatComboBox.getSelectedItem()).get();
-			double discount = Double.parseDouble(discountTextField.getText());
-			Subscription subscription = new Subscription(subperiod, start, price, vat, discount, true);
-			subscription = subscriptionDAO.insert(subscription).get();
-
-			lbOutput.setText("Abbonamento inserito");
-			if(selectedCustomer != null) {
-				subscriptionDAO.insertSubscriptionToCustomer(selectedCustomer, subscription, start);
-			}
-			refreshTable();
-		} catch (Exception e) {
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(new JFrame(), e.getLocalizedMessage(), "Errore di inserimento",
-					JOptionPane.ERROR_MESSAGE);
+			isDataValid();
+			price = BigDecimal.valueOf(Double.parseDouble(priceTextField.getText()));
+			priceTextField.setBorder(UIManager.getBorder("SplitPane.border"));
+		} catch (NullPointerException | NumberFormatException e) {
+			JOptionPane.showMessageDialog(parent, "Campo prezzo errato");
+			priceTextField.setBorder(new LineBorder(Color.RED));
+			return;
+		} catch (InvalidInputException e) {
+			JOptionPane.showMessageDialog(parent, e.getMessage());
+			return;
 		}
+
+		try {
+			discount = Double.parseDouble(discountTextField.getText());
+			discountTextField.setBorder(UIManager.getBorder("SplitPane.border"));
+		} catch (NullPointerException | NumberFormatException e) {
+			JOptionPane.showMessageDialog(parent, "Campo Sconto errato");
+			discountTextField.setBorder(new LineBorder(Color.RED));
+			return;
+		}
+
+		LocalDate start = datePicker.getDate();
+		SubPeriod subperiod = (SubPeriod) subPeriodComboBox.getSelectedItem();
+		LocalDate end = start.plusMonths(subperiod.getMonths());
+		VAT vat = DAO.get(VAT.class, VATComboBox.getSelectedItem().getId()).get();
+
+		Customer customer = null;
+		if (!returnCustomers.isEmpty()) {
+			customer = returnCustomers.getFirst();
+		}
+
+		Subscription subscription = new Subscription(subperiod, start, end, price, vat, discount, customer);
+		DAO.insert(subscription);
+
+		lbOutput.setText("Abbonamento inserito");
+		refresh();
 	}
 
 	@Override
 	public void updateElement() {
-		try {
-			if (table.getSelectedRow() < 0) return;
-
-			BigDecimal price = BigDecimal.valueOf(Double.parseDouble(priceTextField.getText()));
-			LocalDate start = datePicker.getDate();
-			SubPeriod subperiod = (SubPeriod) subPeriodComboBox.getSelectedItem();
-			VAT vat = vatComboBox.getSelectedItem();
-			Subscription subscription = subscriptionDAO.get(id).get();
-			
-			subscription.setVat(vat);
-			subscription.setEnabled(isEnabled);
-			subscription.setDiscount(discount);
-			subscription.setStart(start);
-			subscription.setPrice(price);
-			subscription.setSubPeriod(subperiod);
-
-			if(selectedCustomer != null) {
-				if(start != null) {
-					subscriptionDAO.insertSubscriptionToCustomer(selectedCustomer, subscription, start);
-				} else {
-					JOptionPane.showMessageDialog(new JFrame(), "Dati errati o mancanti: Nessuna data scelta",
-					"Errore di aggiornamento",
-					JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-			}
-			
-			lbOutput.setText("Abbonamento aggiornato");
-			subscriptionDAO.update(id, subscription);
-			refreshTable();
-		} catch (Exception e) {
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(new JFrame(), "Dati errati o mancanti\n" + e.getLocalizedMessage(),
-					"Errore di aggiornamento",
-					JOptionPane.ERROR_MESSAGE);
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(parent, "Nessun cliente selezionato");
+			return; // do not allow invalid ids to be passed to update
 		}
+		if (selectedData.getId() == null || !selectedData.isEnabled())
+			return;
+
+		BigDecimal price = BigDecimal.ZERO;
+		double discount = 0;
+		try {
+			isDataValid();
+			price = BigDecimal.valueOf(Double.parseDouble(priceTextField.getText()));
+			priceTextField.setBorder(UIManager.getBorder("SplitPane.border"));
+		} catch (NullPointerException | NumberFormatException e) {
+			JOptionPane.showMessageDialog(parent, "Campo prezzo errato");
+			priceTextField.setBorder(new LineBorder(Color.RED));
+			return;
+		} catch (InvalidInputException e) {
+			JOptionPane.showMessageDialog(parent, e.getMessage());
+			return;
+		}
+
+		try {
+			discount = Double.parseDouble(discountTextField.getText());
+			discountTextField.setBorder(UIManager.getBorder("SplitPane.border"));
+		} catch (NullPointerException | NumberFormatException e) {
+			JOptionPane.showMessageDialog(parent, "Campo Sconto errato");
+			discountTextField.setBorder(new LineBorder(Color.RED));
+			return;
+		}
+
+		LocalDate start = datePicker.getDate();
+		SubPeriod subperiod = (SubPeriod) subPeriodComboBox.getSelectedItem();
+		LocalDate end = start.plusMonths(subperiod.getMonths());
+		VAT vat = DAO.get(VAT.class, VATComboBox.getSelectedItem().getId()).get();
+
+		// customer is updated in modelquickviewer
+
+		selectedData.setVat(vat);
+		selectedData.setDiscount(discount);
+		selectedData.setStart(start);
+		selectedData.setEnd(end);
+		selectedData.setPrice(price);
+		selectedData.setSubperiod(subperiod);
+		if(returnCustomers.isEmpty()) {
+			selectedData.setCustomer(null);
+		} else {
+			selectedData.setCustomer(returnCustomers.getFirst());
+		}
+
+		DAO.update(selectedData);
+
+		lbOutput.setText("Abbonamento aggiornato");
+		refresh();
+
 	}
 
 	@Override
 	public void deleteElement() {
-		if (table.getSelectedRow() < 0) return;
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(parent, "Nessun cliente selezionato");
+			return; // do not allow invalid ids to be passed to update
+		}
+		if (selectedData.getId() == null || !selectedData.isEnabled())
+			return;
 		lbOutput.setText("Abbonamento rimosso");
-		subscriptionDAO.delete(id);
-		refreshTable();
+		DAO.delete(selectedData);
+		refresh();
 	}
 
 	@Override
 	public void disableElement() {
-		if (table.getSelectedRow() < 0) return;
-		lbOutput.setText(!isEnabled ? "Abbonamento abilitato" : "Abbonamento disabilitato");
-		subscriptionDAO.toggle(id);
-		refreshTable();
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(parent, "Nessun cliente selezionato");
+			return; // do not allow invalid ids to be passed to update
+		}
+		if (selectedData == null)
+			return;
+		DAO.toggle(selectedData);
+		lbOutput.setText(selectedData.isEnabled() ? "Abbonamento abilitato" : "Abbonamento disabilitato");
+		refresh();
 	}
 
 	@Override
 	public void populateTable() {
-		isRefreshing = true;
-		subscriptionModel.setRowCount(0);
-
-		List<Subscription> subscriptions = subscriptionDAO.getAll();
+		subscriptions = DAO.getAll(Subscription.class);
 		if (!subscriptions.isEmpty()) {
-			subscriptions.parallelStream()
-					.forEach(t -> subscriptionModel.addRow(t.toTableRow()));
+			model.addRows(subscriptions);
 		} else {
 			lbOutput.setText("Lista abbonamenti vuota");
 		}
-
-
-		isRefreshing = false;
 	}
 
 	@Override
 	public void clearTxfFields() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'clearTxfFields'");
+		datePicker.setDate(LocalDate.now());
+		discountTextField.setText(0);
+		priceTextField.setText(0);
+		subPeriodComboBox.setSelectedIndex(0);
+		VATComboBox.setSelectedIndex(0);
+		returnCustomers.clear();
 	}
 
 	@Override
@@ -201,37 +255,44 @@ public class SubscriptionPanel extends BasePanel<Subscription> {
 		return new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent event) {
-				if (isRefreshing) return;
+				if (event.getValueIsAdjusting())
+					return;
+
 				int selectedRow = table.getSelectedRow();
-				if (selectedRow < 0) return;
+				if (selectedRow < 0)
+					return;
 
-				var values = getRowMap(table, subscriptionModel);
+				selectedData = model.getObjAt(selectedRow);
+				if (selectedData == null || !selectedData.isEnabled())
+					return;
 
-				id = (int) values.get("ID");
-				isEnabled = (boolean) values.get("Abilitato");
-
-				BigDecimal price = (BigDecimal) values.get("Prezzo");
-				LocalDate start = (LocalDate) values.get("Inizio");
-				VAT vat = (VAT) values.get("IVA");
-				discount = (double) values.get("Sconto applicato");
-				selectedCustomer = (Customer) values.get("Cliente");
+				BigDecimal price = selectedData.getPrice();
+				LocalDate start = selectedData.getStart();
+				VAT vat = selectedData.getVat();
+				double discount = selectedData.getDiscount();
 
 				priceTextField.setText(price.toString());
 				datePicker.setDate(start);
-				vatComboBox.setSelectedItem(vat);
-				if(selectedCustomer != null) {
-					customerBtnField.setFieldText(selectedCustomer.getFullName());
-				}
+				VATComboBox.setSelectedItem(vat);
 				discountTextField.setText(discount);
-				lbOutput.setText("");
 
+				returnCustomers.clear();
 			}
 		};
 	}
 
 	@Override
 	public boolean isDataValid() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'isDataValid'");
+		try {
+			if (!datePicker.getDatePicker().isTextFieldValid()) {
+				throw new InvalidInputException("Data non valida", datePicker);
+			} else {
+				datePicker.setBorder(UIManager.getBorder("SplitPane.border"));
+			}
+		} catch (InputValidatorException e) {
+			JOptionPane.showMessageDialog(parent, e.getMessage());
+		}
+
+		return datePicker.isTextFieldValid();
 	}
 }

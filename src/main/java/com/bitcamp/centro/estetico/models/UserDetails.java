@@ -1,6 +1,7 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import it.kamaladafrica.codicefiscale.City;
@@ -20,32 +21,29 @@ public class UserDetails {
 	private String notes;
 	private String eu_tin;
 
-	public UserDetails() {}
-
-	public UserDetails(Map<String, Object> map) {
-		this(
-			(String) map.get("Nome"),
-			(String) map.get("Cognome"),
-			(Gender) map.get("Sesso"),
-			(LocalDate) map.get("Data di nascita"),
-			(String) map.get("Luogo di nascita"),
-			(String) map.get("Note"),
-			(String) map.get("C.F")
-		);
+	public UserDetails() {
 	}
 
-	public UserDetails(String name, String surname, Gender gender, LocalDate birthday, String birthplace, String notes) {
-		this(name, surname, gender, birthday, birthplace, notes, calculateEU_TIN(name, surname, birthplace, gender, birthday));
+	public UserDetails(String name, String surname, Gender gender, LocalDate birthday, String birthplace,
+			String notes) {
+		this(name, surname, gender, birthday, birthplace, notes,
+				calculateEU_TIN(name, surname, birthplace, gender, birthday));
 	}
 
-	public UserDetails(String name, String surname, Gender gender, LocalDate birthday, String birthplace, String notes, String eu_tin) {
+	public UserDetails(String name, String surname, Gender gender, LocalDate birthday, String birthplace, String notes,
+			String eu_tin) {
 		this.name = name;
 		this.surname = surname;
 		this.birthplace = birthplace;
 		this.gender = gender;
 		this.birthday = birthday;
 		this.notes = notes;
-		this.eu_tin = eu_tin;
+
+		if (eu_tin == null || eu_tin.isBlank()) {
+			this.eu_tin = calculateEU_TIN(name, surname, birthplace, gender, birthday);
+		} else {
+			this.eu_tin = eu_tin;
+		}
 	}
 
 	protected String getName() {
@@ -73,11 +71,14 @@ public class UserDetails {
 	}
 
 	protected void setEu_tin(String eu_tin) {
+		if (eu_tin == null || eu_tin.isBlank())
+			eu_tin = calculateEU_TIN(name, surname, birthplace, gender, birthday);
 		this.eu_tin = eu_tin;
 	}
 
 	protected String getEu_tin() {
-		if(eu_tin == null) eu_tin = calculateEU_TIN(name, surname, birthplace, gender, birthday);
+		if (eu_tin == null || eu_tin.isBlank())
+			eu_tin = calculateEU_TIN(name, surname, birthplace, gender, birthday);
 		return eu_tin;
 	}
 
@@ -194,14 +195,16 @@ public class UserDetails {
 	}
 
 	public Map<String, Object> toTableRow() {
-		return Map.ofEntries(
-			Map.entry("Nome", name),
-			Map.entry("Cognome", surname),
-			Map.entry("Sesso", gender),
-			Map.entry("Data di nascita", birthday),
-			Map.entry("Luogo di nascita", birthplace),
-			Map.entry("C.F", eu_tin),
-			Map.entry("Note", notes)
-		);
+		Map<String, Object> map = new LinkedHashMap<>();
+
+		map.put("Nome", name);
+		map.put("Cognome", surname);
+		map.put("Sesso", gender);
+		map.put("Data di nascita", birthday);
+		map.put("Luogo di nascita", birthplace);
+		map.put("C.F", eu_tin);
+		map.put("Note", notes);
+
+		return map;
 	}
 }

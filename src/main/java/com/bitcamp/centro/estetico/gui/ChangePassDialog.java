@@ -3,9 +3,15 @@ package com.bitcamp.centro.estetico.gui;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+import javax.swing.WindowConstants;
 
-import com.bitcamp.centro.estetico.DAO.UserCredentialsDAO;
+import com.bitcamp.centro.estetico.controller.DAO;
 import com.bitcamp.centro.estetico.models.Employee;
 
 public class ChangePassDialog extends JDialog {
@@ -15,7 +21,6 @@ public class ChangePassDialog extends JDialog {
 	private static JPasswordField oldPasswordTxt;
 	private static JPasswordField newPasswordTxt2;
 	private static Employee activeUser;
-	private static UserCredentialsDAO userCredentialsDAO = UserCredentialsDAO.getInstance();
 
 	/**
 	 * Create the frame.
@@ -84,7 +89,7 @@ public class ChangePassDialog extends JDialog {
 		if (!isValidPassword()) return;
 		activeUser.setPassword(newPasswordTxt1.getPassword());
 		
-		userCredentialsDAO.update(activeUser); 
+		DAO.update(activeUser); 
 		JOptionPane.showMessageDialog(this, "Password modificata correttamente");
 		dispose();
 

@@ -3,6 +3,7 @@ package com.bitcamp.centro.estetico.models;
 import java.util.Map;
 
 public interface Model {
+
     Long getId();
 
     void setId(Long id);

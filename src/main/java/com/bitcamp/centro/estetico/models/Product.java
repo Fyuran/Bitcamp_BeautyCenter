@@ -1,6 +1,7 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.hibernate.annotations.ColumnDefault;
@@ -38,17 +39,6 @@ public class Product implements Model {
 
 	public Product() {
 		this.isEnabled = true;
-	}
-
-	public Product(Map<String, Object> map) {
-		this(			
-			(Long) map.get("ID"),
-			(String) map.get("Nome"),
-			(BigDecimal) map.get("Prezzo"),
-			(VAT) map.get("IVA"),
-			(ProductCat) map.get("Tipo"),
-			(boolean) map.get("Abilitato")
-		);
 	}
 
 	public Product(String name, BigDecimal price, VAT vat, ProductCat type) {
@@ -175,14 +165,17 @@ public class Product implements Model {
 
 	@Override
 	public Map<String, Object> toTableRow() {
-		return Map.ofEntries(
-			Map.entry("ID", id),
-			Map.entry("Nome", name),
-			Map.entry("Tipo", type),
-			Map.entry("Prezzo", price),
-			Map.entry("IVA", vat),
-			Map.entry("Abilitato", isEnabled)
-		);
+		Map<String, Object> map = new LinkedHashMap<>();
+
+		map.put("ID", id);
+		map.put("Nome", name);
+		map.put("Tipo", type);
+		map.put("Prezzo", price);
+		map.put("IVA", vat);
+		map.put("Abilitato", isEnabled);
+
+		return map;
+
 	}
 
 }

@@ -1,22 +1,27 @@
 package com.bitcamp.centro.estetico.gui;
 
-import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 
-import com.bitcamp.centro.estetico.DAO.BeautyCenterDAO;
-import com.bitcamp.centro.estetico.DAO.EmployeeDAO;
+import com.bitcamp.centro.estetico.controller.DAO;
+import com.bitcamp.centro.estetico.models.BeautyCenter;
+import com.bitcamp.centro.estetico.models.Employee;
 
 public class SetupWelcomeFrame extends JFrame {
 
 	private static final long serialVersionUID = 5654094869271673775L;
-	private static EmployeeDAO employeeDAO = EmployeeDAO.getInstance();
-	private static BeautyCenterDAO beautyCenterDAO = BeautyCenterDAO.getInstance();
-
+	private static JButton nextBtn;
+	
 	public SetupWelcomeFrame() {
 		setTitle("Benvenuto nel Gestionale Centro Estetico");
 		setName("Benvenuto nel Gestionale Centro Estetico");
@@ -24,31 +29,27 @@ public class SetupWelcomeFrame extends JFrame {
 		setVisible(true);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
+		
+		setIconImage(new ImageIcon(
+			MainFrame.class.getResource("/com/bitcamp/centro/estetico/resources/bc_icon.png")).getImage());
 
-		// Pannello principale con layout assoluto
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(null);
 		mainPanel.setBounds(0, 0, 1024, 768);
-		mainPanel.setBackground(Color.WHITE);
 
-		// Pannello per l'immagine
 		JPanel imagePanel = new JPanel();
 		imagePanel.setLayout(null);
 		imagePanel.setBounds(0, 0, 1024, 400);
-		imagePanel.setBackground(Color.WHITE);
 
-		// Caricamento dell'immagine
-		//ImageIcon icon = new ImageIcon("iconeGestionale/download.png");
 		JLabel imageLabel = new JLabel(
-				new ImageIcon(SetupWelcomeFrame.class.getResource("/com/bitcamp/centro/estetico/resources/download.png")));
+				new ImageIcon(
+						SetupWelcomeFrame.class.getResource("/com/bitcamp/centro/estetico/resources/download.png")));
 		imageLabel.setBounds(151, 20, 723, 360);
 		imagePanel.add(imageLabel);
 
-		// Pannello per la descrizione
 		JPanel textPanel = new JPanel();
 		textPanel.setLayout(null);
 		textPanel.setBounds(0, 400, 1024, 208);
-		textPanel.setBackground(Color.WHITE);
 
 		JLabel welcomeLabel = new JLabel("Benvenuto nel Gestionale Centro Estetico!");
 		welcomeLabel.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 24));
@@ -57,13 +58,12 @@ public class SetupWelcomeFrame extends JFrame {
 
 		JTextArea descriptionArea = new JTextArea(
 				"Il gestionale è progettato per offrire una soluzione completa "
-				+ "per il tuo centro estetico. Organizza i tuoi appuntamenti, gestisci i clienti, "
-				+ "e monitora tutto il centro con facilità. ");
+						+ "per il tuo centro estetico. Organizza i tuoi appuntamenti, gestisci i clienti, "
+						+ "e monitora tutto il centro con facilità. ");
 		descriptionArea.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 18));
 		descriptionArea.setLineWrap(true);
 		descriptionArea.setWrapStyleWord(true);
 		descriptionArea.setEditable(false);
-		descriptionArea.setBackground(Color.WHITE);
 		descriptionArea.setBounds(100, 60, 824, 146);
 
 		textPanel.add(welcomeLabel);
@@ -75,22 +75,19 @@ public class SetupWelcomeFrame extends JFrame {
 		setLayout(null);
 		add(mainPanel);
 
-		JButton avantiButton = new JButton("Entra");
-		avantiButton.setBounds(423, 648, 200, 40);
-		mainPanel.add(avantiButton);
-		avantiButton.setFont(new Font("Arial", Font.BOLD, 16));
-		avantiButton.setBackground(new Color(0, 153, 0)); // Colore verde moderno
-		avantiButton.setForeground(new Color(0, 0, 0));
-		avantiButton.setFocusPainted(false);
-		avantiButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		nextBtn = new JButton("Entra");
+		nextBtn.setBounds(423, 648, 200, 40);
+		mainPanel.add(nextBtn);
+		nextBtn.setFont(new Font("Arial", Font.BOLD, 16));
+		nextBtn.setFocusPainted(false);
 
-		avantiButton.addActionListener(new ActionListener() {
+		nextBtn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (beautyCenterDAO.isEmpty()) {
+				if (DAO.isEmpty(BeautyCenter.class)) {
 					new SetupBeautyCenterFrame();
 				} else {
-					if (employeeDAO.isEmpty()) {
+					if (DAO.isEmpty(Employee.class)) {
 						new SetupFirstAccountFrame();
 					} else {
 						new LoginFrame();

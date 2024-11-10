@@ -2,101 +2,95 @@ package com.bitcamp.centro.estetico.gui;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
-import java.time.Duration;
-import java.util.Optional;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import com.bitcamp.centro.estetico.DAO.TreatmentDAO;
-import com.bitcamp.centro.estetico.DAO.VAT_DAO;
+import com.bitcamp.centro.estetico.controller.DAO;
+import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
+import com.bitcamp.centro.estetico.models.Product;
 import com.bitcamp.centro.estetico.models.Treatment;
 import com.bitcamp.centro.estetico.models.VAT;
+import com.bitcamp.centro.estetico.utils.InputValidator;
+import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
+import com.bitcamp.centro.estetico.utils.JSplitBtn;
 import com.bitcamp.centro.estetico.utils.JSplitComboBox;
-import com.bitcamp.centro.estetico.utils.JSplitLbTxf;
-import com.bitcamp.centro.estetico.utils.inputValidator;
-import com.bitcamp.centro.estetico.utils.inputValidator.inputValidatorException;
+import com.bitcamp.centro.estetico.utils.JSplitTimePicker;
+import com.bitcamp.centro.estetico.utils.JSplitTxf;
+import com.bitcamp.centro.estetico.utils.ModelChooser;
 
-public class TreatmentPanel extends BasePanel<Treatment> {
+public class TreatmentPanel extends AbstractBasePanel<Treatment> {
 
-	private static VAT_DAO vat_DAO = VAT_DAO.getInstance();
-	private static TreatmentDAO treatmentDAO = TreatmentDAO.getInstance();
-
-	private static Long id = -1;
-	private static boolean isEnabled = false;
+	private static Treatment selectedData = new Treatment();
+	private static List<Product> returnProducts = new ArrayList<>();
 
 	private static final long serialVersionUID = 1L;
-	private static JSplitLbTxf txfPrice;
-	private static JSplitLbTxf txfName;
-	private static JSplitLbTxf txfType;
+	private static JSplitTxf txfPrice;
+	private static JSplitTxf txfName;
+	private static JSplitTxf txfType;
 	private static JSplitComboBox<VAT> VATComboBox;
-	private static JSplitLbTxf txfDuration;
+	private static JSplitTimePicker timePicker;
+	private static JSplitBtn productsBtn;
 
-	public TreatmentPanel() {
-
+	public TreatmentPanel(JFrame parent) {
+		super(parent);
 		setSize(1024, 768);
 		setName("Trattamenti");
 		setTitle("GESTIONE TRATTAMENTI");
-		
-		table.setModel(treatmentModel);
 
-		JTable productTable = new JTable(productModel);
-		productTable.setEnabled(false);
+		txfName = new JSplitTxf("Nome");
+		txfType = new JSplitTxf("Descrizione");
+		txfPrice = new JSplitTxf("Prezzo", new JFormattedTextField(NumberFormat.getInstance()));
+		productsBtn = new JSplitBtn("Prodotto", "Scelta Prodotti");
+		productsBtn.addActionListener(l -> {
+			ModelChooser<Product> picker = new ModelChooser<>(parent, "Prodotti",
+					ListSelectionModel.MULTIPLE_INTERVAL_SELECTION, returnProducts);
 
-		JScrollPane productScrollPane = new JScrollPane(productTable);
-		productScrollPane.setBounds(577, 474, 437, 181);
-		actionsPanel.add(productScrollPane);
+			products = DAO.getAll(Product.class);
+			var available = products
+					.parallelStream()
+					.filter(c -> c.isEnabled())
+					.toList();
 
-		txfName = new JSplitLbTxf("Nome");
+			if (!available.isEmpty()) {
+				NonEditableTableModel<Product> model = picker.getModel();
+				model.addRows(available);
+			} else
+				picker.getLbOutput().setText("Lista vuota");
+
+			picker.setVisible(true);
+		});
+		VATComboBox = new JSplitComboBox<>("IVA");
+		timePicker = new JSplitTimePicker("Durata");
+
 		actionsPanel.add(txfName);
-
-		txfType = new JSplitLbTxf("Descrizione");
 		actionsPanel.add(txfType);
-
-		txfPrice = new JSplitLbTxf("Prezzo", new JFormattedTextField(NumberFormat.getInstance()));
 		actionsPanel.add(txfPrice);
-
-		VATComboBox = new JSplitComboBox<>();
 		actionsPanel.add(VATComboBox);
+		actionsPanel.add(timePicker);
+		actionsPanel.add(productsBtn);
 
-		txfDuration = new JSplitLbTxf("Durata", new JFormattedTextField(NumberFormat.getInstance()));
-		actionsPanel.add(txfDuration);
+		vats = DAO.getAll(VAT.class);
+		vats.stream()
+				.filter(v -> v.isEnabled())
+				.forEach(v -> VATComboBox.addItem(v));
+		VATComboBox.setSelectedIndex(0);
 
-		JButton productBtn = new JButton("Seleziona i prodotti");
-		productBtn.setBounds(530, 432, 166, 29);
-		productBtn.addActionListener(e -> new ProductSelector(this));
-		actionsPanel.add(productBtn);
 	}
 
-	private void populateTableByFilter() {
-		lbOutput.setText("");
-		if (txfSearchBar.getText().isBlank() || txfSearchBar.getText().isEmpty()) {
-			lbOutput.setText("Inserire un filtro!");
-			return;
-		}
-		clearTable(table);
-
-		if (products.isEmpty()) return;
-		for (Treatment t : treatments) {
-			if (t.isEnabled() && t.getType().toLowerCase().contains(txfSearchBar.getText().toLowerCase())) {
-				treatmentModel.addRow(new String[] { String.valueOf(t.getId()), t.getType(), String.valueOf(t.getPrice()),
-						t.get().toString(), String.valueOf(t.getDuration()) });
-			}
-		}
-	}
-	
 	@Override
 	public void clearTxfFields() {
 		txfName.setText("");
 		txfPrice.setText("");
-		txfDuration.setText("");
+		timePicker.setTime(null);
 		products.clear();
-		txfSearchBar.setText("");
 	}
 
 	@Override
@@ -107,93 +101,113 @@ public class TreatmentPanel extends BasePanel<Treatment> {
 
 	@Override
 	public void insertElement() {
-		if (!isDataValid()) return;
+		try { // all fields must be filled
+			isDataValid();
+		} catch (InputValidatorException e) {
+			JOptionPane.showMessageDialog(parent, e.getMessage());
+			return;
+		}
+
 		String name = txfName.getText();
 		BigDecimal price = new BigDecimal(txfPrice.getText());
-		String vatString = String.valueOf(VATComboBox.getSelectedItem().toString());
-		double vatAmount = Double.parseDouble(vatString.substring(0, vatString.length() - 1));
-		VAT vat = vat_DAO.getVATByAmount(vatAmount).get();
-		int durationInt = Integer.parseInt(txfDuration.getText());
-		Duration duration = Duration.ofMinutes(durationInt);
 
-		Treatment treatment = new Treatment(name, price, vat, duration, products, true);
+		VAT vat = VATComboBox.getSelectedItem();
+		LocalTime duration = timePicker.getTime();
 
-		Optional<Treatment> opt = treatmentDAO.insert(treatment);
-		treatmentDAO.addProductsToTreatment(treatment, products);
+		List<Product> newProducts = null;
+		if (!returnProducts.isEmpty()) {
+			newProducts = returnProducts;
+		}
+		Treatment treatment = new Treatment(name, price, vat, duration, newProducts);
+		DAO.insert(treatment);
 
 		lbOutput.setText(name + " inserito");
 		clearTxfFields();
-		refreshTable();
-		
+		refresh();
+
 	}
 
 	@Override
 	public void updateElement() {
-		if (!isDataValid()) return;
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(parent, "Nessun Trattamento selezionato");
+			return; // do not allow invalid ids to be passed to update
+		}
+		if (selectedData.getId() == null || !selectedData.isEnabled())
+			return;
+		try { // all fields must be filled
+			isDataValid();
+		} catch (InputValidatorException e) {
+			JOptionPane.showMessageDialog(parent, e.getMessage());
+			return;
+		}
+
 		String name = txfName.getText();
 		BigDecimal price = new BigDecimal(txfPrice.getText());
-		String vatString = String.valueOf(VATComboBox.getSelectedItem().toString());
-		double vatAmount = Double.parseDouble(vatString.substring(0, vatString.length() - 1));
-		VAT vat = vat_DAO.getVATByAmount(vatAmount).get();
-		int durationInt = Integer.parseInt(txfDuration.getText());
-		Duration duration = Duration.ofMinutes(durationInt);
-		// prodottiSelezionati
-		// isEnabled
-		Treatment t = new Treatment(name, price, vat, duration, products, true);
+
+		VAT vat = VATComboBox.getSelectedItem();
+		LocalTime duration = timePicker.getTime();
+
+		selectedData.setType(name);
+		selectedData.setPrice(price);
+		selectedData.setVat(vat);
+		selectedData.setTime(duration);
+		if (returnProducts.isEmpty()) {
+			selectedData.setProducts(null);
+		} else {
+			selectedData.setProducts(returnProducts);
+		}
 
 		clearTxfFields();
-		treatmentDAO.update(id, t);
-		refreshTable();
+		DAO.update(selectedData);
+		lbOutput.setText("Trattamento aggiornato");
+		refresh();
 	}
 
 	@Override
 	public void deleteElement() {
-		try {
-			int row = table.getSelectedRow();
-			if (row == -1) {
-				throw new IllegalArgumentException("no row selected");
-			}
-			final Long id = (int) treatmentModel.getValueAt(row, 0);
-			lbOutput.setText("Trattamento cancellato");
-			treatmentDAO.delete(id);
-			refreshTable();
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, "Impossibile cancellare: " + e.getMessage(), "Errore di database",
-					JOptionPane.ERROR_MESSAGE);
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(parent, "Nessun Trattamento selezionato");
+			return; // do not allow invalid ids to be passed to update
 		}
+		if (selectedData.getId() == null || !selectedData.isEnabled())
+			return;
+
+		DAO.delete(selectedData);
+		lbOutput.setText("Trattamento cancellato");
+		refresh();
 	}
 
 	@Override
 	public void disableElement() {
-		lbOutput.setText("Trattamento disabilitato");
-		treatmentDAO.toggle(id);
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(parent, "Nessun Trattamento selezionato");
+			return; // do not allow invalid ids to be passed to update
+		}
+		if (selectedData == null)
+			return;
+
+		DAO.toggle(selectedData);
+		lbOutput.setText(selectedData.isEnabled() ? "Trattamento abilitato" : "Trattamento disabilitato");
+		refresh();
 	}
 
 	@Override
 	public void populateTable() {
-		clearTable(table);
-		if (treatments.isEmpty()) return;
-		treatments.parallelStream()
-				.filter(t -> t.isEnabled() || isAdmin())
-				.forEach(t -> treatmentModel.addRow(t.toTableRow()));
-		
-		if (products.isEmpty()) return;
-		products.parallelStream()
-				.filter(t -> t.isEnabled())
-				.forEach(p -> productModel.addRow(p.toTableRow()));
+		treatments = DAO.getAll(Treatment.class);
+		if (!treatments.isEmpty()) {
+			model.addRows(treatments);
+		} else {
+			lbOutput.setText("Lista Trattamenti vuota");
+		}
 	}
 
 	@Override
 	public boolean isDataValid() {
-		if (!treatmentDAO.isTreatmentNameUnique(txfName.getText())) {
-			lbOutput.setText("Nome del trattamento già presente");
-			return false;
-		}
 		try {
-			inputValidator.validateName(txfName);
-		} catch (inputValidatorException e) {
-			lbOutput.setText(e.getMessage());
-			e.printStackTrace();
+			InputValidator.validateName(txfName);
+		} catch (InputValidatorException e) {
+			JOptionPane.showMessageDialog(parent, e.getMessage());
 		}
 		return false;
 	}
@@ -203,27 +217,31 @@ public class TreatmentPanel extends BasePanel<Treatment> {
 		return new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent event) {
-				if (!event.getValueIsAdjusting()) {
-					int selectedRow = table.getSelectedRow();
-					if (selectedRow != -1) {
+				if(event.getValueIsAdjusting())
+					return;
 
-						id = Integer.parseInt(String.valueOf(treatmentModel.getValueAt(selectedRow, 0)));
-						String name = String.valueOf(treatmentModel.getValueAt(selectedRow, 1));
-						String price = String.valueOf(String.valueOf(treatmentModel.getValueAt(selectedRow, 2)));
-						String vat = String.valueOf(treatmentModel.getValueAt(selectedRow, 3) + "%");
-						Duration duration = (Duration) treatmentModel.getValueAt(selectedRow, 4);
-						products = treatmentDAO.getProductsOfTreatment(id);
-						populateTable();
-
-						txfName.setText(name);
-						//VATComboBox.setSelectedItem(vat);
-						txfPrice.setText(price);
-						txfPrice.setText(price);
-						txfDuration.setText(String.valueOf(duration.toMinutes()));
-						table.clearSelection();
-
-					}
+				int selectedRow = table.getSelectedRow();
+				if (selectedRow <= -1) {
+					return;
 				}
+
+				selectedData = model.getObjAt(selectedRow);
+				if (!selectedData.isEnabled())
+					return;
+
+				String name = selectedData.getType();
+				BigDecimal price = selectedData.getPrice();
+				VAT vat = selectedData.getVat();
+				LocalTime duration = selectedData.getTime();
+
+				txfName.setText(name);
+				VATComboBox.setSelectedItem(vat);
+				txfPrice.setText(price);
+				txfPrice.setText(price);
+				timePicker.setTime(duration);
+
+				returnProducts.clear();
+
 			}
 		};
 	}

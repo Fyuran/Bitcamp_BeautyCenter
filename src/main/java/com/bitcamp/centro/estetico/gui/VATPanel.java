@@ -1,64 +1,34 @@
 package com.bitcamp.centro.estetico.gui;
 
 import java.text.NumberFormat;
-import java.util.List;
 
 import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import com.bitcamp.centro.estetico.DAO.VAT_DAO;
-import com.bitcamp.centro.estetico.gui.render.CustomTableCellRenderer;
+import com.bitcamp.centro.estetico.controller.DAO;
 import com.bitcamp.centro.estetico.models.VAT;
-import com.bitcamp.centro.estetico.utils.JSplitLbTxf;
-import com.bitcamp.centro.estetico.utils.inputValidator;
-import com.bitcamp.centro.estetico.utils.inputValidator.inputValidatorException;
+import com.bitcamp.centro.estetico.utils.InputValidator;
+import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
+import com.bitcamp.centro.estetico.utils.JSplitTxf;
 
-public class VATPanel extends BasePanel<VAT> {
+public class VATPanel extends AbstractBasePanel<VAT> {
 
-	private static VAT_DAO vat_DAO = VAT_DAO.getInstance();
-	
+	private static VAT selectedData;
+
 	private static final long serialVersionUID = 1L;
-	private static Long id;
-	private static double amount;
-	private static boolean isEnabled;
+	private static JSplitTxf txfAmount;
 
-	private static JSplitLbTxf txfAmount;
-
-
-	public VATPanel() {
-
+	public VATPanel(JFrame parent) {
+		super(parent);
 		setSize(1024, 768);
 		setName("IVA");
 		setTitle("ALIQUOTE IVA");
 
-		table.getSelectionModel().addListSelectionListener(getTableListSelectionListener());
-		table.setDefaultRenderer(Object.class, new CustomTableCellRenderer(vatModel));
-		table.setModel(vatModel);
-
-		txfAmount = new JSplitLbTxf("Percentuale", new JFormattedTextField(NumberFormat.getInstance()));
+		txfAmount = new JSplitTxf("Percentuale", new JFormattedTextField(NumberFormat.getInstance()));
 		actionsPanel.add(txfAmount);
-		
-	}
-
-	private void populateTableByFilter() {
-		lbOutput.setText("");
-		if (txfSearchBar.getText().isBlank() || txfSearchBar.getText().isEmpty()) {
-			lbOutput.setText("Inserire un filtro!");
-			return;
-		}
-		clearTable(table);
-		List<VAT> vats = vat_DAO.getAll();
-		if (vats.isEmpty()) {
-			vatModel.addRow(new String[] { "Sembra non ci siano aliquote presenti", "" });
-			return;
-		}
-		vats.parallelStream()
-		.filter(v -> v.isEnabled() && v.getAmount() == Double.parseDouble(txfSearchBar.getText()))
-		.forEach(v -> vatModel.addRow(v.toTableRow()));
-		
-		txfSearchBar.setText("");
 	}
 
 	@Override
@@ -71,68 +41,90 @@ public class VATPanel extends BasePanel<VAT> {
 	public void insertElement() {
 		double amount = Double.parseDouble(txfAmount.getText());
 		lbOutput.setText("Aliquota inserita");
-		vat_DAO.insert(new VAT(amount));
-		refreshTable();
+		DAO.insert(new VAT(amount));
+		refresh();
 	}
 
 	@Override
 	public void updateElement() {
-		if (!isDataValid() && id >= 0) return;
+		if (!isDataValid())
+			return;
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(parent, "Nessuna aliquota selezionata");
+			return; // do not allow invalid ids to be passed to update
+		}
+		if (selectedData.getId() == null || !selectedData.isEnabled())
+			return;
+
 		double amount = Double.parseDouble(txfAmount.getText());
+
+		selectedData.setAmount(amount);
 		lbOutput.setText("Aliquota modificata");
-		vat_DAO.update(id, new VAT(amount));
-		refreshTable();
+		DAO.update(selectedData);
+		refresh();
 	}
 
 	@Override
 	public void deleteElement() {
-		if (table.getSelectedRow() < 0) return;
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(parent, "Nessuna aliquota selezionata");
+			return; // do not allow invalid ids to be passed to update
+		}
+		if (selectedData.getId() == null || !selectedData.isEnabled())
+			return;
+
 		lbOutput.setText("Aliquota rimossa");
-		vat_DAO.delete(id);
-		refreshTable();
+		DAO.delete(selectedData);
+		refresh();
 	}
 
 	@Override
 	public void disableElement() {
-		if (table.getSelectedRow() < 0) return;
-		vat_DAO.toggle(id);
-		lbOutput.setText(!isEnabled ? "Aliquota abilitata" : "Aliquota disabilitata");
-		refreshTable();
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(parent, "Nessuna aliquota selezionata");
+			return; // do not allow invalid ids to be passed to update
+		}
+		if (selectedData == null)
+			return;
+
+		DAO.toggle(selectedData);
+		lbOutput.setText(selectedData.isEnabled() ? "Aliquota abilitata" : "Aliquota disabilitata");
+		refresh();
 	}
 
 	@Override
 	public void populateTable() {
-		isRefreshing = true;
-		vats = vat_DAO.getAll();
-		if (vats.isEmpty()) return;
-		clearTable(table);
-		vats.parallelStream().forEach(v -> vatModel.addRow(v.toTableRow()));
-		isRefreshing = false;
+		vats = DAO.getAll(VAT.class);
+		if(!vats.isEmpty()) {
+			model.addRows(vats);
+		} else {
+			lbOutput.setText("Lista IVA vuota");
+		}
 	}
 
 	@Override
 	public void clearTxfFields() {
-		txfAmount.setText("null");
+		txfAmount.setText(0);
 	}
-
 
 	@Override
 	public ListSelectionListener getTableListSelectionListener() {
 		return new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent event) {
-				if (isRefreshing) return;
+				if(event.getValueIsAdjusting())
+					return;
+					
 				int selectedRow = table.getSelectedRow();
-				if (selectedRow < 0) return;
+				if (selectedRow < 0)
+					return;
+					
+				selectedData = model.getObjAt(selectedRow);
+				if (selectedData.getId() == null || !selectedData.isEnabled())
+					return;
 
-				var values = getRowMap(table, vatModel);
-
-				id = (int) values.get( "ID");
-				amount = (double) values.get( "Percentuale");
+				double amount = selectedData.getAmount();
 				txfAmount.setText(amount);
-				isEnabled = (boolean) values.get( "Abilitato");
-
-				lbOutput.setText("");
 			}
 		};
 	}
@@ -140,10 +132,10 @@ public class VATPanel extends BasePanel<VAT> {
 	@Override
 	public boolean isDataValid() {
 		try {
-			inputValidator.validateVAT(txfAmount);
-		} catch (inputValidatorException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Dati non validi",
-			JOptionPane.ERROR_MESSAGE);
+			InputValidator.validateNumber(txfAmount, 0, Integer.MAX_VALUE);
+		} catch (InputValidatorException e) {
+			JOptionPane.showMessageDialog(parent, e.getMessage(), "Dati non validi",
+					JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 		return true;

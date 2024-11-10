@@ -1,27 +1,33 @@
 package com.bitcamp.centro.estetico.models;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import com.bitcamp.centro.estetico.controller.DAO;
+import javax.swing.JButton;
+import javax.swing.ListSelectionModel;
 
+import com.bitcamp.centro.estetico.utils.ModelViewer;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 
 @Entity
 @DiscriminatorValue("C")
 public class Customer extends User {
 
-	@OneToOne(mappedBy = "customer", optional = true)
+	@OneToOne(mappedBy = "customer", cascade = CascadeType.MERGE)
 	private Subscription subscription;
 
-	@OneToMany
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	@JoinTable(
 		name = "customer_prize",
 		joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id", nullable = false),
@@ -39,20 +45,7 @@ public class Customer extends User {
 
 	public Customer() {
 		super();
-	}
-
-	public Customer(Map<String, Object> map) {
-		this(
-			(Long) map.get("ID"), 
-			(UserDetails) map.get("Dettagli"), 
-			(UserCredentials) map.get("Credenziali"), 
-			(boolean) map.get("Abilitato"),
-			(String) map.get("P.IVA"), 
-			(String) map.get("Codice Destinatario"), 
-			(int) map.get("Punti fedeltà"), 
-			(Subscription) map.get("Abbonamento"),
-			(List<Prize>) map.get("Premi")
-		);
+		prizes = new ArrayList<>();
 	}
 
 	public Customer(
@@ -82,6 +75,7 @@ public class Customer extends User {
 	}
 
 	public List<Prize> getPrizes() {
+		if(prizes == null) return new ArrayList<>();
 		return prizes;
 	}
 
@@ -190,15 +184,30 @@ public class Customer extends User {
 
 	@Override
 	public Map<String, Object> toTableRow() {
-		var map = super.toTableRow();
-		map.putAll(Map.ofEntries(
-			Map.entry("Abbonamento", subscription),
-			Map.entry("P.IVA", p_iva),
-			Map.entry("Codice Destinatario", recipientCode),
-			Map.entry("Punti fedeltà", loyaltyPoints)
-		));
+		var superMap = super.toTableRow();
 
-		return map;
+		JButton showPrizes = new JButton("Premi");
+		showPrizes.addActionListener(l -> {
+			ModelViewer<Prize> picker = new ModelViewer<>("Premi Acquisiti",
+					ListSelectionModel.SINGLE_SELECTION, getPrizes());
+			picker.setVisible(true);
+		});
+
+		JButton showSubscription = new JButton("Abbonamento");
+		showSubscription.addActionListener(l -> {
+			ModelViewer<Subscription> picker = new ModelViewer<>("Abbonamento",
+					ListSelectionModel.SINGLE_SELECTION, getSubscription());
+			picker.setVisible(true);
+		});
+
+		superMap.put("Abbonamento", showSubscription);
+		superMap.put("P.IVA", p_iva);
+		superMap.put("Codice Destinatario", recipientCode);
+		superMap.put("Punti fedeltà", loyaltyPoints);
+		superMap.put("Premi", showPrizes);
+
+
+		return superMap;
 	}
 
 }

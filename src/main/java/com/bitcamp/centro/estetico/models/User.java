@@ -1,9 +1,15 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.swing.JButton;
+import javax.swing.ListSelectionModel;
+
 import org.hibernate.annotations.ColumnDefault;
+
+import com.bitcamp.centro.estetico.utils.ModelViewer;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -31,7 +37,7 @@ public abstract class User implements Model {
 	@Embedded
 	private UserDetails details;
 
-	@OneToOne(optional = false, cascade = CascadeType.PERSIST)
+	@OneToOne(optional = false, cascade = CascadeType.MERGE)
 	@JoinColumn(name = "credentials_id", nullable = false)
 	private UserCredentials userCredentials;
 
@@ -41,15 +47,6 @@ public abstract class User implements Model {
 
 	User() {
 		this.isEnabled = true;
-	}
-
-	public User(Map<String, Object> map) {
-		this(
-			(Long) map.get("ID"),
-			(UserDetails) map.get("Dettagli"),
-			(UserCredentials) map.get("Credenziali"),
-			(boolean) map.get("Abilitato")
-		);
 	}
 
 	User(UserDetails details, UserCredentials userCredentials) {
@@ -267,12 +264,19 @@ public abstract class User implements Model {
 
 	@Override
 	public Map<String, Object> toTableRow() {
-		Map<String, Object> map = Map.of(
-			"ID", id,
-			"Abilitato", isEnabled
-		);
-		map.putAll(userCredentials.toTableRow());
+		Map<String, Object> map = new LinkedHashMap<>();
+
+		JButton showCredentials = new JButton("Credenziali");
+		showCredentials.addActionListener(l -> {
+			ModelViewer<UserCredentials> picker = new ModelViewer<>("Credenziali",
+					ListSelectionModel.SINGLE_SELECTION, getUserCredentials());
+			picker.setVisible(true);
+		});
+
+		map.put("ID", id);
 		map.putAll(details.toTableRow());
+		map.put("Credenziali", showCredentials);
+		map.put("Abilitato", isEnabled);
 
 		return map;
 	}

@@ -11,6 +11,7 @@ public class CustomListCellRenderer extends DefaultListCellRenderer {
     private static final long serialVersionUID = -1600461002451054914L;
 
     public CustomListCellRenderer() {
+        super();
         setOpaque(true);
     }
 
@@ -18,7 +19,7 @@ public class CustomListCellRenderer extends DefaultListCellRenderer {
     public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
             boolean cellHasFocus) {
         if(value instanceof Customer c) {
-            setText(c.getFullName() + " " + c.getEU_TIN().getValue());
+            setText(c.getFullName() + " " + c.getEu_tin());
         }
 
         if (isSelected) {

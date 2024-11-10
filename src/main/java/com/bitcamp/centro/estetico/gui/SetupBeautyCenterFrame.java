@@ -3,26 +3,27 @@ package com.bitcamp.centro.estetico.gui;
 import java.awt.Color;
 import java.awt.Font;
 import java.time.LocalTime;
-import java.util.Optional;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 
-import com.bitcamp.centro.estetico.DAO.BeautyCenterDAO;
-import com.bitcamp.centro.estetico.DAO.EmployeeDAO;
-import com.bitcamp.centro.estetico.DAO.VAT_DAO;
+import com.bitcamp.centro.estetico.controller.DAO;
 import com.bitcamp.centro.estetico.models.BeautyCenter;
+import com.bitcamp.centro.estetico.models.Employee;
 import com.bitcamp.centro.estetico.models.VAT;
-import com.bitcamp.centro.estetico.utils.inputValidator;
-import com.bitcamp.centro.estetico.utils.inputValidator.inputValidatorException;
-import com.bitcamp.centro.estetico.utils.placeholderHelper;
+import com.bitcamp.centro.estetico.utils.InputValidator;
+import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
+import com.bitcamp.centro.estetico.utils.PlaceholderHelper;
 import com.github.lgooddatepicker.components.TimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 
 public class SetupBeautyCenterFrame extends JFrame {
-
-	private static EmployeeDAO employeeDAO = EmployeeDAO.getInstance();
-	private static BeautyCenterDAO beautyCenterDAO = BeautyCenterDAO.getInstance();
-	private static VAT_DAO vat_DAO = VAT_DAO.getInstance();
 
 	private static final long serialVersionUID = 1L;
 	private static JTextField txfName;
@@ -48,6 +49,8 @@ public class SetupBeautyCenterFrame extends JFrame {
 		setLayout(null);
 		setVisible(true);
 		setLocationRelativeTo(null);
+		setIconImage(new ImageIcon(
+			MainFrame.class.getResource("/com/bitcamp/centro/estetico/resources/bc_icon.png")).getImage());
 
 		JLabel titleDatiFiscali = new JLabel("INIZIALIZZA IL TUO CENTRO - INSERISCI  I DATI FISCALI");
 		titleDatiFiscali.setHorizontalAlignment(SwingConstants.CENTER);
@@ -62,7 +65,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 
 		txfName = new JTextField();
 		txfName.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		placeholderHelper.addPlaceholder(txfName, "*");
+		PlaceholderHelper.addPlaceholder(txfName, "*");
 		txfName.setColumns(10);
 		txfName.setBounds(219, 183, 220, 20);
 		add(txfName);
@@ -107,7 +110,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 
 		txfSedeLegale = new JTextField();
 		txfSedeLegale.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		placeholderHelper.addPlaceholder(txfSedeLegale, "*");
+		PlaceholderHelper.addPlaceholder(txfSedeLegale, "*");
 		txfSedeLegale.setColumns(10);
 		txfSedeLegale.setBounds(219, 351, 220, 20);
 		add(txfSedeLegale);
@@ -119,7 +122,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 
 		txfSedeOperativa = new JTextField();
 		txfSedeOperativa.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		placeholderHelper.addPlaceholder(txfSedeOperativa, "*");
+		PlaceholderHelper.addPlaceholder(txfSedeOperativa, "*");
 		txfSedeOperativa.setColumns(10);
 		txfSedeOperativa.setBounds(219, 393, 220, 20);
 		add(txfSedeOperativa);
@@ -131,7 +134,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 
 		txfRea = new JTextField();
 		txfRea.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		placeholderHelper.addPlaceholder(txfRea, "*");
+		PlaceholderHelper.addPlaceholder(txfRea, "*");
 		txfRea.setColumns(10);
 		txfRea.setBounds(724, 183, 220, 20);
 		add(txfRea);
@@ -143,7 +146,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 
 		txfPIva = new JTextField();
 		txfPIva.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
-		placeholderHelper.addPlaceholder(txfPIva, "*");
+		PlaceholderHelper.addPlaceholder(txfPIva, "*");
 		txfPIva.setColumns(10);
 		txfPIva.setBounds(724, 225, 220, 20);
 		add(txfPIva);
@@ -172,7 +175,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 		btnNext.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 14));
 		btnNext.setBackground(new Color(64, 64, 64)); // green new Color(0, 204, 102)
 		btnNext.addActionListener(e -> {
-			if (employeeDAO.isEmpty()) {
+			if (DAO.isEmpty(Employee.class)) {
 				new SetupFirstAccountFrame();
 			} else {
 				new LoginFrame();
@@ -187,13 +190,14 @@ public class SetupBeautyCenterFrame extends JFrame {
 		btnInserisci.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		btnInserisci.setBounds(388, 450, 100, 30);
 		add(btnInserisci);
-		if (!beautyCenterDAO.isEmpty()) {
+		if (!DAO.isEmpty(BeautyCenter.class)) {
 			btnInserisci.setEnabled(false);
 			btnNext.setEnabled(true);
 		}
 
 		btnInserisci.addActionListener(e -> {
-			if (!validateInputs()) return;
+			if (!validateInputs())
+				return;
 
 			try {
 				// Estrai i dati dai campi di input
@@ -208,28 +212,16 @@ public class SetupBeautyCenterFrame extends JFrame {
 				LocalTime openingHour = aperturaPicker.getTime();
 				LocalTime closingHour = chiusuraPicker.getTime();
 
-				// Crea VAT di default e inseriscili nel database
 				// https://www.agenziaentrate.gov.it/portale/web/guest/iva-regole-generali-aliquote-esenzioni-pagamento/norme-generali-e-aliquote
-				vat_DAO.insert(new VAT(4));
-				vat_DAO.insert(new VAT(5));
-				vat_DAO.insert(new VAT(10));
-				vat_DAO.insert(new VAT(22));
+				DAO.insert(new VAT(4));
+				DAO.insert(new VAT(5));
+				DAO.insert(new VAT(10));
+				DAO.insert(new VAT(22));
 
-				// Crea un nuovo oggetto BeautyCenter
-				/*
-				 * String name, String phone, String certifiedMail, String mail, String
-				 * registeredOffice, String operatingOffice, String REA, String P_IVA, LocalTime
-				 * openingHour, LocalTime closingHour
-				 *
-				 */
 				BeautyCenter beautyCenter = new BeautyCenter(name, phone, certifiedMail, email, registeredOffice,
 						operatingOffice, rea, pIva, openingHour, closingHour);
 
-				Optional<BeautyCenter> result = beautyCenterDAO.insert(beautyCenter);
-				if (result.isEmpty()) {
-					JOptionPane.showMessageDialog(null, "Errore durante l'inserimento dei dati.");
-					return;
-				}
+				DAO.insert(beautyCenter).orElseThrow();
 
 				btnInserisci.setEnabled(false);
 				btnAnnulla.setEnabled(false);
@@ -237,7 +229,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 				btnNext.setEnabled(true);
 				btnNext.setBackground(new Color(0, 204, 102));
 			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(null, "Errore durante l'inserimento: " + ex.getMessage());
+				JOptionPane.showMessageDialog(this, "Errore durante l'inserimento: " + ex.getMessage());
 			}
 		});
 
@@ -281,22 +273,22 @@ public class SetupBeautyCenterFrame extends JFrame {
 	// Metodo per validare gli input
 	private static boolean validateInputs() {
 		try {
-			inputValidator.validateAlphanumeric(txfName, "Nome");
-			inputValidator.validatePhoneNumber(txfPhone);
-			inputValidator.validateEmail(txfPEC);
-			inputValidator.validateEmail(txfEmail);
-			inputValidator.validateAlphanumeric(txfSedeLegale, "Sede legale");
-			inputValidator.validateAlphanumeric(txfSedeOperativa, "Sede operativa");
-			inputValidator.validateAlphanumeric(txfRea, "REA");
-			inputValidator.validatePIva(txfPIva);
-			inputValidator.validateRea(txfRea);
-		} catch (inputValidatorException e) {
+			InputValidator.validateAlphanumeric(txfName, "Nome");
+			InputValidator.validatePhoneNumber(txfPhone);
+			InputValidator.validateEmail(txfPEC);
+			InputValidator.validateEmail(txfEmail);
+			InputValidator.validateAlphanumeric(txfSedeLegale, "Sede legale");
+			InputValidator.validateAlphanumeric(txfSedeOperativa, "Sede operativa");
+			InputValidator.validateAlphanumeric(txfRea, "REA");
+			InputValidator.validatePIva(txfPIva);
+			InputValidator.validateRea(txfRea);
+		} catch (InputValidatorException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 			e.printStackTrace();
 			return false;
 		}
 		return aperturaPicker.getTime().compareTo(chiusuraPicker.getTime()) < 0 &&
-			aperturaPicker.isTextFieldValid() &&
-			chiusuraPicker.isTextFieldValid();
+				aperturaPicker.isTextFieldValid() &&
+				chiusuraPicker.isTextFieldValid();
 	}
 }

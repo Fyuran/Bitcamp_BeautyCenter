@@ -12,7 +12,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
-import com.bitcamp.centro.estetico.DAO.UserCredentialsDAO;
+import com.bitcamp.centro.estetico.controller.DAO;
 import com.bitcamp.centro.estetico.models.Employee;
 
 public class ChangeUserDialog extends JDialog {
@@ -22,7 +22,6 @@ public class ChangeUserDialog extends JDialog {
 	private JPasswordField txfPassword;
 	private Employee activeUser;
 	private UserAccessPanel parentPanel;
-	private static UserCredentialsDAO userCredentialsDAO = UserCredentialsDAO.getInstance();
 
 	/**
 	 * Create the frame.
@@ -84,7 +83,7 @@ public class ChangeUserDialog extends JDialog {
 		String username = txfNewUsername.getText();
 		activeUser.setUsername(username);
 		
-		userCredentialsDAO.update(activeUser);
+		DAO.update(activeUser);
 		JOptionPane.showMessageDialog(this, "Username modificato correttamente");
 		
 		parentPanel.updateData();
@@ -93,10 +92,6 @@ public class ChangeUserDialog extends JDialog {
 	}
 
 	private boolean isDataValid() {
-		if (!userCredentialsDAO.isUsernameUnique(txfNewUsername.getText())) {
-			JOptionPane.showMessageDialog(this, "Nuovo username già in uso");
-			return false;
-		}
 		if (!activeUser.isValidPassword(txfPassword.getPassword())) {
 			System.out.println(activeUser.getUsername());
 			JOptionPane.showMessageDialog(this, "Password errata");

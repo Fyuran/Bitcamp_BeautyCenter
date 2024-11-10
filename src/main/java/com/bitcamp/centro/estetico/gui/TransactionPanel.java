@@ -4,88 +4,94 @@ import java.awt.Color;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JFormattedTextField;
-import javax.swing.JList;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.ScrollPaneConstants;
+import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import com.bitcamp.centro.estetico.DAO.BeautyCenterDAO;
-import com.bitcamp.centro.estetico.DAO.TransactionDAO;
-import com.bitcamp.centro.estetico.gui.render.CustomTableCellRenderer;
+import com.bitcamp.centro.estetico.controller.DAO;
+import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
+import com.bitcamp.centro.estetico.models.BeautyCenter;
 import com.bitcamp.centro.estetico.models.Customer;
 import com.bitcamp.centro.estetico.models.PayMethod;
 import com.bitcamp.centro.estetico.models.Transaction;
 import com.bitcamp.centro.estetico.models.VAT;
+import com.bitcamp.centro.estetico.utils.JSplitBtn;
 import com.bitcamp.centro.estetico.utils.JSplitComboBox;
 import com.bitcamp.centro.estetico.utils.JSplitDateTimePicker;
-import com.bitcamp.centro.estetico.utils.JSplitLbTxf;
+import com.bitcamp.centro.estetico.utils.JSplitTxf;
+import com.bitcamp.centro.estetico.utils.ModelChooser;
 
-public class TransactionPanel extends BasePanel<Transaction> {
-	
-	private static TransactionDAO transactionDAO = TransactionDAO.getInstance();
-	private static BeautyCenterDAO beautyCenterDAO = BeautyCenterDAO.getInstance();
-
+public class TransactionPanel extends AbstractBasePanel<Transaction> {
 	private static JSplitComboBox<PayMethod> payMethodComboBox;
-	private static JSplitLbTxf priceTextField;
+	private static JSplitTxf priceTextField;
 	private static JSplitComboBox<VAT> VATComboBox;
-	private static JList<Customer> customersJList;
-	private static DefaultListModel<Customer> customerListModel;
-	private static JSplitLbTxf servicesTextArea;
+	private static JSplitTxf servicesTextArea;
 	private static JSplitDateTimePicker dateTimePicker;
-	private static Long id = -1;
-	private static boolean isEnabled = false;
+	private static JSplitBtn customerBtn;
 
-	public TransactionPanel() {
-		//init BasePanel members
+	private static List<Customer> returnCustomers = new ArrayList<>();
 
+	private static BeautyCenter beautyCenter = DAO.get(BeautyCenter.class, 1L).get();
+	private static Transaction selectedData = new Transaction();
+
+	public TransactionPanel(JFrame parent) {
+		super(parent);
 		setSize(1080, 900);
 		setName("Transazioni");
 		setTitle("GESTIONE TRANSAZIONI");
-		
-		table.setModel(transactionModel);
-		table.setDefaultRenderer(Object.class, new CustomTableCellRenderer(transactionModel));
 
 		payMethodComboBox = new JSplitComboBox<>("Pagamento");
-		actionsPanel.add(payMethodComboBox);
-		for(PayMethod payMethod : PayMethod.values()) {
+		for (PayMethod payMethod : PayMethod.values()) {
 			payMethodComboBox.addItem(payMethod);
 		}
+		payMethodComboBox.setSelectedIndex(0);
 
-		priceTextField = new JSplitLbTxf("Conto", new JFormattedTextField(NumberFormat.getInstance()));
-		actionsPanel.add(priceTextField);
-
+		priceTextField = new JSplitTxf("Conto", new JFormattedTextField(NumberFormat.getInstance()));
 		VATComboBox = new JSplitComboBox<>("IVA");
-		actionsPanel.add(VATComboBox);
-		for(VAT vat : vats) {
-			VATComboBox.addItem(vat);
-		}
-
-		JScrollPane customerListScrollPane = new JScrollPane();
-		actionsPanel.add(customerListScrollPane);
-
-		customerListModel = new DefaultListModel<>();
-		customersJList = new JList<>();
-		customersJList.setLocale(Locale.getDefault());
-		customersJList.setBorder(new LineBorder(new Color(0, 0, 0), 1, true));
-		customersJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		customerListScrollPane.setViewportView(customersJList);
-		customerListScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		customersJList.setModel(customerListModel);
-		customersJList.setCellRenderer(customListCellRenderer);
-
-		servicesTextArea = new JSplitLbTxf("Servizi Effettuati");
-		actionsPanel.add(servicesTextArea);
-
+		servicesTextArea = new JSplitTxf("Servizi Effettuati");
 		dateTimePicker = new JSplitDateTimePicker("Data e Orario");
+
+		customerBtn = new JSplitBtn("Cliente", "Scelta Cliente");
+		customerBtn.addActionListener(l1 -> {
+			ModelChooser<Customer> picker = new ModelChooser<>(parent, "Scelta Cliente",
+					ListSelectionModel.SINGLE_SELECTION, returnCustomers);	
+
+			customers = DAO.getAll(Customer.class);
+			var available = customers
+			.parallelStream()
+			.filter(c -> c.isEnabled())
+			.toList();
+			
+			if(!available.isEmpty()) {
+				NonEditableTableModel<Customer> model = picker.getModel();
+				model.addRows(available);
+			}
+			else
+				picker.getLbOutput().setText("Lista vuota");
+
+			picker.setVisible(true);
+		});
+
+		actionsPanel.add(payMethodComboBox);
+		actionsPanel.add(priceTextField);
+		actionsPanel.add(VATComboBox);
+		actionsPanel.add(customerBtn);
+		actionsPanel.add(servicesTextArea);
 		actionsPanel.add(dateTimePicker);
+
+		vats.stream()
+		.filter(v -> v.isEnabled())
+		.forEach(v -> VATComboBox.addItem(v));
+		VATComboBox.setSelectedIndex(0);
+
 	}
 
 	@Override
@@ -94,85 +100,100 @@ public class TransactionPanel extends BasePanel<Transaction> {
 		throw new UnsupportedOperationException("Unimplemented method 'search'");
 	}
 
-	
-
 	@Override
 	public void insertElement() {
+		BigDecimal price = BigDecimal.ZERO;
 		try {
-			BigDecimal price = BigDecimal.valueOf(Double.parseDouble(priceTextField.getText()));
-			LocalDateTime dateTime = dateTimePicker.getDateTimePermissive();
-			PayMethod paymentMethod = (PayMethod) payMethodComboBox.getSelectedItem();
-			VAT vat = (VAT) VATComboBox.getSelectedItem();
-			Customer customer = customersJList.getSelectedValue();
-			String services = servicesTextArea.getText();
-
-			lbOutput.setText("Transazione inserita");
-			transactionDAO.insert(new Transaction(price, paymentMethod, dateTime, customer, vat,
-				beautyCenterDAO.getFirst().get(), services));
-			refreshTable();
+			price = BigDecimal.valueOf(Double.parseDouble(priceTextField.getText()));
+			priceTextField.setBorder(UIManager.getBorder("SplitPane.border"));
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, "Dati errati o mancanti", "Errore di inserimento",
-					JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(parent, "Campo prezzo errato");
+			priceTextField.setBorder(new LineBorder(Color.RED));
+			return;
 		}
+
+		LocalDateTime dateTime = dateTimePicker.getDateTimePermissive();
+		PayMethod paymentMethod = (PayMethod) payMethodComboBox.getSelectedItem();
+		VAT vat = (VAT) VATComboBox.getSelectedItem();
+		String services = servicesTextArea.getText();
+		Customer customer = null;
+		if (!returnCustomers.isEmpty()) {
+			customer = returnCustomers.getFirst();
+		}
+
+		lbOutput.setText("Transazione inserita");
+		DAO.insert(new Transaction(price, vat, dateTime, paymentMethod, customer, beautyCenter, services));
+		refresh();
 	}
 
 	@Override
 	public void updateElement() {
-		try {
-			int selectedRow = table.getSelectedRow();
-			if (selectedRow == -1) {
-				throw new IllegalArgumentException("no selectedRow selected");
-			}
-			BigDecimal price = BigDecimal.valueOf(Double.parseDouble(priceTextField.getText()));
-			LocalDateTime dateTime = dateTimePicker.getDateTimePermissive();
-			PayMethod paymentMethod = (PayMethod) payMethodComboBox.getSelectedItem();
-			VAT vat = (VAT) VATComboBox.getSelectedItem();
-			Customer customer = customersJList.getSelectedValue();
-			String services = servicesTextArea.getText();
-
-			lbOutput.setText("Transazione aggiornata");
-			transactionDAO.update(id, new Transaction(price, paymentMethod, dateTime, customer, vat,
-				beautyCenterDAO.getFirst().get(), services));
-			refreshTable();
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, "Dati errati o mancanti", "Errore di aggiornamento",
-					JOptionPane.ERROR_MESSAGE);
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(parent, "Nessuna transazione selezionata");
+			return; // do not allow invalid ids to be passed to update
 		}
+		if (selectedData.getId() == null || !selectedData.isEnabled())
+			return;
+		if(returnCustomers.isEmpty()) {
+			JOptionPane.showMessageDialog(parent, "Nessun cliente scelto", "Errore", JOptionPane.ERROR_MESSAGE);
+			return;
+		} else {
+			selectedData.setCustomer(returnCustomers.getFirst());
+		}
+
+		BigDecimal price = BigDecimal.valueOf(Double.parseDouble(priceTextField.getText()));
+		LocalDateTime dateTime = dateTimePicker.getDateTimePermissive();
+		PayMethod paymentMethod = (PayMethod) payMethodComboBox.getSelectedItem();
+		VAT vat = (VAT) VATComboBox.getSelectedItem();
+		String services = servicesTextArea.getText();
+		// customer is updated by model quick viewer
+
+		selectedData.setPrice(price);
+		selectedData.setDateTime(dateTime);
+		selectedData.setPaymentMethod(paymentMethod);
+		selectedData.setVat(vat);
+		selectedData.setServices(services);
+
+		lbOutput.setText("Transazione aggiornata");
+		DAO.update(selectedData);
+		refresh();
 	}
 
 	@Override
 	public void deleteElement() {
-		if (table.getSelectedRow() < 0) return;
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(parent, "Nessuna transazione selezionata");
+			return; // do not allow invalid ids to be passed to update
+		}
+		if (selectedData.getId() == null || !selectedData.isEnabled())
+			return;
 		lbOutput.setText("Transazione cancellata");
-		transactionDAO.delete(id);
-		refreshTable();
+		DAO.delete(selectedData);
+		refresh();
 	}
 
 	@Override
 	public void disableElement() {
-		if (table.getSelectedRow() < 0) return;
-		lbOutput.setText(!isEnabled ? "Transazione abilitata" : "Transazione disabilitata");
-		transactionDAO.toggle(id);
-		refreshTable();
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(parent, "Nessuna transazione selezionata");
+			return; // do not allow invalid ids to be passed to update
+		}
+		if (selectedData == null)
+			return;
+		DAO.toggle(selectedData);
+		lbOutput.setText(selectedData.isEnabled() ? "Transazione abilitata" : "Transazione disabilitata");
+		refresh();
 	}
 
 	@Override
 	public void populateTable() {
-		isRefreshing = true;
-		clearTable(table);
-		customerListModel.clear();
-		
-		customers.parallelStream()
-		.forEach(c -> customerListModel.addElement(c));
-
-		transactions = transactionDAO.getAll();
+		transactions = DAO.getAll(Transaction.class);
 		if (!transactions.isEmpty()) {
 			transactions.parallelStream()
-			.forEach(t -> transactionModel.addRow(t.toTableRow()));
+					.forEach(t -> model.addRow(t));
 		} else {
 			lbOutput.setText("Lista Transazioni vuota");
 		}
-		isRefreshing = false;
 	}
 
 	@Override
@@ -180,35 +201,30 @@ public class TransactionPanel extends BasePanel<Transaction> {
 		return new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent event) {
-				if (isRefreshing) return;
+				if(event.getValueIsAdjusting())
+					return;
 				int selectedRow = table.getSelectedRow();
-				if (selectedRow < 0) return;
+				if (selectedRow < 0)
+					return;
 
-				var values = getRowMap(table, transactionModel);
+				selectedData = model.getObjAt(selectedRow);
+				if (selectedData.getId() == null || !selectedData.isEnabled())
+					return;
 
-				id = (int) values.get("ID");
-				isEnabled = (boolean) values.get("Abilitato");
-				
-				BigDecimal price = (BigDecimal) values.get("Conto"); // price
-				LocalDateTime dateTime = (LocalDateTime) values.get("Data");
-				PayMethod payMethod = (PayMethod) values.get("Pagamento");
-				VAT vat = (VAT) values.get("IVA");
-				Customer customer = (Customer) values.get("Cliente");
-				String services = (String) values.get("Servizi");
+				BigDecimal price = selectedData.getPrice(); // price
+				LocalDateTime dateTime = selectedData.getDateTime();
+				PayMethod payMethod = selectedData.getPaymentMethod();
+				VAT vat = selectedData.getVat();
+				String services = selectedData.getServices();
 
 				priceTextField.setText(price.toString());
 				dateTimePicker.setDateTimePermissive(dateTime);
 				payMethodComboBox.setSelectedItem(payMethod);
 				VATComboBox.setSelectedItem(vat);
 				servicesTextArea.setText(services);
+				
+				returnCustomers.clear();
 
-				lbOutput.setText("");
-				for (Object obj : customerListModel.toArray()) {
-					Customer c = (Customer) obj;
-					if (c.getFullName().equals(customer.getFullName())) {
-						customersJList.setSelectedValue(obj, true);
-					}
-				}		
 			}
 		};
 	}
@@ -220,8 +236,12 @@ public class TransactionPanel extends BasePanel<Transaction> {
 
 	@Override
 	public void clearTxfFields() {
-		throw new UnsupportedOperationException("Unimplemented method 'clearTxfFields'");
+		payMethodComboBox.setSelectedIndex(0);
+		priceTextField.setText(0);
+		returnCustomers.clear();
+		servicesTextArea.setText("");
+		VATComboBox.setSelectedIndex(0);
+		dateTimePicker.setDateTimePermissive(LocalDateTime.now());
 	}
 
-	
 }

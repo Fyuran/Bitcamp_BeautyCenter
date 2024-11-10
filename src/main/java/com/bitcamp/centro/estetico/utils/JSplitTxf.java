@@ -1,25 +1,25 @@
 package com.bitcamp.centro.estetico.utils;
 
-import java.awt.Font;
-
+import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 //JSplitPane.VERTICAL_SPLIT = 0
 //JSplitPane.HORIZONTAL_SPLIT = 1
-public class JSplitLbTxf extends JSplitLabel {
+public class JSplitTxf extends JSplitLabel {
 	private static final long serialVersionUID = 1L;
 	private JTextField textField;
 
-	public JSplitLbTxf() {
+	public JSplitTxf() {
 		this("Label text");
 	}
-	public JSplitLbTxf(String text) {
+
+	public JSplitTxf(String text) {
 		this(text, new JTextField());
 	}
-	public JSplitLbTxf(String text, JTextField textField) {
-		super(text, textField);
-		this.textField = textField;
 
+	public JSplitTxf(String text, JTextField textField) {
+		super(new JLabel(text), textField);
+		this.textField = textField;
 		setDefaultSize();
 	}
 
@@ -32,7 +32,7 @@ public class JSplitLbTxf extends JSplitLabel {
 	}
 
 	private void setDefaultSize() {
-		textField.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+		textField.setFont(font);
 	}
 
 	public String getText() {
@@ -42,7 +42,16 @@ public class JSplitLbTxf extends JSplitLabel {
 	public void setText(String text) {
 		textField.setText(text);
 	}
-    public void setText(Number number) {
-        textField.setText(String.valueOf(number));
-    }
+
+	public void setText(Number number) {
+		textField.setText(String.valueOf(number));
+	}
+
+	public boolean isEditable() {
+		return textField.isEditable();
+	}
+
+	public void setIsEditable(boolean isEditable) {
+		textField.setEditable(isEditable);
+	}
 }

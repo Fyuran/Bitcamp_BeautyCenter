@@ -2,16 +2,25 @@ package com.bitcamp.centro.estetico.models;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.Map;
+
+import javax.swing.JButton;
+import javax.swing.ListSelectionModel;
 
 import org.hibernate.annotations.ColumnDefault;
 
+import com.bitcamp.centro.estetico.utils.ModelViewer;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
@@ -31,14 +40,18 @@ public class Subscription implements Model {
 
 	private BigDecimal price;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "vat_id", nullable = false)
 	private VAT vat;
 
 	private double discount;
 
-	@OneToOne
-	@JoinColumn(name = "customer_id", nullable = true)
+	@OneToOne(cascade = CascadeType.MERGE)
+	@JoinTable(
+		name = "subscription_customer",
+		joinColumns = @JoinColumn(name = "subscription_id", referencedColumnName = "id", nullable = false),
+		inverseJoinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id", nullable = false)
+	)
 	private Customer customer;
 
 	@Column(name = "is_enabled")
@@ -47,20 +60,6 @@ public class Subscription implements Model {
 
 	public Subscription() {
 		this.isEnabled = true;
-	}
-
-	public Subscription(Map<String, Object> map) {
-		this(
-			(Long) map.get("ID"),
-			(SubPeriod) map.get("Periodo"),
-			(LocalDate) map.get("Inizio"),
-			(LocalDate) map.get("Scadenza"),
-			(BigDecimal) map.get("Prezzo"),
-			(VAT) map.get("IVA"),
-			(double) map.get("Sconto Applicato"),
-			(Customer) map.get("Cliente"),
-			(boolean) map.get("Abilitato")
-		);
 	}
 
 	public Subscription(SubPeriod subperiod, LocalDate start, LocalDate end, BigDecimal price, VAT vat,
@@ -79,11 +78,6 @@ public class Subscription implements Model {
 		this.discount = discount;
 		this.customer = customer;
 		this.isEnabled = isEnabled;
-	}
-
-	public Subscription(SubPeriod subperiod, LocalDate start, LocalDate end, BigDecimal price, VAT vat,
-			double discount) {
-				this(subperiod, start, end, price, vat, discount, null);
 	}
 
 	public Long getId() {
@@ -161,17 +155,26 @@ public class Subscription implements Model {
 
 	@Override
 	public Map<String, Object> toTableRow() {
-		return Map.ofEntries(
-			Map.entry("ID", id),
-			Map.entry("Prezzo", price),
-			Map.entry("IVA", vat),
-			Map.entry("Periodo", subperiod),
-			Map.entry("Inizio", start),
-			Map.entry("Scadenza", end),
-			Map.entry("Sconto Applicato", discount),
-			Map.entry("Cliente", customer),
-			Map.entry("Abilitato", isEnabled)
-		);
+		Map<String, Object> map = new LinkedHashMap<>();
+
+		JButton showCustomers = new JButton("Clienti");
+		showCustomers.addActionListener(l -> {
+			ModelViewer<Customer> picker = new ModelViewer<>("Clienti",
+					ListSelectionModel.SINGLE_SELECTION, getCustomer());
+			picker.setVisible(true);
+		});
+
+		map.put("ID", id);
+		map.put("Prezzo", price);
+		map.put("IVA", vat);
+		map.put("Periodo", subperiod);
+		map.put("Inizio", start);
+		map.put("Scadenza", end);
+		map.put("Sconto Applicato", discount);
+		map.put("Cliente", showCustomers);
+		map.put("Abilitato", isEnabled);
+		
+		return map;
 	}
 
 	@Override

@@ -1,113 +1,115 @@
 package com.bitcamp.centro.estetico.gui;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import com.bitcamp.centro.estetico.DAO.CustomerDAO;
-import com.bitcamp.centro.estetico.DAO.UserCredentialsDAO;
-import com.bitcamp.centro.estetico.gui.render.CustomTableCellRenderer;
+import com.bitcamp.centro.estetico.controller.DAO;
+import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.Customer;
 import com.bitcamp.centro.estetico.models.Gender;
 import com.bitcamp.centro.estetico.models.Prize;
 import com.bitcamp.centro.estetico.models.Subscription;
 import com.bitcamp.centro.estetico.models.UserCredentials;
 import com.bitcamp.centro.estetico.models.UserDetails;
-import com.bitcamp.centro.estetico.utils.JSplitBtnField;
+import com.bitcamp.centro.estetico.utils.InputValidator;
+import com.bitcamp.centro.estetico.utils.InputValidator.EmptyInputException;
+import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
+import com.bitcamp.centro.estetico.utils.InputValidator.InvalidInputException;
+import com.bitcamp.centro.estetico.utils.JSplitBtn;
 import com.bitcamp.centro.estetico.utils.JSplitDatePicker;
-import com.bitcamp.centro.estetico.utils.JSplitLbTxf;
 import com.bitcamp.centro.estetico.utils.JSplitRadialButtons;
-import com.bitcamp.centro.estetico.utils.ObjectPicker;
-import com.bitcamp.centro.estetico.utils.inputValidator;
-import com.bitcamp.centro.estetico.utils.inputValidator.emptyInputException;
-import com.bitcamp.centro.estetico.utils.inputValidator.inputValidatorException;
+import com.bitcamp.centro.estetico.utils.JSplitTxf;
+import com.bitcamp.centro.estetico.utils.ModelChooser;
 
-public class CustomerPanel extends BasePanel<Customer> {
+public class CustomerPanel extends AbstractBasePanel<Customer> {
 
 	private static final long serialVersionUID = 1L;
-	private static UserCredentialsDAO userCredentialsDAO = UserCredentialsDAO.getInstance();
-	private static CustomerDAO customerDAO = CustomerDAO.getInstance();
 
-	private static JSplitLbTxf txfName;
-	private static JSplitLbTxf txfSurname;
-	private static JSplitLbTxf txfPhone;
-	private static JSplitLbTxf txfMail;
-	private static JSplitLbTxf txfAddress;
-	private static JSplitLbTxf txfIban;
-	private static JSplitLbTxf txfBirthplace;
+	private static JSplitTxf txfName;
+	private static JSplitTxf txfSurname;
+	private static JSplitTxf txfPhone;
+	private static JSplitTxf txfMail;
+	private static JSplitTxf txfAddress;
+	private static JSplitTxf txfIban;
+	private static JSplitTxf txfBirthplace;
 	private static JSplitRadialButtons genderBtns;
 	private static JSplitDatePicker txfBirthday;
-	private static JSplitLbTxf txfNotes;
-	private static JSplitLbTxf txfPIVA;
-	private static JSplitLbTxf txfRecipientCode;
-	private static JSplitLbTxf txfLoyaltyPoints;
-	private static JSplitBtnField txfSubscriptionBtnField;
-	private static JSplitBtnField txfPrizesBtnField;
+	private static JSplitTxf txfNotes;
+	private static JSplitTxf txfPIVA;
+	private static JSplitTxf txfRecipientCode;
+	private static JSplitTxf txfLoyaltyPoints;
+	private static JSplitBtn subscriptionBtn;
+	private static JSplitBtn prizesBtnField;
 
-	private static Long id = -1;
-	private static Gender gender;
-	private static String name;
-	private static String surname;
-	private static Subscription selectedSubscription;
-	private static List<Prize> selectedPrizes;
-	private static boolean isEnabled = false;
+	private static List<Subscription> returnSubscriptions = new ArrayList<>();
+	private static List<Prize> returnPrizes = new ArrayList<>();
 
-	public CustomerPanel() {
+	private static Customer selectedData = new Customer();
 
+	public CustomerPanel(JFrame parent) {
+		super(parent);
 		setName("Clienti");
 		setTitle("GESTIONE CLIENTI");
-		setSize(1024, 768);
+		setSize(1300, 768);
 
-		table.setModel(customerModel);
-		table.setDefaultRenderer(Object.class, new CustomTableCellRenderer(customerModel));
-
-		txfName = new JSplitLbTxf("Nome");
-		txfSurname = new JSplitLbTxf("Cognome");
-		txfMail = new JSplitLbTxf("Mail");
-		txfPhone = new JSplitLbTxf("Telefono");
-		txfAddress = new JSplitLbTxf("Indirizzo");
+		txfName = new JSplitTxf("Nome");
+		txfSurname = new JSplitTxf("Cognome");
+		txfMail = new JSplitTxf("Mail");
+		txfPhone = new JSplitTxf("Telefono");
+		txfAddress = new JSplitTxf("Indirizzo");
 		txfBirthday = new JSplitDatePicker("Data di nascita");
-		txfBirthplace = new JSplitLbTxf("Città Natale");
+		txfBirthplace = new JSplitTxf("Luogo di nascita");
 		genderBtns = new JSplitRadialButtons("Genere", "Maschio", "Femmina");
-		txfNotes = new JSplitLbTxf("Note");
-		txfIban = new JSplitLbTxf("IBAN");
-		txfPIVA = new JSplitLbTxf("P.IVA");
-		txfRecipientCode = new JSplitLbTxf("Codice Ricezione");
-		txfLoyaltyPoints = new JSplitLbTxf("Punti fedeltà");
-		txfSubscriptionBtnField = new JSplitBtnField("Abbonamento", "Visualizza Abbonamento");
-		txfSubscriptionBtnField.addActionListener(l -> {
-			ObjectPicker<Subscription> picker = new ObjectPicker<>(parent, "Scelta Cliente", subscriptions,
-					ListSelectionModel.SINGLE_SELECTION);
-					picker.setSelectedItems(selectedSubscription);
-					
-			picker.addActionListener(ll -> {
-				if(!picker.isSelectionEmpty()) {
-					selectedSubscription = picker.getSelectedValue();
-					picker.dispose();
-					txfSubscriptionBtnField.setFieldText(selectedSubscription.getSubPeriod().toString());
-				}
-			});
+		txfNotes = new JSplitTxf("Note");
+		txfIban = new JSplitTxf("IBAN");
+		txfPIVA = new JSplitTxf("P.IVA");
+		txfRecipientCode = new JSplitTxf("Codice Ricezione");
+		txfLoyaltyPoints = new JSplitTxf("Punti fedeltà");
+		txfLoyaltyPoints.setText(0);
+		subscriptionBtn = new JSplitBtn("Abbonamento", "Scegli Abbonamenti");
+		subscriptionBtn.addActionListener(l -> {
+			ModelChooser<Subscription> picker = new ModelChooser<>(parent, "Abbonamenti",
+					ListSelectionModel.SINGLE_SELECTION, returnSubscriptions);
+
+			subscriptions = DAO.getAll(Subscription.class);
+			var available = subscriptions
+					.parallelStream()
+					.filter(c -> c.isEnabled())
+					.toList();
+
+			if (!available.isEmpty()) {
+				NonEditableTableModel<Subscription> model = picker.getModel();
+				model.addRows(available);
+			} else
+				picker.getLbOutput().setText("Lista vuota");
+
 			picker.setVisible(true);
 		});
-		txfPrizesBtnField = new JSplitBtnField("Premi", "Visualizza Pemi");
-		txfPrizesBtnField.addActionListener(l -> {
-			ObjectPicker<Prize> picker = new ObjectPicker<>(parent, "Aggiunta Premi", prizes,
-					ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-					picker.setSelectedItems(selectedPrizes);
-			picker.addActionListener(ll -> {
-				if(!picker.isSelectionEmpty()) {
-					selectedPrizes = picker.getSelectedValuesList();
-					picker.dispose();
-					int quantity = selectedPrizes.size();
-					txfPrizesBtnField.setFieldText(quantity + (quantity == 1 ? " premio scelto" : " premi scelti"));
-				}
-			});
+		prizesBtnField = new JSplitBtn("Premi", "Scegli Pemi");
+		prizesBtnField.addActionListener(l -> {
+			ModelChooser<Prize> picker = new ModelChooser<>(parent, "Premi",
+					ListSelectionModel.MULTIPLE_INTERVAL_SELECTION, returnPrizes);
+
+			prizes = DAO.getAll(Prize.class);
+			var available = prizes
+					.parallelStream()
+					.filter(p -> p.isEnabled())
+					.toList();
+
+			if (!available.isEmpty()) {
+				NonEditableTableModel<Prize> model = picker.getModel();
+				model.addRows(available);
+			} else
+				picker.getLbOutput().setText("Lista vuota");
+
 			picker.setVisible(true);
 		});
 
@@ -124,8 +126,9 @@ public class CustomerPanel extends BasePanel<Customer> {
 		actionsPanel.add(txfPIVA);
 		actionsPanel.add(txfRecipientCode);
 		actionsPanel.add(txfLoyaltyPoints);
-		actionsPanel.add(txfSubscriptionBtnField);
-		actionsPanel.add(txfPrizesBtnField);
+		actionsPanel.add(subscriptionBtn);
+		actionsPanel.add(prizesBtnField);
+
 	}
 
 	@Override
@@ -138,95 +141,133 @@ public class CustomerPanel extends BasePanel<Customer> {
 	public void insertElement() {
 		try { // all fields must be filled
 			isDataValid();
-		} catch (inputValidatorException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
+		} catch (InputValidatorException e) {
+			JOptionPane.showMessageDialog(parent, e.getMessage());
 			return;
 		}
 
-		UserCredentials cred = new UserCredentials("", new char[0], txfAddress.getText(), txfIban.getText(),
-				txfPhone.getText(), txfMail.getText());
-		UserDetails det = new UserDetails(txfName.getText(), txfSurname.getText(), getGender(), txfBirthday.getDate(),
-				txfBirthplace.getText(), txfNotes.getText());
-		try {
-			cred = userCredentialsDAO.insert(cred).orElseThrow();
-		} catch (NoSuchElementException e) {
-			JOptionPane.showMessageDialog(null, "Campi già esistenti");
+		String name = txfName.getText();
+		String surname = txfSurname.getText();
+		String birthplace = txfBirthplace.getText();
+		LocalDate BoD = txfBirthday.getDate();
+		// LocalDate hired = LocalDate.now();
+		String notes = txfNotes.getText();
+		// String username = txfUsername.getText();
+		// char[] password = txfPassword.getPassword();
+		String address = txfAddress.getText();
+		String iban = txfIban.getText();
+		String phone = txfPhone.getText();
+		String mail = txfMail.getText();
+		String recipientCode = txfRecipientCode.getText();
+
+		String loyaltytfxText = txfLoyaltyPoints.getText();
+		int loyaltyPoints = loyaltytfxText.isBlank() ? 0 : Integer.parseInt(loyaltytfxText);
+
+		UserCredentials cred = new UserCredentials("", new char[0], address, iban, phone, mail, null);
+		UserDetails det = new UserDetails(name, surname, getGender(), BoD, birthplace, notes);
+
+		Subscription subscription = null;
+		if (!returnSubscriptions.isEmpty()) {
+			subscription = returnSubscriptions.getFirst();
 		}
-		Customer customer = new Customer(det, cred, txfPIVA.getText(), txfRecipientCode.getText(),
-				Integer.parseInt(txfLoyaltyPoints.getText()), selectedSubscription, selectedPrizes);
+		List<Prize> newPrizes = null;
+		if (!returnPrizes.isEmpty()) {
+			newPrizes = returnPrizes;
+		}
+
+		Customer customer = new Customer(det, cred, mail, recipientCode, loyaltyPoints, subscription, newPrizes);
+
+		cred.setUser(customer);
+		DAO.insert(cred);
+		DAO.insert(customer);
 
 		lbOutput.setText("Nuovo utente creato");
-		customerDAO.insert(customer);
-		refreshTable();
+		refresh();
 	}
 
 	@Override
 	public void updateElement() {
-		try {
-			isDataValid();
-		} catch (inputValidatorException e) {
-			if (!(e instanceof emptyInputException)) { // fields can be empty
-				JOptionPane.showMessageDialog(null, e.getMessage());
-				return;
-			}
-			e.errorComponent.setBorder(UIManager.getBorder("TextField.border")); // reset field's border in update mode
-		}
 		if (table.getSelectedRow() < 0) {
-			JOptionPane.showMessageDialog(null, "Nessun cliente selezionato");
+			JOptionPane.showMessageDialog(parent, "Nessun cliente selezionato");
 			return; // do not allow invalid ids to be passed to update
 		}
+		if (selectedData.getId() == null || !selectedData.isEnabled())
+			return;
 
-		Customer customer = customers.parallelStream().filter(e -> e.getId() == id).findFirst().get();
-		customer.setName(txfName.getText());
-		customer.setSurname(txfSurname.getText());
-		customer.setBirthplace(txfBirthplace.getText());
-		customer.setBoD(txfBirthday.getDate());
-		customer.setNotes(txfNotes.getText());
-		customer.setAddress(txfAddress.getText());
-		customer.setPhone(txfPhone.getText());
-		customer.setMail(txfMail.getText());
-		customer.setRecipientCode(txfRecipientCode.getText());
-		customer.setLoyaltyPoints(Integer.parseInt(txfLoyaltyPoints.getText()));
-		customer.setP_iva(txfPIVA.getText());
-		customer.setSubscription(selectedSubscription);
-		customer.addPrizes(selectedPrizes);
-		customer.setGender(gender);
+		try {
+			isDataValid();
+		} catch (InputValidatorException e) {
+			if (!(e instanceof EmptyInputException)) { // fields can be empty
+				JOptionPane.showMessageDialog(parent, e.getMessage());
+				return;
+			}
+			e.errorComponent.setBorder(UIManager.getBorder("SplitPane.border")); // reset field's border in update mode
+		}
 
-		lbOutput.setText(name + " " + surname + " modificato");
-		customerDAO.update(id, customer);
-		refreshTable();
+		selectedData.setName(txfName.getText());
+		selectedData.setSurname(txfSurname.getText());
+		selectedData.setBirthplace(txfBirthplace.getText());
+		selectedData.setBoD(txfBirthday.getDate());
+		selectedData.setNotes(txfNotes.getText());
+		selectedData.setAddress(txfAddress.getText());
+		selectedData.setPhone(txfPhone.getText());
+		selectedData.setMail(txfMail.getText());
+		selectedData.setRecipientCode(txfRecipientCode.getText());
+		selectedData.setLoyaltyPoints(Integer.parseInt(txfLoyaltyPoints.getText()));
+		selectedData.setP_iva(txfPIVA.getText());
+		selectedData.setGender(getGender());
+		if (returnSubscriptions.isEmpty()) {
+			selectedData.setSubscription(null);
+		} else {
+			selectedData.setSubscription(returnSubscriptions.getFirst());
+		}
+		if (returnPrizes.isEmpty()) {
+			selectedData.setPrizes(null);
+		} else {
+			selectedData.setPrizes(returnPrizes);
+		}
+
+		lbOutput.setText("Utente modificato");
+		DAO.update(selectedData);
+		refresh();
 	}
 
 	@Override
 	public void deleteElement() {
-		if (table.getSelectedRow() < 0)
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(parent, "Nessun cliente selezionato");
+			return; // do not allow invalid ids to be passed to update
+		}
+		if (selectedData.getId() == null || !selectedData.isEnabled())
 			return;
-		customerDAO.delete(id);
+
+		DAO.delete(selectedData);
 		lbOutput.setText("Cliente rimosso");
-		refreshTable();
+		refresh();
 	}
 
 	@Override
 	public void disableElement() {
-		if (table.getSelectedRow() < 0)
+		if (table.getSelectedRow() < 0) {
+			JOptionPane.showMessageDialog(parent, "Nessun cliente selezionato");
+			return; // do not allow invalid ids to be passed to update
+		}
+		if (selectedData == null)
 			return;
-		customerDAO.toggle(id);
-		lbOutput.setText(!isEnabled ? "Cliente abilitato" : "Cliente disabilitato");
-		refreshTable();
+
+		DAO.toggle(selectedData);
+		lbOutput.setText(selectedData.isEnabled() ? "Cliente abilitato" : "Cliente disabilitato");
+		refresh();
 	}
 
 	@Override
 	public void populateTable() {
-		isRefreshing = true;
-		clearTableModel(customerModel);
-		customers = customerDAO.getAll();
+		customers = DAO.getAll(Customer.class);
 		if (!customers.isEmpty()) {
-			customers.parallelStream()
-					.forEach(c -> customerModel.addRow(c.toTableRow()));
+			model.addRows(customers);
 		} else {
 			lbOutput.setText("Lista Clienti vuota");
 		}
-		isRefreshing = false;
 	}
 
 	@Override
@@ -245,15 +286,15 @@ public class CustomerPanel extends BasePanel<Customer> {
 		txfRecipientCode.setText("");
 	}
 
-	private static boolean getGender() {
+	private static Gender getGender() {
 		if (genderBtns.getSelectedIndex() == 1)
-			return true;
-		return false;
+			return Gender.FEMALE;
+		return Gender.MALE;
 	}
 
 	/*
 	 * "ID", "Genere", "Nome", "Cognome", "Telefono", "Email",
-	 * "Data di Nascita", "Città natale", "Codice fiscale", "P.IVA",
+	 * "Data di Nascita", "Luogo di nascita", "Codice fiscale", "P.IVA",
 	 * "Codice Ricezione",
 	 * "Punti Fedeltà", "Abbonamento", "Note", "Abilitato"
 	 */
@@ -262,50 +303,38 @@ public class CustomerPanel extends BasePanel<Customer> {
 		return new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent event) {
-				if (isRefreshing)
+				if (event.getValueIsAdjusting())
 					return;
 				int selectedRow = table.getSelectedRow();
 				if (selectedRow < 0)
 					return;
 
-				var values = getRowMap(table, customerModel);
+				selectedData = model.getObjAt(selectedRow);
+				if (selectedData == null || !selectedData.isEnabled())
+					return;
 
-				String phone = (String) values.get("Telefono");
-				String mail = (String) values.get("Email");
-				LocalDate BoD = (LocalDate) values.get("Data di Nascita");
-				String birthplace = (String) values.get("Città natale");
-				String address = (String) values.get("Indirizzo");
-				String P_IVA = (String) values.get("P.IVA");
-				String recipientCode = (String) values.get("Codice Ricezione");
-				int loyaltyPoints = (int) values.get("Punti Fedeltà");
-				String notes = (String) values.get("Note");
-				String iban = (String) values.get("IBAN");
+				txfName.setText(selectedData.getName());
+				txfSurname.setText(selectedData.getSurname());
+				txfPhone.setText(selectedData.getPhone());
+				txfMail.setText(selectedData.getMail());
+				txfBirthday.setDate(selectedData.getBirthday());
+				txfBirthplace.setText(selectedData.getBirthplace());
+				txfIban.setText(selectedData.getIban());
+				txfNotes.setText(selectedData.getNotes());
+				txfLoyaltyPoints.setText(selectedData.getLoyaltyPoints());
+				txfPIVA.setText(selectedData.getP_iva());
+				txfRecipientCode.setText(selectedData.getRecipientCode());
+				txfAddress.setText(selectedData.getAddress());
 
-				id = (int) values.get("ID");
-				name = (String) values.get("Nome");
-				surname = (String) values.get("Cognome");
-				gender = (Gender) values.get("Genere");
-				isEnabled = (boolean) values.get("Abilitato");
-				selectedSubscription = (Subscription) values.get("Abbonamento");
-
-				txfName.setText(name);
-				txfSurname.setText(surname);
-				txfPhone.setText(phone);
-				txfMail.setText(mail);
-				txfBirthday.setDate(BoD);
-				txfBirthplace.setText(birthplace);
-				txfIban.setText(iban);
-				txfNotes.setText(notes);
-				txfLoyaltyPoints.setText(loyaltyPoints);
-				txfPIVA.setText(P_IVA);
-				txfRecipientCode.setText(recipientCode);
-				txfAddress.setText(address);
-
-				if (gender == Gender.FEMALE) {
+				if (selectedData.getGender() == Gender.FEMALE) {
 					genderBtns.setSelected(1);
 				} else {
 					genderBtns.setSelected(0);
 				}
+
+				returnPrizes.clear();
+				returnSubscriptions.clear();
+				;
 			}
 		};
 	}
@@ -313,19 +342,18 @@ public class CustomerPanel extends BasePanel<Customer> {
 	@Override
 	public boolean isDataValid() {
 		try {
-			inputValidator.validateName(txfName);
-			inputValidator.validateSurname(txfSurname);
-			inputValidator.validateIban(txfIban);
-			inputValidator.validateEmail(txfMail);
-			inputValidator.validatePhoneNumber(txfPhone);
-			inputValidator.validateAlphanumeric(txfAddress, "Indirizzo");
-			// inputValidator.validateIban(txfIban);
-			inputValidator.validateAlphanumeric(txfBirthplace, "Città natale");
-			inputValidator.isValidCity(txfBirthplace);
-		} catch (inputValidatorException e) {
+			if (!txfBirthday.getDatePicker().isTextFieldValid()) {
+				throw new InvalidInputException("Anno di nascita non valida", txfBirthday);
+			} else {
+				txfBirthday.setBorder(UIManager.getBorder("SplitPane.border"));
+			}
+			InputValidator.isValidCity(txfBirthplace);
+			InputValidator.validateNumber(txfLoyaltyPoints, 0, Integer.MAX_VALUE);
+		} catch (InputValidatorException e) {
 			throw e;
 		}
 
 		return txfBirthday.isTextFieldValid();
 	}
+
 }

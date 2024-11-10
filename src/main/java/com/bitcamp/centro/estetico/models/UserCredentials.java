@@ -1,6 +1,7 @@
 package com.bitcamp.centro.estetico.models;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.hibernate.annotations.ColumnDefault;
@@ -34,7 +35,7 @@ public class UserCredentials implements Model {
 
 	private String mail;
 
-	@OneToOne(mappedBy = "userCredentials", cascade = CascadeType.PERSIST)
+	@OneToOne(mappedBy = "userCredentials", optional = false, cascade = CascadeType.MERGE)
 	private User user;
 
 	@Column(name = "is_enabled")
@@ -43,20 +44,6 @@ public class UserCredentials implements Model {
 
 	public UserCredentials() {
 		this.isEnabled = true;
-	}
-
-	public UserCredentials(Map<String, Object> map) {
-		this(
-			(Long) map.get("ID"),
-			(String) map.get("Username"),
-			(char[]) map.get("Password"),
-			(String) map.get("Indirizzo"),
-			(String) map.get("IBAN"),
-			(String) map.get("Telefono"),
-			(String) map.get("Email"),
-			(User) map.get("Utente"),
-			(boolean) map.get("Abilitato")
-		);
 	}
 
 	public UserCredentials(String username, char[] password, String address, String iban, String phone,
@@ -241,14 +228,17 @@ public class UserCredentials implements Model {
 
 	@Override
 	public Map<String, Object> toTableRow() {
-		return Map.ofEntries(
-			Map.entry("ID", id),
-			Map.entry("Username", username),
-			Map.entry("Indirizzo", address),
-			Map.entry("IBAN", iban),
-			Map.entry("Telefono", phone),
-			Map.entry("Email", mail),
-			Map.entry("Abilitato", isEnabled)
-		);
+		Map<String, Object> map = new LinkedHashMap<>();
+
+			map.put("ID", id);
+			map.put("Username", username);
+			map.put("Indirizzo", address);
+			map.put("IBAN", iban);
+			map.put("Telefono", phone);
+			map.put("Email", mail);
+			map.put("Abilitato", isEnabled);
+
+		return map;
+
 	}
 }

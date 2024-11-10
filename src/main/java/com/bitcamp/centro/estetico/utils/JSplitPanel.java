@@ -1,6 +1,5 @@
 package com.bitcamp.centro.estetico.utils;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -11,20 +10,20 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
-
-public class JSplitPanel extends JComponent {
+public class JSplitPanel extends JPanel {
     private JPanel leftPanel = new JPanel();
     private JPanel rightPanel = new JPanel();
-    
+
     public JSplitPanel() {
-        setBackground(new Color(255, 255, 255));
+        super();
         setLayout(new GridLayout(1, 2));
-        
+
         leftPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
-        
+
         rightPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
 
@@ -36,7 +35,7 @@ public class JSplitPanel extends JComponent {
         Component[] leftComponents = leftPanel.getComponents();
         Component[] rightComponents = rightPanel.getComponents();
 
-        if(leftComponents.length <= rightComponents.length) {
+        if (leftComponents.length <= rightComponents.length) {
             leftPanel.add(component);
             leftPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         } else {
@@ -53,26 +52,53 @@ public class JSplitPanel extends JComponent {
         Component[] rightComponents = rightPanel.getComponents();
 
         List<Component> components = new ArrayList<>();
-        for(int i = 0; i < leftComponents.length; i++) {
-            components.add(leftComponents[i]); 
+        for (int i = 0; i < leftComponents.length; i++) {
+            components.add(leftComponents[i]);
         }
-        for(int i = 0; i < rightComponents.length; i++) {
-            components.add(rightComponents[i]); 
-        } 
-        
+        for (int i = 0; i < rightComponents.length; i++) {
+            components.add(rightComponents[i]);
+        }
+
         return components.toArray(new Component[components.size()]);
     }
 
-    /*public void addComponents(Component... components) {
-        int quantity = components.length;
+    public JPanel getLeftPanel() {
+        return leftPanel;
+    }
 
-        int remainder = Math.ceilMod(quantity, _PANELS_QUANTITY);
-        int quotient = Math.ceilDiv(quantity, _PANELS_QUANTITY);
+    public void setLeftPanel(JPanel leftPanel) {
+        this.leftPanel = leftPanel;
+    }
 
-        List<Component> comps = Arrays.asList(components);
-        List<List<Component>> distributedComps = new ArrayList<>();
-        for(int i = 0; i < quantity; i += quotient) {
-            distributedComps.add(comps.subList(i, quotient + i));
+    public JPanel getRightPanel() {
+        return rightPanel;
+    }
+
+    public void setRightPanel(JPanel rightPanel) {
+        this.rightPanel = rightPanel;
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        if(leftPanel != null && rightPanel != null) {
+            leftPanel.setBackground(UIManager.getColor("background"));
+            rightPanel.setBackground(UIManager.getColor("background"));
         }
-    }*/
-}   
+    }
+
+    /*
+     * public void addComponents(Component... components) {
+     * int quantity = components.length;
+     * 
+     * int remainder = Math.ceilMod(quantity, _PANELS_QUANTITY);
+     * int quotient = Math.ceilDiv(quantity, _PANELS_QUANTITY);
+     * 
+     * List<Component> comps = Arrays.asList(components);
+     * List<List<Component>> distributedComps = new ArrayList<>();
+     * for(int i = 0; i < quantity; i += quotient) {
+     * distributedComps.add(comps.subList(i, quotient + i));
+     * }
+     * }
+     */
+}

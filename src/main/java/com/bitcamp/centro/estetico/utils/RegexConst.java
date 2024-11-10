@@ -12,7 +12,6 @@ public enum RegexConst {
     IBAN("IT\\d{2}[ ][a-zA-Z]\\d{3}[ ]\\d{4}[ ]\\d{4}[ ]\\d{4}[ ]\\d{4}[ ]\\d{3}|IT\\d{2}[a-zA-Z]\\d{22}"),
     REA("^\\S{1,10}");
 
-
     private String type;
 
     private RegexConst(String type) {
@@ -20,7 +19,7 @@ public enum RegexConst {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return type;
     }
 }

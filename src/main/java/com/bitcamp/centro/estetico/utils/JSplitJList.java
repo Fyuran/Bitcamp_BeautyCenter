@@ -1,7 +1,7 @@
 package com.bitcamp.centro.estetico.utils;
 
+import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JSplitPane;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 
@@ -9,17 +9,17 @@ public class JSplitJList<T> extends JSplitLabel {
     private JList<T> list;
 
     public JSplitJList() {
-		this("Label text");
-	}
+        this("Label text");
+    }
 
-	public JSplitJList(String text) {
-		this(text, new JList<T>());
-	}
+    public JSplitJList(String text) {
+        this(text, new JList<T>());
+    }
 
-	public JSplitJList(String text, JList<T> list) {
-		super(JSplitPane.VERTICAL_SPLIT, text, list);
+    public JSplitJList(String text, JList<T> list) {
+        super(new JLabel(text), list);
         this.list = list;
-	}
+    }
 
     public void setSelectionMode(int selectionMode) {
         list.setSelectionMode(selectionMode);

@@ -1,13 +1,19 @@
 package com.bitcamp.centro.estetico.models;
 
-import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JButton;
+import javax.swing.ListSelectionModel;
+
 import org.hibernate.annotations.ColumnDefault;
 
+import com.bitcamp.centro.estetico.utils.ModelViewer;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,9 +41,9 @@ public class Turn implements Model {
 
 	private String notes;
 
-	@ManyToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	@JoinTable(
-		name = "employees_turns", 
+		name = "employee_turn", 
 		joinColumns = @JoinColumn(name = "turn_id", referencedColumnName = "id", nullable = false), 
 		inverseJoinColumns = @JoinColumn(name = "employee_id", referencedColumnName = "id", nullable = false)
 	)
@@ -50,18 +56,7 @@ public class Turn implements Model {
 	public Turn() {
 		this.type = TurnType.HOLIDAYS;
 		this.isEnabled = true;
-	}
-
-	public Turn(Map<String, Object> map) {
-		this(
-			(Long) map.get("ID"),
-			(LocalDateTime) map.get("Inizio"),
-			(LocalDateTime) map.get("Fine"),
-			(TurnType) map.get("Tipo"),
-			(String) map.get("Note"),
-			(List<Employee>) map.get("Assegnati"),
-			(boolean) map.get("Abilitato")
-		);
+		assignedEmployees = new ArrayList<>();
 	}
 
 	public Turn(LocalDateTime start, LocalDateTime end, TurnType type, String notes,
@@ -121,6 +116,7 @@ public class Turn implements Model {
 	}
 
 	public List<Employee> getAssignedEmployees() {
+		if(assignedEmployees == null) return new ArrayList<>();
 		return assignedEmployees;
 	}
 
@@ -199,14 +195,25 @@ public class Turn implements Model {
 
 	@Override
 	public Map<String, Object> toTableRow() {
-		return Map.ofEntries(
-			Map.entry("ID", id),
-			Map.entry("Inizio", start),
-			Map.entry("Fine", end),
-			Map.entry("Tipo", type),
-			Map.entry("Note", notes),
-			Map.entry("Abilitato", isEnabled)
-		);
+		Map<String, Object> map = new LinkedHashMap<>();
+
+		JButton showEmployees = new JButton("Operatori");
+		showEmployees.addActionListener(l -> {
+			ModelViewer<Employee> picker = new ModelViewer<>("Operatori",
+					ListSelectionModel.SINGLE_SELECTION, getAssignedEmployees());
+			picker.setVisible(true);
+		});
+
+		map.put("ID", id);
+		map.put("Inizio", start);
+		map.put("Fine", end);
+		map.put("Operatori", showEmployees);
+		map.put("Tipo", type);
+		map.put("Note", notes);
+		map.put("Abilitato", isEnabled);
+
+		return map;
+		
 	}
 
 }

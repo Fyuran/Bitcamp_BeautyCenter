@@ -1,10 +1,11 @@
 package com.bitcamp.centro.estetico.utils;
 
-import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
@@ -13,27 +14,31 @@ public class JSplitRadialButtons extends JSplitLabel {
     ButtonGroup btnGrp = new ButtonGroup();
 
     public JSplitRadialButtons() {
-		this("Label", "1", "2");
-	}
-	public JSplitRadialButtons(String text, String... radials) {
-		this(text, new JPanel(), radials);
-	}
-	public JSplitRadialButtons(String text, JPanel panel, String... radials) {
-		super(text, panel);
+        this("Label", "1", "2");
+    }
 
-        for(String radial : radials) {
+    public JSplitRadialButtons(String text, String... radials) {
+        this(text, new JPanel(), radials);
+    }
+
+    public JSplitRadialButtons(String text, JPanel panel, String... radials) {
+        super(new JLabel(text), panel);
+
+        for (String radial : radials) {
             JRadioButton btn = new JRadioButton(radial);
-            btn.setFont(new Font("Microsoft Sans Serif", Font.PLAIN, 14));
+            btn.setFont(font);
             buttons.add(btn);
 
+            panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
             panel.add(btn);
             btnGrp.add(btn);
         }
-	}
+    }
 
     public int getSelectedIndex() {
-        for(int i = 0; i < buttons.size(); i++) {
-            if(buttons.get(i).isSelected()) return i;
+        for (int i = 0; i < buttons.size(); i++) {
+            if (buttons.get(i).isSelected())
+                return i;
         }
         return -1;
     }
@@ -43,8 +48,9 @@ public class JSplitRadialButtons extends JSplitLabel {
     }
 
     public JRadioButton getSelectedBtn() {
-        for(JRadioButton btn : buttons) {
-            if(btn.isSelected()) return btn;
+        for (JRadioButton btn : buttons) {
+            if (btn.isSelected())
+                return btn;
         }
         return null;
     }

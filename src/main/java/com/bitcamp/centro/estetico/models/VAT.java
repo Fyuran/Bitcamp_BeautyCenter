@@ -1,5 +1,6 @@
 package com.bitcamp.centro.estetico.models;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.hibernate.annotations.ColumnDefault;
@@ -32,14 +33,6 @@ public class VAT implements Model {
 		this.id = id;
 		this.amount = amount;
 		this.isEnabled = isEnabled;
-	}
-
-	public VAT(Map<String, Object> map) {
-		this(
-			(Long) map.get("ID"),
-			(double) map.get("%"),
-			(boolean) map.get("Abilitato")
-		);
 	}
 
 	public VAT(double amount) {
@@ -77,11 +70,13 @@ public class VAT implements Model {
 	}
 
 	public Map<String, Object> toTableRow() {
-		return Map.ofEntries(
-			Map.entry("ID", id),
-			Map.entry("%", amount),
-			Map.entry("Abilitato", isEnabled)
-		);
+		Map<String, Object> map = new LinkedHashMap<>();
+
+		map.put("ID", id);
+		map.put("%", amount);
+		map.put("Abilitato", isEnabled);
+
+		return map;
 	}
 	
 	@Override
