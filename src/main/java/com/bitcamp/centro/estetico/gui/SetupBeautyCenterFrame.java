@@ -11,6 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 import com.bitcamp.centro.estetico.controller.DAO;
@@ -22,6 +23,7 @@ import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
 import com.bitcamp.centro.estetico.utils.PlaceholderHelper;
 import com.github.lgooddatepicker.components.TimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
+import com.github.lgooddatepicker.components.TimePickerSettings.TimeArea;
 
 public class SetupBeautyCenterFrame extends JFrame {
 
@@ -36,7 +38,8 @@ public class SetupBeautyCenterFrame extends JFrame {
 	private static JTextField txfPIva;
 	private static TimePicker aperturaPicker;
 	private static TimePicker chiusuraPicker;
-	private static TimePickerSettings timePickerSettings;
+	private static TimePickerSettings openingTimePickerSettings;
+	private static TimePickerSettings closingTimePickerSettings;
 	private static JButton btnInserisci;
 	private static JButton btnAnnulla;
 	private static JButton btnNext;
@@ -46,6 +49,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 		setName("Benvenuto nel Gestionale Centro Estetico");
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setSize(1024, 570);
+		setResizable(false);
 		setLayout(null);
 		setVisible(true);
 		setLocationRelativeTo(null);
@@ -67,7 +71,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 		txfName.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		PlaceholderHelper.addPlaceholder(txfName, "*");
 		txfName.setColumns(10);
-		txfName.setBounds(219, 183, 220, 20);
+		txfName.setBounds(219, 183, 220, 25);
 		add(txfName);
 
 		JLabel lblPhone = new JLabel("Contatto Telefonico:");
@@ -78,7 +82,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 		txfPhone = new JTextField();
 		txfPhone.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		txfPhone.setColumns(10);
-		txfPhone.setBounds(219, 225, 220, 20);
+		txfPhone.setBounds(219, 225, 220, 25);
 		add(txfPhone);
 
 		JLabel lblEmail = new JLabel("Email:");
@@ -89,7 +93,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 		txfEmail = new JTextField();
 		txfEmail.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		txfEmail.setColumns(10);
-		txfEmail.setBounds(219, 309, 220, 20);
+		txfEmail.setBounds(219, 309, 220, 25);
 		add(txfEmail);
 
 		JLabel lblPEC = new JLabel("PEC:");
@@ -100,7 +104,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 		txfPEC = new JTextField();
 		txfPEC.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		txfPEC.setColumns(10);
-		txfPEC.setBounds(219, 267, 220, 20);
+		txfPEC.setBounds(219, 267, 220, 25);
 		add(txfPEC);
 
 		JLabel lblSedeLegale = new JLabel("Sede Legale:");
@@ -112,7 +116,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 		txfSedeLegale.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		PlaceholderHelper.addPlaceholder(txfSedeLegale, "*");
 		txfSedeLegale.setColumns(10);
-		txfSedeLegale.setBounds(219, 351, 220, 20);
+		txfSedeLegale.setBounds(219, 351, 220, 25);
 		add(txfSedeLegale);
 
 		JLabel lblSedeOperativa = new JLabel("Sede Operativa:");
@@ -124,7 +128,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 		txfSedeOperativa.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		PlaceholderHelper.addPlaceholder(txfSedeOperativa, "*");
 		txfSedeOperativa.setColumns(10);
-		txfSedeOperativa.setBounds(219, 393, 220, 20);
+		txfSedeOperativa.setBounds(219, 393, 220, 25);
 		add(txfSedeOperativa);
 
 		JLabel lblREA = new JLabel("REA:");
@@ -136,7 +140,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 		txfRea.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		PlaceholderHelper.addPlaceholder(txfRea, "*");
 		txfRea.setColumns(10);
-		txfRea.setBounds(724, 183, 220, 20);
+		txfRea.setBounds(724, 183, 220, 25);
 		add(txfRea);
 
 		JLabel lblPIva = new JLabel("Partita IVA:");
@@ -148,7 +152,7 @@ public class SetupBeautyCenterFrame extends JFrame {
 		txfPIva.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
 		PlaceholderHelper.addPlaceholder(txfPIva, "*");
 		txfPIva.setColumns(10);
-		txfPIva.setBounds(724, 225, 220, 20);
+		txfPIva.setBounds(724, 225, 220, 25);
 		add(txfPIva);
 
 		JLabel lblApertura = new JLabel("Orario Apertura:");
@@ -156,9 +160,11 @@ public class SetupBeautyCenterFrame extends JFrame {
 		lblApertura.setBounds(544, 268, 170, 14);
 		add(lblApertura);
 
-		timePickerSettings = new TimePickerSettings();
-		timePickerSettings.setAllowEmptyTimes(false);
-		aperturaPicker = new TimePicker(timePickerSettings);
+		openingTimePickerSettings = new TimePickerSettings();
+		openingTimePickerSettings.setColor(TimeArea.TextFieldBackgroundValidTime, UIManager.getColor("TextField.background"));
+        openingTimePickerSettings.setColor(TimeArea.TimePickerTextValidTime, UIManager.getColor("TextField.foreground"));
+		openingTimePickerSettings.setAllowEmptyTimes(false);
+		aperturaPicker = new TimePicker(openingTimePickerSettings);
 		aperturaPicker.setBounds(724, 267, 220, 25);
 		add(aperturaPicker);
 
@@ -167,7 +173,11 @@ public class SetupBeautyCenterFrame extends JFrame {
 		lblChiusura.setBounds(544, 310, 170, 14);
 		add(lblChiusura);
 
-		chiusuraPicker = new TimePicker(timePickerSettings);
+		closingTimePickerSettings = new TimePickerSettings();
+		closingTimePickerSettings.setColor(TimeArea.TextFieldBackgroundValidTime, UIManager.getColor("TextField.background"));
+        closingTimePickerSettings.setColor(TimeArea.TimePickerTextValidTime, UIManager.getColor("TextField.foreground"));
+		closingTimePickerSettings.setAllowEmptyTimes(false);
+		chiusuraPicker = new TimePicker(closingTimePickerSettings);
 		chiusuraPicker.setBounds(724, 309, 220, 25);
 		add(chiusuraPicker);
 

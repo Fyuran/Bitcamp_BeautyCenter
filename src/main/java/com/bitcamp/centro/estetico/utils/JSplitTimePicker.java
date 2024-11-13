@@ -1,34 +1,47 @@
 package com.bitcamp.centro.estetico.utils;
 
+import java.awt.Font;
 import java.time.LocalTime;
 
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.UIManager;
 
 import com.github.lgooddatepicker.components.TimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.github.lgooddatepicker.components.TimePickerSettings.TimeArea;
 
-public class JSplitTimePicker extends JSplitLabel {
+public class JSplitTimePicker extends JPanel {
+    private JLabel label;
     private TimePicker timePicker;
     private TimePickerSettings settings;
+    private final static Font font;
 
-    public JSplitTimePicker() {
-        this("Label text");
+    static {
+        font = new Font("Microsoft Sans Serif", Font.PLAIN, 14);
     }
 
     public JSplitTimePicker(String text) {
-        this(text, new TimePicker());
+        this(text, false);
     }
 
-    public JSplitTimePicker(String text, TimePicker timePicker) {
-        super(new JLabel(text), timePicker);
+    public JSplitTimePicker(String text, boolean allowEmptyTimes) {
+        super();
 
-        this.timePicker = timePicker;
-        this.settings = timePicker.getSettings();
+        label = new JLabel(text);
+        if (settings != null) {
+            this.timePicker = new TimePicker(settings);
+        } else {
+            this.timePicker = new TimePicker();
+            this.settings = timePicker.getSettings();
+        }
 
-        settings.setAllowEmptyTimes(false);
+        settings.setAllowEmptyTimes(allowEmptyTimes);
         settings.fontValidTime = font;
+
+        setLayout(new RelativeLayout());
+        add(label, 0.4f);
+        add(timePicker, 1f);
     }
 
     public TimePicker getTimePicker() {
@@ -54,7 +67,8 @@ public class JSplitTimePicker extends JSplitLabel {
     @Override
     public void updateUI() {
 
-        if(settings == null) return;
+        if (settings == null)
+            settings = new TimePickerSettings();
 
         settings.setColor(TimeArea.TextFieldBackgroundValidTime, UIManager.getColor("TextField.background"));
         settings.setColor(TimeArea.TimePickerTextValidTime, UIManager.getColor("TextField.foreground"));

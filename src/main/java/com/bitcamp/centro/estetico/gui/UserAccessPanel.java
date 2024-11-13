@@ -17,6 +17,7 @@ import javax.swing.border.TitledBorder;
 import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.Employee;
 import com.bitcamp.centro.estetico.models.Turn;
+import com.bitcamp.centro.estetico.models.User;
 
 public class UserAccessPanel extends JPanel {
 
@@ -24,7 +25,7 @@ public class UserAccessPanel extends JPanel {
 	private DateTimeFormatter dayFormat;
 	private DateTimeFormatter timeFormat;
 	private NonEditableTableModel<Turn> model;
-	private Employee user = (Employee) MainFrame.getSessionUser();
+	private User user = MainFrame.getSessionUser();
 	private JLabel lblName;
 	private JLabel lblUsername;
 	private JLabel lblSurname;
@@ -96,7 +97,6 @@ public class UserAccessPanel extends JPanel {
 		lblPhone.setBounds(25, 212, 324, 16);
 		dataPanel.add(lblPhone);
 
-		String[] columnNames = { "Giorno", "Inizio turno", "Fine turno", "Tipologia" };
 		model = new NonEditableTableModel<>();
 
 		// Creazione della tabella
@@ -125,39 +125,43 @@ public class UserAccessPanel extends JPanel {
 	}
 
 	void populateShiftTable() {
-		var turns = user.getTurns();
-		if (turns == null)
-			return;
-		for (Turn shift : turns) {
+		if(user instanceof Employee employee) {
+			var turns = employee.getTurns();
+			if (turns == null)
+				return;
+			for (Turn shift : turns) {
 
-			String day = shift.getStart().format(dayFormat);
-			String start = shift.getStart().format(timeFormat);
-			String end = shift.getEnd().format(timeFormat);
-			String type = shift.getType() == null ? null : shift.getType().toString();
-			model.addRow(new String[] { day, start, end, type });
+				String day = shift.getStart().format(dayFormat);
+				String start = shift.getStart().format(timeFormat);
+				String end = shift.getEnd().format(timeFormat);
+				String type = shift.getType() == null ? null : shift.getType().toString();
+				model.addRow(new String[] { day, start, end, type });
+			}
 		}
 	}
 
 	public void updateData() {
 		lblName.setText("Nome: " + user.getName());
 		lblSurname.setText("Cognome: " + user.getSurname());
-		lblRole.setText("Ruolo: " + user.getRole().toString());
+		if(user instanceof Employee employee) {
+			lblRole.setText("Ruolo: " + employee.getRole().toString());
+			lblHireDate.setText("Data di assunzione: " + employee.getHiredDate());
+		}
 		lblAddress.setText("Indirizzo: " + user.getAddress() + ", " + user.getBirthplace());
 		lblIBAN.setText("IBAN: " + user.getIban());
-		lblHireDate.setText("Data di assunzione: " + user.getHiredDate());
 		lblUsername.setText("Username: " + user.getUsername());
 		lblMail.setText("Mail: " + user.getMail());
 		lblPhone.setText("Telefono: " + user.getPhone());
 	}
 
 	public void changePassword() {
-		ChangePassDialog changePassDialog = new ChangePassDialog(user);
+		ChangePassDialog changePassDialog = new ChangePassDialog();
 		changePassDialog.setAlwaysOnTop(true);
 
 	}
 
 	public void changeUsername() {
-		ChangeUserDialog changeUserDialog = new ChangeUserDialog(this, user);
+		ChangeUserDialog changeUserDialog = new ChangeUserDialog(this);
 		changeUserDialog.setAlwaysOnTop(true);
 		updateData();
 

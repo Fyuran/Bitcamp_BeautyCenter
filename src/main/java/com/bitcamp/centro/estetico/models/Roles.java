@@ -1,6 +1,7 @@
 package com.bitcamp.centro.estetico.models;
 
 public enum Roles {
+	USER("Utente"),
 	PERSONNEL("Personale"),
 	SECRETARY("Front-desk"),
 	ADMIN("Amministratore");
@@ -13,6 +14,10 @@ public enum Roles {
 
 	public static Roles toEnum(String s) {
 		switch (s.toLowerCase()) {
+			case "utente":
+				return Roles.USER;
+			case "user":
+				return Roles.USER;
 			case "personale":
 				return Roles.PERSONNEL;
 			case "personnel":

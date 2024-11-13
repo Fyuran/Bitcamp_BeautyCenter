@@ -1,89 +1,70 @@
 package com.bitcamp.centro.estetico.gui;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.WindowConstants;
 
 import com.bitcamp.centro.estetico.controller.DAO;
-import com.bitcamp.centro.estetico.models.Employee;
+import com.bitcamp.centro.estetico.models.User;
+import com.bitcamp.centro.estetico.utils.JSplitPanel;
+import com.bitcamp.centro.estetico.utils.JSplitPf;
+import com.bitcamp.centro.estetico.utils.JSplitTxf;
 
 public class ChangeUserDialog extends JDialog {
+	private final JSplitTxf usernameTxf;
+	private final JSplitPf passwordTxf;
+	private final JSplitPanel panel;
+	private final JButton confirmBtn;
+	private final User user = MainFrame.getSessionUser();
+	private final UserAccessPanel parentPanel;
 
-	private static final long serialVersionUID = 1L;
-	private JTextField txfNewUsername;
-	private JPasswordField txfPassword;
-	private Employee activeUser;
-	private UserAccessPanel parentPanel;
-
-	/**
-	 * Create the frame.
-	 */
-	public ChangeUserDialog(UserAccessPanel parentPanel, Employee activeUser) {
-		setBounds(100, 100, 400, 300);
-		getContentPane().setLayout(null);
+	public ChangeUserDialog(UserAccessPanel parentPanel) {
 		setTitle("Cambia username");
-		this.activeUser = activeUser;
+		setLayout(new GridBagLayout());
 		this.parentPanel = parentPanel;
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-		JLabel lblNewUsername = new JLabel("Nuovo username:");
-		lblNewUsername.setBounds(6, 44, 116, 16);
-		getContentPane().add(lblNewUsername);
+		GridBagConstraints gbc = new GridBagConstraints();
 
-		JLabel lblPasswordCheck = new JLabel("Password:");
-		lblPasswordCheck.setBounds(6, 84, 149, 16);
-		getContentPane().add(lblPasswordCheck);
+		JLabel lbOutput = new JLabel("");
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.weightx = 0.2;
+		gbc.weighty = 0.2;
+		add(lbOutput, gbc);
 
-		txfNewUsername = new JTextField();
-		txfNewUsername.setBounds(179, 39, 182, 26);
-		getContentPane().add(txfNewUsername);
+		panel = new JSplitPanel();
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.weightx = 1;
+		gbc.weighty = 1;
+		add(panel, gbc);
 
-		JButton confirmBtn = new JButton("Conferma");
+		confirmBtn = new JButton("Conferma");
 		confirmBtn.addActionListener(e -> updateUsername());
-		confirmBtn.setBounds(38, 168, 117, 29);
 
-		getContentPane().add(confirmBtn);
+		usernameTxf = new JSplitTxf("Username");
+		passwordTxf = new JSplitPf("Password");
 
-		txfPassword = new JPasswordField();
-		txfPassword.setBounds(179, 79, 182, 26);
-		getContentPane().add(txfPassword);
+		panel.add(usernameTxf);
+		panel.add(passwordTxf);
+		panel.add(confirmBtn);
 
-		JCheckBox visibleCheck = new JCheckBox("Mostra password");
-		visibleCheck.setBounds(179, 117, 182, 23);
-		visibleCheck.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (visibleCheck.isSelected()) {
-					txfPassword.setEchoChar((char) 0);
-				} else {
-					txfPassword.setEchoChar('•');
-				}
-			}
-		});
-		getContentPane().add(visibleCheck);
-
-		JLabel msgLbl = new JLabel(""); // label per i messaggi all'utente
-		msgLbl.setBounds(179, 168, 182, 16);
-		getContentPane().add(msgLbl);
-		setVisible(true);
 		setVisible(true);
 	}
 
 	private void updateUsername() {
 		if (!isDataValid()) return;
 		
-		String username = txfNewUsername.getText();
-		activeUser.setUsername(username);
+		String username = usernameTxf.getText();
+		user.setUsername(username);
 		
-		DAO.update(activeUser);
+		DAO.update(user);
 		JOptionPane.showMessageDialog(this, "Username modificato correttamente");
 		
 		parentPanel.updateData();
@@ -92,8 +73,7 @@ public class ChangeUserDialog extends JDialog {
 	}
 
 	private boolean isDataValid() {
-		if (!activeUser.isValidPassword(txfPassword.getPassword())) {
-			System.out.println(activeUser.getUsername());
+		if (!user.isValidPassword(passwordTxf.getPassword())) {
 			JOptionPane.showMessageDialog(this, "Password errata");
 			return false;
 		}

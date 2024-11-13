@@ -22,7 +22,8 @@ public class UserCredentials implements Model {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
+	
+	@Column(unique = true)
 	private String username;
 
 	private char[] password;
@@ -35,7 +36,7 @@ public class UserCredentials implements Model {
 
 	private String mail;
 
-	@OneToOne(mappedBy = "userCredentials", optional = false, cascade = CascadeType.MERGE)
+	@OneToOne(mappedBy = "userCredentials", optional = false, cascade = CascadeType.ALL)
 	private User user;
 
 	@Column(name = "is_enabled")
@@ -85,7 +86,7 @@ public class UserCredentials implements Model {
 	}
 
 	public void setPassword(char[] password) {
-		this.password = password;
+		this.password = encryptPassword(password);
 	}
 
 	public String getAddress() {
@@ -150,7 +151,13 @@ public class UserCredentials implements Model {
 	}
 
 	public boolean isValidPassword(char[] password) {
-		return BCrypt.verifyer().verify(password, this.password).verified;
+		if(password == null || password.length == 0) return false;
+		if(this.password == null || this.password.length == 0) return true;
+		try {
+			return BCrypt.verifyer().verify(password, this.password).verified;
+		} catch (IllegalArgumentException e) {
+			return false;
+		}
 	}
 
 	@Override
@@ -215,11 +222,6 @@ public class UserCredentials implements Model {
 			if (other.mail != null)
 				return false;
 		} else if (!mail.equals(other.mail))
-			return false;
-		if (user == null) {
-			if (other.user != null)
-				return false;
-		} else if (!user.equals(other.user))
 			return false;
 		if (isEnabled != other.isEnabled)
 			return false;

@@ -12,7 +12,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.bitcamp.centro.estetico.controller.DAO;
-import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.Customer;
 import com.bitcamp.centro.estetico.models.Gender;
 import com.bitcamp.centro.estetico.models.Prize;
@@ -25,6 +24,8 @@ import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
 import com.bitcamp.centro.estetico.utils.InputValidator.InvalidInputException;
 import com.bitcamp.centro.estetico.utils.JSplitBtn;
 import com.bitcamp.centro.estetico.utils.JSplitDatePicker;
+import com.bitcamp.centro.estetico.utils.JSplitNumber;
+import com.bitcamp.centro.estetico.utils.JSplitPf;
 import com.bitcamp.centro.estetico.utils.JSplitRadialButtons;
 import com.bitcamp.centro.estetico.utils.JSplitTxf;
 import com.bitcamp.centro.estetico.utils.ModelChooser;
@@ -39,13 +40,15 @@ public class CustomerPanel extends AbstractBasePanel<Customer> {
 	private static JSplitTxf txfMail;
 	private static JSplitTxf txfAddress;
 	private static JSplitTxf txfIban;
+	private static JSplitTxf txfUsername;
+	private static JSplitPf txfPassword;
 	private static JSplitTxf txfBirthplace;
 	private static JSplitRadialButtons genderBtns;
 	private static JSplitDatePicker txfBirthday;
 	private static JSplitTxf txfNotes;
 	private static JSplitTxf txfPIVA;
 	private static JSplitTxf txfRecipientCode;
-	private static JSplitTxf txfLoyaltyPoints;
+	private static JSplitNumber txfLoyaltyPoints;
 	private static JSplitBtn subscriptionBtn;
 	private static JSplitBtn prizesBtnField;
 
@@ -66,28 +69,29 @@ public class CustomerPanel extends AbstractBasePanel<Customer> {
 		txfPhone = new JSplitTxf("Telefono");
 		txfAddress = new JSplitTxf("Indirizzo");
 		txfBirthday = new JSplitDatePicker("Data di nascita");
+		txfUsername = new JSplitTxf("Username");
+		txfPassword = new JSplitPf("Password");
 		txfBirthplace = new JSplitTxf("Luogo di nascita");
 		genderBtns = new JSplitRadialButtons("Genere", "Maschio", "Femmina");
 		txfNotes = new JSplitTxf("Note");
 		txfIban = new JSplitTxf("IBAN");
 		txfPIVA = new JSplitTxf("P.IVA");
 		txfRecipientCode = new JSplitTxf("Codice Ricezione");
-		txfLoyaltyPoints = new JSplitTxf("Punti fedeltà");
+		txfLoyaltyPoints = new JSplitNumber("Punti fedeltà");
 		txfLoyaltyPoints.setText(0);
 		subscriptionBtn = new JSplitBtn("Abbonamento", "Scegli Abbonamenti");
 		subscriptionBtn.addActionListener(l -> {
 			ModelChooser<Subscription> picker = new ModelChooser<>(parent, "Abbonamenti",
 					ListSelectionModel.SINGLE_SELECTION, returnSubscriptions);
-
-			subscriptions = DAO.getAll(Subscription.class);
+			subscriptions.clear();
+			subscriptions.addAll(DAO.getAll(Subscription.class));
 			var available = subscriptions
 					.parallelStream()
 					.filter(c -> c.isEnabled())
 					.toList();
 
 			if (!available.isEmpty()) {
-				NonEditableTableModel<Subscription> model = picker.getModel();
-				model.addRows(available);
+				picker.addRows(available);
 			} else
 				picker.getLbOutput().setText("Lista vuota");
 
@@ -97,16 +101,15 @@ public class CustomerPanel extends AbstractBasePanel<Customer> {
 		prizesBtnField.addActionListener(l -> {
 			ModelChooser<Prize> picker = new ModelChooser<>(parent, "Premi",
 					ListSelectionModel.MULTIPLE_INTERVAL_SELECTION, returnPrizes);
-
-			prizes = DAO.getAll(Prize.class);
+			prizes.clear();
+			prizes.addAll(DAO.getAll(Prize.class));
 			var available = prizes
 					.parallelStream()
 					.filter(p -> p.isEnabled())
 					.toList();
 
 			if (!available.isEmpty()) {
-				NonEditableTableModel<Prize> model = picker.getModel();
-				model.addRows(available);
+				picker.addRows(available);
 			} else
 				picker.getLbOutput().setText("Lista vuota");
 
@@ -117,7 +120,9 @@ public class CustomerPanel extends AbstractBasePanel<Customer> {
 		actionsPanel.add(txfSurname);
 		actionsPanel.add(txfMail);
 		actionsPanel.add(txfPhone);
+		actionsPanel.add(txfUsername);
 		actionsPanel.add(txfAddress);
+		actionsPanel.add(txfPassword);
 		actionsPanel.add(txfBirthday);
 		actionsPanel.add(txfBirthplace);
 		actionsPanel.add(genderBtns);
@@ -129,12 +134,6 @@ public class CustomerPanel extends AbstractBasePanel<Customer> {
 		actionsPanel.add(subscriptionBtn);
 		actionsPanel.add(prizesBtnField);
 
-	}
-
-	@Override
-	public void search() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'search'");
 	}
 
 	@Override
@@ -159,26 +158,35 @@ public class CustomerPanel extends AbstractBasePanel<Customer> {
 		String phone = txfPhone.getText();
 		String mail = txfMail.getText();
 		String recipientCode = txfRecipientCode.getText();
+		String username = txfUsername.getText();
+		char[] password = txfPassword.getPassword();
 
 		String loyaltytfxText = txfLoyaltyPoints.getText();
 		int loyaltyPoints = loyaltytfxText.isBlank() ? 0 : Integer.parseInt(loyaltytfxText);
 
-		UserCredentials cred = new UserCredentials("", new char[0], address, iban, phone, mail, null);
+		UserCredentials cred = new UserCredentials(username, null, address, iban, phone, mail, null);
+		cred.setPassword(password);
 		UserDetails det = new UserDetails(name, surname, getGender(), BoD, birthplace, notes);
 
-		Subscription subscription = null;
+		try {
+			InputValidator.validateUsername(txfUsername, cred);
+		} catch (InputValidatorException e) {
+			JOptionPane.showMessageDialog(parent, e.getMessage());
+			return;
+		}
+
+		Subscription newSubscription = null;
 		if (!returnSubscriptions.isEmpty()) {
-			subscription = returnSubscriptions.getFirst();
+			newSubscription = returnSubscriptions.getFirst();
 		}
 		List<Prize> newPrizes = null;
 		if (!returnPrizes.isEmpty()) {
 			newPrizes = returnPrizes;
 		}
 
-		Customer customer = new Customer(det, cred, mail, recipientCode, loyaltyPoints, subscription, newPrizes);
-
+		Customer customer = new Customer(det, cred, mail, recipientCode, loyaltyPoints, newSubscription, newPrizes);
 		cred.setUser(customer);
-		DAO.insert(cred);
+
 		DAO.insert(customer);
 
 		lbOutput.setText("Nuovo utente creato");
@@ -209,6 +217,8 @@ public class CustomerPanel extends AbstractBasePanel<Customer> {
 		selectedData.setBirthplace(txfBirthplace.getText());
 		selectedData.setBoD(txfBirthday.getDate());
 		selectedData.setNotes(txfNotes.getText());
+		selectedData.setUsername(txfUsername.getText());
+		selectedData.setPassword(txfPassword.getPassword());
 		selectedData.setAddress(txfAddress.getText());
 		selectedData.setPhone(txfPhone.getText());
 		selectedData.setMail(txfMail.getText());
@@ -227,8 +237,15 @@ public class CustomerPanel extends AbstractBasePanel<Customer> {
 			selectedData.setPrizes(returnPrizes);
 		}
 
-		lbOutput.setText("Utente modificato");
+		try {
+			InputValidator.validateUsername(txfUsername, selectedData.getUserCredentials());
+		} catch (InputValidatorException e) {
+			JOptionPane.showMessageDialog(parent, e.getMessage());
+			return;
+		}
+
 		DAO.update(selectedData);
+		lbOutput.setText("Utente modificato");
 		refresh();
 	}
 
@@ -262,7 +279,8 @@ public class CustomerPanel extends AbstractBasePanel<Customer> {
 
 	@Override
 	public void populateTable() {
-		customers = DAO.getAll(Customer.class);
+		customers.clear();
+		customers.addAll(DAO.getAll(Customer.class));
 		if (!customers.isEmpty()) {
 			model.addRows(customers);
 		} else {
@@ -324,6 +342,7 @@ public class CustomerPanel extends AbstractBasePanel<Customer> {
 				txfLoyaltyPoints.setText(selectedData.getLoyaltyPoints());
 				txfPIVA.setText(selectedData.getP_iva());
 				txfRecipientCode.setText(selectedData.getRecipientCode());
+				txfUsername.setText(selectedData.getUsername());
 				txfAddress.setText(selectedData.getAddress());
 
 				if (selectedData.getGender() == Gender.FEMALE) {
@@ -347,6 +366,13 @@ public class CustomerPanel extends AbstractBasePanel<Customer> {
 			} else {
 				txfBirthday.setBorder(UIManager.getBorder("SplitPane.border"));
 			}
+			InputValidator.validateName(txfName);
+			InputValidator.validateSurname(txfSurname);
+			InputValidator.validatePhoneNumber(txfPhone);
+			InputValidator.validateAlphanumeric(txfAddress, "Indirizzo");
+			InputValidator.validateAlphanumeric(txfUsername, "Username");
+			InputValidator.validatePassword(txfPassword);
+			InputValidator.validateAlphanumeric(txfBirthplace, "Luogo di nascita");
 			InputValidator.isValidCity(txfBirthplace);
 			InputValidator.validateNumber(txfLoyaltyPoints, 0, Integer.MAX_VALUE);
 		} catch (InputValidatorException e) {

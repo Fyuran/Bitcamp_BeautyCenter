@@ -21,6 +21,7 @@ import com.bitcamp.centro.estetico.models.UserDetails;
 import com.bitcamp.centro.estetico.utils.InputValidator;
 import com.bitcamp.centro.estetico.utils.InputValidator.EmptyInputException;
 import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
+import com.bitcamp.centro.estetico.utils.InputValidator.InvalidInputException;
 import com.bitcamp.centro.estetico.utils.JSplitBtn;
 import com.bitcamp.centro.estetico.utils.JSplitComboBox;
 import com.bitcamp.centro.estetico.utils.JSplitDatePicker;
@@ -65,7 +66,7 @@ public class EmployeePanel extends AbstractBasePanel<Employee> {
 		txfAddress = new JSplitTxf("Indirizzo");
 		txfBirthday = new JSplitDatePicker("Data di nascita");
 		txfHired = new JSplitDatePicker("Assunto");
-		txfTermination = new JSplitDatePicker("Scadenza");
+		txfTermination = new JSplitDatePicker("Scadenza", true);
 		roleComboBox = new JSplitComboBox<>("Ruolo");
 		txfUsername = new JSplitTxf("Username");
 		txfPassword = new JSplitPf("Password");
@@ -77,15 +78,15 @@ public class EmployeePanel extends AbstractBasePanel<Employee> {
 		treatmentBtn.addActionListener(l -> {
 			ModelChooser<Treatment> picker = new ModelChooser<>(parent, "Trattamenti",
 					ListSelectionModel.MULTIPLE_INTERVAL_SELECTION, returnTreatments);
-
-			treatments = DAO.getAll(Treatment.class);
+			treatments.clear();
+			treatments.addAll(DAO.getAll(Treatment.class));
 			var available = treatments
 			.stream()
 			.filter(t -> t.isEnabled())
 			.toList();
 
 			if (!treatments.isEmpty()) {
-				picker.getModel().addRows(available);
+				picker.addRows(available);
 			} else {
 				picker.getLbOutput().setText("Lista vuota");
 			}
@@ -123,12 +124,6 @@ public class EmployeePanel extends AbstractBasePanel<Employee> {
 	}
 
 	@Override
-	public void search() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'search'");
-	}
-
-	@Override
 	public void insertElement() {
 		try { // all fields must be filled
 			isDataValid();
@@ -160,11 +155,20 @@ public class EmployeePanel extends AbstractBasePanel<Employee> {
 			newTreatments = returnTreatments;
 		}
 
-		UserCredentials cred = new UserCredentials(username, password, address, iban, phone, mail, null);
+		UserCredentials cred = new UserCredentials(username, null, address, iban, phone, mail, null);
+		cred.setPassword(password);
+
+		try {
+			InputValidator.validateUsername(txfUsername, cred);
+		} catch (InputValidatorException e) {
+			JOptionPane.showMessageDialog(parent, e.getMessage());
+			return;
+		}
+
 		UserDetails det = new UserDetails(name, surname, getGender(), BoD, birthplace, notes);
 		Employee employee = new Employee(det, cred, role, newTreatments, null, hired, termination);
-
 		cred.setUser(employee);
+
 		DAO.insert(employee);
 
 		lbOutput.setText("Nuovo operatore creato");
@@ -222,7 +226,10 @@ public class EmployeePanel extends AbstractBasePanel<Employee> {
 		selectedData.setNotes(notes);
 		selectedData.setRole(role);
 		selectedData.setUsername(username);
-		selectedData.setPassword(password);
+
+		if(password.length != 0) 
+			selectedData.setPassword(password);
+			
 		selectedData.setAddress(address);
 		selectedData.setIban(iban);
 		selectedData.setPhone(phone);
@@ -231,6 +238,13 @@ public class EmployeePanel extends AbstractBasePanel<Employee> {
 			selectedData.setEnabledTreatments(null);
 		} else {
 			selectedData.setEnabledTreatments(returnTreatments);
+		}
+
+		try {
+			InputValidator.validateUsername(txfUsername, selectedData.getUserCredentials());
+		} catch (InputValidatorException e) {
+			JOptionPane.showMessageDialog(parent, e.getMessage());
+			return;
 		}
 
 		DAO.update(selectedData);
@@ -280,7 +294,8 @@ public class EmployeePanel extends AbstractBasePanel<Employee> {
 
 	@Override
 	public void populateTable() {
-		employees = DAO.getAll(Employee.class);
+		employees.clear();
+		employees.addAll(DAO.getAll(Employee.class));
 		if (!employees.isEmpty()) {
 			model.addRows(employees);
 		} else {
@@ -348,6 +363,11 @@ public class EmployeePanel extends AbstractBasePanel<Employee> {
 	@Override
 	public boolean isDataValid() {
 		try {
+			if (!txfBirthday.getDatePicker().isTextFieldValid()) {
+				throw new InvalidInputException("Anno di nascita non valida", txfBirthday);
+			} else {
+				txfBirthday.setBorder(UIManager.getBorder("SplitPane.border"));
+			}
 			InputValidator.validateName(txfName);
 			InputValidator.validateSurname(txfSurname);
 			InputValidator.validateIban(txfIban);

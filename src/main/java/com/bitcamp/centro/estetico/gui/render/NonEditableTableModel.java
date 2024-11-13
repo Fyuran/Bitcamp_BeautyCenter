@@ -3,6 +3,7 @@ package com.bitcamp.centro.estetico.gui.render;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.IntStream;
 
 import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
@@ -110,5 +111,26 @@ public class NonEditableTableModel<T extends Model> extends DefaultTableModel { 
         return Object.class;
     }
 
-    
+    public List<String> getColumnNames() {
+        if(columnIdentifiers.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<String> identifiers = new ArrayList<>();
+
+        IntStream.range(0, columnIdentifiers.size())
+        .forEach(i -> {
+            var obj = dataVector.get(0).get(i);
+            if(obj instanceof String) {
+                identifiers.add((String) columnIdentifiers.get(i));
+            } else if (
+                !(obj instanceof Boolean) && 
+                !(obj instanceof JButton)
+            ) {
+                identifiers.add(columnIdentifiers.get(i).toString());
+            }
+        });
+
+        return identifiers;
+    }
 }

@@ -2,12 +2,10 @@ package com.bitcamp.centro.estetico.gui;
 
 import java.awt.Color;
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -17,7 +15,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.bitcamp.centro.estetico.controller.DAO;
-import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.Customer;
 import com.bitcamp.centro.estetico.models.SubPeriod;
 import com.bitcamp.centro.estetico.models.Subscription;
@@ -27,7 +24,7 @@ import com.bitcamp.centro.estetico.utils.InputValidator.InvalidInputException;
 import com.bitcamp.centro.estetico.utils.JSplitBtn;
 import com.bitcamp.centro.estetico.utils.JSplitComboBox;
 import com.bitcamp.centro.estetico.utils.JSplitDatePicker;
-import com.bitcamp.centro.estetico.utils.JSplitTxf;
+import com.bitcamp.centro.estetico.utils.JSplitNumber;
 import com.bitcamp.centro.estetico.utils.ModelChooser;
 
 public class SubscriptionPanel extends AbstractBasePanel<Subscription> {
@@ -37,11 +34,11 @@ public class SubscriptionPanel extends AbstractBasePanel<Subscription> {
 
 	private static final long serialVersionUID = 1712892330014716939L;
 	// actions
-	private static JSplitTxf priceTextField;
+	private static JSplitNumber priceTextField;
 	private static JSplitDatePicker datePicker;
 	private static JSplitComboBox<VAT> VATComboBox;
 	private static JSplitComboBox<SubPeriod> subPeriodComboBox;
-	private static JSplitTxf discountTextField;
+	private static JSplitNumber discountTextField;
 	private static JSplitBtn customerBtn;
 
 	public SubscriptionPanel(JFrame parent) {
@@ -50,23 +47,22 @@ public class SubscriptionPanel extends AbstractBasePanel<Subscription> {
 		setName("Abbonamenti");
 		setTitle("Gestione Abbonamenti");
 
-		priceTextField = new JSplitTxf("Prezzo", new JFormattedTextField(NumberFormat.getInstance()));
+		priceTextField = new JSplitNumber("Prezzo");
 		VATComboBox = new JSplitComboBox<>("IVA");
 
 		customerBtn = new JSplitBtn("Cliente", "Scelta cliente");
 		customerBtn.addActionListener(l1 -> {
 			ModelChooser<Customer> picker = new ModelChooser<>(parent, "Scelta Cliente",
 					ListSelectionModel.MULTIPLE_INTERVAL_SELECTION, returnCustomers);
-
-			customers = DAO.getAll(Customer.class);
+			customers.clear();
+			customers.addAll(DAO.getAll(Customer.class));
 			var available = customers
 			.parallelStream()
 			.filter(c -> c.isEnabled())
 			.toList();
 
 			if(!available.isEmpty()) {
-				NonEditableTableModel<Customer> model = picker.getModel();
-				model.addRows(available);
+				picker.addRows(available);
 			}
 			else
 				picker.getLbOutput().setText("Lista vuota");
@@ -81,7 +77,7 @@ public class SubscriptionPanel extends AbstractBasePanel<Subscription> {
 		subPeriodComboBox.setSelectedIndex(0);
 
 		datePicker = new JSplitDatePicker("Data inizio");
-		discountTextField = new JSplitTxf("Sconto applicato", new JFormattedTextField(NumberFormat.getInstance()));
+		discountTextField = new JSplitNumber("Sconto applicato");
 
 		actionsPanel.add(VATComboBox);
 		actionsPanel.add(priceTextField);
@@ -94,12 +90,6 @@ public class SubscriptionPanel extends AbstractBasePanel<Subscription> {
 		.filter(v -> v.isEnabled())
 		.forEach(v -> VATComboBox.addItem(v));
 		VATComboBox.setSelectedIndex(0);
-	}
-
-	@Override
-	public void search() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'search'");
 	}
 
 	@Override
@@ -232,7 +222,16 @@ public class SubscriptionPanel extends AbstractBasePanel<Subscription> {
 
 	@Override
 	public void populateTable() {
-		subscriptions = DAO.getAll(Subscription.class);
+		vats.clear();
+		vats.addAll(DAO.getAll(VAT.class));
+		VATComboBox.removeAllItems();
+		vats.stream()
+				.filter(v -> v.isEnabled())
+				.forEach(v -> VATComboBox.addItem(v));
+		VATComboBox.setSelectedIndex(0);
+
+		subscriptions.clear();
+		subscriptions.addAll(DAO.getAll(Subscription.class));
 		if (!subscriptions.isEmpty()) {
 			model.addRows(subscriptions);
 		} else {
@@ -271,7 +270,7 @@ public class SubscriptionPanel extends AbstractBasePanel<Subscription> {
 				VAT vat = selectedData.getVat();
 				double discount = selectedData.getDiscount();
 
-				priceTextField.setText(price.toString());
+				priceTextField.setText(price);
 				datePicker.setDate(start);
 				VATComboBox.setSelectedItem(vat);
 				discountTextField.setText(discount);

@@ -19,21 +19,23 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
-import com.bitcamp.centro.estetico.gui.Main;
 import com.bitcamp.centro.estetico.models.Customer;
 import com.bitcamp.centro.estetico.models.Gender;
 import com.bitcamp.centro.estetico.models.Product;
 import com.bitcamp.centro.estetico.models.Subscription;
-import com.github.weisj.darklaf.theme.spec.ColorToneRule;
 
 import it.kamaladafrica.codicefiscale.CodiceFiscale;
 
 public class CustomTableCellRenderer extends DefaultTableCellRenderer {
     private static final long serialVersionUID = -5727490185915218173L;
+
     protected static final Border SAFE_NO_FOCUS_BORDER = new EmptyBorder(1, 1, 1, 1);
     protected static final Border DEFAULT_NO_FOCUS_BORDER = new EmptyBorder(1, 1, 1, 1);
-    protected Color unselectedForeground;
-    protected Color unselectedBackground;
+
+    private static Color disabledBackground = new Color(34,34,34);
+    private static Color disabledForeground = new Color(255,255,255);
+    private static Color disabledBackgroundSelect = new Color(99,99,99);
+    private static Color disabledBackgroundFocus = new Color(101, 35, 255);
 
     public CustomTableCellRenderer() {
         super();
@@ -65,7 +67,8 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
         } else if (value instanceof Product p) {
             setText(p.getName());
         } else {
-            String text = value == null ? "" : String.valueOf(value); // renderer requires text as every cell is a String
+            String text = value == null ? "" : String.valueOf(value); // renderer requires text as every cell is a
+                                                                      // String
             setText(text);
         }
     }
@@ -85,66 +88,57 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 
         Color background = null;
         Color foreground = null;
-
+        
         if (isSelected) {
             if(isEnabled) {
-                foreground = table.getSelectionForeground();
-                background = table.getSelectionBackground();
+                background = UIManager.getColor("Table.backgroundSelectedNoFocus");
+                foreground = UIManager.getColor("Table.foregroundSelectedNoFocus");
             } else {
-                foreground = new Color(53, 126, 199);
+                background = disabledBackgroundSelect;
+                foreground = disabledForeground;
             }
         } else {
-            if(unselectedBackground != null) {
-                background = unselectedBackground;
+            if(isEnabled) {
+                background = UIManager.getColor("Table.background");
+                foreground = UIManager.getColor("Table.foreground");
             } else {
-                if(isEnabled) {
-                    background = table.getBackground();
-                } else {
-                    if (Main.theme.getColorToneRule() == ColorToneRule.DARK) {
-                        background = new Color(140,140,140);
-                    } else {
-                        background = Color.LIGHT_GRAY;
-                    }
-                }
+                background = disabledBackground;
+                foreground = disabledForeground;
             }
-
-            if(unselectedForeground != null) {
-                foreground = unselectedForeground;
-            } else {
-                foreground = table.getForeground();
-            }
-
-        }
+        }  
         
-        super.setForeground(foreground);
-        super.setBackground(background);
-        setFont(table.getFont());
-
         if (hasFocus) {
             Border border = null;
-            if (isSelected) {
+            if (isSelected) {           
                 border = UIManager.getBorder("Table.focusSelectedCellHighlightBorder");
-            }
-            if (border == null) {
-                border = UIManager.getBorder("Table.focusCellHighlightBorder");
-            }
-            setBorder(border);
-
-            if (!isSelected && table.isCellEditable(row, column)) {
-                Color col;
-                col = UIManager.getColor("Table.focusCellForeground");
-                if (col != null) {
-                    super.setForeground(col);
-                }
-                col = UIManager.getColor("Table.focusCellBackground");
-                if (col != null) {
-                    super.setBackground(col);
-                }
+                setBorder(border);
+            } else {
+                background = UIManager.getColor("Table.backgroundSelected");
+                foreground = UIManager.getColor("Table.foregroundSelected");
             }
         } else {
             setBorder(getNoFocusBorder());
         }
 
+        //check for StockPanel
+        try {
+            TableColumn currentStockColumn = table.getColumn("Scorta");
+            TableColumn minStockColumn = table.getColumn("Richiesto");
+            int currentStock = (int) model.getValueAt(row, currentStockColumn.getModelIndex());
+            int minStock = (int) model.getValueAt(row, minStockColumn.getModelIndex());
+            //orange (255,69,0)
+            if (currentStock <= (minStock / 3)) { // if it's lower than a third popup message
+                background = new Color(155,69,0);
+                foreground = disabledForeground;
+            }
+        } catch (IllegalArgumentException e) {
+            //do nothing
+        }
+
+        setForeground(foreground);
+        setBackground(background);
+
+        setFont(UIManager.getFont("Table.font"));
         setValue(value);
 
         return this;
@@ -158,5 +152,14 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
             }
         }
         return noFocusBorder;
+    }
+
+    public float lerp(float a, float b, float f) {
+        return (a * (1.0f - f)) + (b * f);
+    }
+
+    public Number linearConversion(Number oldMin, Number oldMax, Number oldValue, Number newMin, Number newMax) {
+        return (((oldValue.floatValue() - oldMin.floatValue()) * (newMax.floatValue() - newMin.floatValue()))
+                / (oldMax.floatValue() - oldMin.floatValue())) + newMin.floatValue();
     }
 }

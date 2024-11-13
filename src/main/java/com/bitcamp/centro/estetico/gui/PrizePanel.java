@@ -1,8 +1,5 @@
 package com.bitcamp.centro.estetico.gui;
 
-import java.text.NumberFormat;
-
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
@@ -15,6 +12,7 @@ import com.bitcamp.centro.estetico.utils.InputValidator;
 import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
 import com.bitcamp.centro.estetico.utils.JSplitComboBox;
 import com.bitcamp.centro.estetico.utils.JSplitDatePicker;
+import com.bitcamp.centro.estetico.utils.JSplitNumber;
 import com.bitcamp.centro.estetico.utils.JSplitTxf;
 
 public class PrizePanel extends AbstractBasePanel<Prize> {
@@ -22,7 +20,7 @@ public class PrizePanel extends AbstractBasePanel<Prize> {
 
 	private static Prize selectedData;
 
-	private static JSplitTxf txfThreshold;
+	private static JSplitNumber txfThreshold;
 	private static JSplitTxf txfName;
 	private static JSplitDatePicker expirationDatePicker;
 	private static JSplitComboBox<PrizeType> typeComboBox;
@@ -41,19 +39,13 @@ public class PrizePanel extends AbstractBasePanel<Prize> {
 		}
 		typeComboBox.setSelectedIndex(0);
 		
-		txfThreshold = new JSplitTxf("Punti Necessari", new JFormattedTextField(NumberFormat.getInstance()));
+		txfThreshold = new JSplitNumber("Punti Necessari");
 		expirationDatePicker = new JSplitDatePicker("Scadenza");
 
 		actionsPanel.add(txfName);
 		actionsPanel.add(typeComboBox);
 		actionsPanel.add(txfThreshold);
 		actionsPanel.add(expirationDatePicker);
-	}
-
-	@Override
-	public void search() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'search'");
 	}
 
 	@Override
@@ -127,7 +119,8 @@ public class PrizePanel extends AbstractBasePanel<Prize> {
 
 	@Override
 	public void populateTable() {
-		prizes = DAO.getAll(Prize.class);
+		prizes.clear();
+		prizes.addAll(DAO.getAll(Prize.class));
 		if (!prizes.isEmpty()) {
 			model.addRows(prizes);
 		} else {
@@ -138,7 +131,7 @@ public class PrizePanel extends AbstractBasePanel<Prize> {
 	@Override
 	public void clearTxfFields() {
 		txfName.setText("");
-		txfThreshold.setText("");
+		txfThreshold.setText(0);
 		typeComboBox.setSelectedIndex(0);
 	}
 

@@ -1,8 +1,5 @@
 package com.bitcamp.centro.estetico.gui;
 
-import java.text.NumberFormat;
-
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
@@ -12,14 +9,14 @@ import com.bitcamp.centro.estetico.controller.DAO;
 import com.bitcamp.centro.estetico.models.VAT;
 import com.bitcamp.centro.estetico.utils.InputValidator;
 import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
-import com.bitcamp.centro.estetico.utils.JSplitTxf;
+import com.bitcamp.centro.estetico.utils.JSplitNumber;
 
 public class VATPanel extends AbstractBasePanel<VAT> {
 
 	private static VAT selectedData;
 
 	private static final long serialVersionUID = 1L;
-	private static JSplitTxf txfAmount;
+	private static JSplitNumber txfAmount;
 
 	public VATPanel(JFrame parent) {
 		super(parent);
@@ -27,14 +24,8 @@ public class VATPanel extends AbstractBasePanel<VAT> {
 		setName("IVA");
 		setTitle("ALIQUOTE IVA");
 
-		txfAmount = new JSplitTxf("Percentuale", new JFormattedTextField(NumberFormat.getInstance()));
+		txfAmount = new JSplitNumber("Percentuale");
 		actionsPanel.add(txfAmount);
-	}
-
-	@Override
-	public void search() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'search'");
 	}
 
 	@Override
@@ -94,7 +85,8 @@ public class VATPanel extends AbstractBasePanel<VAT> {
 
 	@Override
 	public void populateTable() {
-		vats = DAO.getAll(VAT.class);
+		vats.clear();
+		vats.addAll(DAO.getAll(VAT.class));
 		if(!vats.isEmpty()) {
 			model.addRows(vats);
 		} else {

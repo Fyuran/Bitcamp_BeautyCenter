@@ -42,7 +42,7 @@ public class JSplitPanel extends JPanel {
             rightPanel.add(component);
             rightPanel.add(Box.createRigidArea(new Dimension(0, 5)));
         }
-        component.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
+        component.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         return component;
     }
 

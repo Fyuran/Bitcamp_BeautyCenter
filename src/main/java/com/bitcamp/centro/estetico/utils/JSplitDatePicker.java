@@ -1,37 +1,47 @@
 package com.bitcamp.centro.estetico.utils;
 
+import java.awt.Font;
 import java.time.LocalDate;
 
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.UIManager;
 
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.components.DatePickerSettings.DateArea;
 
-public class JSplitDatePicker extends JSplitLabel {
+public class JSplitDatePicker extends JPanel {
     private DatePickerSettings settings;
     private DatePicker datePicker;
+    private JLabel label;
+    private final static Font font;
 
-    public JSplitDatePicker() {
-        this("Label text");
-    }
+	static {
+		font = new Font("Microsoft Sans Serif", Font.PLAIN, 14);
+	}
 
     public JSplitDatePicker(String text) {
-        this(text, new DatePicker());
+        this(text, false);
     }
 
-    public JSplitDatePicker(String text, DatePicker datePicker) {
-        super(new JLabel(text), datePicker);
-        this.datePicker = datePicker;
+    public JSplitDatePicker(String text, boolean allowEmptyDates) {
+        super();
 
-        if(settings == null) {
-            settings = new DatePickerSettings();
+        label = new JLabel(text);
+        if (settings != null) {
+            this.datePicker = new DatePicker(settings);
+        } else {
+            this.datePicker = new DatePicker();
+            this.settings = datePicker.getSettings();
         }
-        settings.setFontValidDate(font);
-        settings.setAllowEmptyDates(false);
 
-        datePicker.setSettings(settings);
+        settings.setFontValidDate(font);
+        settings.setAllowEmptyDates(allowEmptyDates);
+
+        setLayout(new RelativeLayout());
+        add(label, 0.4f);
+        add(datePicker, 1f);
     }
 
     public DatePicker getDatePicker() {
@@ -62,9 +72,8 @@ public class JSplitDatePicker extends JSplitLabel {
     public void updateUI() {
         super.updateUI();
 
-        if(settings == null) {
+        if(settings == null)
             settings = new DatePickerSettings();
-        }
         
         settings.setColor(DateArea.CalendarBackgroundNormalDates, UIManager.getColor("Panel.background"));
         settings.setColor(DateArea.BackgroundOverallCalendarPanel, UIManager.getColor("Panel.background"));

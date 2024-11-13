@@ -27,8 +27,6 @@ public class Employee extends User {
 	@Column(name = "serial")
 	private String employeeSerial;
 
-	private Roles role;
-
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
 	@JoinTable(
 		name = "employee_treatment",
@@ -49,7 +47,6 @@ public class Employee extends User {
 	public Employee() {
 		super();
 		this.employeeSerial = UUID.randomUUID().toString();
-		this.role = Roles.PERSONNEL;
 		enabledTreatments = new ArrayList<>();
 		turns = new ArrayList<>();
 	}
@@ -66,9 +63,8 @@ public class Employee extends User {
 
 	public Employee(Long id, UserDetails details, UserCredentials userCredentials, boolean isEnabled,
 			String employeeSerial, Roles role, List<Treatment> enabledTreatments, List<Turn> turns, LocalDate hiredDate, LocalDate terminationDate) {
-		super(id, details, userCredentials, isEnabled);
+		super(id, role, details, userCredentials, isEnabled);
 		this.employeeSerial = employeeSerial;
-		this.role = role;
 		this.turns = turns;
 		this.hiredDate = hiredDate;
 		this.terminationDate = terminationDate;
@@ -91,11 +87,11 @@ public class Employee extends User {
 	}
 
 	public Roles getRole() {
-		return role;
+		return super.getRole();
 	}
 
 	public void setRole(Roles role) {
-		this.role = role;
+		super.setRole(role);
 	}
 
 	public LocalDate getTerminationDate() {
@@ -137,13 +133,11 @@ public class Employee extends User {
 		return String.format("%s %s", this.getName(), this.getSurname());
 	}
 
-	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((employeeSerial == null) ? 0 : employeeSerial.hashCode());
-		result = prime * result + ((role == null) ? 0 : role.hashCode());
 		result = prime * result + ((enabledTreatments == null) ? 0 : enabledTreatments.hashCode());
 		result = prime * result + ((turns == null) ? 0 : turns.hashCode());
 		result = prime * result + ((hiredDate == null) ? 0 : hiredDate.hashCode());
@@ -155,7 +149,7 @@ public class Employee extends User {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -164,8 +158,6 @@ public class Employee extends User {
 			if (other.employeeSerial != null)
 				return false;
 		} else if (!employeeSerial.equals(other.employeeSerial))
-			return false;
-		if (role != other.role)
 			return false;
 		if (enabledTreatments == null) {
 			if (other.enabledTreatments != null)
@@ -209,7 +201,6 @@ public class Employee extends User {
 		superMap.put("Matricola", employeeSerial);
 		superMap.put("Assunto", hiredDate);
 		superMap.put("Scadenza", terminationDate);
-		superMap.put("Ruolo", role);
 		superMap.put("Trattamenti", showTreatments);
 		superMap.put("Turni", showTurns);
 		

@@ -30,6 +30,8 @@ import com.bitcamp.centro.estetico.utils.InputValidator;
 import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
 import com.bitcamp.centro.estetico.utils.PlaceholderHelper;
 import com.github.lgooddatepicker.components.DatePicker;
+import com.github.lgooddatepicker.components.DatePickerSettings;
+import com.github.lgooddatepicker.components.DatePickerSettings.DateArea;
 
 public class SetupFirstAccountFrame extends JFrame {
 
@@ -64,6 +66,7 @@ public class SetupFirstAccountFrame extends JFrame {
 		setName("Primo Account");
 		setVisible(true);
 		setLocationRelativeTo(null);
+		setResizable(false);
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setIconImage(new ImageIcon(
 		MainFrame.class.getResource("/com/bitcamp/centro/estetico/resources/bc_icon.png")).getImage());
@@ -83,7 +86,7 @@ public class SetupFirstAccountFrame extends JFrame {
 
 		txfName = new JTextField();
 		txfName.setColumns(10);
-		txfName.setBounds(200, 89, 220, 20);
+		txfName.setBounds(200, 89, 220, 25);
 		add(txfName);
 
 		JLabel lblSurname = new JLabel("Cognome:");
@@ -93,7 +96,7 @@ public class SetupFirstAccountFrame extends JFrame {
 
 		txfSurname = new JTextField();
 		txfSurname.setColumns(10);
-		txfSurname.setBounds(200, 129, 220, 20);
+		txfSurname.setBounds(200, 129, 220, 25);
 		add(txfSurname);
 
 		JLabel lblBirthday = new JLabel("Data di nascita:");
@@ -108,22 +111,22 @@ public class SetupFirstAccountFrame extends JFrame {
 
 		txfIban = new JTextField();
 		txfIban.setColumns(10);
-		txfIban.setBounds(200, 209, 220, 20);
+		txfIban.setBounds(200, 209, 220, 25);
 		add(txfIban);
 
 		txfMail = new JTextField();
 		txfMail.setColumns(10);
-		txfMail.setBounds(740, 169, 220, 20);
+		txfMail.setBounds(740, 169, 220, 25);
 		add(txfMail);
 
 		txfPhone = new JTextField();
 		txfPhone.setColumns(10);
-		txfPhone.setBounds(740, 209, 220, 20);
+		txfPhone.setBounds(740, 209, 220, 25);
 		add(txfPhone);
 
 		txfAddress = new JTextField();
 		txfAddress.setColumns(10);
-		txfAddress.setBounds(740, 89, 220, 20);
+		txfAddress.setBounds(740, 89, 220, 25);
 		add(txfAddress);
 
 		JLabel lblMail = new JLabel("Mail:");
@@ -148,7 +151,7 @@ public class SetupFirstAccountFrame extends JFrame {
 
 		txfUsername = new JTextField();
 		txfUsername.setColumns(10);
-		txfUsername.setBounds(200, 249, 220, 20);
+		txfUsername.setBounds(200, 249, 220, 25);
 		add(txfUsername);
 
 		JLabel lblPassword = new JLabel("Password:");
@@ -158,12 +161,12 @@ public class SetupFirstAccountFrame extends JFrame {
 
 		txfPassword = new JPasswordField();
 		txfPassword.setColumns(10);
-		txfPassword.setBounds(200, 289, 220, 20);
+		txfPassword.setBounds(200, 289, 220, 25);
 		add(txfPassword);
 
 		JCheckBox visibleCheck = new JCheckBox("Mostra password");
 		visibleCheck.setFont(new Font("MS Reference Sans Serif", Font.ITALIC, 11));
-		visibleCheck.setBounds(30, 313, 121, 14);
+		visibleCheck.setBounds(30, 320, 180, 20);
 		visibleCheck.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -183,7 +186,7 @@ public class SetupFirstAccountFrame extends JFrame {
 
 		txfBirthplace = new JTextField();
 		txfBirthplace.setColumns(10);
-		txfBirthplace.setBounds(740, 129, 220, 20);
+		txfBirthplace.setBounds(740, 129, 220, 25);
 		add(txfBirthplace);
 
 		maleRadioBtn = new JRadioButton("Uomo");
@@ -219,6 +222,22 @@ public class SetupFirstAccountFrame extends JFrame {
 		txfBirthday = new DatePicker();
 		txfBirthday.setBounds(200, 169, 220, 25);
 		add(txfBirthday);
+        DatePickerSettings settings = new DatePickerSettings();
+        settings.setColor(DateArea.CalendarBackgroundNormalDates, UIManager.getColor("Panel.background"));
+        settings.setColor(DateArea.BackgroundOverallCalendarPanel, UIManager.getColor("Panel.background"));
+        settings.setColor(DateArea.TextFieldBackgroundValidDate, UIManager.getColor("TextField.background"));
+        settings.setColor(DateArea.CalendarBackgroundSelectedDate, UIManager.getColor("Button.background"));
+        settings.setColor(DateArea.BackgroundTopLeftLabelAboveWeekNumbers, UIManager.getColor("Label.background"));
+        settings.setColor(DateArea.BackgroundMonthAndYearMenuLabels, UIManager.getColor("Label.background"));
+        settings.setColor(DateArea.BackgroundTodayLabel, UIManager.getColor("Label.background"));
+        settings.setColor(DateArea.DatePickerTextValidDate, UIManager.getColor("TextField.foreground"));
+        settings.setColor(DateArea.BackgroundClearLabel, UIManager.getColor("Button.background"));
+        settings.setColor(DateArea.CalendarTextNormalDates, UIManager.getColor("Label.foreground"));
+        settings.setColor(DateArea.CalendarBorderSelectedDate, UIManager.getColor("Table.selectionBackground").darker());
+        settings.setColor(DateArea.BackgroundCalendarPanelLabelsOnHover, UIManager.getColor("ComboBox.buttonHighlight"));
+        settings.setColor(DateArea.CalendarTextWeekdays, UIManager.getColor("Button.foreground"));
+        settings.setColorBackgroundWeekdayLabels(UIManager.getColor("Button.background"), true);
+		txfBirthday.setSettings(settings);
 
 		btnAbort = new JButton("Annulla");
 		btnAbort.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 14));
@@ -278,10 +297,12 @@ public class SetupFirstAccountFrame extends JFrame {
 		String mail = txfMail.getText();
 
 		UserDetails det = new UserDetails(name, surname, getGender(), BoD, birthplace, notes);
-		UserCredentials cred = new UserCredentials(username, password, address, iban, phone, mail, null);
-		Employee employee = new Employee(det, cred, Roles.ADMIN, null, null, hired, hired);
-		cred.setUser(employee);
-		
+		UserCredentials cred = new UserCredentials(username, null, address, iban, phone, mail, null);
+		cred.setPassword(password);
+
+		Employee employee = new Employee(det, cred, Roles.ADMIN, null, null, hired, null);
+		cred.setUser(employee);	
+
 		DAO.insert(employee);
 
 		lbOutput.setText("Nuovo utente creato correttamente");

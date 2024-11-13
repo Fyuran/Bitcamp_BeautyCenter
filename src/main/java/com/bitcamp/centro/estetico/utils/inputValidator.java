@@ -7,12 +7,15 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.swing.JComponent;
+import javax.swing.JFormattedTextField;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 
+import com.bitcamp.centro.estetico.controller.DAO;
 import com.bitcamp.centro.estetico.models.Model;
+import com.bitcamp.centro.estetico.models.UserCredentials;
 
 import it.kamaladafrica.codicefiscale.city.CityByName;
 import it.kamaladafrica.codicefiscale.city.CityProvider;
@@ -175,7 +178,7 @@ public class InputValidator {
 		validateVAT(textField.getJTextField());
 	}
 
-	public static void validateNumber(JTextField textField) {
+	public static void validateNumber(JFormattedTextField textField) {
 		String text = textField.getText().trim();
 		NumberFormat nf = NumberFormat.getInstance();
 		try {
@@ -186,11 +189,11 @@ public class InputValidator {
 		textField.setBorder(UIManager.getBorder("SplitPane.border"));
 	}
 
-	public static void validateNumber(JSplitTxf textField) {
-		validateNumber(textField.getJTextField());
+	public static void validateNumber(JSplitNumber textField) {
+		validateNumber(textField.getjFormattedTextField());
 	}
 
-	public static void validateNumber(JTextField textField, int min, int max) {
+	public static void validateNumber(JFormattedTextField textField, int min, int max) {
 		String text = textField.getText().trim();
 		NumberFormat nf = NumberFormat.getInstance();
 		Number number;
@@ -213,8 +216,8 @@ public class InputValidator {
 		textField.setBorder(UIManager.getBorder("SplitPane.border"));
 	}
 
-	public static void validateNumber(JSplitTxf textField, int min, int max) {
-		validateNumber(textField.getJTextField(), min, max);
+	public static void validateNumber(JSplitNumber textField, int min, int max) {
+		validateNumber(textField.getjFormattedTextField(), min, max);
 	}
 
 	public static void validateAlphanumeric(JTextField textField, String title) {
@@ -236,6 +239,16 @@ public class InputValidator {
 
 	public static void validateAlphanumeric(JSplitTxf textField, String title) {
 		validateAlphanumeric(textField.getJTextField(), title);
+	}
+
+	public static void validateUsername(JTextField textField, UserCredentials uc) {
+		if(!DAO.isUsernameUnique(uc)) {
+			throw new InvalidInputException("Username già esistente", textField);
+		}
+		textField.setBorder(UIManager.getBorder("SplitPane.border"));
+	}
+	public static void validateUsername(JSplitTxf textField, UserCredentials uc) {
+		validateUsername(textField.getJTextField(), uc);
 	}
 
 	// min 8 chars: min 1 word, 1 number and 1 special char

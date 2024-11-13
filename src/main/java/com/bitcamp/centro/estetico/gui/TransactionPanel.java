@@ -2,12 +2,10 @@ package com.bitcamp.centro.estetico.gui;
 
 import java.awt.Color;
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -17,7 +15,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.bitcamp.centro.estetico.controller.DAO;
-import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.BeautyCenter;
 import com.bitcamp.centro.estetico.models.Customer;
 import com.bitcamp.centro.estetico.models.PayMethod;
@@ -26,12 +23,13 @@ import com.bitcamp.centro.estetico.models.VAT;
 import com.bitcamp.centro.estetico.utils.JSplitBtn;
 import com.bitcamp.centro.estetico.utils.JSplitComboBox;
 import com.bitcamp.centro.estetico.utils.JSplitDateTimePicker;
+import com.bitcamp.centro.estetico.utils.JSplitNumber;
 import com.bitcamp.centro.estetico.utils.JSplitTxf;
 import com.bitcamp.centro.estetico.utils.ModelChooser;
 
 public class TransactionPanel extends AbstractBasePanel<Transaction> {
 	private static JSplitComboBox<PayMethod> payMethodComboBox;
-	private static JSplitTxf priceTextField;
+	private static JSplitNumber priceTextField;
 	private static JSplitComboBox<VAT> VATComboBox;
 	private static JSplitTxf servicesTextArea;
 	private static JSplitDateTimePicker dateTimePicker;
@@ -54,7 +52,7 @@ public class TransactionPanel extends AbstractBasePanel<Transaction> {
 		}
 		payMethodComboBox.setSelectedIndex(0);
 
-		priceTextField = new JSplitTxf("Conto", new JFormattedTextField(NumberFormat.getInstance()));
+		priceTextField = new JSplitNumber("Conto");
 		VATComboBox = new JSplitComboBox<>("IVA");
 		servicesTextArea = new JSplitTxf("Servizi Effettuati");
 		dateTimePicker = new JSplitDateTimePicker("Data e Orario");
@@ -64,15 +62,15 @@ public class TransactionPanel extends AbstractBasePanel<Transaction> {
 			ModelChooser<Customer> picker = new ModelChooser<>(parent, "Scelta Cliente",
 					ListSelectionModel.SINGLE_SELECTION, returnCustomers);	
 
-			customers = DAO.getAll(Customer.class);
+			customers.clear();
+			customers.addAll(DAO.getAll(Customer.class));
 			var available = customers
 			.parallelStream()
 			.filter(c -> c.isEnabled())
 			.toList();
 			
 			if(!available.isEmpty()) {
-				NonEditableTableModel<Customer> model = picker.getModel();
-				model.addRows(available);
+				picker.addRows(available);
 			}
 			else
 				picker.getLbOutput().setText("Lista vuota");
@@ -92,12 +90,6 @@ public class TransactionPanel extends AbstractBasePanel<Transaction> {
 		.forEach(v -> VATComboBox.addItem(v));
 		VATComboBox.setSelectedIndex(0);
 
-	}
-
-	@Override
-	public void search() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'search'");
 	}
 
 	@Override
@@ -187,7 +179,16 @@ public class TransactionPanel extends AbstractBasePanel<Transaction> {
 
 	@Override
 	public void populateTable() {
-		transactions = DAO.getAll(Transaction.class);
+		vats.clear();
+		vats.addAll(DAO.getAll(VAT.class));
+		VATComboBox.removeAllItems();
+		vats.stream()
+				.filter(v -> v.isEnabled())
+				.forEach(v -> VATComboBox.addItem(v));
+		VATComboBox.setSelectedIndex(0);
+
+		transactions.clear();
+		transactions.addAll(DAO.getAll(Transaction.class));
 		if (!transactions.isEmpty()) {
 			transactions.parallelStream()
 					.forEach(t -> model.addRow(t));
@@ -217,7 +218,7 @@ public class TransactionPanel extends AbstractBasePanel<Transaction> {
 				VAT vat = selectedData.getVat();
 				String services = selectedData.getServices();
 
-				priceTextField.setText(price.toString());
+				priceTextField.setText(price);
 				dateTimePicker.setDateTimePermissive(dateTime);
 				payMethodComboBox.setSelectedItem(payMethod);
 				VATComboBox.setSelectedItem(vat);

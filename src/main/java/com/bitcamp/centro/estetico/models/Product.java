@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.hibernate.annotations.ColumnDefault;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -33,6 +34,9 @@ public class Product implements Model {
 
 	private ProductCat type;
 
+	@OneToOne(mappedBy = "product", cascade = CascadeType.MERGE)
+	private Stock stock;
+
 	@Column(name = "is_enabled")
 	@ColumnDefault(value = "true")
 	private boolean isEnabled;
@@ -42,10 +46,10 @@ public class Product implements Model {
 	}
 
 	public Product(String name, BigDecimal price, VAT vat, ProductCat type) {
-		this(null, name, price, vat, type, true);
+		this(null, name, price, vat, type, null, true);
 	}
 
-	public Product(Long id, String name, BigDecimal price, VAT vat, ProductCat type,
+	public Product(Long id, String name, BigDecimal price, VAT vat, ProductCat type, Stock stock,
 			boolean isEnabled) {
 		this.id = id;
 		this.name = name;
@@ -95,6 +99,14 @@ public class Product implements Model {
 
 	public void setType(ProductCat type) {
 		this.type = type;
+	}
+
+	public Stock getStock() {
+		return stock;
+	}
+
+	public void setStock(Stock stock) {
+		this.stock = stock;
 	}
 
 	@Override

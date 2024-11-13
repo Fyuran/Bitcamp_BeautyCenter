@@ -1,9 +1,7 @@
 package com.bitcamp.centro.estetico.gui;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
@@ -12,10 +10,13 @@ import javax.swing.event.ListSelectionListener;
 import com.bitcamp.centro.estetico.controller.DAO;
 import com.bitcamp.centro.estetico.models.Product;
 import com.bitcamp.centro.estetico.models.ProductCat;
+import com.bitcamp.centro.estetico.models.Stock;
 import com.bitcamp.centro.estetico.models.VAT;
 import com.bitcamp.centro.estetico.utils.InputValidator;
 import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
+import com.bitcamp.centro.estetico.utils.JOptionPaneGoToTab;
 import com.bitcamp.centro.estetico.utils.JSplitComboBox;
+import com.bitcamp.centro.estetico.utils.JSplitNumber;
 import com.bitcamp.centro.estetico.utils.JSplitTxf;
 
 public class ProductPanel extends AbstractBasePanel<Product> {
@@ -24,7 +25,7 @@ public class ProductPanel extends AbstractBasePanel<Product> {
 
 	private static final long serialVersionUID = 1L;
 	private static JSplitTxf txfName;
-	private static JSplitTxf txfPrice;
+	private static JSplitNumber txfPrice;
 	private static JSplitComboBox<VAT> VATComboBox;
 	private static JSplitComboBox<ProductCat> categoryComboBox;
 
@@ -37,7 +38,7 @@ public class ProductPanel extends AbstractBasePanel<Product> {
 
 		txfName = new JSplitTxf("Nome");
 
-		txfPrice = new JSplitTxf("Prezzo", new JFormattedTextField(NumberFormat.getInstance()));
+		txfPrice = new JSplitNumber("Prezzo");
 
 		categoryComboBox = new JSplitComboBox<>("Categoria");
 		for (ProductCat cat : ProductCat.values()) {
@@ -45,7 +46,8 @@ public class ProductPanel extends AbstractBasePanel<Product> {
 		}
 		categoryComboBox.setSelectedIndex(0);
 
-		vats = DAO.getAll(VAT.class);
+		vats.clear();
+		vats.addAll(DAO.getAll(VAT.class));
 		VATComboBox = new JSplitComboBox<>("IVA");
 		vats.stream()
 				.filter(v -> v.isEnabled())
@@ -57,12 +59,6 @@ public class ProductPanel extends AbstractBasePanel<Product> {
 		actionsPanel.add(categoryComboBox);
 		actionsPanel.add(VATComboBox);
 
-	}
-
-	@Override
-	public void search() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'search'");
 	}
 
 	@Override
@@ -149,7 +145,7 @@ public class ProductPanel extends AbstractBasePanel<Product> {
 	@Override
 	public void clearTxfFields() {
 		txfName.setText("");
-		txfPrice.setText("");
+		txfPrice.setText(0);
 	}
 
 	@Override
@@ -159,7 +155,7 @@ public class ProductPanel extends AbstractBasePanel<Product> {
 			public void valueChanged(ListSelectionEvent event) {
 				if (event.getValueIsAdjusting())
 					return;
-					
+
 				int selectedRow = table.getSelectedRow();
 				if (selectedRow < 0)
 					return;
@@ -177,23 +173,46 @@ public class ProductPanel extends AbstractBasePanel<Product> {
 				txfPrice.setText(price);
 				categoryComboBox.setSelectedItem(category);
 				VATComboBox.setSelectedItem(vat);
-				
+
 			}
 		};
 	}
 
 	@Override
 	public boolean isDataValid() {
-		InputValidator.validateName(txfName);
 		InputValidator.validateNumber(txfPrice);
 		return true;
 	}
 
 	@Override
 	public void populateTable() {
-		products = DAO.getAll(Product.class);
+		products.clear();
+		products.addAll(DAO.getAll(Product.class));
+		stocks.clear();
+		stocks.addAll(DAO.getAll(Stock.class));
+
+		vats.clear();
+		vats.addAll(DAO.getAll(VAT.class));
+		VATComboBox.removeAllItems();
+		vats.stream()
+				.filter(v -> v.isEnabled())
+				.forEach(v -> VATComboBox.addItem(v));
+		VATComboBox.setSelectedIndex(0);
+
 		if (!products.isEmpty()) {
 			model.addRows(products);
+
+			StringBuilder lowStock = new StringBuilder();
+			for (Stock stock : stocks) {
+				if (stock.getCurrentStock() <= (stock.getMinimumStock() / 3)) { // if it's lower than a third popup message
+					lowStock.append(stock.getProduct().getName() + " quantità bassa\n");
+				}
+			}
+
+			if(!lowStock.isEmpty()) {
+				new JOptionPaneGoToTab(MainFrame.geJTabbedPane(),
+				lowStock.toString(), "Inventario", MainFrame.getStockPanel());
+			}
 		} else {
 			lbOutput.setText("Lista Prodotti vuota");
 		}

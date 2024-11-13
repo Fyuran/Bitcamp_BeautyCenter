@@ -12,11 +12,11 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.bitcamp.centro.estetico.controller.DAO;
-import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.Customer;
 import com.bitcamp.centro.estetico.models.Employee;
 import com.bitcamp.centro.estetico.models.Reservation;
 import com.bitcamp.centro.estetico.models.ReservationState;
+import com.bitcamp.centro.estetico.models.Roles;
 import com.bitcamp.centro.estetico.models.Treatment;
 import com.bitcamp.centro.estetico.models.Turn;
 import com.bitcamp.centro.estetico.utils.InputValidator;
@@ -53,15 +53,15 @@ public class ReservationPanel extends AbstractBasePanel<Reservation> {
 			ModelChooser<Customer> picker = new ModelChooser<>(parent, "Scelta Cliente",
 					ListSelectionModel.SINGLE_SELECTION, returnCustomer);
 
-			customers = DAO.getAll(Customer.class);
+			customers.clear();
+			customers.addAll(DAO.getAll(Customer.class));
 			var available = customers
 					.parallelStream()
 					.filter(c -> c.isEnabled())
 					.toList();
 
 			if (!available.isEmpty()) {
-				NonEditableTableModel<Customer> model = picker.getModel();
-				model.addRows(available);
+				picker.addRows(available);
 			} else
 				picker.getLbOutput().setText("Lista vuota");
 
@@ -71,16 +71,15 @@ public class ReservationPanel extends AbstractBasePanel<Reservation> {
 		treatmentBtn.addActionListener(l1 -> {
 			ModelChooser<Treatment> picker = new ModelChooser<>(parent, "Scelta Trattamento",
 					ListSelectionModel.SINGLE_SELECTION, returnTreatments);
-
-			treatments = DAO.getAll(Treatment.class);
+			treatments.clear();
+			treatments.addAll(DAO.getAll(Treatment.class));
 			var available = treatments
 					.parallelStream()
 					.filter(t -> t.isEnabled())
 					.toList();
 
 			if (!available.isEmpty()) {
-				NonEditableTableModel<Treatment> model = picker.getModel();
-				model.addRows(available);
+				picker.addRows(available);
 			} else
 				picker.getLbOutput().setText("Lista vuota");
 
@@ -90,9 +89,14 @@ public class ReservationPanel extends AbstractBasePanel<Reservation> {
 		employeesBtn.addActionListener(l1 -> {
 			ModelChooser<Employee> picker = new ModelChooser<>(parent, "Scelta Operatori",
 					ListSelectionModel.SINGLE_SELECTION, returnEmployees);
+			employees.clear();
+			employees.addAll(DAO.getAll(Employee.class));
 
-			employees = DAO.getAll(Employee.class);
-			var available = employees
+			List<Employee> operators = employees.parallelStream()
+			.filter(e -> e.getRole().equals(Roles.PERSONNEL))
+			.toList();
+			
+			var available = operators
 				.parallelStream()
 				.filter(e -> {
 					List<Turn> turns = e.getTurns();
@@ -102,7 +106,7 @@ public class ReservationPanel extends AbstractBasePanel<Reservation> {
 					} else {
 						isValid = turns.stream()
 							.anyMatch(t -> { //find out if anyone has a turn within reservation's datetime
-								var selectedDataTime = selectedData.getDateTime();
+								var selectedDataTime = dateTimePicker.getDateTimePermissive();
 								return t.getStart().compareTo(selectedDataTime) <= 0 &&
 										t.getEnd().compareTo(selectedDataTime) >= 0;
 							});
@@ -112,8 +116,8 @@ public class ReservationPanel extends AbstractBasePanel<Reservation> {
 				.toList();
 
 			if (!available.isEmpty()) {
-				NonEditableTableModel<Employee> model = picker.getModel();
-				model.addRows(available);
+
+				picker.addRows(available);
 			} else
 				picker.getLbOutput().setText("Lista vuota");
 
@@ -131,12 +135,6 @@ public class ReservationPanel extends AbstractBasePanel<Reservation> {
 		actionsPanel.add(customerBtn);
 		actionsPanel.add(treatmentBtn);
 		actionsPanel.add(employeesBtn);
-	}
-
-	@Override
-	public void search() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'search'");
 	}
 
 	@Override
@@ -240,7 +238,8 @@ public class ReservationPanel extends AbstractBasePanel<Reservation> {
 
 	@Override
 	public void populateTable() {
-		reservations = DAO.getAll(Reservation.class);
+		reservations.clear();
+		reservations.addAll(DAO.getAll(Reservation.class));
 		if (!reservations.isEmpty()) {
 			model.addRows(reservations);
 		} else {

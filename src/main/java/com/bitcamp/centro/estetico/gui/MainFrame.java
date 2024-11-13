@@ -29,6 +29,7 @@ public class MainFrame {
 	private static User user;
 	private static JFrame mainFrame;
 	private static JButton themeModeBtn;
+	private static JPanel stockPanel;
 	private static final URL lightModeURL = MainFrame.class
 			.getResource("/com/bitcamp/centro/estetico/resources/light_mode.png");
 	private static final URL darkModeURL = MainFrame.class
@@ -94,20 +95,20 @@ public class MainFrame {
 		GridBagConstraints gbc = new GridBagConstraints();
 
 		gbc.gridx = 0;
-		gbc.gridy = 1;
-		gbc.fill = GridBagConstraints.NONE;
-		gbc.weightx = 0.1;
-		gbc.weighty = 0.1;
-		gbc.anchor = GridBagConstraints.WEST;
-		mainFrame.add(themeModeBtn, gbc);
-
-		gbc.gridx = 0;
 		gbc.gridy = 0;
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.anchor = GridBagConstraints.CENTER;
 		gbc.weightx = 1;
 		gbc.weighty = 1;
 		mainFrame.add(mainPane, gbc);
+
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		gbc.fill = GridBagConstraints.NONE;
+		gbc.weightx = 0;
+		gbc.weighty = 0;
+		gbc.anchor = GridBagConstraints.WEST;
+		mainFrame.add(themeModeBtn, gbc);
 
 		mainFrame.setVisible(true);
 	}
@@ -121,11 +122,21 @@ public class MainFrame {
 		mainPane.add(new SubscriptionPanel(mainFrame));
 		mainPane.add(new VATPanel(mainFrame));
 		mainPane.add(new ReservationPanel(mainFrame));
-		mainPane.add(new StockPanel(mainFrame));
+		stockPanel = new StockPanel(mainFrame);
+		mainPane.add(stockPanel);
+		mainPane.add(new TurnPanel(mainFrame));
 	}
 
 	public static JFrame getMainFrame() {
 		return mainFrame;
+	}
+
+	public static JTabbedPane geJTabbedPane() {
+		return mainPane;
+	}
+
+	public static JPanel getStockPanel() {
+		return stockPanel;
 	}
 
 	public static User getSessionUser() {

@@ -37,7 +37,9 @@ public abstract class User implements Model {
 	@Embedded
 	private UserDetails details;
 
-	@OneToOne(optional = false, cascade = CascadeType.MERGE)
+	private Roles role;
+
+	@OneToOne(optional = false, cascade = CascadeType.ALL)
 	@JoinColumn(name = "credentials_id", nullable = false)
 	private UserCredentials userCredentials;
 
@@ -47,14 +49,16 @@ public abstract class User implements Model {
 
 	User() {
 		this.isEnabled = true;
+		this.role = Roles.USER;
 	}
 
-	User(UserDetails details, UserCredentials userCredentials) {
-		this(null, details, userCredentials, true);
+	User(Roles role, UserDetails details, UserCredentials userCredentials) {
+		this(null, role, details, userCredentials, true);
 	}
 
-	User(Long id, UserDetails details, UserCredentials userCredentials, boolean isEnabled) {
+	User(Long id, Roles role, UserDetails details, UserCredentials userCredentials, boolean isEnabled) {
 		this.id = id;
+		this.role = role;
 		this.details = details;
 		this.userCredentials = userCredentials;
 		this.isEnabled = isEnabled;
@@ -68,6 +72,14 @@ public abstract class User implements Model {
 	@Override
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Roles getRole() {
+		return role;
+	}
+
+	public void setRole(Roles role) {
+		this.role = role;
 	}
 
 	public UserDetails getDetails() {
@@ -228,6 +240,7 @@ public abstract class User implements Model {
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((details == null) ? 0 : details.hashCode());
+		result = prime * result + ((role == null) ? 0 : role.hashCode());
 		result = prime * result + ((userCredentials == null) ? 0 : userCredentials.hashCode());
 		result = prime * result + (isEnabled ? 1231 : 1237);
 		return result;
@@ -252,6 +265,8 @@ public abstract class User implements Model {
 				return false;
 		} else if (!details.equals(other.details))
 			return false;
+		if (role != other.role)
+			return false;
 		if (userCredentials == null) {
 			if (other.userCredentials != null)
 				return false;
@@ -274,6 +289,7 @@ public abstract class User implements Model {
 		});
 
 		map.put("ID", id);
+		map.put("Ruolo", role);
 		map.putAll(details.toTableRow());
 		map.put("Credenziali", showCredentials);
 		map.put("Abilitato", isEnabled);

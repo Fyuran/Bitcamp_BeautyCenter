@@ -1,111 +1,101 @@
 package com.bitcamp.centro.estetico.gui;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.util.Arrays;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
 import javax.swing.WindowConstants;
 
 import com.bitcamp.centro.estetico.controller.DAO;
-import com.bitcamp.centro.estetico.models.Employee;
+import com.bitcamp.centro.estetico.models.User;
+import com.bitcamp.centro.estetico.utils.JSplitPf;
+import com.github.weisj.darklaf.components.border.DarkBorders;
 
 public class ChangePassDialog extends JDialog {
 
-	private static final long serialVersionUID = 1L;
-	private static JPasswordField newPasswordTxt1;
-	private static JPasswordField oldPasswordTxt;
-	private static JPasswordField newPasswordTxt2;
-	private static Employee activeUser;
+	private final JSplitPf newPasswordTxf;
+	private final JSplitPf newPasswordConfirmTxf;
+	private final JSplitPf oldPasswordTxf;
+	private final JButton confirmBtn;
+	private final User user = MainFrame.getSessionUser();
 
-	/**
-	 * Create the frame.
-	 */
-	public ChangePassDialog(Employee activeUser) {
-		setBounds(100, 100, 400, 500);
-		getContentPane().setLayout(null);
-		setTitle("Cambia password");
-		this.activeUser = activeUser;
+	public ChangePassDialog() {
+		setTitle("Cambio password");
+		setSize(new Dimension(400, 400));
+		setResizable(false);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		JLabel lblOldPassword = new JLabel("Vecchia password:");
-		lblOldPassword.setBounds(6, 91, 116, 16);
-		getContentPane().add(lblOldPassword);
+		setLayout(new GridBagLayout());
+		getRootPane().setBorder(DarkBorders.createLineBorder(5, 5, 5, 5));
+		GridBagConstraints gbc = new GridBagConstraints();
 
-		JLabel lblNewPassword1 = new JLabel("Nuova password:");
-		lblNewPassword1.setBounds(6, 132, 116, 16);
-		getContentPane().add(lblNewPassword1);
+		JLabel lbOutput = new JLabel("");
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gbc.insets = new Insets(10, 10, 10, 10);
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.weightx = 0.2;
+		add(lbOutput, gbc);
 
-		JLabel lblNewPassword2 = new JLabel("Nuova password(ripeti):");
-		lblNewPassword2.setBounds(6, 172, 149, 16);
-		getContentPane().add(lblNewPassword2);
+		oldPasswordTxf = new JSplitPf("Vecchia Password");
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.weightx = 0.5;
+		add(oldPasswordTxf, gbc);
 
-		newPasswordTxt1 = new JPasswordField();
-		newPasswordTxt1.setBounds(179, 127, 182, 26);
-		getContentPane().add(newPasswordTxt1);
+		newPasswordTxf = new JSplitPf("Nuova Password");
+		gbc.gridx = 0;
+		gbc.gridy = 2;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.weightx = 0.5;
+		add(newPasswordTxf, gbc);
 
-		JButton confirmBtn = new JButton("Conferma");
+		newPasswordConfirmTxf = new JSplitPf("<html><p style='text-align:center'>Ripeti Nuova Password</p><html>");
+		gbc.gridx = 0;
+		gbc.gridy = 3;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.weightx = 0.5;
+		add(newPasswordConfirmTxf, gbc);
+
+		confirmBtn = new JButton("Conferma");
 		confirmBtn.addActionListener(e -> updatePassword());
-		confirmBtn.setBounds(38, 256, 117, 29);
+		gbc.gridx = 0;
+		gbc.gridy = 4;
+		gbc.fill = GridBagConstraints.NONE;
+		gbc.weightx = 0.2;
+		gbc.weighty = 0.2;
+		add(confirmBtn, gbc);
 
-		getContentPane().add(confirmBtn);
-
-		oldPasswordTxt = new JPasswordField();
-		oldPasswordTxt.setBounds(179, 86, 182, 26);
-		getContentPane().add(oldPasswordTxt);
-
-		newPasswordTxt2 = new JPasswordField();
-		newPasswordTxt2.setBounds(179, 167, 182, 26);
-		getContentPane().add(newPasswordTxt2);
-
-		JCheckBox visibleCheck = new JCheckBox("Mostra password");
-		visibleCheck.setBounds(179, 205, 182, 23);
-		visibleCheck.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (visibleCheck.isSelected()) {
-					oldPasswordTxt.setEchoChar((char) 0);
-					newPasswordTxt1.setEchoChar((char) 0);
-					newPasswordTxt2.setEchoChar((char) 0);
-				} else {
-					oldPasswordTxt.setEchoChar('•');
-					newPasswordTxt1.setEchoChar('•');
-					newPasswordTxt2.setEchoChar('•');
-				}
-			}
-		});
-		getContentPane().add(visibleCheck);
-
-		JLabel msgLbl = new JLabel(""); // label per i messaggi all'utente
-		msgLbl.setBounds(179, 261, 182, 16);
-		getContentPane().add(msgLbl);
 		setVisible(true);
 	}
 
 	private void updatePassword() {
-		if (!isValidPassword()) return;
-		activeUser.setPassword(newPasswordTxt1.getPassword());
-		
-		DAO.update(activeUser); 
+		if (!isValidPassword())
+			return;
+		user.setPassword(newPasswordTxf.getPassword());
+
+		DAO.update(user);
 		JOptionPane.showMessageDialog(this, "Password modificata correttamente");
 		dispose();
 
 	}
 
 	private boolean isValidPassword() {
-		char[] oldPassword = oldPasswordTxt.getPassword();
-		char[] newPassword1 = newPasswordTxt1.getPassword();
-		char[] newPassword2 = newPasswordTxt2.getPassword();
-		System.out.println(oldPassword);
-		
-		if (!activeUser.isValidPassword(oldPassword)) {
+		char[] oldPassword = oldPasswordTxf.getPassword();
+		char[] newPassword1 = newPasswordTxf.getPassword();
+		char[] newPassword2 = newPasswordConfirmTxf.getPassword();
+
+		if (!user.isValidPassword(oldPassword)) {
 			JOptionPane.showMessageDialog(this, "Vecchia password errata");
 			return false;
 		}
-		if (!newPassword1.equals(newPassword2)) {
+		if (!Arrays.equals(newPassword1, newPassword2)) {
 			JOptionPane.showMessageDialog(this, "Le password non coincidono");
 			return false;
 		}

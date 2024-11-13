@@ -20,7 +20,7 @@ public class JSplitComboBox<T> extends JSplitLabel {
     public JSplitComboBox(String text, JComboBox<T> comboBox) {
         super(new JLabel(text), comboBox);
         this.comboBox = comboBox;
-
+        comboBox.setFont(font);
     }
 
     public JComboBox<T> getComboBox() {

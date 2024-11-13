@@ -17,6 +17,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
@@ -26,21 +27,25 @@ public class Stock implements Model {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @OneToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "product_id", nullable = false)
-    Product product;
+    @JoinTable(
+		name = "stock_product",
+		joinColumns = @JoinColumn(name = "stock_id", referencedColumnName = "id", nullable = false),
+		inverseJoinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id", nullable = false)
+	)
+    private Product product;
 
     @Column(name = "current_stock")
-    int currentStock;
+    private int currentStock;
 
     @Column(name = "minimum_stock")
-    int minimumStock;
+    private int minimumStock;
 
     @Column(name = "is_enabled")
     @ColumnDefault(value = "true")
-    boolean isEnabled;
+    private boolean isEnabled;
 
     public Stock() {
         this.isEnabled = true;

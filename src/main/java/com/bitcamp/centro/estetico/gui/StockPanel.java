@@ -1,10 +1,8 @@
 package com.bitcamp.centro.estetico.gui;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -12,14 +10,13 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.bitcamp.centro.estetico.controller.DAO;
-import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.Product;
 import com.bitcamp.centro.estetico.models.Stock;
 import com.bitcamp.centro.estetico.utils.InputValidator;
 import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
 import com.bitcamp.centro.estetico.utils.InputValidator.InvalidInputException;
 import com.bitcamp.centro.estetico.utils.JSplitBtn;
-import com.bitcamp.centro.estetico.utils.JSplitTxf;
+import com.bitcamp.centro.estetico.utils.JSplitNumber;
 import com.bitcamp.centro.estetico.utils.ModelChooser;
 
 public class StockPanel extends AbstractBasePanel<Stock> {
@@ -28,8 +25,8 @@ public class StockPanel extends AbstractBasePanel<Stock> {
     private static List<Product> returnProduct = new ArrayList<>();
 
     private static JSplitBtn productsBtn;
-    private static JSplitTxf txfMinStock;
-    private static JSplitTxf txfCurrentStock;
+    private static JSplitNumber txfMinStock;
+    private static JSplitNumber txfCurrentStock;
 
     public StockPanel(JFrame parent) {
         super(parent);
@@ -37,25 +34,24 @@ public class StockPanel extends AbstractBasePanel<Stock> {
         setTitle("GESTIONE INVENTARIO");
         setSize(1300, 768);
 
-        txfMinStock = new JSplitTxf("Minimo", new JFormattedTextField(NumberFormat.getInstance()));
+        txfMinStock = new JSplitNumber("Minimo");
         txfMinStock.setText(1);
-        txfCurrentStock = new JSplitTxf("Corrente", new JFormattedTextField(NumberFormat.getInstance()));
+        txfCurrentStock = new JSplitNumber("Corrente");
         txfCurrentStock.setText(0);
 
         productsBtn = new JSplitBtn("Prodotti", "Scelta Prodotti");
         productsBtn.addActionListener(l1 -> {
             ModelChooser<Product> picker = new ModelChooser<>(parent, "Scelta Prodotti",
                     ListSelectionModel.MULTIPLE_INTERVAL_SELECTION, returnProduct);
-
-            products = DAO.getAll(Product.class);
+            products.clear();
+            products.addAll(DAO.getAll(Product.class));
             var available = products
                     .parallelStream()
                     .filter(p -> p.isEnabled())
                     .toList();
 
             if (!available.isEmpty()) {
-                NonEditableTableModel<Product> model = picker.getModel();
-                model.addRows(available);
+                picker.addRows(available);
             } else
                 picker.getLbOutput().setText("Lista vuota");
 
@@ -65,12 +61,6 @@ public class StockPanel extends AbstractBasePanel<Stock> {
         actionsPanel.add(txfMinStock);
         actionsPanel.add(productsBtn);
         actionsPanel.add(txfCurrentStock);
-    }
-
-    @Override
-    public void search() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'search'");
     }
 
     @Override
@@ -85,7 +75,7 @@ public class StockPanel extends AbstractBasePanel<Stock> {
         int min = Integer.parseInt(txfMinStock.getText());
         int current = Integer.parseInt(txfCurrentStock.getText());
 
-        Stock stock = new Stock(returnProduct.getFirst(), min, current);
+        Stock stock = new Stock(returnProduct.getFirst(), current, min);
 
         DAO.insert(stock);
 
@@ -145,7 +135,8 @@ public class StockPanel extends AbstractBasePanel<Stock> {
 
     @Override
     public void populateTable() {
-        stocks = DAO.getAll(Stock.class);
+        stocks.clear();
+        stocks.addAll(DAO.getAll(Stock.class));
         if (!stocks.isEmpty()) {
             model.addRows(stocks);
         } else {
@@ -155,7 +146,7 @@ public class StockPanel extends AbstractBasePanel<Stock> {
 
     @Override
     public void clearTxfFields() {
-        txfMinStock.setText(0);
+        txfMinStock.setText(1);
         txfCurrentStock.setText(0);
         returnProduct.clear();
     }
@@ -190,7 +181,7 @@ public class StockPanel extends AbstractBasePanel<Stock> {
             InputValidator.validateNumber(txfMinStock, 1, Integer.MAX_VALUE);
             InputValidator.validateNumber(txfCurrentStock, 0, Integer.MAX_VALUE);
 
-            if (Integer.parseInt(txfMinStock.getText()) > Integer.parseInt(txfCurrentStock.getText())) {
+            if (Integer.parseInt(txfMinStock.getText()) < Integer.parseInt(txfCurrentStock.getText())) {
                 throw new InvalidInputException("Minimo non valido", txfMinStock);
             }
         } catch (InputValidatorException e) {

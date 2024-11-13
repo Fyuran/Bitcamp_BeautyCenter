@@ -6,7 +6,7 @@ import com.github.weisj.darklaf.LafManager;
 import com.github.weisj.darklaf.theme.Theme;
 
 public class Main {
-	public static boolean _DEBUG_MODE_FULL = true;
+	public final static boolean _DEBUG_MODE_FULL = true;
 	public static Theme theme;
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(() -> {

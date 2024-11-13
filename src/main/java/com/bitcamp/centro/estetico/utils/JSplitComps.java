@@ -3,6 +3,7 @@ package com.bitcamp.centro.estetico.utils;
 import java.awt.Font;
 import java.util.Collection;
 
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -28,6 +29,8 @@ public class JSplitComps extends JPanel {
         for(int i = 0; i < comps.length; i++) {
             if(comps[i] instanceof JLabel) {
                 add(comps[i], 0.4f);
+            }else if (comps[i] instanceof JCheckBox) {
+                add(comps[i], 0.1f);
             } else {
                 add(comps[i], 1f);
             }

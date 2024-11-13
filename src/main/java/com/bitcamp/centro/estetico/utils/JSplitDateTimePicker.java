@@ -1,8 +1,10 @@
 package com.bitcamp.centro.estetico.utils;
 
+import java.awt.Font;
 import java.time.LocalDateTime;
 
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.UIManager;
 
 import com.github.lgooddatepicker.components.DatePicker;
@@ -13,40 +15,48 @@ import com.github.lgooddatepicker.components.TimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.github.lgooddatepicker.components.TimePickerSettings.TimeArea;
 
-public class JSplitDateTimePicker extends JSplitLabel {
+public class JSplitDateTimePicker extends JPanel {
     private DatePickerSettings datePickerSettings;
     private TimePickerSettings timePickerSettings;
     private DateTimePicker dateTimePicker;
     private DatePicker datePicker;
     private TimePicker timePicker;
+    private JLabel label;
+    private final static Font font;
 
-    public JSplitDateTimePicker() {
-        this("Label text");
-    }
+	static {
+		font = new Font("Microsoft Sans Serif", Font.PLAIN, 14);
+	}
 
     public JSplitDateTimePicker(String text) {
-        this(text, new DateTimePicker());
+        this(text, false);
     }
 
-    public JSplitDateTimePicker(String text, DateTimePicker dateTimePicker) {
-        super(new JLabel(text), dateTimePicker);
+    public JSplitDateTimePicker(String text, boolean allowEmptyDateTimes) {
+        super();
 
-        if (datePickerSettings == null)
-            datePickerSettings = new DatePickerSettings();
+        setLayout(new RelativeLayout());
 
-        this.dateTimePicker = dateTimePicker;
+        label = new JLabel(text);
+
+        if(datePickerSettings != null && timePickerSettings != null) {
+            this.dateTimePicker = new DateTimePicker(datePickerSettings, timePickerSettings);
+        } else {
+            this.dateTimePicker = new DateTimePicker();
+            this.timePickerSettings = dateTimePicker.getTimePicker().getSettings();   
+        }
         this.datePicker = dateTimePicker.getDatePicker();
         this.timePicker = dateTimePicker.getTimePicker();
-        timePickerSettings = timePicker.getSettings();
 
         datePickerSettings.setFontValidDate(font);
-        datePickerSettings.setAllowEmptyDates(false);
-        datePicker.setSettings(datePickerSettings);
+        datePickerSettings.setAllowEmptyDates(allowEmptyDateTimes);
 
-        timePickerSettings.setAllowEmptyTimes(false);
+        timePickerSettings.setAllowEmptyTimes(allowEmptyDateTimes);
         timePickerSettings.fontValidTime = font;
 
-
+        setLayout(new RelativeLayout());
+        add(label, 0.4f);
+        add(dateTimePicker, 1f);
     }
 
     public DateTimePicker getDateTimePicker() {
@@ -66,15 +76,19 @@ public class JSplitDateTimePicker extends JSplitLabel {
     }
 
     public DatePicker getDatePicker() {
-        return dateTimePicker.getDatePicker();
+        return datePicker;
     }
 
     public TimePicker getTimePicker() {
-        return dateTimePicker.getTimePicker();
+        return timePicker;
     }
 
     public DatePickerSettings getDatePickerSettings() {
         return datePickerSettings;
+    }
+
+    public TimePickerSettings getTimePickerSettings() {
+        return timePickerSettings;
     }
 
     @Override
@@ -99,7 +113,8 @@ public class JSplitDateTimePicker extends JSplitLabel {
         datePickerSettings.setColor(DateArea.CalendarTextWeekdays, UIManager.getColor("Button.foreground"));
         datePickerSettings.setColorBackgroundWeekdayLabels(UIManager.getColor("Button.background"), true);
 
-        if(timePickerSettings == null) return;
+        if(timePickerSettings == null)
+            timePickerSettings = new TimePickerSettings();
 
         timePickerSettings.setColor(TimeArea.TextFieldBackgroundValidTime, UIManager.getColor("TextField.background"));
         timePickerSettings.setColor(TimeArea.TimePickerTextValidTime, UIManager.getColor("TextField.foreground"));

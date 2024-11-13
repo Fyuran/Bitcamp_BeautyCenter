@@ -57,7 +57,7 @@ public class Customer extends User {
 	public Customer(
 			Long id, UserDetails details, UserCredentials userCredentials, boolean isEnabled,
 			String P_IVA, String recipientCode, int loyaltyPoints, Subscription subscription, List<Prize> prizes) {
-		super(id, details, userCredentials, isEnabled);
+		super(id, Roles.USER, details, userCredentials, isEnabled);
 		this.subscription = subscription;
 		this.prizes = prizes;
 		this.p_iva = P_IVA;
@@ -136,10 +136,11 @@ public class Customer extends User {
 		return getName() + " " + getSurname();
 	}
 
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((subscription == null) ? 0 : subscription.hashCode());
 		result = prime * result + ((prizes == null) ? 0 : prizes.hashCode());
 		result = prime * result + ((p_iva == null) ? 0 : p_iva.hashCode());
@@ -152,7 +153,7 @@ public class Customer extends User {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;

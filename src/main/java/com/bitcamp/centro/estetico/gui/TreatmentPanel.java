@@ -1,12 +1,10 @@
 package com.bitcamp.centro.estetico.gui;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -14,7 +12,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.bitcamp.centro.estetico.controller.DAO;
-import com.bitcamp.centro.estetico.gui.render.NonEditableTableModel;
 import com.bitcamp.centro.estetico.models.Product;
 import com.bitcamp.centro.estetico.models.Treatment;
 import com.bitcamp.centro.estetico.models.VAT;
@@ -22,6 +19,7 @@ import com.bitcamp.centro.estetico.utils.InputValidator;
 import com.bitcamp.centro.estetico.utils.InputValidator.InputValidatorException;
 import com.bitcamp.centro.estetico.utils.JSplitBtn;
 import com.bitcamp.centro.estetico.utils.JSplitComboBox;
+import com.bitcamp.centro.estetico.utils.JSplitNumber;
 import com.bitcamp.centro.estetico.utils.JSplitTimePicker;
 import com.bitcamp.centro.estetico.utils.JSplitTxf;
 import com.bitcamp.centro.estetico.utils.ModelChooser;
@@ -32,7 +30,7 @@ public class TreatmentPanel extends AbstractBasePanel<Treatment> {
 	private static List<Product> returnProducts = new ArrayList<>();
 
 	private static final long serialVersionUID = 1L;
-	private static JSplitTxf txfPrice;
+	private static JSplitNumber txfPrice;
 	private static JSplitTxf txfName;
 	private static JSplitTxf txfType;
 	private static JSplitComboBox<VAT> VATComboBox;
@@ -47,21 +45,20 @@ public class TreatmentPanel extends AbstractBasePanel<Treatment> {
 
 		txfName = new JSplitTxf("Nome");
 		txfType = new JSplitTxf("Descrizione");
-		txfPrice = new JSplitTxf("Prezzo", new JFormattedTextField(NumberFormat.getInstance()));
+		txfPrice = new JSplitNumber("Prezzo");
 		productsBtn = new JSplitBtn("Prodotto", "Scelta Prodotti");
 		productsBtn.addActionListener(l -> {
 			ModelChooser<Product> picker = new ModelChooser<>(parent, "Prodotti",
 					ListSelectionModel.MULTIPLE_INTERVAL_SELECTION, returnProducts);
-
-			products = DAO.getAll(Product.class);
+			products.clear();
+			products.addAll(DAO.getAll(Product.class));
 			var available = products
 					.parallelStream()
 					.filter(c -> c.isEnabled())
 					.toList();
 
 			if (!available.isEmpty()) {
-				NonEditableTableModel<Product> model = picker.getModel();
-				model.addRows(available);
+				picker.addRows(available);
 			} else
 				picker.getLbOutput().setText("Lista vuota");
 
@@ -77,7 +74,8 @@ public class TreatmentPanel extends AbstractBasePanel<Treatment> {
 		actionsPanel.add(timePicker);
 		actionsPanel.add(productsBtn);
 
-		vats = DAO.getAll(VAT.class);
+		vats.clear();
+		vats.addAll(DAO.getAll(VAT.class));
 		vats.stream()
 				.filter(v -> v.isEnabled())
 				.forEach(v -> VATComboBox.addItem(v));
@@ -88,15 +86,9 @@ public class TreatmentPanel extends AbstractBasePanel<Treatment> {
 	@Override
 	public void clearTxfFields() {
 		txfName.setText("");
-		txfPrice.setText("");
+		txfPrice.setText(0);
 		timePicker.setTime(null);
 		products.clear();
-	}
-
-	@Override
-	public void search() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'search'");
 	}
 
 	@Override
@@ -194,7 +186,16 @@ public class TreatmentPanel extends AbstractBasePanel<Treatment> {
 
 	@Override
 	public void populateTable() {
-		treatments = DAO.getAll(Treatment.class);
+		vats.clear();
+		vats.addAll(DAO.getAll(VAT.class));
+		VATComboBox.removeAllItems();
+		vats.stream()
+				.filter(v -> v.isEnabled())
+				.forEach(v -> VATComboBox.addItem(v));
+		VATComboBox.setSelectedIndex(0);
+
+		treatments.clear();
+		treatments.addAll(DAO.getAll(Treatment.class));
 		if (!treatments.isEmpty()) {
 			model.addRows(treatments);
 		} else {

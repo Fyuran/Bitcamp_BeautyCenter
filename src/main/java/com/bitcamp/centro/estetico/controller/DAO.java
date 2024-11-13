@@ -115,6 +115,17 @@ public class DAO {
         return Optional.empty();
     }
 
+    public static <T extends Model> boolean isUsernameUnique(UserCredentials userCredentials) {
+        List<UserCredentials> uc = getAll(UserCredentials.class);
+
+        return !uc.stream().anyMatch(u -> {
+                return u.getUsername()
+                .equalsIgnoreCase(userCredentials.getUsername()) && 
+                !u.equals(userCredentials);
+            }
+        );
+    }
+
     public static <T extends Model> List<T> getAll(Class<T> c) {
         Transaction tx = null;
         List<T> list = new ArrayList<>();
@@ -167,7 +178,7 @@ public class DAO {
             tx = session.beginTransaction();
 
             Class<T> c = null;
-            if(obj instanceof T) {
+            if (obj instanceof T) {
                 c = (Class<T>) obj.getClass();
             }
             CriteriaBuilder cb = session.getCriteriaBuilder();

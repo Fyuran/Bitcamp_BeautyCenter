@@ -1,100 +1,98 @@
 package com.bitcamp.centro.estetico.gui;
 
+import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
 import com.bitcamp.centro.estetico.controller.DAO;
 import com.bitcamp.centro.estetico.models.BeautyCenter;
 import com.bitcamp.centro.estetico.models.Employee;
+import com.github.weisj.darklaf.components.border.DarkBorders;
 
-public class SetupWelcomeFrame extends JFrame {
+public class SetupWelcomeFrame {
+	private static JFrame frame;
 
-	private static final long serialVersionUID = 5654094869271673775L;
-	private static JButton nextBtn;
-	
 	public SetupWelcomeFrame() {
-		setTitle("Benvenuto nel Gestionale Centro Estetico");
-		setName("Benvenuto nel Gestionale Centro Estetico");
-		setSize(1024, 768);
-		setVisible(true);
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		setLocationRelativeTo(null);
+		frame = new JFrame("Benvenuto");
+		frame.setName("Benvenuto nel Gestionale Centro Estetico");
+		frame.setSize(1000, 800);
+		frame.setVisible(true);
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		frame.setLocationRelativeTo(null);
+		frame.setIconImage(new ImageIcon(
+				MainFrame.class.getResource("/com/bitcamp/centro/estetico/resources/bc_icon.png")).getImage());
+		frame.setResizable(false);
+		frame.getRootPane().setBorder(DarkBorders.createWidgetLineBorder(5, 5, 5, 5));
+
+		JPanel panel = new JPanel(new GridBagLayout());
+		frame.add(panel);
 		
-		setIconImage(new ImageIcon(
-			MainFrame.class.getResource("/com/bitcamp/centro/estetico/resources/bc_icon.png")).getImage());
+		GridBagConstraints gbc = new GridBagConstraints();
 
-		JPanel mainPanel = new JPanel();
-		mainPanel.setLayout(null);
-		mainPanel.setBounds(0, 0, 1024, 768);
+		Image img = new ImageIcon(
+				SetupWelcomeFrame.class.getResource("/com/bitcamp/centro/estetico/resources/download.png")).getImage();
+		img = img.getScaledInstance(600, -1, Image.SCALE_FAST);
+		JLabel imgLb = new JLabel(new ImageIcon(img));
+		gbc.gridx = 0;
+		gbc.anchor = GridBagConstraints.CENTER;
+		gbc.gridy = 0;
+		gbc.fill = GridBagConstraints.BOTH;
+		gbc.weightx = 0;
+		gbc.weighty = 0.1;
+		gbc.insets = new Insets(0, 0, 0, 0);
+		panel.add(imgLb, gbc);
 
-		JPanel imagePanel = new JPanel();
-		imagePanel.setLayout(null);
-		imagePanel.setBounds(0, 0, 1024, 400);
+		JLabel welcomeLb = new JLabel("Benvenuto nel Gestionale Centro Estetico!");
+		welcomeLb.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 24));
+		welcomeLb.setHorizontalAlignment(SwingConstants.CENTER);
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(welcomeLb, gbc);
 
-		JLabel imageLabel = new JLabel(
-				new ImageIcon(
-						SetupWelcomeFrame.class.getResource("/com/bitcamp/centro/estetico/resources/download.png")));
-		imageLabel.setBounds(151, 20, 723, 360);
-		imagePanel.add(imageLabel);
+		JLabel descriptionLb = new JLabel(
+				"<html><p style='text-align:center'>Il gestionale è progettato per offrire una soluzione completa per il tuo centro estetico."
+						+ "Organizza i tuoi appuntamenti, gestisci i clienti, e monitora tutto il centro con facilità.</p></html>");
+		descriptionLb.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 18));
+		descriptionLb.setHorizontalAlignment(SwingConstants.CENTER);
+		descriptionLb.setMinimumSize(new Dimension(600, 100));
+		gbc.gridx = 0;
+		gbc.gridy = 3;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		panel.add(descriptionLb, gbc);
 
-		JPanel textPanel = new JPanel();
-		textPanel.setLayout(null);
-		textPanel.setBounds(0, 400, 1024, 208);
-
-		JLabel welcomeLabel = new JLabel("Benvenuto nel Gestionale Centro Estetico!");
-		welcomeLabel.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 24));
-		welcomeLabel.setBounds(200, 10, 624, 40);
-		welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
-		JTextArea descriptionArea = new JTextArea(
-				"Il gestionale è progettato per offrire una soluzione completa "
-						+ "per il tuo centro estetico. Organizza i tuoi appuntamenti, gestisci i clienti, "
-						+ "e monitora tutto il centro con facilità. ");
-		descriptionArea.setFont(new Font("MS Reference Sans Serif", Font.PLAIN, 18));
-		descriptionArea.setLineWrap(true);
-		descriptionArea.setWrapStyleWord(true);
-		descriptionArea.setEditable(false);
-		descriptionArea.setBounds(100, 60, 824, 146);
-
-		textPanel.add(welcomeLabel);
-		textPanel.add(descriptionArea);
-
-		mainPanel.add(imagePanel);
-		mainPanel.add(textPanel);
-
-		setLayout(null);
-		add(mainPanel);
-
-		nextBtn = new JButton("Entra");
-		nextBtn.setBounds(423, 648, 200, 40);
-		mainPanel.add(nextBtn);
-		nextBtn.setFont(new Font("Arial", Font.BOLD, 16));
+		JButton nextBtn = new JButton("Entra");
+		nextBtn.setFont(new Font("MS Reference Sans Serif", Font.BOLD, 16));
 		nextBtn.setFocusPainted(false);
-
-		nextBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (DAO.isEmpty(BeautyCenter.class)) {
-					new SetupBeautyCenterFrame();
+		nextBtn.addActionListener((l) -> {
+			if (DAO.isEmpty(BeautyCenter.class)) {
+				new SetupBeautyCenterFrame();
+			} else {
+				if (DAO.isEmpty(Employee.class)) {
+					new SetupFirstAccountFrame();
 				} else {
-					if (DAO.isEmpty(Employee.class)) {
-						new SetupFirstAccountFrame();
-					} else {
-						new LoginFrame();
-					}
+					new LoginFrame();
 				}
-				dispose();
 			}
+			frame.dispose();
 		});
+		gbc.gridx = 0;
+		gbc.gridy = 4;
+		gbc.fill = GridBagConstraints.NONE;
+		nextBtn.setMinimumSize(new Dimension(200, 30));
+		panel.add(nextBtn, gbc);
+
+		frame.getRootPane().setDefaultButton(nextBtn);
 	}
 }

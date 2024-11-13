@@ -11,7 +11,6 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -23,7 +22,8 @@ public class ButtonTableCellRenderer extends AbstractCellEditor
     private int mnemonic;
     private Border focusBorder;
     private Object editorValue;
-
+    private static Color disabledBackground = new Color(255, 153, 0);
+    private static Color disabledBackgroundSelect = new Color(35, 255, 101);
     private JButton button;
     private boolean isButtonTableCellRendererEditor;
 
@@ -39,7 +39,7 @@ public class ButtonTableCellRenderer extends AbstractCellEditor
     public ButtonTableCellRenderer(JTable table) {
         super();
         this.table = table;
-        setFocusBorder(new LineBorder(Color.BLUE));
+        // setFocusBorder(new LineBorder(Color.BLUE));
         table.addMouseListener(this);
     }
 
@@ -116,12 +116,7 @@ public class ButtonTableCellRenderer extends AbstractCellEditor
         TableColumn isEnabledCol = table.getColumn("Abilitato");
         boolean isEnabled = (boolean) model.getValueAt(row, isEnabledCol.getModelIndex());
 
-        if (!isEnabled) {
-            button.setEnabled(false);
-        } else {
-            button.setEnabled(true);
-        }
-
+        button.setEnabled(isEnabled);
         return button;
     }
 
@@ -174,4 +169,5 @@ public class ButtonTableCellRenderer extends AbstractCellEditor
 
     public void mouseExited(MouseEvent e) {
     }
+
 }

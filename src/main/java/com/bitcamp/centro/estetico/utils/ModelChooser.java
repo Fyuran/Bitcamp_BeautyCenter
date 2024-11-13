@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -18,8 +20,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.RowFilter;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.TableRowSorter;
 
 import com.bitcamp.centro.estetico.gui.AbstractBasePanel;
 import com.bitcamp.centro.estetico.gui.render.ButtonTableCellRenderer;
@@ -39,6 +43,8 @@ public class ModelChooser<T extends Model> extends JDialog {
 	private final JButton btnInsert;
 	private final JButton btnDelete;
 	private final JLabel lbOutput;
+	private final SearchBar searchFiltersBar;
+	private final TableRowSorter<NonEditableTableModel<T>> tableRowSorter;
 
 	public ModelChooser(JFrame owner, String title, int selectionMode, List<T> returnData) {
 		this(owner, title, Dialog.ModalityType.DOCUMENT_MODAL, selectionMode, returnData);
@@ -53,17 +59,15 @@ public class ModelChooser<T extends Model> extends JDialog {
 		setSize(1000, 480);
 		setMinimumSize(getSize());
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-		GridBagLayout gridBagLayout = new GridBagLayout();
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.weightx = 0.2;
-		gbc.weighty = 0.2;
-		setLayout(gridBagLayout);
+		setLayout(new GridBagLayout());
 
 		panel = new JPanel();
 		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
-		GridBagLayout gbl_panel = new GridBagLayout();
-		panel.setLayout(gbl_panel);
+		panel.setLayout(new GridBagLayout());
+
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.weightx = 0.2;
+		gbc.weighty = 0.2;
 		gbc.insets = new Insets(5, 5, 5, 5);
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.gridx = 0;
@@ -71,26 +75,49 @@ public class ModelChooser<T extends Model> extends JDialog {
 		add(panel, gbc);
 		
 		Font font = new Font("Microsoft Sans Serif", Font.BOLD, 16);
+		lbTitle = new JLabel("PLACEHOLDER");
+		lbTitle.setFont(font);
+		lbTitle.setHorizontalAlignment(SwingConstants.CENTER);
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		panel.add(lbTitle, gbc);
+
 		lbOutput = new JLabel();
 		lbOutput.setForeground(new Color(0, 204, 51));
 		lbOutput.setFont(font);
 		lbOutput.setHorizontalAlignment(SwingConstants.CENTER);
 		gbc.gridx = 0;
-		gbc.gridwidth = GridBagConstraints.REMAINDER;
 		gbc.gridy = 1;
 		panel.add(lbOutput, gbc);
 
-		lbTitle = new JLabel("PLACEHOLDER");
-		lbTitle.setFont(font);
-		lbTitle.setHorizontalAlignment(SwingConstants.CENTER);
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		panel.add(lbTitle, gbc);
-
-		btnInsert = new JButton("Assegna Elemento/i");
+		searchFiltersBar = new SearchBar();
+		searchFiltersBar.addSearchBtnActionListener(l -> {
+			search();
+			searchFiltersBar.clearSearchField();
+		});
+		searchFiltersBar.addSearchBarKeyListener(new KeyListener() {
+			@Override
+			public void keyTyped(KeyEvent e) {}
+			@Override
+			public void keyReleased(KeyEvent e) {}
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+					search();
+					searchFiltersBar.clearSearchField();
+				}
+			}	
+		});
 		gbc.anchor = GridBagConstraints.WEST;
 		gbc.gridwidth = 1;
 		gbc.gridx = 0;
+		gbc.gridy = 2;
+		panel.add(searchFiltersBar, gbc);
+
+		btnInsert = new JButton("Assegna Elemento/i");
+		gbc.anchor = GridBagConstraints.WEST;
+		gbc.gridx = 1;
 		gbc.gridy = 2;
 		panel.add(btnInsert, gbc);
 
@@ -118,8 +145,6 @@ public class ModelChooser<T extends Model> extends JDialog {
 
 			dispose();
 		});
-
-
 		lbTitle.setText(title);
 		table = new JTable();
 		table.setSelectionMode(selectionMode);
@@ -131,6 +156,8 @@ public class ModelChooser<T extends Model> extends JDialog {
 
 		model = new NonEditableTableModel<>();
 		table.setModel(model);
+		tableRowSorter = new TableRowSorter<>(model);
+		table.setRowSorter(tableRowSorter);
 
 		scrollPane = new JScrollPane(table);
 
@@ -181,4 +208,22 @@ public class ModelChooser<T extends Model> extends JDialog {
 			table.getSelectionModel().addSelectionInterval(row, row);
 		}
 	}
+
+	public void addRows(List<T> objs) {
+		model.addRows(objs);
+
+		for(int i = 0; i < model.getColumnCount(); i++) {
+			tableRowSorter.setComparator(i, AbstractBasePanel.comparator);
+		}
+		
+		searchFiltersBar.clearComboBox();
+		for(String identifier : model.getColumnNames()) {
+			searchFiltersBar.addComboBoxItem(identifier);
+		}
+	}
+
+	private void search() {
+		RowFilter<NonEditableTableModel<T>, Integer> filter = searchFiltersBar.getRowFilter();
+		tableRowSorter.setRowFilter(filter);
+	};
 }
