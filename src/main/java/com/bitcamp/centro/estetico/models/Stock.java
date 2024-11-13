@@ -10,7 +10,6 @@ import org.hibernate.annotations.ColumnDefault;
 
 import com.bitcamp.centro.estetico.utils.ModelViewer;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,7 +28,7 @@ public class Stock implements Model {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(cascade = CascadeType.MERGE)
+    @OneToOne
     @JoinTable(
 		name = "stock_product",
 		joinColumns = @JoinColumn(name = "stock_id", referencedColumnName = "id", nullable = false),
